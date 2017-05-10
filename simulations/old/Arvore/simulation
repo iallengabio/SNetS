@@ -1,0 +1,6 @@
+//simulação com a topologia Arvore
+requests:100000
+rsa:sequencial;djk;firstfit
+loadPoints:5
+replications:5
+significance:0.05

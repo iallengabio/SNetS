@@ -1,0 +1,6 @@
+//simulacao com a topologia NSFNET
+requests:200000
+rsa:sequencial;djk;dedicatedzonefirstfit
+loadPoints:10
+replications:10
+significance:0.05

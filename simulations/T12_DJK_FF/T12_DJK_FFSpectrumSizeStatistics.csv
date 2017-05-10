@@ -1,0 +1,14 @@
+Metrics,load point,link,number of slots,slot, ,rep0,rep1,rep2,rep3,rep4,rep5,rep6,rep7,rep8,rep9
+Requisitons per number of slots,0,all,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots,1,all,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots,2,all,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+
+
+Requisitons per number of slots per link,0,<1-2>,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots per link,0,<2-1>,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots per link,1,<1-2>,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots per link,1,<2-1>,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots per link,2,<1-2>,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Requisitons per number of slots per link,2,<2-1>,2,-, ,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+
+

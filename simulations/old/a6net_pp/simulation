@@ -1,0 +1,6 @@
+//teste simulationParser
+requests:100000
+rsa:integrated;pseudopartition
+loadPoints:6
+replications:10
+significance:0.05

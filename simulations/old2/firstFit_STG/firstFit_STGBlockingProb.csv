@@ -1,0 +1,87 @@
+Metrics;LoadPoint;Bandwidth;src;dest; ;rep1;rep2;rep3;rep4;rep5;rep6;rep7;rep8;rep9;rep10
+blocking probability;1;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability;2;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability;3;all;all;all; ;0.0;9.998800143982723E-5;9.998800143982723E-6;0.0;0.0;0.0;0.0;3.999520057593089E-5;5.9992800863896336E-5;0.0
+
+
+blocking probability lack of transmitters;1;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability lack of transmitters;2;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability lack of transmitters;3;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+
+
+blocking probability lack of receivers;1;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability lack of receivers;2;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability lack of receivers;3;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+
+
+blocking probability fragmentation;1;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability fragmentation;2;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probability fragmentation;3;all;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+
+
+blocking probabilities per pair;1;all;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair;1;all;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair;2;all;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair;2;all;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair;3;all;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;1.1932462263588091E-4;0.0
+blocking probabilities per pair;3;all;2;1; ;0.0;2.0130040058779716E-4;2.001641345903641E-5;0.0;0.0;0.0;0.0;7.9701914838504E-5;0.0;0.0
+
+
+blocking probabilities per bandwidth;1;10.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;1;20.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;1;40.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;1;80.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;1;160.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;1;320.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;2;10.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;2;20.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;2;40.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;2;80.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;2;160.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;2;320.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;3;10.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;3;20.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;3;40.0Gbps;all;all; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;5.996282304970918E-5;0.0
+blocking probabilities per bandwidth;3;80.0Gbps;all;all; ;0.0;6.040471156750227E-5;0.0;0.0;0.0;0.0;0.0;0.0;6.002040693835904E-5;0.0
+blocking probabilities per bandwidth;3;160.0Gbps;all;all; ;0.0;1.1974613818704346E-4;5.9755004481625337E-5;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per bandwidth;3;320.0Gbps;all;all; ;0.0;4.1733738746795447E-4;0.0;0.0;0.0;0.0;0.0;2.4013928078285405E-4;2.3702299123014932E-4;0.0
+
+
+blocking probabilities per pair and bandwidth;1;10.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;10.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;20.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;20.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;40.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;40.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;80.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;80.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;160.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;160.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;320.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;1;320.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;10.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;10.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;20.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;20.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;40.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;40.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;80.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;80.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;160.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;160.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;320.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;2;320.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;10.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;10.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;20.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;20.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;40.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;1.1973180076628352E-4;0.0
+blocking probabilities per pair and bandwidth;3;40.0Gbps;2;1; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;80.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;1.208313194780087E-4;0.0
+blocking probabilities per pair and bandwidth;3;80.0Gbps;2;1; ;0.0;1.2132977432661975E-4;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;160.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;160.0Gbps;2;1; ;0.0;2.4301336573511544E-4;1.1869436201780416E-4;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+blocking probabilities per pair and bandwidth;3;320.0Gbps;1;2; ;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;4.7031158142269255E-4;0.0
+blocking probabilities per pair and bandwidth;3;320.0Gbps;2;1; ;0.0;8.401344215074412E-4;0.0;0.0;0.0;0.0;0.0;4.7784016246565523E-4;0.0;0.0
+
+

@@ -1,0 +1,1 @@
+{"requestGenerators":[{"source":"1","destination":"2","bandwidth":1.0E10,"arrivalRate":4.0,"holdRate":2.0,"arrivalRateIncrease":1.0},{"source":"2","destination":"1","bandwidth":1.0E10,"arrivalRate":4.0,"holdRate":2.0,"arrivalRateIncrease":1.0}]}

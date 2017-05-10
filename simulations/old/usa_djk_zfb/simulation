@@ -1,0 +1,6 @@
+//primeira simulação com a topologia USA
+requests:200000
+rsa:sequencial;djk;zonefirstbestfit
+loadPoints:4
+replications:10
+significance:0.05

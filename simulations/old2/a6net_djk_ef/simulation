@@ -1,0 +1,6 @@
+//teste simulationParser
+requests:100000
+rsa:sequencial;djk;exactfit
+loadPoints:4
+replications:10
+significance:0.05

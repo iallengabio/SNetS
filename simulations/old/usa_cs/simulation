@@ -1,0 +1,6 @@
+//primeira simulação com a topologia USA
+requests:200000
+rsa:integrated;completesharing
+loadPoints:1
+replications:1
+significance:0.05
