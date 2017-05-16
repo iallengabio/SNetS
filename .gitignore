@@ -1,2 +1,5 @@
 target/
 *.swp
+/simulations/old2/
+/simulations/old/
+out/
