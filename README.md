@@ -10,4 +10,11 @@ O SNetS é um simulador de redes ópticas elásticas voltado para a avaliação 
 
 ### Build
 
-    $ mvn compile
+    $ mvn package
+
+### Run
+
+    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar DIR
+
+Where `DIR` is the **absolute** path to directory holding simulation config
+files.
