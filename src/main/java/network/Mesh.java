@@ -1,6 +1,5 @@
 package network;
 
-import measurement.Measurements;
 import simulationControl.parsers.NetworkConfig;
 import simulationControl.parsers.TrafficConfig;
 import util.RandGenerator;
@@ -24,7 +23,7 @@ public class Mesh implements Serializable {
         HashMap<String, Node> nodesAux = new HashMap<>();
         this.nodeList = new Vector<>();
         for (NetworkConfig.NodeConfig nodeConf : nc.getNodes()) {
-            Node aux = new Node(nodeConf.getName(), nodeConf.getTranseivers(), nodeConf.getReceivers());
+            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmiters(), nodeConf.getReceivers());
             this.nodeList.add(aux);
             nodesAux.put(aux.getName(), aux);
         }

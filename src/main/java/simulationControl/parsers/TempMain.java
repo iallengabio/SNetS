@@ -2,8 +2,10 @@ package simulationControl.parsers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import grmlsa.GRMLSA;
-import simulator.Simulation;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 /**
  * Created by Iallen on 04/05/2017.
@@ -11,39 +13,44 @@ import simulator.Simulation;
 public class TempMain {
 
     public static void main(String args[]){
-        System.out.println("Hello gson");
-        Gson gson = new GsonBuilder().create();
 
-        NetworkConfig nc = new NetworkConfig();
-        nc.setGuardBand(1);
-        nc.getNodes().add(new NetworkConfig.NodeConfig("1",100,100));
-        nc.getNodes().add(new NetworkConfig.NodeConfig("2",100,100));
-        nc.getLinks().add(new NetworkConfig.LinkConfig("1","2",401,12500000000.0, 100));
-        nc.getLinks().add(new NetworkConfig.LinkConfig("2","1",401,12500000000.0, 100));
+        String path  = "./simulations/old/usa_cs/network";
 
-        String jnet = gson.toJson(nc);
-        System.out.println(jnet);
 
-        SimulationConfig sc = new SimulationConfig();
-        sc.setGrooming(GRMLSA.GROOMING_OPT_NOTRAFFICGROOMING);
-        sc.setIntegratedRsa(null);
-        sc.setModulation(null);
-        sc.setRouting(GRMLSA.ROUTING_DJK);
-        sc.setSpectrumAssignment(GRMLSA.SPECTRUM_ASSIGNMENT_FISTFIT);
-        sc.setRsaType(GRMLSA.RSA_SEQUENCIAL);
-        sc.setLoadPoints(3);
-        sc.setReplications(10);
-        sc.setRequests(100000);
+        try {
+            NetworkConfig nc = new NetworkConfig();
+            Scanner sc = new Scanner(new File(path));
+            sc.nextLine(); //linha só com 'node:'
 
-        String jsim = gson.toJson(sc);
-        System.out.println(jsim);
+            String descNode = sc.nextLine();
 
-        TrafficConfig tc = new TrafficConfig();
-        tc.getRequestGenerators().add(new TrafficConfig.RequestGeneratorConfig("1","2",10000000000.0, 4.0, 2.0, 1.0));
-        tc.getRequestGenerators().add(new TrafficConfig.RequestGeneratorConfig("2","1",10000000000.0, 4.0, 2.0, 1.0));
+            while(!descNode.equals("links:")){//descrição dos nodes
+                String[] split = descNode.split(";");
+                if(split.length==3) {
+                    nc.getNodes().add(new NetworkConfig.NodeConfig(split[0], Integer.parseInt(split[1]), Integer.parseInt(split[2])));
+                }else{//tx e rx infinitos
+                    nc.getNodes().add(new NetworkConfig.NodeConfig(descNode, 100000, 100000));
+                }
 
-        String jtraf = gson.toJson(tc);
-        System.out.println(jtraf);
+                descNode = sc.nextLine();
+            }
+
+            while(sc.hasNextLine()){//descrição dos links
+                String descLink = sc.nextLine();
+                String[] split = descLink.split(";");
+                nc.getLinks().add(new NetworkConfig.LinkConfig(split[0],split[1],Integer.parseInt(split[3]),Double.parseDouble(split[4]),Double.parseDouble(split[5])));
+            }
+            nc.setGuardBand(1);
+
+
+            Gson gson = new GsonBuilder().create();
+            System.out.println(gson.toJson(nc));
+
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
 
     }

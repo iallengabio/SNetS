@@ -1,7 +1,5 @@
 package simulationControl.parsers;
 
-import grmlsa.modulation.Modulation;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,12 +51,12 @@ public class NetworkConfig {
     public static class NodeConfig{
 
         private String name;
-        private int transeivers;
+        private int transmiters;
         private int receivers;
 
-        public NodeConfig(String name, int transeivers, int receivers) {
+        public NodeConfig(String name, int transmiters, int receivers) {
             this.name = name;
-            this.transeivers = transeivers;
+            this.transmiters = transmiters;
             this.receivers = receivers;
         }
 
@@ -70,12 +68,12 @@ public class NetworkConfig {
             this.name = name;
         }
 
-        public int getTranseivers() {
-            return transeivers;
+        public int getTransmiters() {
+            return transmiters;
         }
 
-        public void setTranseivers(int transeivers) {
-            this.transeivers = transeivers;
+        public void setTransmiters(int transmiters) {
+            this.transmiters = transmiters;
         }
 
         public int getReceivers() {
