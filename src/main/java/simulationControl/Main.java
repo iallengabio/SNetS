@@ -1,5 +1,12 @@
 package simulationControl;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseCredentials;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.Mesh;
@@ -7,10 +14,13 @@ import network.Pair;
 import network.RequestGenerator;
 import simulationControl.parsers.NetworkConfig;
 import simulationControl.parsers.SimulationConfig;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.parsers.TrafficConfig;
 import simulator.Simulation;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -28,24 +38,100 @@ public class Main {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        System.out.println("Reading files");
-        List<List<Simulation>> allSimulations = createAllSimulations(args);
+        if (args.length > 0) {
+            localSimulation(args[0]);
+        } else {//funcionar em modo Servidor
+            simulationServer();
+        }
 
+    }
+
+    private static void simulationServer() throws IOException {
+        initFirebase();
+
+        FirebaseDatabase.getInstance().getReference("simulations").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                Gson gson = new GsonBuilder().create();
+                SimulationRequest sr = gson.fromJson(dataSnapshot.getValue(false).toString(),SimulationRequest.class);
+                //SimulationRequest sr = (SimulationRequest) dataSnapshot.getValue();
+                if(sr.getStatus().equals("new")) {
+                    try {
+                        dataSnapshot.getRef().child("status").setValue("started");
+                        System.out.println("Setting up");
+                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig());
+                        //remember to implement with thread
+                        System.out.println("Starting simulations");
+                        SimulationManagement sm = new SimulationManagement(allSimulations, "./trash");
+                        sm.startSimulations();
+                        System.out.println("saving results");
+                        sm.saveResults();
+                        System.out.println("finish!");
+                        dataSnapshot.getRef().child("status").setValue("finished");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        dataSnapshot.getRef().child("status").setValue("failed");
+                    }
+                }else{//do nothing
+                    System.out.println("opa");
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {//do nothing
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {//do nothing
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {//do nothing
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {//do nothing yet
+
+            }
+        });
+
+        while(true){//manter o servidor ligado
+            try {
+                Thread.sleep(1000);
+                //System.out.println("thread");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void initFirebase() throws IOException {
+        FileInputStream serviceAccount =
+                new FileInputStream("private-key-firebase.json");
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
+                .setDatabaseUrl("https://snets-2905e.firebaseio.com")
+                .build();
+        FirebaseApp.initializeApp(options);
+    }
+
+    private static void localSimulation(String path) throws Exception {
+        System.out.println("Reading files");
+        List<List<Simulation>> allSimulations = createAllSimulations(path);
         //agora dar o start nas simulações
         System.out.println("Starting simulations");
-        SimulationManagement sm = new SimulationManagement(allSimulations, args[0]);
+        SimulationManagement sm = new SimulationManagement(allSimulations, path);
         sm.startSimulations();
         System.out.println("saving results");
         sm.saveResults();
         System.out.println("finish!");
-
     }
 
-
-    private static List<List<Simulation>> createAllSimulations(String[] args) throws Exception {
+    private static List<List<Simulation>> createAllSimulations(String path) throws Exception {
 
         //path dos arquivos de configuração da simulação
-        String filesPath = args[0];
+        String filesPath = path;
         String networkFilePath = filesPath + "/network";
         String simulationFilePath = filesPath + "/simulation";
         String traficFilePath = filesPath + "/traffic";
@@ -72,6 +158,11 @@ public class Main {
         SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
         TrafficConfig tc = gson.fromJson(trafficConfigJSON, TrafficConfig.class);
 
+        return createAllSimulations(nc, sc, tc);
+
+    }
+
+    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc) throws Exception {
         //criar a lista de simulações
         List<List<Simulation>> allSimulations = new ArrayList<>(); // cada elemento deste conjunto é uma lista com 10 replicações de um mesmo ponto de carga
         int i, j;
@@ -87,7 +178,6 @@ public class Main {
         }
 
         return allSimulations;
-
     }
 
     /**

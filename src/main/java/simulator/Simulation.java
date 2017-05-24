@@ -34,7 +34,7 @@ public class Simulation implements Serializable {
         this.spectrumAssignmentAlgorithm = sc.getSpectrumAssignment();
         this.integratedRSAAlgorithm = sc.getIntegratedRsa();
         this.groomingAlgorithm = sc.getGrooming();
-        this.modulationLevelAlgorithm = sc.getModulation();
+        this.modulationLevelAlgorithm = sc.getModulationSelection();
         this.measurements = new Measurements(sc.getRequests(),loadPoint,replication,mesh);
         this.mesh = mesh;
         controlPlane = new ControlPlane();

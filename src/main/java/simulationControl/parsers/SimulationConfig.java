@@ -1,8 +1,5 @@
 package simulationControl.parsers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Esta classe representa o arquivo de configuração Simulation, sua representação na forma de entidade é importante para a armazenação e transmissão deste tipo de configução no formato JSON.
  * Created by Iallen on 04/05/2017.
@@ -14,7 +11,7 @@ public class SimulationConfig {
     private String routing;
     private String spectrumAssignment;
     private String integratedRsa;
-    private String modulation;
+    private String modulationSelection;
     private String grooming;
     private int loadPoints;
     private int replications;
@@ -59,12 +56,12 @@ public class SimulationConfig {
         this.integratedRsa = integratedRsa;
     }
 
-    public String getModulation() {
-        return modulation;
+    public String getModulationSelection() {
+        return modulationSelection;
     }
 
-    public void setModulation(String modulation) {
-        this.modulation = modulation;
+    public void setModulationSelection(String modulationSelection) {
+        this.modulationSelection = modulationSelection;
     }
 
     public String getGrooming() {
