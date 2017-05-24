@@ -3,10 +3,8 @@ package simulationControl;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseCredentials;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.*;
+import com.google.firebase.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.Mesh;
@@ -66,9 +64,18 @@ public class Main {
                         SimulationManagement sm = new SimulationManagement(allSimulations);
                         sm.startSimulations();
                         System.out.println("saving results");
-                        sm.saveResults("./trash");
+                        sr.getResult().blockingProbability = sm.getBlockingProbabilityCsv();
+                        sr.getResult().bandwidthBlockingProbability = sm.getBandwidthBlockingProbabilityCsv();
+                        sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
+                        sr.getResult().relativeFragmentation = sm.getRelativeFragmentationCsv();
+                        sr.getResult().spectrumUtilization = sm.getSpectrumUtilizationCsv();
+                        sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
+                        sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
+                        sr.setStatus("finished");
+                        dataSnapshot.getRef().setValue(sr);
+
                         System.out.println("finish!");
-                        dataSnapshot.getRef().child("status").setValue("finished");
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         dataSnapshot.getRef().child("status").setValue("failed");

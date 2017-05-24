@@ -8,6 +8,15 @@ public class SimulationRequest {
     private TrafficConfig trafficConfig;
     private SimulationConfig simulationConfig;
     private String status;
+    private Result result = new Result();
+
+    public Result getResult() {
+        return result;
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
 
     public NetworkConfig getNetworkConfig() {
         return networkConfig;
@@ -39,5 +48,17 @@ public class SimulationRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public static class Result{
+
+        public String blockingProbability;
+        public String bandwidthBlockingProbability;
+        public String externalFragmentation;
+        public String relativeFragmentation;
+        public String spectrumUtilization;
+        public String transceiversUtilization;
+        public String spectrumStatistics;
+
     }
 }

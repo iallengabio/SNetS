@@ -89,14 +89,14 @@ public class NetworkConfig {
         private String source;
         private String destination;
         private int slots;
-        private double sectrum;
+        private double spectrum;
         private double size;
 
-        public LinkConfig(String source, String destination, int slots, double sectrum, double size) {
+        public LinkConfig(String source, String destination, int slots, double spectrum, double size) {
             this.source = source;
             this.destination = destination;
             this.slots = slots;
-            this.sectrum = sectrum;
+            this.spectrum = spectrum;
             this.size = size;
         }
 
@@ -124,12 +124,12 @@ public class NetworkConfig {
             this.slots = slots;
         }
 
-        public double getSectrum() {
-            return sectrum;
+        public double getSpectrum() {
+            return spectrum;
         }
 
-        public void setSectrum(double sectrum) {
-            this.sectrum = sectrum;
+        public void setSpectrum(double spectrum) {
+            this.spectrum = spectrum;
         }
 
         public double getSize() {

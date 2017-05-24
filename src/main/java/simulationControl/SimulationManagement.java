@@ -83,13 +83,13 @@ public class SimulationManagement {
             //Utilização
 
             fw = new FileWriter(new File(pathResultFiles + "/" + nome + "SpectrumUtilization.csv"));
-            fw.write(getSpectrumUtilization());
+            fw.write(getSpectrumUtilizationCsv());
             fw.close();
 
             //estatísticas de espectro
 
             fw = new FileWriter(new File(pathResultFiles + "/" + nome + "SpectrumSizeStatistics.csv"));
-            fw.write(getSpectrumStatistics());
+            fw.write(getSpectrumStatisticsCsv());
             fw.close();
 
             //estatísticas de tx e rx
@@ -162,7 +162,7 @@ public class SimulationManagement {
         return rfm.result();
     }
 
-    public String getSpectrumUtilization(){
+    public String getSpectrumUtilizationCsv(){
         //utilização de espectro
         List<List<UtilizacaoSpectro>> llus = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
@@ -177,7 +177,7 @@ public class SimulationManagement {
         return surm.result();
     }
 
-    public String getSpectrumStatistics(){
+    public String getSpectrumStatisticsCsv(){
         //utilização de espectro
         List<List<SpectrumSizeStatistics>> llsss = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
