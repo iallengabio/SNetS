@@ -7,14 +7,25 @@ O SNetS é um simulador de redes ópticas elásticas voltado para a avaliação 
 
 - Java 8
 - Maven
+- GSON
+- Firebase SDK
 
 ### Build
 
     $ mvn package
 
 ### Run
+- Local Simulation
+
 
     $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar DIR
-
+      
 Where `DIR` is the **absolute** path to directory holding simulation config
 files.
+
+- Simulation Server
+
+
+    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+In this way the program works as a simulation server.,

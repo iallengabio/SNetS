@@ -1,4 +1,4 @@
-package simulationControl.parsers;
+package simulationControl.parsers.parsers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,7 +14,7 @@ public class TempMain {
 
     public static void main(String args[]){
 
-        String path  = "./simulations/old/usa_cs/network";
+        String path  = "./simulations/old/nsfnet_djk_dzff/network";
 
 
         try {

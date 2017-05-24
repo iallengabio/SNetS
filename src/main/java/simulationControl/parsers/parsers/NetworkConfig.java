@@ -1,4 +1,4 @@
-package simulationControl.parsers;
+package simulationControl.parsers.parsers;
 
 import java.util.ArrayList;
 import java.util.List;

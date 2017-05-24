@@ -1,4 +1,4 @@
-package simulationControl.parsers;
+package simulationControl.parsers.parsers;
 
 /**
  * Esta classe representa o arquivo de configuração Simulation, sua representação na forma de entidade é importante para a armazenação e transmissão deste tipo de configução no formato JSON.

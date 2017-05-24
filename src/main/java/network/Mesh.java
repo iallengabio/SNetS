@@ -30,7 +30,7 @@ public class Mesh implements Serializable {
 
         this.linkList = new Vector<>();
         for (NetworkConfig.LinkConfig linkConf : nc.getLinks()) {
-            Link lAux = new Link(nodesAux.get(linkConf.getSource()).getOxc(), nodesAux.get(linkConf.getDestination()).getOxc(), linkConf.getSlots(), linkConf.getSectrum(), linkConf.getSize());
+            Link lAux = new Link(nodesAux.get(linkConf.getSource()).getOxc(), nodesAux.get(linkConf.getDestination()).getOxc(), linkConf.getSlots(), linkConf.getSpectrum(), linkConf.getSize());
             linkList.add(lAux);
             nodesAux.get(linkConf.getSource()).getOxc().addLink(lAux);
         }
