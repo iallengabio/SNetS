@@ -63,10 +63,10 @@ public class Main {
                         List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig());
                         //remember to implement with thread
                         System.out.println("Starting simulations");
-                        SimulationManagement sm = new SimulationManagement(allSimulations, "./trash");
+                        SimulationManagement sm = new SimulationManagement(allSimulations);
                         sm.startSimulations();
                         System.out.println("saving results");
-                        sm.saveResults();
+                        sm.saveResults("./trash");
                         System.out.println("finish!");
                         dataSnapshot.getRef().child("status").setValue("finished");
                     } catch (Exception e) {
@@ -121,10 +121,10 @@ public class Main {
         List<List<Simulation>> allSimulations = createAllSimulations(path);
         //agora dar o start nas simulações
         System.out.println("Starting simulations");
-        SimulationManagement sm = new SimulationManagement(allSimulations, path);
+        SimulationManagement sm = new SimulationManagement(allSimulations);
         sm.startSimulations();
         System.out.println("saving results");
-        sm.saveResults();
+        sm.saveResults(path);
         System.out.println("finish!");
     }
 
