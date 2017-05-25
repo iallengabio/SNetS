@@ -8,6 +8,7 @@ public class SimulationRequest {
     private TrafficConfig trafficConfig;
     private SimulationConfig simulationConfig;
     private String status;
+    private Double progress = 0.0;
     private Result result = new Result();
 
     public Result getResult() {
@@ -48,6 +49,14 @@ public class SimulationRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Double progress) {
+        this.progress = progress;
     }
 
     public static class Result{

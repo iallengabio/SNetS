@@ -29,13 +29,13 @@ public class SimulationManagement {
     /**
      * executa as simulações de forma centralizada
      */
-    public void startSimulations() {
+    public void startSimulations(SimulationProgressListener simulationProgressListener) {
         mainMeasuremens = new ArrayList<>();
         Util.pairs.addAll(simulations.get(0).get(0).getMesh().getPairList());
 
 
         double quantLP = simulations.size();
-        double quantLPE = 0;
+        double done = 0;
         for (List<Simulation> loadPoint : simulations) {
             ArrayList<Measurements> measurementsLoadPoint = new ArrayList<>();
             this.mainMeasuremens.add(measurementsLoadPoint);
@@ -46,12 +46,30 @@ public class SimulationManagement {
                 simulator = new Simulator(replication);
                 measurementsLoadPoint.add(simulator.start());
 
+                //atualizar progresso
+                done++;
+
+                simulationProgressListener.onSimulationProgressUpdate(done/(quantLP*loadPoint.size()));
 
             }
-            quantLPE++;
-            System.out.println(quantLPE / quantLP * 100.0 + "%");
-        }
 
+        }
+        simulationProgressListener.onSimulationFinished();
+
+    }
+
+    public void startSimulations(){
+        startSimulations(new SimulationProgressListener() {
+            @Override
+            public void onSimulationProgressUpdate(double progress) {
+
+            }
+
+            @Override
+            public void onSimulationFinished() {
+
+            }
+        });
     }
 
     public void saveResults(String pathResultFiles) {
@@ -203,6 +221,15 @@ public class SimulationManagement {
         }
         TransmitersReceiversUtilizationResultManager trurm = new TransmitersReceiversUtilizationResultManager(lltru);
         return trurm.result();
+    }
+
+
+    public static interface SimulationProgressListener{
+
+        public void onSimulationProgressUpdate(double progress);
+
+        public void onSimulationFinished();
+
     }
 
 }
