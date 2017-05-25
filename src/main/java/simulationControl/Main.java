@@ -46,24 +46,30 @@ public class Main {
 
     private static void simulationServer() throws IOException {
         initFirebase();
-
+        System.out.println("SNetS Simulation Server Running");
         FirebaseDatabase.getInstance().getReference("simulations").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
                 Gson gson = new GsonBuilder().create();
                 SimulationRequest sr = gson.fromJson(dataSnapshot.getValue(false).toString(),SimulationRequest.class);
                 //SimulationRequest sr = (SimulationRequest) dataSnapshot.getValue();
                 if(sr.getStatus().equals("new")) {
                     try {
                         dataSnapshot.getRef().child("status").setValue("started");
-                        System.out.println("Setting up");
+                        dataSnapshot.getRef().child("progress").setValue(0.0);
                         List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig());
                         //remember to implement with thread
-                        System.out.println("Starting simulations");
                         SimulationManagement sm = new SimulationManagement(allSimulations);
-                        sm.startSimulations();
-                        System.out.println("saving results");
+                        sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
+                            @Override
+                            public void onSimulationProgressUpdate(double progress) {
+                                dataSnapshot.getRef().child("progress").setValue(progress);
+                            }
+
+                            @Override
+                            public void onSimulationFinished() {//do nothing
+                            }
+                        });
                         sr.getResult().blockingProbability = sm.getBlockingProbabilityCsv();
                         sr.getResult().bandwidthBlockingProbability = sm.getBandwidthBlockingProbabilityCsv();
                         sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
@@ -71,17 +77,15 @@ public class Main {
                         sr.getResult().spectrumUtilization = sm.getSpectrumUtilizationCsv();
                         sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
                         sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
+                        sr.setProgress(1.0);
                         sr.setStatus("finished");
                         dataSnapshot.getRef().setValue(sr);
-
-                        System.out.println("finish!");
 
                     } catch (Exception e) {
                         e.printStackTrace();
                         dataSnapshot.getRef().child("status").setValue("failed");
                     }
                 }else{//do nothing
-                    System.out.println("opa");
                 }
             }
 
