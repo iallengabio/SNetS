@@ -34,6 +34,10 @@ public class ProbabilidadeDeBloqueioDeBanda extends Measurement{
 	
 	public ProbabilidadeDeBloqueioDeBanda(int loadPoint, int rep){
 		super(loadPoint, rep);
+		//probabilidade de bloqueio geral
+		this.bandaRequisitadaGeral=0;
+		this.bandaBloqueadaGeral=0;
+
 		this.bandaRequisitadaBW = new HashMap<>();
 		this.bandaBloqueadaBW = new HashMap<>();
 		this.bandaRequisitadaPair = new HashMap<>();
@@ -154,6 +158,7 @@ public class ProbabilidadeDeBloqueioDeBanda extends Measurement{
 		String or = p.getSource().getName();
 		String dest = p.getDestination().getName();
 		Double gen = this.bandaRequisitadaPairBW.get(or + SEP + dest).get(bw);
+		if(gen==null) return 0;//nenhuma requisição gerada para este par e largura de banda
 		Double block = 0.0;
 		
 		HashMap<Double, Double> hashAux = this.bandaBloqueadaPairBW.get(or + SEP + dest);
