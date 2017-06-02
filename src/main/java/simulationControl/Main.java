@@ -133,7 +133,17 @@ public class Main {
         //agora dar o start nas simulações
         System.out.println("Starting simulations");
         SimulationManagement sm = new SimulationManagement(allSimulations);
-        sm.startSimulations();
+        sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
+            @Override
+            public void onSimulationProgressUpdate(double progress) {
+                System.out.println("progress: "+ progress*100 + "%");
+            }
+
+            @Override
+            public void onSimulationFinished() {
+
+            }
+        });
         System.out.println("saving results");
         sm.saveResults(path);
         System.out.println("finish!");
