@@ -42,6 +42,12 @@ public class ProbabilidadeDeBloqueio extends Measurement {
     public ProbabilidadeDeBloqueio(int loadPoint, int rep) {
         super(loadPoint, rep);
 
+        this.numReqGenGeral=0;
+        this.numReqBlockGeral=0;
+        this.numReqBlockGeralFragment=0;
+        this.numReqBlockGenLackTransmitters=0;
+        this.numReqBlockGenLackReceivers=0;
+
         this.numReqGenBW = new HashMap<>();
         this.numReqBlockBW = new HashMap<>();
         this.numReqGenPair = new HashMap<>();
@@ -61,29 +67,25 @@ public class ProbabilidadeDeBloqueio extends Measurement {
 
         // incrementar requisi��es geradas geral
         this.numReqGenGeral++;
+
         // incrementar requisi��es geradas por par
-        Integer i = this.numReqGenPair
-                .get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
-        if (i == null)
-            i = 0;
-        this.numReqGenPair.put(
-                request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(), i + 1);
+        Integer i = this.numReqGenPair.get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
+        if (i == null) i = 0;
+        this.numReqGenPair.put(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(), i + 1);
+
         // incrementar requisi��es geradas por largura de banda
         i = this.numReqGenBW.get(request.getRequiredBandwidth());
-        if (i == null)
-            i = 0;
+        if (i == null) i = 0;
         this.numReqGenBW.put(request.getRequiredBandwidth(), i + 1);
+
         // incrementar requisi��es geradas por par/larguraDeBanda
-        HashMap<Double, Integer> gplb = this.numReqGenPairBW
-                .get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
+        HashMap<Double, Integer> gplb = this.numReqGenPairBW.get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
         if (gplb == null) {
             gplb = new HashMap<>();
-            this.numReqGenPairBW.put(
-                    request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(), gplb);
+            this.numReqGenPairBW.put(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(), gplb);
         }
         i = gplb.get(request.getRequiredBandwidth());
-        if (i == null)
-            i = 0;
+        if (i == null) i = 0;
         gplb.put(request.getRequiredBandwidth(), i + 1);
 
         // caso haja bloqueio
@@ -117,30 +119,21 @@ public class ProbabilidadeDeBloqueio extends Measurement {
             }
 
             // incrementar requisicoes bloqueadas por par
-            i = this.numReqBlockPair
-                    .get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
-            if (i == null)
-                i = 0;
-            this.numReqBlockPair.put(
-                    request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(),
-                    i + 1);
+            i = this.numReqBlockPair.get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
+            if (i == null) i = 0;
+            this.numReqBlockPair.put(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(),i + 1);
             // incrementar requisi��es bloqueadas por largura de banda
             i = this.numReqBlockBW.get(request.getRequiredBandwidth());
-            if (i == null)
-                i = 0;
+            if (i == null) i = 0;
             this.numReqBlockBW.put(request.getRequiredBandwidth(), i + 1);
             // incrementar requisi��es bloqueadas por par/larguraDeBanda
-            HashMap<Double, Integer> bplb = this.numReqBlockPairBW
-                    .get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
+            HashMap<Double, Integer> bplb = this.numReqBlockPairBW.get(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName());
             if (bplb == null) {
                 bplb = new HashMap<>();
-                this.numReqBlockPairBW.put(
-                        request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(),
-                        bplb);
+                this.numReqBlockPairBW.put(request.getPair().getSource().getName() + SEP + request.getPair().getDestination().getName(),bplb);
             }
             i = bplb.get(request.getRequiredBandwidth());
-            if (i == null)
-                i = 0;
+            if (i == null) i = 0;
             bplb.put(request.getRequiredBandwidth(), i + 1);
         }
     }
@@ -260,6 +253,7 @@ public class ProbabilidadeDeBloqueio extends Measurement {
         String or = p.getSource().getName();
         String dest = p.getDestination().getName();
         Integer gen = this.numReqGenPairBW.get(or + SEP + dest).get(bw);
+        if(gen==null) return 0; //nenhuma requisição gerada para este par e largura de banda
         Integer block = 0;
 
         HashMap<Double, Integer> hashAux = this.numReqBlockPairBW.get(or + SEP + dest);
@@ -268,6 +262,8 @@ public class ProbabilidadeDeBloqueio extends Measurement {
         } else {
             block = hashAux.get(bw);
         }
+
+
 
         res = ((double) block / (double) gen);
 

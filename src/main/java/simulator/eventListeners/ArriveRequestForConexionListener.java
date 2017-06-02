@@ -38,7 +38,6 @@ public class ArriveRequestForConexionListener implements EventListener, Serializ
 
         beforeReq();
         //tentar atender a requisição
-
         Boolean success = simulation.getControlPlane().atenderRequisicao(requestForConexion);
         if (success) {//agendar o fim da requisição e liberação dos recursos
             em.insert(new Event(requestForConexion, new HoldRequestListener(simulation), requestForConexion.getTimeOfFinalizeHours()));
