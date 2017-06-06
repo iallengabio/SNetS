@@ -25,8 +25,13 @@ public class Simulation implements Serializable {
     private ControlPlane controlPlane;
     private Measurements measurements;
 
+    private int loadPoint;
+    private int replication;
+
 
     public Simulation(SimulationConfig sc, Mesh mesh, int loadPoint, int replication) throws Exception {
+        this.loadPoint = loadPoint;
+        this.replication = replication;
         this.numReply = sc.getReplications();
         this.totalNumberOfRequests = sc.getRequests();
         this.rsaType = sc.getRsaType();
@@ -166,6 +171,14 @@ public class Simulation implements Serializable {
 
     public void setModulationLevelAlgorithm(String modulationLevelAlgorithm) {
         this.modulationLevelAlgorithm = modulationLevelAlgorithm;
+    }
+
+    public int getLoadPoint() {
+        return loadPoint;
+    }
+
+    public int getReplication() {
+        return replication;
     }
 
     /**

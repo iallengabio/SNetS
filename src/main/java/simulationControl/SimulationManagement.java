@@ -10,12 +10,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SimulationManagement {
 
-    private Simulator simulator;
-    private List<List<Simulation>> simulations;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 5;
 
+    private List<List<Simulation>> simulations;
+    private int done;
+    private int numOfSimulations;
 
     /**
      * armazena os resultados para todos os pontos com todas replicacoes
@@ -24,36 +28,49 @@ public class SimulationManagement {
 
     public SimulationManagement(List<List<Simulation>> simulations) {
         this.simulations = simulations;
+        done = 0;
+        numOfSimulations = 0;
+        mainMeasuremens = new ArrayList<>();
+        for(List<Simulation> loadPoint : simulations){
+            List<Measurements> aux = new ArrayList<>();
+            mainMeasuremens.add(aux);
+            for(Simulation replication : loadPoint){
+                aux.add(null);
+                numOfSimulations++;
+            }
+        }
     }
 
     /**
      * executa as simulações de forma centralizada
      */
     public void startSimulations(SimulationProgressListener simulationProgressListener) {
-        mainMeasuremens = new ArrayList<>();
+
         Util.pairs.addAll(simulations.get(0).get(0).getMesh().getPairList());
 
-
-        double quantLP = simulations.size();
-        double done = 0;
-        for (List<Simulation> loadPoint : simulations) {
-            ArrayList<Measurements> measurementsLoadPoint = new ArrayList<>();
-            this.mainMeasuremens.add(measurementsLoadPoint);
-
-            for (Simulation replication : loadPoint) {
-
-
-                simulator = new Simulator(replication);
-                measurementsLoadPoint.add(simulator.start());
-
-                //atualizar progresso
-                done++;
-
-                simulationProgressListener.onSimulationProgressUpdate(done/(quantLP*loadPoint.size()));
-
+        ExecutorService executor = Executors.newScheduledThreadPool(NUMBER_OF_ACTIVE_THREADS);
+        done = 0;
+        for(List<Simulation> loadPoint : simulations){
+            for(Simulation replication : loadPoint){
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Simulator simulator = new Simulator(replication);
+                        mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
+                        done++;
+                        simulationProgressListener.onSimulationProgressUpdate((double)done/numOfSimulations);
+                    }
+                });
             }
-
         }
+        while(done<numOfSimulations){//wait untill all simulations have done
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         simulationProgressListener.onSimulationFinished();
 
     }
