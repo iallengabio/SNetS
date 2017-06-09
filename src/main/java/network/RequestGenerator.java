@@ -5,7 +5,7 @@ import simulator.eventListeners.ArriveRequestForConexionListener;
 
 import java.io.Serializable;
 
-import request.RequestForConexion;
+import request.RequestForConnection;
 import util.RandGenerator;
 
 public class RequestGenerator implements Serializable {
@@ -42,7 +42,7 @@ public class RequestGenerator implements Serializable {
    * o método irá calcular o instante da próxima requisição e agendar o evento correspondente
    */
   public void scheduleNextRequest(EventMachine em, ArriveRequestForConexionListener arriveRequest) {
-	RequestForConexion r = new RequestForConexion();
+	RequestForConnection r = new RequestForConnection();
 	double arriveTimeHours = randGenerator.negexp(arrivedRate);
     atualTimeHours = atualTimeHours + arriveTimeHours;
     r.setTimeOfRequestHours(atualTimeHours);

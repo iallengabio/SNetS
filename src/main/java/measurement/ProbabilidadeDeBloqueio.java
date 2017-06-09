@@ -3,7 +3,7 @@ package measurement;
 import network.Circuit;
 import network.Link;
 import network.Pair;
-import request.RequestForConexion;
+import request.RequestForConnection;
 import util.IntersectionFreeSpectrum;
 
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class ProbabilidadeDeBloqueio extends Measurement {
      * @param sucess
      * @param request
      */
-    public void addNewObservation(boolean sucess, RequestForConexion request) {
+    public void addNewObservation(boolean sucess, RequestForConnection request) {
 
         // incrementar requisi��es geradas geral
         this.numReqGenGeral++;

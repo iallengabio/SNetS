@@ -2,7 +2,7 @@ package network;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
-import request.RequestForConexion;
+import request.RequestForConnection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ public class Circuit {
     protected Route route;
     protected int spectrumAssigned[];
     protected Modulation modulation;
-    protected List<RequestForConexion> requests; //requisições atendidas por este circuito
+    protected List<RequestForConnection> requests; //requisições atendidas por este circuito
 
     public Circuit() {
         requests = new ArrayList<>();
@@ -55,7 +55,7 @@ public class Circuit {
     public double getRequiredBandwidth() {
         double res = 0.0;
 
-        for (RequestForConexion r : requests) {
+        for (RequestForConnection r : requests) {
             res += r.getRequiredBandwidth();
         }
 
@@ -94,16 +94,16 @@ public class Circuit {
     }
 
 
-    public void addRequest(RequestForConexion rfc) {
+    public void addRequest(RequestForConnection rfc) {
         requests.add(rfc);
     }
 
-    public void removeRequest(RequestForConexion rfc) {
+    public void removeRequest(RequestForConnection rfc) {
         requests.remove(rfc);
     }
 
 
-    public List<RequestForConexion> getRequests() {
+    public List<RequestForConnection> getRequests() {
         return requests;
     }
 

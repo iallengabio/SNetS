@@ -2,7 +2,7 @@ package network;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
-import request.RequestForConexion;
+import request.RequestForConnection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,13 +84,13 @@ public class ControlPlane {
      *
      * @return
      */
-    public boolean atenderRequisicao(RequestForConexion rfc) {
+    public boolean atenderRequisicao(RequestForConnection rfc) {
 
         return this.grmlsa.atenderRequisicao(rfc);
 
     }
 
-    public void finalizarConexao(RequestForConexion rfc) {
+    public void finalizarConexao(RequestForConnection rfc) {
         this.grmlsa.finalizarConexao(rfc);
     }
 

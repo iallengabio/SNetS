@@ -1,7 +1,7 @@
 package simulator.eventListeners;
 
 import measurement.Measurements;
-import request.RequestForConexion;
+import request.RequestForConnection;
 import simulator.Event;
 import simulator.EventMachine;
 import simulator.Simulation;
@@ -27,22 +27,22 @@ public class ArriveRequestForConexionListener implements EventListener, Serializ
     @Override
     public void execute(Event e) {
 
-        RequestForConexion requestForConexion = (RequestForConexion) e.getObject();
+        RequestForConnection requestForConnection = (RequestForConnection) e.getObject();
 
         //agendar próxima requisição para conexão com este mesmo requestGenerator
         Measurements m = simulation.getMeasurements();
         if (!m.finished()) { //agendar outra requisicao atraves do mesmo gerador desta
-            requestForConexion.getRequestGenerator().scheduleNextRequest(em, this);
+            requestForConnection.getRequestGenerator().scheduleNextRequest(em, this);
         }
 
 
         beforeReq();
         //tentar atender a requisição
-        Boolean success = simulation.getControlPlane().atenderRequisicao(requestForConexion);
+        Boolean success = simulation.getControlPlane().atenderRequisicao(requestForConnection);
         if (success) {//agendar o fim da requisição e liberação dos recursos
-            em.insert(new Event(requestForConexion, new HoldRequestListener(simulation), requestForConexion.getTimeOfFinalizeHours()));
+            em.insert(new Event(requestForConnection, new HoldRequestListener(simulation), requestForConnection.getTimeOfFinalizeHours()));
         }
-        afterReq(requestForConexion, success);
+        afterReq(requestForConnection, success);
 
 
     }
@@ -55,7 +55,7 @@ public class ArriveRequestForConexionListener implements EventListener, Serializ
         m.incNumGeneratedReq();
     }
 
-    private void afterReq(RequestForConexion request, boolean success) {
+    private void afterReq(RequestForConnection request, boolean success) {
 
         Measurements m = simulation.getMeasurements();
         m.getProbabilidadeDeBloqueioMeasurement().addNewObservation(success, request);

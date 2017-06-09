@@ -12,7 +12,7 @@ import grmlsa.trafficGrooming.SimpleTrafficGrooming;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithm;
 import network.Circuit;
 import network.ControlPlane;
-import request.RequestForConexion;
+import request.RequestForConnection;
 
 /**
  * Esta classe devera ser responsavel por executar os algoritmos de RSA, verificando se o algoritmo selecionado eh do tipo
@@ -206,12 +206,12 @@ public class GRMLSA {
         return false;
     }
 
-    public boolean atenderRequisicao(RequestForConexion rfc) {
+    public boolean atenderRequisicao(RequestForConnection rfc) {
         return grooming.searchCircuitsForGrooming(rfc, this);
     }
 
-    public void finalizarConexao(RequestForConexion rfc) {
-        this.grooming.finalizarConexao(rfc, this);
+    public void finalizarConexao(RequestForConnection rfc) {
+        this.grooming.finishConnection(rfc, this);
     }
 
     public ControlPlane getControlPlane() {

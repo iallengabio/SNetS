@@ -9,7 +9,10 @@ import network.Node;
 import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
+/**
+ * This class represents the MMRDS Routing Algorithm.
+ * This algorithm is presented in http://sbrc2013.unb.br/files/anais/trilha-principal/artigos/artigo-9.pdf
+ */
 public class MMRDS implements RoutingInterface, Serializable {
     private static final String DIV = "-";
 

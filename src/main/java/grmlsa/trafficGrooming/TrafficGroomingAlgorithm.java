@@ -1,24 +1,23 @@
 package grmlsa.trafficGrooming;
 
 import grmlsa.GRMLSA;
-import request.RequestForConexion;
+import request.RequestForConnection;
 
 public interface TrafficGroomingAlgorithm {
 	
 	/**
-	 * Este método deverá definir de acordo com as políticas adotadas pelo algoritmo qual/quais circuitos serão utilizados para fazer agregação de tráfego,
-	 * Mesmo na ausência de circuitos para realizar a aglomeração os algoritmos podem requerer a criação de novos circuitos para atender a requisição.
+	 * This method defines which circuits will be used to aggregate traffic.
+	 * Even in the absence of circuits to perform the traffic grooming, the algorithms may require the creation of new circuits to meet the new request.
 	 * @param rfc
-	 * @param mesh
-	 * @return retorna falso se não for possível atender à requisição e verdadeira se for possível
+	 * @return if the new request could be met.
 	 */
-	public boolean searchCircuitsForGrooming(RequestForConexion rfc, GRMLSA grmlsa);
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, GRMLSA grmlsa);
 	
 	/**
-	 * O algoritmo deve definir o que deve ser feito no fim de uma conexão.
-	 * Ex: encerrar o circuito; manter o circuito; reduzir a quantidade de slots alocados, etc.
+	 * Defines what should be done at the end of a connection.
+	 * For example: finish the circuit; keep the circuit active; reduce the number of slots allocated for the circuit, etc.
 	 * @param rfc
 	 * @param grmlsa
 	 */
-	public void finalizarConexao(RequestForConexion rfc, GRMLSA grmlsa);
+	public void finishConnection(RequestForConnection rfc, GRMLSA grmlsa);
 }

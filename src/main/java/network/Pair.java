@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@SuppressWarnings("serial")
 public class Pair implements Serializable {
 
     private Node source;

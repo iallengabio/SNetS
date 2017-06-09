@@ -3,7 +3,7 @@ package measurement;
 import java.util.HashMap;
 
 import network.Pair;
-import request.RequestForConexion;
+import request.RequestForConnection;
 
 /**
  * Esta classe representa a métrica de probabilidade de bloqueio (geral, por par, por largura de banda, por par/larguraDeBanda)
@@ -52,7 +52,7 @@ public class ProbabilidadeDeBloqueioDeBanda extends Measurement{
 	 * @param sucess
 	 * @param request
 	 */
-	public void addNewObservation(boolean sucess, RequestForConexion request){
+	public void addNewObservation(boolean sucess, RequestForConnection request){
 		//calcular a quantidade de banda requisitada pelo circuito
 		Double time = request.getTimeOfFinalizeHours() - request.getTimeOfRequestHours();
 		Double banda = time * request.getRequiredBandwidth();

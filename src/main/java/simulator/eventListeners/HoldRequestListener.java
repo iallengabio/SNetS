@@ -1,6 +1,6 @@
 package simulator.eventListeners;
 
-import request.RequestForConexion;
+import request.RequestForConnection;
 import simulator.Event;
 import simulator.Simulation;
 
@@ -16,7 +16,7 @@ public class HoldRequestListener implements EventListener, Serializable {
 
     @Override
     public void execute(Event e) {
-        RequestForConexion request = (RequestForConexion) e.getObject();
+        RequestForConnection request = (RequestForConnection) e.getObject();
         simulation.getControlPlane().finalizarConexao(request);
     }
 

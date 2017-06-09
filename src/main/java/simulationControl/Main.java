@@ -70,6 +70,7 @@ public class Main {
                             public void onSimulationFinished() {//do nothing
                             }
                         });
+
                         sr.getResult().blockingProbability = sm.getBlockingProbabilityCsv();
                         sr.getResult().bandwidthBlockingProbability = sm.getBandwidthBlockingProbabilityCsv();
                         sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
@@ -103,7 +104,6 @@ public class Main {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {//do nothing yet
-
             }
         });
 

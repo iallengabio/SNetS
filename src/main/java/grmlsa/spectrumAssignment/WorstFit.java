@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Esta � uma classe que faz atribui��o de espectro seguindo a pol�tica first fit
- *
+ * This class represents the spectrum allocation technique called Best Fit.
+ * This technique chooses the biggest free spectrum band that accommodates the request.
  * @author Iallen
  */
 public class WorstFit implements SpectrumAssignmentAlgoritm {
@@ -27,15 +27,14 @@ public class WorstFit implements SpectrumAssignmentAlgoritm {
             composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        //agora basta buscar a faixa livre com tamanho mais distante da quantidade de slots requisitados
         int chosen[] = null;
         int maiorDif = -1;
         for (int[] band : composition) {
             int tamFaixa = band[1] - band[0] + 1;
             if (tamFaixa >= numberOfSlots) {
-                if (tamFaixa - numberOfSlots > maiorDif) { //encontrou uma faixa com quantidade de slots mais "diferente"
+                if (tamFaixa - numberOfSlots > maiorDif) {
                     chosen = band;
-                    chosen[1] = chosen[0] + numberOfSlots - 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
+                    chosen[1] = chosen[0] + numberOfSlots - 1;
                     maiorDif = tamFaixa - numberOfSlots;
                 }
             }
@@ -46,12 +45,6 @@ public class WorstFit implements SpectrumAssignmentAlgoritm {
         return true;
     }
 
-
-    private void printFreeSpectrumBands(List<int[]> links) {
-        for (int[] is : links) {
-
-        }
-    }
 
 }
 

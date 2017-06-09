@@ -7,7 +7,7 @@ import network.RequestGenerator;
 /*
  * Esta classe representa as requisições feitas pelos clientes para o estabelecimento de conexões entre dois nós da rede
  */
-public class RequestForConexion {
+public class RequestForConnection {
 	
 	protected Pair pair;
 	protected double timeOfRequestHours;
