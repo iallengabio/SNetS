@@ -2,28 +2,39 @@ package network;
 
 import java.io.Serializable;
 
+/**
+ * This class represents the transmitters on the network
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
 public class Transmitters implements Serializable {
 
 	private int txUtilization;
-	private int numberOfTx=1000000; //sem limitação de transmitters
+	private int numberOfTx = Integer.MAX_VALUE; // Without limitation of transmitters
 
+	/**
+	 * Creates a new instance of Transmitters
+	 */
 	public Transmitters() {
 		this.txUtilization = 0;
 	}
 
+	/**
+	 * Creates a new instance of Transmitters with a limited number of transmitters
+	 * 
+	 * @param numberOfTx int
+	 */
 	public Transmitters(int numberOfTx){
 		this.numberOfTx = numberOfTx;
 		this.txUtilization = 0;
 	}
 
-	// ----------------------------------------------------------------------------
 	/**
-	 * Incrementa o num de transmissores que estao sendo utilizados e atualiza o
-	 * somatorio e o pico de utilizacao de receptor
+	 * Increases the number of transmitters being used and updates the sum and peak transmitter utilization
 	 */
-	public boolean alocTx() {
-		if(this.txUtilization<this.numberOfTx){
+	public boolean allocateTx() {
+		if(this.txUtilization < this.numberOfTx){
 			this.txUtilization++;
 			return true;
 		}else{
@@ -31,10 +42,9 @@ public class Transmitters implements Serializable {
 		}		
 	}
 
-	// ----------------------------------------------------------------------------
 	/**
-	 * Decrementa o num de transmissores que estao sendo utilizados Este metodo
-	 * dever ser invocado quando uma conexao com origem neste ns for finalizada
+	 * Decrements the number of transmitters being used
+	 * This method should be invoked when a connection originating from this node source is terminated
 	 */
 	public void freeTx() {
 		this.txUtilization--;
@@ -47,21 +57,40 @@ public class Transmitters implements Serializable {
 		this.txUtilization = 0;
 	}
 
+	/**
+	 * Returns the use of transmitters
+	 * 
+	 * @return int
+	 */
 	public int getTxUtilization() {
 		return txUtilization;
 	}
 
+	/**
+	 * Returns the maximum number of transmitters
+	 * 
+	 * @return int
+	 */
 	public int getNumberOfTx() {
 		return numberOfTx;
 	}
 
+	/**
+	 * Sets the maximum number of transmitters
+	 * 
+	 * @param numberOfTx int
+	 */
 	public void setNumberOfTx(int numberOfTx) {
 		this.numberOfTx = numberOfTx;
 	}
 	
+	/**
+	 * To verify if the use of transmitters has reached the maximum number of available transmitters
+	 * 
+	 * @return boolean
+	 */
 	public boolean isFullUtilized(){
 		return numberOfTx==txUtilization;
 	}
 	
-
 }

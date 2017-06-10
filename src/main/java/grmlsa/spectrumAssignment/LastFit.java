@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Esta � uma classe que faz atribui��o de espectro seguindo a pol�tica first fit
+ * This class represents the spectrum allocation technique called First Fit.
+ * This technique chooses the last free spectrum band that accommodates the request.
  *
  * @author Iallen
  */
@@ -31,10 +32,9 @@ public class LastFit implements SpectrumAssignmentAlgoritm {
             composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        //agora basta buscar a primeira faixa livre com a quantidade de slots requsiitadas na composi��o gerada
         int chosen[] = lastFit(numberOfSlots, composition);
 
-        if (chosen == null) return false; //n�o encontrou nenhuma faixa cont�gua e cont�nua dispon�vel
+        if (chosen == null) return false;
 
         request.setSpectrumAssigned(chosen);
 
@@ -42,18 +42,18 @@ public class LastFit implements SpectrumAssignmentAlgoritm {
     }
 
     /**
-     * aplica a pol�tica lastFit a uma determinada lista de faixas livres retorna a faixa escolhida
+     *
      *
      * @param numberOfSlots
-     * @param livres
+     * @param freeSpectrumBands
      * @return
      */
-    public static int[] lastFit(int numberOfSlots, List<int[]> livres) {
+    public static int[] lastFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
         int band[] = null;
         int i;
-        for (i = livres.size() - 1; i >= 0; i--) {
-            band = livres.get(i);
+        for (i = freeSpectrumBands.size() - 1; i >= 0; i--) {
+            band = freeSpectrumBands.get(i);
             if (band[1] - band[0] + 1 >= numberOfSlots) {
                 chosen = band;
                 chosen[0] = chosen[1] - numberOfSlots + 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria

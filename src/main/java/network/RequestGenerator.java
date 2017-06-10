@@ -5,13 +5,18 @@ import simulator.eventListeners.ArriveRequestForConexionListener;
 
 import java.io.Serializable;
 
-import request.RequestForConexion;
+import request.RequestForConnection;
 import util.RandGenerator;
 
+/**
+ * This class represents the network request generator
+ * 
+ * @author Iallen
+ */
 public class RequestGenerator implements Serializable {
 
   private Pair pair;
-  private double bandwidth; // em bits por segundo (bps)
+  private double bandwidth; // In bits per second (bps)
   private double holdRate;
   private double arrivedRate;  
   private double incLoad;
@@ -19,30 +24,34 @@ public class RequestGenerator implements Serializable {
   private  RandGenerator randGenerator;
 
   /**
+   * Creates a new instance of RequestGenerator
    * 
-   * @param pair
-   * @param bandwidth em bits por segundo (bps)
-   * @param holdRate
-   * @param arrivedRate
-   * @param incLoad
+   * @param pair Pair
+   * @param bandwidth double
+   * @param holdRate double
+   * @param arrivedRate double
+   * @param incLoad double
+   * @param randGenerator RandGenerator
    */
   public RequestGenerator(Pair pair, double bandwidth, double holdRate, double arrivedRate,double incLoad, RandGenerator randGenerator) {
     this.pair = pair;
     this.bandwidth = bandwidth;	  
 	this.holdRate = holdRate;
     this.arrivedRate = arrivedRate;
-    this.incLoad=incLoad;
-    atualTimeHours = 0;
+    this.incLoad = incLoad;
+    this.atualTimeHours = 0;
     this.randGenerator = randGenerator;
   }
 
-  //---------------------------------------------------------------------------
   /**
-   * Agenda uma nova requisicao de conexao,
-   * o método irá calcular o instante da próxima requisição e agendar o evento correspondente
+   * Schedule a new connection request, the method will calculate the instant 
+   * of the next request and schedule the corresponding event
+   * 
+   * @param em EventMachine
+   * @param arriveRequest ArriveRequestForConexionListener
    */
   public void scheduleNextRequest(EventMachine em, ArriveRequestForConexionListener arriveRequest) {
-	RequestForConexion r = new RequestForConexion();
+	RequestForConnection r = new RequestForConnection();
 	double arriveTimeHours = randGenerator.negexp(arrivedRate);
     atualTimeHours = atualTimeHours + arriveTimeHours;
     r.setTimeOfRequestHours(atualTimeHours);
@@ -56,108 +65,102 @@ public class RequestGenerator implements Serializable {
     em.insert(e);
   }
 
-  //---------------------------------------------------------------------------
   /**
-   * Retorna a taxa de chegada de requisicoes
+   * Returns the arrival rate of requests
+   * 
    * @return double
    */
   public double getArrivedRate() {
     return arrivedRate;
   }
 
- 
-
-  //---------------------------------------------------------------------------
   /**
-   * Retorna a taxa de atendimento de requisicoes.
+   * Return the hold rate of requests
    * @return double
    */
   public double getHoldRate() {
     return holdRate;
   }
 
- 
-
-  //---------------------------------------------------------------------------
   /**
-   * Configura a taxa de chegada de requisicoes.
+   * Configures the arrival rate of requests
+   * 
    * @param arrivedRate double
    */
   public void setArrivedRate(double arrivedRate) {
     this.arrivedRate = arrivedRate;
   }
 
-
-
-  //---------------------------------------------------------------------------
   /**
-   * Configura a taxa de atendimento de requisicoes.
+   * Configures the hold rate of requests
+   * 
    * @param holdRate double
    */
   public void setHoldRate(double holdRate) {
     this.holdRate = holdRate;
   }
 
-  
-
-  //---------------------------------------------------------------------------
-
-
-
-
-
-  //---------------------------------------------------------------------------
   /**
-   * Retorna o valor de incremento para a taxa de chegada.
+   * Returns the increment value for the arrival rate
+   * 
    * @return double
    */
   public double getIncLoad() {
     return incLoad;
   }
 
-
-  //---------------------------------------------------------------------------
   /**
-   * Configura o valor de incremento para a taxa de chegada.
+   * Sets the increment value for the arrival rate
+   * 
    * @param incLoad double
    */
   public void setIncLoad(double incLoad) {
     this.incLoad = incLoad;
   }
 
-/**
- * @return the pair
- */
-public Pair getPair() {
-	return pair;
-}
+  /**
+	 * Returns the pair
+	 * 
+	 * @return Pair the pair
+	 */
+  public Pair getPair() {
+	  return pair;
+  }
 
-/**
- * @param pair the pair to set
- */
-public void setPair(Pair pair) {
-	this.pair = pair;
-}
-
-/**
- * @return the bandwidth
- */
-public double getBandwidth() {
-	return bandwidth;
-}
-
-/**
- * @param bandwidth the bandwidth to set
- */
-public void setBandwidth(double bandwidth) {
-	this.bandwidth = bandwidth;
-}
-
-public void incArrivedRate(int mult){
-	this.arrivedRate = this.arrivedRate + mult * this.incLoad;
-}
-
-
+  /**
+	 * Sets the pair
+	 * 
+	 * @param pair Pair the pair to set
+	 */
+  public void setPair(Pair pair) {
+	  this.pair = pair;
+  }
   
+  /**
+	 * Returns the bandwidth
+	 * 
+	 * @return double the bandwidth
+	 */
+  public double getBandwidth() {
+	  return bandwidth;
+  }
+
+  /**
+	 * Sets the bandwidth
+	 * 
+	 * @param bandwidth double the bandwidth to set
+	 */
+  public void setBandwidth(double bandwidth) {
+	  this.bandwidth = bandwidth;
+  }
+  
+  /**
+	 * Increases the arrival rate
+	 * 
+	 * @param mult int
+	 */
+  public void incArrivedRate(int mult){
+	  this.arrivedRate = this.arrivedRate + mult * this.incLoad;
+  }
   
 }

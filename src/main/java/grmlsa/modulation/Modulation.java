@@ -5,20 +5,24 @@ public class Modulation {
     private final int guardBand;
     private String name;
 
-    private double bitsPerSimbol;
+    private double bitsPerSymbol;
     /*
      * max range in Km
      */
     private double maxRange;
 
     private double freqSlot;
+    
+    private double level; //nivel do formato de modulacao
+	public double k2;
+	public double M; //quantidade de simbolos do formato de modulacao
 
 
-    public Modulation(String name, double bitsPerSimbol, double freq, double maxRange, int guardBand) {
+    public Modulation(String name, double bitsPerSymbol, double freqSlot, double maxRange, int guardBand) {
         this.name = name;
-        this.bitsPerSimbol = bitsPerSimbol;
+        this.bitsPerSymbol = bitsPerSymbol;
         this.maxRange = maxRange;
-        this.freqSlot = freq;
+        this.freqSlot = freqSlot;
         this.guardBand = guardBand;
     }
 
@@ -30,10 +34,10 @@ public class Modulation {
     }
 
     /**
-     * @return the bitsPerSimbol
+     * @return the bitsPerSymbol
      */
-    public double getBitsPerSimbol() {
-        return bitsPerSimbol;
+    public double getBitsPerSymbol() {
+        return bitsPerSymbol;
     }
 
     /**
@@ -53,7 +57,7 @@ public class Modulation {
     public int requiredSlots(double bandwidth) {
         //System.out.println("C = " + bandwidth + "    bm = " + this.bitsPerSimbol + "     fslot = " + this.freqSlot);
 
-        double res = bandwidth / (this.bitsPerSimbol * this.freqSlot);
+        double res = bandwidth / (this.bitsPerSymbol * this.freqSlot);
 
         //System.out.println("res = " + res);
 
@@ -65,9 +69,52 @@ public class Modulation {
 
         res2 = res2 + guardBand; //adiciona mais um slot necessário para ser usado como banda de guarda
 
-
         return res2;
     }
 
+	/**
+	 * @return the level
+	 */
+	public double getLevel() {
+		return level;
+	}
+
+	/**
+	 * @param level the level to set
+	 */
+	public void setLevel(double level) {
+		this.level = level;
+	}
+
+	/**
+	 * @return the k2
+	 */
+	public double getK2() {
+		return k2;
+	}
+
+	/**
+	 * @param k2 the k2 to set
+	 */
+	public void setK2(double k2) {
+		this.k2 = k2;
+	}
+
+	/**
+	 * @return the m
+	 */
+	public double getM() {
+		return M;
+	}
+
+	/**
+	 * @param m the m to set
+	 */
+	public void setM(double m) {
+		M = m;
+	}
+    
+    
+    
 
 }

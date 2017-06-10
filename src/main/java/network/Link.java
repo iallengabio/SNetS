@@ -3,6 +3,13 @@ package network;
 import java.io.Serializable;
 import java.util.List;
 
+import request.RequestForConnection;
+
+/**
+ * This class represents a network link
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
 public class Link implements Serializable {
 
@@ -17,8 +24,9 @@ public class Link implements Serializable {
      *
      * @param s             Oxc New value of property source.
      * @param d             Oxc New value of property destination.
-     * @param numberOfSlots int New value of property numberWave
-     * @param distance      double
+     * @param numberOfSlots int New value of property number of slots
+     * @param spectrumBand  double New value of property spectrum band
+     * @param distance      double New Value of distance
      */
     public Link(Oxc s, Oxc d, int numberOfSlots, double spectrumBand, double distance) {
         this.source = s;
@@ -27,11 +35,8 @@ public class Link implements Serializable {
         this.distance = distance;
     }
 
-
-//------------------------------------------------------------------------------
-
     /**
-     * is node x destination of this link.
+     * Is node x destination of this link.
      *
      * @param x Oxc
      * @return true if Oxc x is destination of this Link; false otherwise.
@@ -44,33 +49,25 @@ public class Link implements Serializable {
         }
     }
 
-//------------------------------------------------------------------------------
-
-
     /**
-     * Este método ocupa uma determinada faixa de spectro definida no parâmetro
+     * This method occupies a certain range of spectrum defined in the parameter
      *
-     * @param interval vetor de duas posições, a primeira se refere ao primeiro slot e a segunda ao último slot a ser utilizado
-     * @return
+     * @param interval - int[] - Vector of two positions, the first refers to the first slot 
+     *                           and the second to the last slot to be used
+     * @return boolean
      */
     public boolean useSpectrum(int interval[]) {
         return spectrum.useSpectrum(interval);
     }
 
-
-//------------------------------------------------------------------------------
-
     /**
-     * Libera uma determinada faixa de spectro que está sendo utilizada
+     * Releases a certain range of spectrum being used
      *
-     * @param spectrumBand
+     * @param spectrumBand int[]
      */
-    public void liberateSpectrum(int spectrumBand[]) {
+    public void freeSpectrum(int spectrumBand[]) {
         spectrum.freeSpectrum(spectrumBand);
     }
-
-
-//------------------------------------------------------------------------------
 
     /**
      * Getter for property destination.
@@ -81,8 +78,6 @@ public class Link implements Serializable {
         return destination;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Setter for property destination.
      *
@@ -92,8 +87,6 @@ public class Link implements Serializable {
         this.destination = destination;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Setter for property source.
      *
@@ -102,7 +95,6 @@ public class Link implements Serializable {
     public void setSource(Oxc source) {
         this.source = source;
     }
-    //------------------------------------------------------------------------------
 
     /**
      * Getter for property source.
@@ -112,7 +104,6 @@ public class Link implements Serializable {
     public Oxc getSource() {
         return source;
     }
-    //------------------------------------------------------------------------------
 
     /**
      * Getter for property cost.
@@ -122,7 +113,6 @@ public class Link implements Serializable {
     public double getCost() {
         return cost;
     }
-    //------------------------------------------------------------------------------
 
     /**
      * Setter for property Cost.
@@ -132,19 +122,9 @@ public class Link implements Serializable {
     public void setCost(double cost) {
         this.cost = cost;
     }
-    //------------------------------------------------------------------------------
-
-
-    //------------------------------------------------------------------------------
-
-
-    //------------------------------------------------------------------------------
-
-
-    //------------------------------------------------------------------------------
 
     /**
-     * Retorna a distancia deste link
+     * Returns the distance of this link
      *
      * @return double
      */
@@ -152,37 +132,27 @@ public class Link implements Serializable {
         return distance;
     }
 
-    //------------------------------------------------------------------------------
-
     /**
-     * retorna o nome do link no formato <origem, destino>
+     * Returns the name of the link in the format <source, destination>
      *
      * @return String
      */
     public String getName() {
         return "<" + getSource().getName() + "," + getDestination().getName() + ">";
     }
-    //------------------------------------------------------------------------------
-
-
-    //------------------------------------------------------------------------------
 
     /**
-     * para reiniciar o calculo de metricas
-     */
-    public void reStart() {
-    }
-
-    /**
-     * Retorna a lista de faixas de espectro disponíveis no link
+     * Returns the list of spectrum bands available on the link
      *
-     * @return
+     * @return List<int[]>
      */
     public List<int[]> getFreeSpectrumBands() {
         return spectrum.getFreeSpectrumBands();
     }
 
     /**
+     * Returns the bandwidth of a slot
+     * 
      * @return the slotSpectrumBand
      */
     public double getSlotSpectrumBand() {
@@ -190,20 +160,37 @@ public class Link implements Serializable {
     }
 
     /**
-     * @return the numOfSlots
+     * Returns the number of slots in the link
+     * 
+     * @return int the numOfSlots
      */
     public int getNumOfSlots() {
         return spectrum.getNumOfSlots();
     }
-
+    
+    /**
+     * Returns the number of used slots
+     * 
+	 * @return int
+	 */
+	public int getUsedSlots(){
+		return spectrum.getUsedSlots();
+	}
 
     /**
-     * retorna a utilização do link
+     * Returns link usage
      *
-     * @return
+     * @return Double
      */
     public Double getUtilization() {
         return this.spectrum.utilization();
     }
+    
+    /**
+	 * @return the listRequests
+	 */
+	public List<RequestForConnection> getListRequests() {
+		return null;
+	}
 
 }

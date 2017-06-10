@@ -5,14 +5,24 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
+/**
+ * This class represents the spectrum in the network links
+ * 
+ * @author Iallen
+ */
 public class Spectrum {
 	
 	private TreeSet<int[]> freeSpectrumBands;
 	private int numOfSlots;
 	private double slotSpectrumBand;
-	private int slotsUsados;
+	private int usedSlots;
 	
-	
+	/**
+	 * Creates a new instance of Spectrum
+	 * 
+	 * @param numOfSlots int
+	 * @param slotSpectrumBand double
+	 */
 	public Spectrum(int numOfSlots, double slotSpectrumBand){
 		
 		freeSpectrumBands = new TreeSet<int[]>(new Comparator<int[]>() {
@@ -30,38 +40,38 @@ public class Spectrum {
 		fsin[0] = 1;
 		fsin[1] = numOfSlots;		
 		freeSpectrumBands.add(fsin);
-		slotsUsados = 0; 
+		usedSlots = 0; 
 	}
 	
-	
 	/**
-	 * marca como utilizada uma determinada faixa de espectro
-	 * @param spectrumBand
-	 * @return
+	 * Mark as used a certain spectrum band
+	 * 
+	 * @param spectrumBand int
+	 * @return boolean
 	 */
 	public boolean useSpectrum(int spectrumBand[]){
 		
 		for (int freSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freSpecBand)){
-				freeSpectrumBands.remove(freSpecBand); //remover faixa livre
+				freeSpectrumBands.remove(freSpecBand); // Remove free bands
 				
-				//criar novas faixas livres
+				// Create new free bands
 				int newSpecBand[];
-				if(spectrumBand[0] - freSpecBand[0] != 0){ //criar faixa do que restou para tr�s
+				if(spectrumBand[0] - freSpecBand[0] != 0){ // Create band of what's left behind
 					newSpecBand = new int[2];
 					newSpecBand[0] = freSpecBand[0];
 					newSpecBand[1] = spectrumBand[0] - 1;
 					this.freeSpectrumBands.add(newSpecBand);
 				}
 				
-				if(freSpecBand[1] - spectrumBand[1] != 0){ //criar faixa do que restou para frente
+				if(freSpecBand[1] - spectrumBand[1] != 0){ // Create band of what's left ahead
 					newSpecBand = new int[2];
 					newSpecBand[0] = spectrumBand[1] + 1;
 					newSpecBand[1] = freSpecBand[1];
 					this.freeSpectrumBands.add(newSpecBand);
 				}
 				
-				slotsUsados = slotsUsados + (spectrumBand[1] - spectrumBand[0] + 1);
+				usedSlots = usedSlots + (spectrumBand[1] - spectrumBand[0] + 1);
 				
 				return true;
 			}			
@@ -71,10 +81,11 @@ public class Spectrum {
 	}
 	
 	/**
-	 * Verifica se o primeiro intervalo est� contido no segundo
-	 * @param inter1
-	 * @param inter2
-	 * @return
+	 * Checks whether the first interval is contained in the second
+	 * 
+	 * @param inter1 int[]
+	 * @param inter2 int[]
+	 * @return boolean
 	 */
 	private boolean isInInterval(int inter1[], int inter2[]){
 		
@@ -86,22 +97,24 @@ public class Spectrum {
 	}
 	
 	/**
-	 * marca como livre uma determinada faixa de espectro
-	 * @param spectrumBand
+	 * Mark as free a certain spectrum band
+	 * 
+	 * @param spectrumBand int[]
 	 */
 	public void freeSpectrum(int spectrumBand[]){
 		
 		this.freeSpectrumBands.add(spectrumBand); //liberando spectro
 		
-		slotsUsados = slotsUsados - (spectrumBand[1] - spectrumBand[0] + 1);
+		usedSlots = usedSlots - (spectrumBand[1] - spectrumBand[0] + 1);
 		
-		//necess�rio fazer o merge de espectros livres quando necess�rio
+		// To merge free spectra when necessary
 		int merge[];
-		//primeiro merge com espectro livre anterior
+		
+		// First merge with previous free spectrum
 		int aux[] = {spectrumBand[0]-1,spectrumBand[1]};
 		int flor[] = this.freeSpectrumBands.floor(aux);
 		
-		if(flor!=null && flor[1] == (spectrumBand[0] - 1)){ //necess�rio fazer o merge
+		if(flor!=null && flor[1] == (spectrumBand[0] - 1)){ // It is necessary to merge
 			merge = new int[2];
 			merge[0] = flor[0];
 			merge[1] = spectrumBand[1];
@@ -111,9 +124,9 @@ public class Spectrum {
 			spectrumBand = merge;
 		}
 		
-		//segundo fazer merge com espectro livre posterior
+		// Second merge with posterior free spectrum
 		int after[] = this.freeSpectrumBands.higher(spectrumBand);
-		if(after != null && (after[0] - 1) == spectrumBand[1]){//necess�rio fazer o merge
+		if(after != null && (after[0] - 1) == spectrumBand[1]){// It is necessary to merge
 			merge = new int[2];
 			merge[0] = spectrumBand[0];
 			merge[1] = after[1];
@@ -121,13 +134,12 @@ public class Spectrum {
 			this.freeSpectrumBands.remove(spectrumBand);
 			this.freeSpectrumBands.add(merge);
 		}	
-		
 	}
 	
-	
 	/**
-	 * retorna as faixas de espectro livres no momento
-	 * @return
+	 * Returns the free spectrum bands at the moment
+	 * 
+	 * @return List<int[]>
 	 */
 	public List<int[]> getFreeSpectrumBands(){
 		
@@ -141,32 +153,39 @@ public class Spectrum {
 	}
 	
 	/**
-	 * retorna a utiliza��o do spectro variando entre 0 e 1
-	 * @return
+	 * Returns the spectrum usage ranging from 0 to 1
+	 * 
+	 * @return double
 	 */
 	public double utilization(){
-		
-		return ((double)slotsUsados)/((double)numOfSlots);
-		
+		return ((double)usedSlots)/((double)numOfSlots);
 	}
 
-
 	/**
-	 * @return the slotSpectrumBand
+	 * Returns the spectrum bandwidth
+	 * 
+	 * @return double the slotSpectrumBand
 	 */
 	public double getSlotSpectrumBand() {
 		return slotSpectrumBand;
 	}
 
-
 	/**
-	 * @return the numOfSlots
+	 * Return the number of slots
+	 * 
+	 * @return int the numOfSlots
 	 */
 	public int getNumOfSlots() {
 		return numOfSlots;
 	}
 	
-	
-	
+	/**
+	 * Returns the number of used slots
+	 * 
+	 * @return the usedSlots
+	 */
+	public int getUsedSlots(){
+		return usedSlots;
+	}
 	
 }

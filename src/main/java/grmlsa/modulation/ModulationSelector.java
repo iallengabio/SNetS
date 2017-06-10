@@ -23,19 +23,17 @@ public class ModulationSelector {
 	 * @return
 	 */
 	public Modulation selectModulation(Circuit r){
-			
 		
 		double maxBPS = 0.0;
 		Modulation res = null;
 		
 		for (Modulation mod : avaliableModulations) {
-			if(mod.getMaxRange()>=r.getRoute().getDistanceAllLinks()){//modulação robusta o suficiente para esta requisição
-				if(mod.getBitsPerSimbol()>maxBPS){ //escolher a modulação com maior quantidade de bits por simbolo possível
+			if(mod.getMaxRange() >= r.getRoute().getDistanceAllLinks()){//modulação robusta o suficiente para esta requisição
+				if(mod.getBitsPerSymbol()>maxBPS){ //escolher a modulação com maior quantidade de bits por simbolo possível
 					res = mod;
 				}				
 			}
 		}
-		
 		
 		return res;
 	}

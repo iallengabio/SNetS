@@ -1,40 +1,48 @@
 package measurement;
 
-import network.Circuit;
-import network.ControlPlane;
-import network.Link;
-import network.Mesh;
-
 import java.util.HashMap;
 import java.util.Set;
 
+import network.Circuit;
+import network.Link;
+import network.Mesh;
 
-public class UtilizacaoSpectro extends Measurement {
+/**
+ * This class stored the metrics related to the use of spectrum.
+ * 
+ * @author Iallen
+ */
+public class SpectrumUtilization extends Measurement {
     public final static String SEP = "-";
 
     private Mesh mesh;
 
     private double utilizationGen;
-    private int obsUtilizacao;
+    private int numberObservations;
     private HashMap<String, Double> utilizationPerLink;
-
 
     private int[] desUtilizationPerSlot;
 
-
-    public UtilizacaoSpectro(int loadPoint, int replication, Mesh mesh) {
+    /**
+     * Creates a new instance of SpectrumUtilization
+     * 
+     * @param loadPoint int
+     * @param replication int
+     * @param mesh Mesh
+     */
+    public SpectrumUtilization(int loadPoint, int replication, Mesh mesh) {
         super(loadPoint, replication);
         this.mesh = mesh;
         utilizationGen = 0.0;
-        obsUtilizacao = 0;
+        numberObservations = 0;
         utilizationPerLink = new HashMap<String, Double>();
 
-        desUtilizationPerSlot = new int[401]; //cuidado ao utilizar links com quantidades de slots diferentes de 400
-
+        int maxSlotsByLinks = mesh.maximumSlotsByLinks();
+        desUtilizationPerSlot = new int[maxSlotsByLinks];
     }
 
     /**
-     * adiciona uma nova observação de utilização
+     * Adds a new usage observation of spectrum utilization
      *
      * @param request
      */
@@ -44,18 +52,17 @@ public class UtilizacaoSpectro extends Measurement {
     }
 
     /**
-     * adiciona uma nova observação de utilização
+     * Adds a new usage observation of spectrum utilizarion
      */
     public void addNewObservation() {
         this.newObsUtilization();
     }
 
-
     /**
-     * observação de utilização do recurso espectral da rede
+     * Observation of the use of the spectrum resource of the network
      */
     private void newObsUtilization() {
-        //utilização geral e por link
+        // General use and per link
         Double utGeral = 0.0;
         Double utLink;
         for (Link link : mesh.getLinkList()) {
@@ -66,23 +73,24 @@ public class UtilizacaoSpectro extends Measurement {
             utLink += link.getUtilization();
             this.utilizationPerLink.put(link.getSource().getName() + SEP + link.getDestination().getName(), utLink);
 
-            //calcular desutilização por slot
+            // Calculate slot unusability
             for (int[] faixa : link.getFreeSpectrumBands()) {
                 incrementarDesUtFaixa(faixa);
             }
-
         }
 
         utGeral = utGeral / (double) mesh.getLinkList().size();
 
         this.utilizationGen += utGeral;
 
-        this.obsUtilizacao++;
-
-
+        this.numberObservations++;
     }
 
-
+    /**
+	 * This method increases slot utilization
+	 * 
+	 * @param band int[]
+	 */
     private void incrementarDesUtFaixa(int faixa[]) {
         int i;
         for (i = faixa[0] - 1; i < faixa[1]; i++) {
@@ -90,25 +98,45 @@ public class UtilizacaoSpectro extends Measurement {
         }
     }
 
-
+    /**
+     * Returns the HashMap key set
+     * The key set corresponds to the links that were analyzed by the metric
+     * 
+     * @return
+     */
     public Set<String> getLinkSet() {
         return this.utilizationPerLink.keySet();
     }
 
-
+    /**
+     * Returns the utilization
+     * 
+     * @return
+     */
     public double getUtilizationGen() {
-        return this.utilizationGen / (double) this.obsUtilizacao;
+        return this.utilizationGen / (double) this.numberObservations;
     }
 
+    /**
+     * Returns the utilization for a given link passed by parameter
+     * 
+     * @param link
+     * @return
+     */
     public double getUtilizationPerLink(String link) {
-        return this.utilizationPerLink.get(link) / (double) this.obsUtilizacao;
+        return this.utilizationPerLink.get(link) / (double) this.numberObservations;
     }
 
+    /**
+     * Returns the utilization for a given slot passed by parameter
+     * 
+     * @param Slot
+     * @return
+     */
     public double getUtilizationPerSlot(int Slot) {
-        double desUt = (double) desUtilizationPerSlot[Slot - 1] / ((double) this.obsUtilizacao * mesh.getLinkList().size());
+        double desUt = (double) desUtilizationPerSlot[Slot - 1] / ((double) this.numberObservations * mesh.getLinkList().size());
 
         return 1 - desUt;
     }
-
 
 }

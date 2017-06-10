@@ -3,8 +3,11 @@ package simulationControl.parsers;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * Esta classe representa o arquivo de configuração Network, sua representação na forma de entidade é importante para a armazenação e transmissão deste tipo de configução no formato JSON.
+ * This class represents the Network configuration file, its representation in entity form is 
+ * important for the storage and transmission of this type of configuration in JSON format.
+ * 
  * Created by Iallen on 04/05/2017.
  */
 public class NetworkConfig {
@@ -14,84 +17,179 @@ public class NetworkConfig {
     private List<ModulationConfig> modulations = new ArrayList<>();
     private int guardBand=1;
 
-
-
+    /**
+     * Returns the list of modulations
+     * 
+     * @return List<ModulationConfig>
+     */
     public List<ModulationConfig> getModulations() {
         return modulations;
     }
 
+    /**
+     * Sets the list of modulations
+     * 
+     * @param modulations List<ModulationConfig>
+     */
     public void setModulations(List<ModulationConfig> modulations) {
         this.modulations = modulations;
     }
 
+    /**
+     * Returns the list of nodes
+     * 
+     * @return List<NodeConfig>
+     */
     public List<NodeConfig> getNodes() {
         return nodes;
     }
 
+    /**
+     * Sets the list of nodes
+     * 
+     * @param nodes List<NodeConfig>
+     */
     public void setNodes(List<NodeConfig> nodes) {
         this.nodes = nodes;
     }
 
+    /**
+     * Returns the list of links
+     * 
+     * @return List<LinkConfig>
+     */
     public List<LinkConfig> getLinks() {
         return links;
     }
 
+    /**
+     * Sets the list of links
+     * 
+     * @param links List<LinkConfig>
+     */
     public void setLinks(List<LinkConfig> links) {
         this.links = links;
     }
 
+    /**
+     * Returns the guard band
+     * 
+     * @return int
+     */
     public int getGuardBand() {
         return guardBand;
     }
 
+    /**
+     * Sets the guard band
+     * 
+     * @param guardBand int
+     */
     public void setGuardBand(int guardBand) {
         this.guardBand = guardBand;
     }
 
+    /**
+     * This class represents a noda of the network
+     * 
+     * @author Iallen
+     */
     public static class NodeConfig{
 
         private String name;
-        private int transmiters;
+        private int transmitters;
         private int receivers;
 
+        /**
+         * Creates a new instance of NodeConfig
+         * 
+         * @param name String
+         * @param transeivers int
+         * @param receivers int
+         */
         public NodeConfig(String name, int transmiters, int receivers) {
             this.name = name;
-            this.transmiters = transmiters;
+            this.transmitters = transmiters;
             this.receivers = receivers;
         }
 
+        /**
+         * Returns the node name
+         * 
+         * @return String
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Sets the node name
+         * 
+         * @param name String
+         */
         public void setName(String name) {
             this.name = name;
         }
 
-        public int getTransmiters() {
-            return transmiters;
+        /**
+         * Returns the number of transmitters
+         * 
+         * @return int
+         */
+        public int getTransmitters() {
+            return transmitters;
         }
 
-        public void setTransmiters(int transmiters) {
-            this.transmiters = transmiters;
+        /**
+         * Sets the number of transmitters
+         * 
+         * @param transmitters int
+         */
+        public void setTransmitters(int transmitters) {
+            this.transmitters = transmitters;
         }
 
+        /**
+         * Returns the number of receivers
+         * 
+         * @return int
+         */
         public int getReceivers() {
             return receivers;
         }
 
+        /**
+         * Sets the number of receivers
+         * 
+         * @param receivers int
+         */
         public void setReceivers(int receivers) {
             this.receivers = receivers;
         }
     }
 
+    /**
+     * This class represents a link of the network
+     * 
+     * @author Iallen
+     */
     public static class LinkConfig{
+    	
         private String source;
         private String destination;
         private int slots;
         private double spectrum;
         private double size;
 
+        /**
+         * Creates a new instance of LinkConfig
+         * 
+         * @param source
+         * @param destination
+         * @param slots
+         * @param sectrum
+         * @param size
+         */
         public LinkConfig(String source, String destination, int slots, double spectrum, double size) {
             this.source = source;
             this.destination = destination;
@@ -100,79 +198,171 @@ public class NetworkConfig {
             this.size = size;
         }
 
+        /**
+         * Returns the source name
+         * 
+         * @return String
+         */
         public String getSource() {
             return source;
         }
 
+        /**
+         * Sets the source name
+         * 
+         * @param source String
+         */
         public void setSource(String source) {
             this.source = source;
         }
 
+        /**
+         * Returns the destination name
+         * 
+         * @return String
+         */
         public String getDestination() {
             return destination;
         }
 
+        /**
+         * Sets the destination name
+         * 
+         * @param destination String
+         */
         public void setDestination(String destination) {
             this.destination = destination;
         }
 
+        /**
+         * Returns the number of slots
+         * 
+         * @return int
+         */
         public int getSlots() {
             return slots;
         }
 
+        /**
+         * Sets the number of sltos
+         * 
+         * @param slots int
+         */
         public void setSlots(int slots) {
             this.slots = slots;
         }
 
+        /**
+         * Returns the spectrum bandwidth
+         * 
+         * @return double
+         */
         public double getSpectrum() {
             return spectrum;
         }
 
+        /**
+         * Sets the spectrum bandwidth
+         * 
+         * @param spectrum double
+         */
         public void setSpectrum(double spectrum) {
             this.spectrum = spectrum;
         }
 
+        /**
+         * Returns the size of the link
+         * 
+         * @return double
+         */
         public double getSize() {
             return size;
         }
 
+        /**
+         * Sets the size of the link
+         * 
+         * @param size double
+         */
         public void setSize(double size) {
             this.size = size;
         }
     }
 
+    /**
+     * This class represents a modulation of the network
+     * 
+     * @author Iallen
+     */
     public static class ModulationConfig{
+    	
         private String name;
-        private double bitsPerSimbol;
+        private double bitsPerSymbol;
         private double maxRange;
 
-
-        public ModulationConfig(String name, double bitsPerSimbol, double maxRange) {
+        /**
+         * Creates a new instance of ModulationConfig
+         * 
+         * @param name
+         * @param bitsPerSymbol
+         * @param maxRange
+         */
+        public ModulationConfig(String name, double bitsPerSymbol, double maxRange) {
             this.name = name;
-            this.bitsPerSimbol = bitsPerSimbol;
+            this.bitsPerSymbol = bitsPerSymbol;
             this.maxRange = maxRange;
         }
 
+        /**
+         * Returns the modulation name
+         * 
+         * @return String
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Sets the modulation name
+         * 
+         * @param name String
+         */
         public void setName(String name) {
             this.name = name;
         }
 
-        public double getBitsPerSimbol() {
-            return bitsPerSimbol;
+        /**
+         * Returns the bits per symbol of the modulation
+         * 
+         * @return double
+         */
+        public double getBitsPerSymbol() {
+            return bitsPerSymbol;
         }
 
-        public void setBitsPerSimbol(double bitsPerSimbol) {
-            this.bitsPerSimbol = bitsPerSimbol;
+        /**
+         * Sets the bits per symbol of the modulation
+         * 
+         * @param bitsPerSymbol
+         */
+        public void setBitsPerSymbol(double bitsPerSymbol) {
+            this.bitsPerSymbol = bitsPerSymbol;
         }
-
+        
+        /**
+         * Returns the maximum range of the modulation
+         * 
+         * @return double
+         */
         public double getMaxRange() {
             return maxRange;
         }
 
+        /**
+         * Sets the maximum range of the modulation
+         * 
+         * @param maxRange double
+         */
         public void setMaxRange(double maxRange) {
             this.maxRange = maxRange;
         }

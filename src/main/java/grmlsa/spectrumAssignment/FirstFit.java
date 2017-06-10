@@ -6,26 +6,22 @@ import util.IntersectionFreeSpectrum;
 import java.util.List;
 
 /**
- * Esta � uma classe que faz atribui��o de espectro seguindo a pol�tica first fit
+ * This class represents the spectrum allocation technique called First Fit.
+ * This technique chooses the first free spectrum band that accommodates the request.
  *
  * @author Iallen
  */
 public class FirstFit implements SpectrumAssignmentAlgoritm {
 
-    public FirstFit() {
-
-    }
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {
-
+    	
         List<int[]> composition = IntersectionFreeSpectrum.merge(request.getRoute());
 
-
-        //agora basta buscar a primeira faixa livre com a quantidade de slots requsiitadas na composi��o gerada
         int chosen[] = firstFit(numberOfSlots, composition);
 
-        if (chosen == null) return false; //n�o encontrou nenhuma faixa cont�gua e cont�nua dispon�vel
+        if (chosen == null) return false;
 
         request.setSpectrumAssigned(chosen);
 
@@ -33,15 +29,14 @@ public class FirstFit implements SpectrumAssignmentAlgoritm {
     }
 
     /**
-     * aplica a pol�tica firstFit a uma determinada lista de faixas livres retorna a faixa escolhida
      *
      * @param numberOfSlots
-     * @param livres
+     * @param freeSpectrumBands
      * @return
      */
-    public static int[] firstFit(int numberOfSlots, List<int[]> livres) {
+    public static int[] firstFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
-        for (int[] band : livres) {
+        for (int[] band : freeSpectrumBands) {
             if (band[1] - band[0] + 1 >= numberOfSlots) {
                 chosen = band;
                 chosen[1] = chosen[0] + numberOfSlots - 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria

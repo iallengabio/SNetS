@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+/**
+ * This class represents the Dijkstra (Shortest Path) Routing Algorithm.
+ */
 public class DJK implements RoutingInterface {
 
     private static final String DIV = "-";
@@ -39,7 +42,7 @@ public class DJK implements RoutingInterface {
      *
      * @param mesh
      */
-    public void computeAllRoutes(Mesh mesh) {
+    private void computeAllRoutes(Mesh mesh) {
         routesForAllPairs = new HashMap<String, Route>();
         for (Node n1 : mesh.getNodeList()) {
             shortestPaths(n1, mesh);
@@ -119,14 +122,6 @@ public class DJK implements RoutingInterface {
         return res;
     }
 
-    /**
-     * Retorna as rotas para cada par(o,d) na rede
-     * método utilizado apenas para roteamento fixo
-     *
-     * @return
-     */
-    public Vector<Route> getRoutesForAllPairs() {
-        return new Vector<>(routesForAllPairs.values());
-    }
+
 
 }

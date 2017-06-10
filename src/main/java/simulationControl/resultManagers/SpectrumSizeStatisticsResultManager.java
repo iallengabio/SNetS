@@ -5,20 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 
 import measurement.SpectrumSizeStatistics;
-import measurement.UtilizacaoSpectro;
 
 /**
- * esta classe eh responsavel por formatar o arquivo com resultados de utilização de recursos
+ * This class is responsible for formatting the file with results of spectrum size statistics
+ * 
  * @author Iallen
- *
  */
 public class SpectrumSizeStatisticsResultManager {
 	
-	private HashMap<Integer, HashMap<Integer, SpectrumSizeStatistics>> ssss; //contem a metrica probabilidade de bloqueio para todos os pontos de carga e replicacoes
+	private HashMap<Integer, HashMap<Integer, SpectrumSizeStatistics>> ssss; // Contains the spectrum size statistics metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
 	
+	/**
+	 * Creates a new instance of SpectrumSizeStatisticsResultManager
+	 * 
+	 * @param lsu List<List<SpectrumSizeStatistics>>
+	 */
 	public SpectrumSizeStatisticsResultManager(List<List<SpectrumSizeStatistics>> lsu){
 		ssss = new HashMap<>();
 		
@@ -33,43 +37,43 @@ public class SpectrumSizeStatisticsResultManager {
 		}
 		loadPoints = new ArrayList<>(ssss.keySet());
 		replications = new ArrayList<>(ssss.values().iterator().next().keySet());
-		
 	} 
 	
 	/**
-	 * retorna uma string correspondente ao arquivo de resultado
-	 * @return
+	 * Returns a string corresponding to the result file for spectrum size statistics
+	 * 
+	 * @return String
 	 */
 	public String result(){
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep +"load point"+sep+"link"+sep+"number of slots"+sep+"slot"+sep+" ");
+		res.append("Metrics" + sep + "load point" + sep + "link" + sep + "number of slots" + sep + "slot" + sep + " ");
 		
-		for (Integer rep : replications) { //verifica quantas replicacoes foram feitas e cria o cabecalho de cada coluna
+		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);
 		}
 		res.append("\n");
 		
-				
-		res.append(resultLarguraEspectroReqGeral());
+		res.append(resultSpectrumBandwidthGeneral());
 		res.append("\n\n");
-		res.append(resultLarguraEspectroPerLink());
+		res.append(resultSpectrumBandwidthPerLink());
 		res.append("\n\n");
 		
 		return res.toString();
 	}
 	
 	/**
-	 * formata o resultado da porcao de requisicoes que exige cada largura de espectro
-	 * @return
+	 * Format the result of the portion of requests that each spectrum width requires
+	 * 
+	 * @return String
 	 */
-	private String resultLarguraEspectroReqGeral(){
+	private String resultSpectrumBandwidthGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Requisitons per number of slots"+sep + loadPoint + sep + "all"+sep; // "all"+sep+" ";
-			for (Integer numSlots : ssss.get(1).get(1).getQuantidadesDeSlots()) {
+			String aux = "Requisitons per number of slots" + sep + loadPoint + sep + "all" + sep; // "all"+sep+" ";
+			for (Integer numSlots : ssss.get(1).get(1).getNumberOfSlotsList()) {
 				String aux2 = aux + numSlots + sep + "-" + sep + " ";
 				for (Integer replic : replications) {
-					aux2 = aux2 + sep + ssss.get(loadPoint).get(replic).getPercentualReq(numSlots);
+					aux2 = aux2 + sep + ssss.get(loadPoint).get(replic).getPercentageReq(numSlots);
 				}			
 				res.append(aux2 + "\n");
 			}		
@@ -78,19 +82,20 @@ public class SpectrumSizeStatisticsResultManager {
 	}
 	
 	/**
-	 * formata o resultado da porcao de requisicoes que exige cada largura de espectro por link
-	 * @return
+	 * Formats the result of the portion of requests that each spectrum bandwidth per link requires
+	 * 
+	 * @return String
 	 */
-	private String resultLarguraEspectroPerLink(){
+	private String resultSpectrumBandwidthPerLink(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Requisitons per number of slots per link"+sep + loadPoint + sep; // "all"+sep+" ";
+			String aux = "Requisitons per number of slots per link" + sep + loadPoint + sep; // "all"+sep+" ";
 			for (String link : ssss.get(1).get(1).getLinkSet()) {
 				String aux2 = aux + "<"+link+">" + sep;
-				for (Integer numSlots : ssss.get(1).get(1).getQuantidadesDeSlotsPorLink(link)) {
+				for (Integer numSlots : ssss.get(1).get(1).getNumberOfSlotsPerLink(link)) {
 					String aux3 = aux2 + numSlots + sep + "-" + sep + " ";
 					for (Integer replic : replications) {
-						aux3 = aux3 + sep + ssss.get(loadPoint).get(replic).getPercentualReq(link, numSlots);
+						aux3 = aux3 + sep + ssss.get(loadPoint).get(replic).getPercentageReq(link, numSlots);
 					}	
 					res.append(aux3 + "\n");
 				}					
@@ -98,8 +103,5 @@ public class SpectrumSizeStatisticsResultManager {
 		}
 		return res.toString();	
 	}
-	
-	
-
 	
 }

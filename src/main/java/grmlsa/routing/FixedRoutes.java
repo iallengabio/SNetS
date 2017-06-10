@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * This class allow to configure a set of pre-established routes for each pair of origin and destination.
+ */
 public class FixedRoutes implements RoutingInterface {
 
     private static final String DIV = "-";
@@ -18,7 +21,8 @@ public class FixedRoutes implements RoutingInterface {
     private HashMap<String, Route> routesForAllPairs;
 
     public FixedRoutes() {
-        try {
+        throw new UnsupportedOperationException();
+        /*try {
             routesIndex = new HashMap<String, List<String>>();
             //List<List<String>> lRoutes = FixedRoutesFileReader.readRoutes(Util.projectPath + "/fixedRoutes");
             List<List<String>> lRoutes = null;
@@ -31,7 +35,7 @@ public class FixedRoutes implements RoutingInterface {
             System.out.println("não foi possível ler o arquivo com as rotas fixas!");
 
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override
@@ -57,7 +61,7 @@ public class FixedRoutes implements RoutingInterface {
      *
      * @param mesh
      */
-    public void computeAllRoutes(Mesh mesh) {
+    private void computeAllRoutes(Mesh mesh) {
         routesForAllPairs = new HashMap<String, Route>();
         HashMap<String, Node> nos = new HashMap<String, Node>();
 
@@ -83,7 +87,7 @@ public class FixedRoutes implements RoutingInterface {
      *
      * @return
      */
-    public Vector<Route> getRoutesForAllPairs() {
+    private Vector<Route> getRoutesForAllPairs() {
         return new Vector<>(routesForAllPairs.values());
     }
 

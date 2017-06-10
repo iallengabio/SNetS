@@ -9,7 +9,10 @@ import network.Node;
 import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
+/**
+ * This class represents the MMRDS Routing Algorithm.
+ * This algorithm is presented in http://sbrc2013.unb.br/files/anais/trilha-principal/artigos/artigo-9.pdf
+ */
 public class MMRDS implements RoutingInterface, Serializable {
     private static final String DIV = "-";
 
@@ -78,7 +81,7 @@ public class MMRDS implements RoutingInterface, Serializable {
             if (possuiLoop(expand))
                 continue;
 
-            if (expand.getDestino().equals(n2)) { //rota finalizada
+            if (expand.getDestination().equals(n2)) { //rota finalizada
 
                 if (expand.getDistanceAllLinks() < tamRoute) { //verifica se encontrou uma rota menor do que as outras ja encontradas
                     tamRoute = expand.getDistanceAllLinks();
@@ -94,7 +97,7 @@ public class MMRDS implements RoutingInterface, Serializable {
             }
 
             //procurar mais rotas a partir desta
-            for (Node no : mesh.getAdjacents(expand.getDestino())) {
+            for (Node no : mesh.getAdjacents(expand.getDestination())) {
                 Route rAux = expand.clone();
                 rAux.addNode(no);
                 rotasEmContrucao.add(rAux);

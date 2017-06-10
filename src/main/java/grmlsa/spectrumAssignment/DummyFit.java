@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Esta � uma classe que faz atribui��o de espectro seguindo a pol�tica first fit
+ * This class represents the spectrum allocation technique called Dummy Fit.
+ * The objective of this class is to just exemplify the implementation of a spectrum allocation algorithm.
  *
  * @author Iallen
  */
@@ -31,10 +32,9 @@ public class DummyFit implements SpectrumAssignmentAlgoritm {
             composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        //agora basta buscar a primeira faixa livre com a quantidade de slots requsiitadas na composi��o gerada
         int chosen[] = dummyFit(numberOfSlots, composition);
 
-        if (chosen == null) return false; //n�o encontrou nenhuma faixa cont�gua e cont�nua dispon�vel
+        if (chosen == null) return false;
 
         request.setSpectrumAssigned(chosen);
 
@@ -42,17 +42,16 @@ public class DummyFit implements SpectrumAssignmentAlgoritm {
     }
 
     /**
-     * aplica a pol�tica firstFit a uma determinada lista de faixas livres retorna a faixa escolhida
      *
      * @param numberOfSlots
-     * @param livres
+     * @param freeSpectrumBands
      * @return
      */
-    public static int[] dummyFit(int numberOfSlots, List<int[]> livres) {
+    private static int[] dummyFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = new int[2];
 
-        if (livres.size() >= 1) {
-            int faixa[] = livres.get(0);
+        if (freeSpectrumBands.size() >= 1) {
+            int faixa[] = freeSpectrumBands.get(0);
             if (faixa[1] - faixa[0] + 1 >= numberOfSlots) {
                 chosen[0] = faixa[0];
                 chosen[1] = chosen[0] + numberOfSlots - 1;

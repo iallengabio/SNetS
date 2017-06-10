@@ -10,7 +10,9 @@ import java.util.List;
 
 
 /**
- * Esta classe faz a atribuicao de espectro seguindo a politica exact fit
+ * This class represents the spectrum allocation technique called Exact Fit.
+ * This technique attempts to allocate a range of spectrum with exactly the same size as the number of slots required by the new request.
+ * If the spectrum band is not found, the request is allocated following the worst fit policy.
  *
  * @author Felipe
  */
@@ -29,10 +31,9 @@ public class ExactFit implements SpectrumAssignmentAlgoritm {
             composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        //primeiro busca-se a faixa livre com tamanho igual ao da quantidade de slots requisitados
         int chosen[] = exactFit(numberOfSlots, composition);
 
-        if (chosen == null) return false; //n�o encontrou nenhuma faixa cont�gua e cont�nua dispon�vel
+        if (chosen == null) return false;
 
         request.setSpectrumAssigned(chosen);
 
@@ -40,15 +41,14 @@ public class ExactFit implements SpectrumAssignmentAlgoritm {
     }
 
     /**
-     * aplica a pol�tica exactFit a uma determinada lista de faixas livres retorna a faixa escolhida
      *
      * @param numberOfSlots
-     * @param livres
+     * @param freeSpectrumBands
      * @return
      */
-    public static int[] exactFit(int numberOfSlots, List<int[]> livres) {
+    private static int[] exactFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
-        for (int[] band : livres) {
+        for (int[] band : freeSpectrumBands) {
             int tamFaixa = band[1] - band[0] + 1;
             if (chosen == null) {
                 if (tamFaixa == numberOfSlots) {
@@ -63,7 +63,7 @@ public class ExactFit implements SpectrumAssignmentAlgoritm {
             //agora basta buscar a faixa livre com tamanho mais distante da quantidade de slots requisitados
 
             int maiorDif = -1;
-            for (int[] band : livres) {
+            for (int[] band : freeSpectrumBands) {
                 int tamFaixa = band[1] - band[0] + 1;
                 if (tamFaixa >= numberOfSlots) {
                     if (tamFaixa - numberOfSlots > maiorDif) { //encontrou uma faixa com quantidade de slots mais "diferente"

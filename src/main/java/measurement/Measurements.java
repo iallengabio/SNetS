@@ -5,123 +5,146 @@ import java.util.*;
 import network.*;
 import java.io.Serializable;
 
+/**
+ * This class manages the performance metrics used in the simulations.
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
 public class Measurements implements Serializable {
 
-	 /**
-     * Numero minimo de requisicoes a serem geradas
+	/**
+     * Minimum number of requests to be generated
      */
     private int numMinRequest;
+
     /**
-     * indica se a simulacao esta na fase transiente ou não.
+     * Indicates whether the simulation is in the transient phase or not
      */
     private boolean transientStep;
     
     /**
-     * utilizado para contar o número de requisições geradas até então, objetivo de verificar o estado transiente
+     * Used to count the number of requests generated until then, objective of verifying the transient state
      */
 	private double numGeneratedReq;  
 	
-    /**
-     * numero da replicação
+	/**
+     * Replication number
      */
     private int replication;
     
     /**
-     * ponto de carga
+     * Loading point
      */
     private int loadPoint;
     
-    
-    
     /**
-     * calcula a probabilidade de bloqueio de circuitos
+     * Calculates the blocking probability of the circuits
      */
-    private ProbabilidadeDeBloqueio probabilidadeDeBloqueioMeasurement;    
+    private BlockingProbability blockingProbabilityMeasurement;    
     
     /**
-     * calcular a probabilidade de bloqueio de banda
+     * Calculates the bandwidth blocking probability of ghe circuits
      */
-    private ProbabilidadeDeBloqueioDeBanda probabilidadeDeBloqueioDeBandaMeasurement;
+    private BandwidthBlockingProbability bandwidthBlockingProbabilityMeasurement;
     
     /**
-     * calcula a fragmentação externa
+     * Calculates the external fragmentation
      */
-    private FragmentacaoExterna fragmentacaoExterna;
+    private ExternalFragmentation externalFragmentation;
     
     /**
-     * Calcula a fragmentação relativa
+     * Calculates the relative fragmentation
      */
-    private FragmentacaoRelativa fragmentacaoRelativa;
+    private RelativeFragmentation relativeFragmentation;
     
     /**
-     * Calcula as métricas referentes à utilização de espectro
-     * 
+     * Calculates metrics for spectrum usage
      */
-    private UtilizacaoSpectro utilizacaoSpectro;
+    private SpectrumUtilization spectrumUtilization;
     
     /**
-     * Atualmente utilizada apenas para analizar o percentual das requisições geradas que exigem cada tamanho de faixa livre de espectro
+     * Currently used only to analyze the percentage of generated requests that require 
+     * each free spectrum band size
      */
     private SpectrumSizeStatistics spectrumSizeStatistics;
     
     /**
-     * Calcula as métricas referentes à utilização de transmissores e receptores
+     * Calculates metrics for the use of transmitters and receivers
      */
-    private TransmitersReceiversUtilization transmitersReceiversUtilization;
+    private TransmittersReceiversUtilization transmitersReceiversUtilization;
 
+    /**
+     * The network mesh
+     */
     private Mesh mesh;
 
+    /**
+     * Creates a new instance of Measurements
+     * 
+     * @param numMinRequest int
+     * @param loadPoint int
+     * @param replication int
+     * @param mesh Mesh
+     */
     public Measurements(int numMinRequest, int loadPoint, int replication, Mesh mesh) {
         this.loadPoint = loadPoint;
         this.replication = replication;
     	this.transientStep = true;
         this.numMinRequest = numMinRequest;       
-        inicializarMetricas(mesh);
+        initializeMetrics(mesh);
         this.mesh = mesh;
     }
     
-    private void inicializarMetricas(Mesh mesh){
+    /**
+     * Initialize the metrics
+     * 
+     * @param mesh Mesh
+     */
+    private void initializeMetrics(Mesh mesh){
     	this.numGeneratedReq = 0.0;
-        this.probabilidadeDeBloqueioMeasurement = new ProbabilidadeDeBloqueio(loadPoint, replication); 
-        this.probabilidadeDeBloqueioDeBandaMeasurement = new ProbabilidadeDeBloqueioDeBanda(loadPoint, replication);
-        this.fragmentacaoExterna = new FragmentacaoExterna(loadPoint, replication,mesh);
-        this.utilizacaoSpectro = new UtilizacaoSpectro(loadPoint, replication,mesh);
-        this.fragmentacaoRelativa = new FragmentacaoRelativa(loadPoint, replication,mesh);
+        this.blockingProbabilityMeasurement = new BlockingProbability(loadPoint, replication); 
+        this.bandwidthBlockingProbabilityMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
+        this.externalFragmentation = new ExternalFragmentation(loadPoint, replication, mesh);
+        this.spectrumUtilization = new SpectrumUtilization(loadPoint, replication, mesh);
+        this.relativeFragmentation = new RelativeFragmentation(loadPoint, replication, mesh);
         this.spectrumSizeStatistics = new SpectrumSizeStatistics(loadPoint, replication);
-        this.transmitersReceiversUtilization = new TransmitersReceiversUtilization(loadPoint, replication,mesh);
+        this.transmitersReceiversUtilization = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
     }
 
-    // ------------------------------------------------------------------------------
+    /**
+     * Returns the replication
+     * 
+     * @return int
+     */
     public int getReplication() {
         return this.replication;
     }
 
-   
-    // ------------------------------------------------------------------------------
     /**
-     * incrementa o num. de requisições geradas.
+     * Increases the number of generated requests.
      */
     public void incNumGeneratedReq() {
         this.numGeneratedReq++;      
     }
     
-
+    /**
+     * Verify the transient phase
+     * 
+     * @param nodeList Vector<Node>
+     */
     public void transientStepVerify(Vector<Node> nodeList) {
         if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {//ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
             this.transientStep = false;
 
-            inicializarMetricas(mesh);
-            numGeneratedReq=0;
-            
+            initializeMetrics(mesh);
+            numGeneratedReq = 0;
         }
     }
 
-
-    // ------------------------------------------------------------------------------
     /**
-     * Responsavel por determinar o fim da simulacao. Caso retorne true nao deve
-     * ser agendado nenhum evento, porém aqueles já agendados seram realizados.
+     * Responsible for determining the end of the simulation.
+     * If it returns true no event should be scheduled, but those already scheduled will be performed.
      * 
      * @return boolean
      */
@@ -132,54 +155,67 @@ public class Measurements implements Serializable {
         return false;
     }
 
-	
     /**
-	 * @return the probBlockMeasures
+     * Returns the blocking probability measurement
+     * 
+	 * @return the blockingProbabilityMeasurement
 	 */
-	public ProbabilidadeDeBloqueio getProbabilidadeDeBloqueioMeasurement() {
-		return probabilidadeDeBloqueioMeasurement;
+	public BlockingProbability getProbabilidadeDeBloqueioMeasurement() {
+		return blockingProbabilityMeasurement;
 	}
 
 	/**
-	 * @return the probabilidadeDeBloqueioDeBandaMeasurement
+	 * Returns the bandwidth blocking probability measurement
+	 * 
+	 * @return the bandwidthBlockingProbabilityMeasurement
 	 */
-	public ProbabilidadeDeBloqueioDeBanda getProbabilidadeDeBloqueioDeBandaMeasurement() {
-		return probabilidadeDeBloqueioDeBandaMeasurement;
+	public BandwidthBlockingProbability getProbabilidadeDeBloqueioDeBandaMeasurement() {
+		return bandwidthBlockingProbabilityMeasurement;
 	}
 
 	/**
-	 * @return the fragmentacaoExterna
+	 * Returns the external fragmentation
+	 * 
+	 * @return the externalFragmentation
 	 */
-	public FragmentacaoExterna getFragmentacaoExterna() {
-		return fragmentacaoExterna;
+	public ExternalFragmentation getFragmentacaoExterna() {
+		return externalFragmentation;
 	}
 	
-	
-
 	/**
-	 * @return the fragmentacaoRelativa
+	 * Returns the relative fragmentation
+	 * 
+	 * @return the relativeFragmentation
 	 */
-	public FragmentacaoRelativa getFragmentacaoRelativa() {
-		return fragmentacaoRelativa;
+	public RelativeFragmentation getFragmentacaoRelativa() {
+		return relativeFragmentation;
 	}
 
 	/**
-	 * @return the utilizacaoSpectro
+	 * Returns the spectrum utilization
+	 * 
+	 * @return the SpectrumUtilization
 	 */
-	public UtilizacaoSpectro getUtilizacaoSpectro() {
-		return utilizacaoSpectro;
+	public SpectrumUtilization getUtilizacaoSpectro() {
+		return spectrumUtilization;
 	}
 
+	/**
+	 * Returns the spectrum size statistics
+	 * 
+	 * @return spectrumSizeStatistics
+	 */
 	public SpectrumSizeStatistics getSpectrumSizeStatistics() {
 		return spectrumSizeStatistics;
 	}
 
-	public TransmitersReceiversUtilization getTransmitersReceiversUtilization() {
+	/**
+	 * Returns the transmitters receivers utilization
+	 * 
+	 * @return transmitersReceiversUtilization
+	 */
+	public TransmittersReceiversUtilization getTransmitersReceiversUtilization() {
 		return transmitersReceiversUtilization;
 	}
-
 	
-
-    
-    
 }

@@ -4,30 +4,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import measurement.FragmentacaoExterna;
-import measurement.FragmentacaoRelativa;
+import measurement.RelativeFragmentation;
 
 /**
- * esta classe eh responsavel por formatar o arquivo com resultados de fragmentacao relativa
+ * This class is responsible for formatting the file with results of relative fragmentation
+ * 
  * @author Iallen
- *
  */
 public class RelativeFragmentationManager {
 	
-	private HashMap<Integer, HashMap<Integer, FragmentacaoRelativa>> frs; //contem a metrica probabilidade de bloqueio para todos os pontos de carga e replicacoes
+	private HashMap<Integer, HashMap<Integer, RelativeFragmentation>> frs; // Contains the relative fragmentation metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
 	
-	public RelativeFragmentationManager(List<List<FragmentacaoRelativa>> lfr){
+	/**
+	 * Creates a new instance of RelativeFragmentationManager
+	 * 
+	 * @param lfr List<List<RelativeFragmentation>>
+	 */
+	public RelativeFragmentationManager(List<List<RelativeFragmentation>> lfr){
 		frs = new HashMap<>();
 		
-		for (List<FragmentacaoRelativa> loadPoint : lfr) {
+		for (List<RelativeFragmentation> loadPoint : lfr) {
 			int load = loadPoint.get(0).getLoadPoint();
-			HashMap<Integer, FragmentacaoRelativa>  reps = new HashMap<>();
+			HashMap<Integer, RelativeFragmentation>  reps = new HashMap<>();
 			frs.put(load, reps);
 			
-			for (FragmentacaoRelativa fr : loadPoint) {
+			for (RelativeFragmentation fr : loadPoint) {
 				reps.put(fr.getReplication(), fr);
 			}			
 		}
@@ -37,31 +41,37 @@ public class RelativeFragmentationManager {
 	} 
 	
 	/**
-	 * retorna uma string correspondente ao arquivo de resultado para a fragmentacao externa
-	 * @return
+	 * Returns a string corresponding to the result file for relative fragmentation
+	 * 
+	 * @return String
 	 */
 	public String result(){
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep +"LoadPoint"+sep+"link"+sep+"spectrum size (c)"+sep+" ");
+		res.append("Metrics" + sep + "LoadPoint" + sep + "link" + sep + "spectrum size (c)" + sep + " ");
 		
-		for (Integer rep : replications) { //verifica quantas replicacoes foram feitas e cria o cabecalho de cada coluna
+		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);
 		}
 		res.append("\n");
 		
-		res.append(resultGeral());
+		res.append(resultGeneral());
 		res.append("\n\n");
 		
 		return res.toString();
 	}
 
-	private String resultGeral() {
+	/**
+	 * Returns the relative fragmentation per spectrum size (c)
+	 * 
+	 * @return String
+	 */
+	private String resultGeneral() {
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			for (Integer c : this.frs.get(1).get(1).getCList()) {
 				String aux = "Relative Fragmentation per spectrum size (c)" + sep + loadPoint + sep + "all" + sep + c + sep + " ";
 				for (Integer replication : replications) {
-					aux = aux + sep + frs.get(loadPoint).get(replication).getFragmentacaoRelativaMedia(c);
+					aux = aux + sep + frs.get(loadPoint).get(replication).getAverageRelativeFragmentation(c);
 				}
 				res.append(aux + "\n");
 			}

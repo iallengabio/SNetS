@@ -5,19 +5,27 @@ import network.Circuit;
 import java.io.Serializable;
 import java.util.Vector;
 
+/**
+ * This class represents the simulator event machine.
+ * It is responsible for managing the events that are created during a simulation.
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
 public class EventMachine implements Serializable {
+	
     private Vector<Event> eventList;
     private double countEvent = 0;
 
+    /**
+     * Creates a new instance of EventMachine
+     */
     public EventMachine() {
         this.eventList = new Vector<Event>();
     }
 
-//------------------------------------------------------------------------------
-
     /**
-     * Insere um evento na máquina de eventos.
+     * Inserts an event in the event machine.
      *
      * @param e Event
      */
@@ -32,12 +40,9 @@ public class EventMachine implements Serializable {
         eventList.insertElementAt(e, i);
     }
 
-//------------------------------------------------------------------------------
-
     /**
-     * Inicia a execução da máquina de eventos. A máquina
-     * de eventos executa até não existir mais eventos
-     * no eventList.
+     * Starts running the event machine.
+     * The event machine runs until there are no more events in the eventList.
      */
     public void executeEvents() {
         while (eventList.size() > 0) {
@@ -48,7 +53,7 @@ public class EventMachine implements Serializable {
     }
 
     /**
-     * Retorna o número de eventos agendados (existente no eventList).
+     * Returns the number of scheduled events (existing in the eventList).
      *
      * @return int
      */
@@ -57,16 +62,16 @@ public class EventMachine implements Serializable {
     }
 
     /**
-     * Finaliza a máquina de eventos (limpa eventList).
+     * Ends the event machine (clear eventList).
      */
     public void stopMachine() {
         this.eventList.removeAllElements();
     }
 
     /**
-     * remove o evento que contem a requisição
+     * Remove the event that contains the request.
      *
-     * @param request RequestMother
+     * @param request Circuit
      */
     public void remove(Circuit request) {
         for (int i = 0; i < this.eventList.size(); i++) {

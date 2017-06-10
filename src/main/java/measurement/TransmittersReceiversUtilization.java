@@ -1,23 +1,23 @@
 package measurement;
 
-import network.ControlPlane;
-import network.Mesh;
-import network.Node;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import network.Mesh;
+import network.Node;
+
 /**
- * Esta classe armazena as medidas referentes a utilização de transmissores e receptores para um ponto de carga/replicação
+ * This class stores the measures regarding the use of transmitters and receivers for 
+ * a load point / replication
  *
  * @author Iallen
  */
-public class TransmitersReceiversUtilization extends Measurement {
+public class TransmittersReceiversUtilization extends Measurement {
 
     private Mesh mesh;
 
-    private double numObs;
+    private double numberObservations;
 
     private double avgTxUtilization;
     private double avgRxUtilization;
@@ -28,11 +28,17 @@ public class TransmitersReceiversUtilization extends Measurement {
     private HashMap<String, Integer> maxTxUtilizationPerNode;
     private HashMap<String, Integer> maxRxUtilizationPerNode;
 
-
-    public TransmitersReceiversUtilization(int loadPoint, int replication, Mesh mesh) {
+    /**
+     * Creates a new instance of TransmitersReceiversUtilization
+     * 
+     * @param loadPoint int
+     * @param replication int
+     * @param mesh Mesh
+     */
+    public TransmittersReceiversUtilization(int loadPoint, int replication, Mesh mesh) {
         super(loadPoint, replication);
         this.mesh = mesh;
-        numObs = 0;
+        numberObservations = 0;
         avgTxUtilization = 0.0;
         avgRxUtilization = 0.0;
 
@@ -41,11 +47,10 @@ public class TransmitersReceiversUtilization extends Measurement {
 
         maxTxUtilizationPerNode = new HashMap<>();
         maxRxUtilizationPerNode = new HashMap<>();
-
     }
 
     /**
-     * adiciona uma nova observação de utilização de transmiters e receivers
+     * Adds a new observation to the use of transmitters and receivers
      */
     public void addNewObservation() {
         ArrayList<Node> nodes = new ArrayList<>(mesh.getNodeList());
@@ -75,37 +80,76 @@ public class TransmitersReceiversUtilization extends Measurement {
                 maxRxUtilizationPerNode.put(node.getName(), node.getRxs().getRxUtilization());
 
         }
-        numObs++;
+        
+        numberObservations++;
     }
 
+    /**
+     * Returns the average transmitters utilization
+     * 
+     * @return double
+     */
     public double getAvgTxUtilizationGen() {
-
-        return avgTxUtilization / numObs;
+        return avgTxUtilization / numberObservations;
     }
 
+    /**
+     * Returns the average receivers utilization
+     * 
+     * @return double
+     */
     public double getAvgRxUtilizationGen() {
-        return avgRxUtilization / numObs;
+        return avgRxUtilization / numberObservations;
     }
 
+    /**
+     * Returns the average transmitters utilization for the node reported as parameter
+     * 
+     * @param node String
+     * @return double
+     */
     public double getAvgTxUtilizationPerNode(String node) {
-        return avgTxUtilizationPerNode.get(node) / numObs;
+        return avgTxUtilizationPerNode.get(node) / numberObservations;
     }
 
+    /**
+     * Returns the average receivers utilization for the node reported as parameter
+     * 
+     * @param node String
+     * @return double
+     */
     public double getAvgRxUtilizationPerNode(String node) {
-        return avgRxUtilizationPerNode.get(node) / numObs;
+        return avgRxUtilizationPerNode.get(node) / numberObservations;
     }
 
+    /**
+     * Returns the maximum transmitters utilization for the node reported as parameter
+     * 
+     * @param node String
+     * @return int
+     */
     public int getMaxTxUtilizationPerNode(String node) {
         return maxTxUtilizationPerNode.get(node);
     }
 
+    /**
+     * Returns the maximum receivers utilization for the node reported as parameter
+     * 
+     * @param node String
+     * @return int
+     */
     public int getMaxRxUtilizationPerNode(String node) {
         return maxRxUtilizationPerNode.get(node);
     }
 
+    /**
+     * Returns the HashMap key set
+     * The key set corresponds to the nodes that were analyzed by the metric
+     * 
+     * @return Set<String>
+     */
     public Set<String> getNodeNamesSet() {
         return avgTxUtilizationPerNode.keySet();
     }
-
 
 }

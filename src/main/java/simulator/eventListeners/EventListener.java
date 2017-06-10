@@ -4,16 +4,17 @@ import simulator.Event;
 
 
 /**
- * Interface das classes que lidam com a execução dos eventos no simulador alterando o estado do sistema
- *
+ * Interface of classes that deal with the execution of events in the simulator by changing the state 
+ * of the system
+ * 
  * @author Iallen
  */
 public interface EventListener {
 
-    /**
-     * executa um determinado evento 'e'.
+	/**
+     * Run a certain 'e' event.
      *
-     * @param e
+     * @param e Event
      */
     public abstract void execute(Event e);
 }

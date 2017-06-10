@@ -1,6 +1,6 @@
 package grmlsa.integrated;
 
-import grmlsa.NewKMenores;
+import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
@@ -14,12 +14,12 @@ import java.util.List;
 
 public class CompleteSharing implements IntegratedRSAAlgoritm {
 
-    private NewKMenores kMenores;
+    private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
 
     @Override
     public boolean rsa(Circuit request, Mesh mesh) {
-        if (kMenores == null) kMenores = new NewKMenores(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
+        if (kMenores == null) kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
         if (modulationSelector == null)
             modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand());
 

@@ -6,14 +6,19 @@ import network.Link;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is responsible for performing the merge between lists of spectrum.
+ * 
+ * @author Iallen
+ */
 public class IntersectionFreeSpectrum {
 
-    /**
-     * Esta funï¿½ï¿½o retorna uma lista de espectros disponï¿½veis em ambas as listas passadas por parï¿½metro
+	 /**
+     * This method returns a list of available spectrum in both lists passed by parameter
      *
-     * @param l1
-     * @param l2
-     * @return
+     * @param l1 List<int[]>
+     * @param l2 List<int[]>
+     * @return List<int[]>
      */
     public static List<int[]> merge(List<int[]> l1, List<int[]> l2) {
         List<int[]> res = new ArrayList<>();
@@ -37,13 +42,13 @@ public class IntersectionFreeSpectrum {
                 aux3[0] = aux2[0];
             }
 
-            if (aux1[1] < aux2[0]) { //intervalos nï¿½o se sobrepï¿½e, pegar a prï¿½ximo intervalor livre na lista 1
+            if (aux1[1] < aux2[0]) { // Intervals does not overlap, pick up the next free intervals in list 1
                 indL1++;
                 aux1 = null;
                 continue;
             }
 
-            if (aux2[1] < aux1[0]) { //intervalos nï¿½o se sobrepï¿½e, pegar a prï¿½ximo intervalor livre na lista 1
+            if (aux2[1] < aux1[0]) { // Intervals does not overlap, pick up the next free intervals in list 2
                 indL2++;
                 aux2 = null;
                 continue;
@@ -57,6 +62,7 @@ public class IntersectionFreeSpectrum {
                 res.add(aux3);
                 continue;
             }
+            
             if (aux2[1] < aux1[1]) {
                 aux3[1] = aux2[1];
                 aux1[0] = aux2[1] + 1;
@@ -66,7 +72,6 @@ public class IntersectionFreeSpectrum {
                 continue;
             }
 
-
             if (aux1[1] == aux2[1]) {
                 aux3[1] = aux2[1];
                 indL1++;
@@ -75,18 +80,16 @@ public class IntersectionFreeSpectrum {
                 aux2 = null;
                 res.add(aux3);
             }
-
-
         }
 
         return res;
     }
 
     /**
-     * retorna uma lista de espectros disponíveis em todos os enlaces da rota passada por parâmetro
+     * Returns a list of available spectrum on all links in the route passed by parameter
      *
-     * @param route
-     * @return
+     * @param route Route
+     * @return List<int[]>
      */
     public static List<int[]> merge(Route route) {
         List<Link> links = new ArrayList<>(route.getLinkList());
@@ -101,14 +104,18 @@ public class IntersectionFreeSpectrum {
         return composition;
     }
 
-    /*
-     * retorna a faixa adjacente superior à faixa passada por parametro.
-     * utilizado em algoritmos de agregação óptica
+    /**
+     * Returns the adjacent range less than the range passed by parameter.
+	 * Used in optical aggregation algorithms.
+     * 
+     * @param band int[]
+     * @param bandsFree List<int[]>
+     * @return int[]
      */
-    public static int[] faixaAdjacenteInferior(int faixa[], List<int[]> faixasLivres) {
+    public static int[] bandAdjacentInferior(int band[], List<int[]> bandsFree) {
 
-        for (int[] fl : faixasLivres) {
-            if (fl[1] == (faixa[0] - 1)) {
+        for (int[] fl : bandsFree) {
+            if (fl[1] == (band[0] - 1)) {
                 return fl;
             }
         }
@@ -116,14 +123,18 @@ public class IntersectionFreeSpectrum {
         return null;
     }
 
-    /*
-     * retorna a faixa adjacente superior à faixa passada por parametro.
-     * utilizado em algoritmos de agregação óptica
+    /**
+     * Returns the adjacent range higher than the range passed by parameter.
+     * Used in optical aggregation algorithms.
+     * 
+     * @param band int[]
+     * @param bandsFree List<int[]>
+     * @return int[]
      */
-    public static int[] faixaAdjacenteSuperior(int faixa[], List<int[]> faixasLivres) {
+    public static int[] bandAdjacentSuperior(int band[], List<int[]> bandsFree) {
 
-        for (int[] fl : faixasLivres) {
-            if (fl[0] == (faixa[1] + 1)) {
+        for (int[] fl : bandsFree) {
+            if (fl[0] == (band[1] + 1)) {
                 return fl;
             }
         }
