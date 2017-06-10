@@ -6,30 +6,43 @@ import network.Node;
 import java.io.Serializable;
 import java.util.Vector;
 
+/**
+ * This class represents a route between two network nodes
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
-public class Route
-        implements Serializable, Comparable<Route> {
+public class Route implements Serializable, Comparable<Route> {
 
+	// List of nodes that are present on the route
     private Vector<Node> nodeList;
+    
+    // List of links that are present on the route
     private Vector<Link> linkList;
+    
+    // Route distance
     private double distanceAllLinks;
 
     /**
-     * Creates a new instance of Route.
+     * Creates a new instance of Route with a given list of nodes
      *
-     * @param nodeList Vector Node List.
+     * @param nodeList Vector<Node>
      */
     public Route(Vector<Node> nodeList) {
         this.nodeList = nodeList;
         this.computeLinks();
     }
 
+    /**
+     * Creates a new instance of Route with empty list of nodes
+     */
     public Route() {
         this.nodeList = new Vector<Node>();
     }
 
-
-    //------------------------------------------------------------------------------
+    /**
+     * Creates the list of links from the route node list
+     */
     private void computeLinks() {
         this.distanceAllLinks = 0;
         this.linkList = new Vector<>();
@@ -42,39 +55,33 @@ public class Route
         }
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Getter for source Node.
      *
      * @return Node. The source Node of this Route.
      */
-    public Node getOrigem() {
+    public Node getSource() {
         if (nodeList.size() > 0) {
             return (nodeList.firstElement());
         } else {
-            System.out.println("lista de nó esta vazia");
+            System.out.println("The node list is empty.");
             return null;
         }
     }
-
-//------------------------------------------------------------------------------
 
     /**
      * Getter for destination node.
      *
      * @return Node. The destination node of route.
      */
-    public Node getDestino() {
+    public Node getDestination() {
         if (nodeList.size() > 0) {
             return (nodeList.lastElement());
         } else {
-            System.out.println("lista de nó esta vazia");
+            System.out.println("The node list is empty.");
             return null;
         }
     }
-
-//------------------------------------------------------------------------------
 
     /**
      * Returns the Node at the specified position in this Route.
@@ -86,19 +93,15 @@ public class Route
         return (nodeList.get(index));
     }
 
-//------------------------------------------------------------------------------
-
-    /**
-     * Returns the Link at the specified position in this Route.
-     *
-     * @param index index of Link to return.
-     * @return Node at the specified index.
-     */
+   /**
+    * Returns the Link at the specified position in this Route.
+    *
+    * @param index index of Link to return.
+    * @return Node at the specified index.
+    */
     public Link getLink(int index) {
         return (linkList.get(index));
     }
-
-//------------------------------------------------------------------------------
 
     /**
      * Returns next Node at Node n.
@@ -115,16 +118,13 @@ public class Route
                 return nodeList.get(i + 1);
             }
         }
-        System.err.println("ERRO: proximo no nao foi encontrado para o no : " +
-                n.getName());
+        System.err.println("ERROR: next node was not found for node : " + n.getName());
         System.out.println("ERRO: class Route");
         return null;
     }
 
-//------------------------------------------------------------------------------
-
     /**
-     * Creates a new instances of Route.
+     * Checks whether there is a common link between two routes
      *
      * @param a Route
      * @return true if existent link; false otherwise.
@@ -136,7 +136,7 @@ public class Route
             ori1 = (this.nodeList.get(i));
             for (int j = 0; j <= a.nodeList.size() - 2; j++) {
                 ori2 = (a.nodeList.get(j));
-                if (ori1.equals(ori2)) { // existem pelo menos dois nos iguais !!!
+                if (ori1.equals(ori2)) { // There are at least two equal nodes !!!
 
                     prox1 = this.getNext(ori1);
                     prox2 = a.getNext(ori2);
@@ -149,18 +149,14 @@ public class Route
         return false;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Getter for property nodeList.
      *
-     * @return Vector.
+     * @return Vector<Node>.
      */
     public Vector<Node> getNodeList() {
         return this.nodeList;
     }
-
-//------------------------------------------------------------------------------
 
     /**
      * Getter for property linkList.
@@ -171,8 +167,6 @@ public class Route
         return this.linkList;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Returns the number of Nodes in this Route.
      *
@@ -182,8 +176,6 @@ public class Route
         return nodeList.size();
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Returns the number of hops in this Route.
      *
@@ -192,8 +184,6 @@ public class Route
     public int getHops() {
         return this.nodeList.size() - 1;
     }
-
-    //----------------------------------------------------------------------------
 
     /**
      * Print Route.
@@ -205,25 +195,19 @@ public class Route
         System.out.println();
     }
 
-
-    //----------------------------------------------------------------------------
-
     /**
      * Print Route.
      */
     public String getRouteInString() {
-        String lista = "";
+        String list = "";
         for (int i = 0; i < nodeList.size(); i++) {
-            lista = lista + nodeList.get(i).getName() + ",";
+            list = list + nodeList.get(i).getName() + ",";
         }
-        return lista;
+        return list;
     }
 
-
-    //----------------------------------------------------------------------------
-
     /**
-     * containThisLink
+     * Checks if the route contains a given link
      *
      * @param link Link
      * @return boolean
@@ -232,11 +216,9 @@ public class Route
         return this.linkList.contains(link);
     }
 
-
-    //----------------------------------------------------------------------------
-
     /**
-     * Retorna o somatorio da distancia de todos os links
+     * Returns the sum of the distance of all the links.
+     * The distance from the route.
      *
      * @return double
      */
@@ -244,9 +226,8 @@ public class Route
         return this.distanceAllLinks;
     }
 
-
     /**
-     * getNodeAdjacent
+     * Returns the adjacent node
      *
      * @param link Link
      * @return Node
@@ -260,17 +241,21 @@ public class Route
         }
     }
 
-
     /**
-     * método utilizado apenas para testes
-     *
+     * Method used only for tests
+     * Configures the links list of route
+     * 
      * @param linkList the linkList to set
      */
     public void setLinkList(Vector<Link> linkList) {
         this.linkList = linkList;
     }
 
-
+    /**
+     * Checks if a given route is equal to the current route
+     * 
+     * @param o Route
+     */
     @Override
     public int compareTo(Route o) {
         Double d1 = this.distanceAllLinks;
@@ -280,22 +265,32 @@ public class Route
 
     }
 
+    /**
+     * Checks if a given route is equal to the current route
+     * 
+     * @param o Route
+     */
     @Override
     public boolean equals(Object o) {
-
         if (o instanceof Route) {
             return this.getRouteInString().equals(((Route) o).getRouteInString());
         }
-
         return false;
     }
 
-
+    /**
+     * Adds a node to the route
+     * 
+     * @param n Node
+     */
     public void addNode(Node n) {
         this.nodeList.add(n);
         this.computeLinks();
     }
 
+    /**
+     * Returns a clone of the route
+     */
     public Route clone() {
         Route res = new Route();
         res.distanceAllLinks = this.distanceAllLinks;
@@ -303,7 +298,6 @@ public class Route
         res.linkList = (Vector<Link>) this.linkList.clone();
 
         return res;
-
     }
 
 }

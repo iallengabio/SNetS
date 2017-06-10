@@ -1,6 +1,6 @@
 package grmlsa.integrated;
 
-import grmlsa.NewKMenores;
+import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
@@ -21,7 +21,7 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
      */
     private HashSet<Double> largBandSuperiores;
 
-    private NewKMenores kMenores;
+    private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
 
     public PseudoPartition() {
@@ -32,7 +32,7 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
     @Override
     public boolean rsa(Circuit request, Mesh mesh) {
         if (kMenores == null)
-            kMenores = new NewKMenores(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
+            kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
         if (modulationSelector == null)
             modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand());
 
