@@ -153,4 +153,20 @@ public class Mesh implements Serializable {
         return this.guarBand;
     }
 
+    /**
+     * This meter returns the maximum amount of slots in a link between all links in the network
+     * 
+     * @return int
+     */
+    public int maximumSlotsByLinks(){
+    	int max = 0;
+    	for (int i = 0; i < linkList.size(); i++) {
+    		int num = linkList.get(i).getNumOfSlots();
+    		if(num > max){
+    			max = num;
+    		}
+    	}
+    	return max;
+    }
+    
 }

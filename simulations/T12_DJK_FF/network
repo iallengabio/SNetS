@@ -1,18 +1,18 @@
 {
 "nodes":
-    [{"name":"1","transeivers":100,"receivers":100},
-    {"name":"2","transeivers":100,"receivers":100}],
+    [{"name":"1","transmitters":100,"receivers":100},
+    {"name":"2","transmitters":100,"receivers":100}],
 "links":
     [{"source":"1",
       "destination":"2",
       "slots":401,
-      "sectrum":1.25E10,
+      "spectrum":1.25E10,
       "size":100.0},
       {"source":"2",
       "destination":"1",
       "slots":401,
-      "sectrum":1.25E10,
+      "spectrum":1.25E10,
       "size":100.0}],
-"modulations":[{"name":"BPSK", "bitsPerSimbol":12, "maxRange":100},{}],
+"modulations":[{"name":"BPSK", "bitsPerSymbol":12, "maxRange":100},{}],
 "guardBand":1
 }

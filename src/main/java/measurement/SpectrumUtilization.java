@@ -37,7 +37,8 @@ public class SpectrumUtilization extends Measurement {
         numberObservations = 0;
         utilizationPerLink = new HashMap<String, Double>();
 
-        desUtilizationPerSlot = new int[401]; // Be careful when using links with different slots of 400
+        int maxSlotsByLinks = mesh.maximumSlotsByLinks();
+        desUtilizationPerSlot = new int[maxSlotsByLinks];
     }
 
     /**

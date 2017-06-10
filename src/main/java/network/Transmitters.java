@@ -34,7 +34,7 @@ public class Transmitters implements Serializable {
 	 * Increases the number of transmitters being used and updates the sum and peak transmitter utilization
 	 */
 	public boolean allocateTx() {
-		if(this.txUtilization<this.numberOfTx){
+		if(this.txUtilization < this.numberOfTx){
 			this.txUtilization++;
 			return true;
 		}else{

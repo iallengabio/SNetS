@@ -5,7 +5,7 @@ public class Modulation {
     private final int guardBand;
     private String name;
 
-    private double bitsPerSimbol;
+    private double bitsPerSymbol;
     /*
      * max range in Km
      */
@@ -14,11 +14,11 @@ public class Modulation {
     private double freqSlot;
 
 
-    public Modulation(String name, double bitsPerSimbol, double freq, double maxRange, int guardBand) {
+    public Modulation(String name, double bitsPerSymbol, double freqSlot, double maxRange, int guardBand) {
         this.name = name;
-        this.bitsPerSimbol = bitsPerSimbol;
+        this.bitsPerSymbol = bitsPerSymbol;
         this.maxRange = maxRange;
-        this.freqSlot = freq;
+        this.freqSlot = freqSlot;
         this.guardBand = guardBand;
     }
 
@@ -30,10 +30,10 @@ public class Modulation {
     }
 
     /**
-     * @return the bitsPerSimbol
+     * @return the bitsPerSymbol
      */
-    public double getBitsPerSimbol() {
-        return bitsPerSimbol;
+    public double getBitsPerSymbol() {
+        return bitsPerSymbol;
     }
 
     /**
@@ -53,7 +53,7 @@ public class Modulation {
     public int requiredSlots(double bandwidth) {
         //System.out.println("C = " + bandwidth + "    bm = " + this.bitsPerSimbol + "     fslot = " + this.freqSlot);
 
-        double res = bandwidth / (this.bitsPerSimbol * this.freqSlot);
+        double res = bandwidth / (this.bitsPerSymbol * this.freqSlot);
 
         //System.out.println("res = " + res);
 
@@ -64,7 +64,6 @@ public class Modulation {
         }
 
         res2 = res2 + guardBand; //adiciona mais um slot necessário para ser usado como banda de guarda
-
 
         return res2;
     }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 /**
  * This class is responsible for managing the executions of the simulations
@@ -104,42 +105,43 @@ public class SimulationManagement {
      */
     public void saveResults(String pathResultFiles) {
     	// Pick folder name
-        String aux[] = pathResultFiles.split("/");
+    	String separator = System.getProperty("file.separator");
+        String aux[] = pathResultFiles.split(Pattern.quote(separator));
         String nome = aux[aux.length - 1];
         try {
             //List<Pair> pairs = new ArrayList(this.simulations.get(0).get(0).getMesh().getPairList());
             // Circuit blocking probability
-            FileWriter fw = new FileWriter(new File(pathResultFiles + "/" + nome + "BlockingProb.csv"));
+            FileWriter fw = new FileWriter(new File(pathResultFiles + separator + nome + "BlockingProb.csv"));
             fw.write(getBlockingProbabilityCsv());
             fw.close();
 
             // Bandwidth blocking probability
-            fw = new FileWriter(new File(pathResultFiles + "/" + nome + "BandwidthBlockingProb.csv"));
+            fw = new FileWriter(new File(pathResultFiles + separator + nome + "BandwidthBlockingProb.csv"));
             fw.write(getBandwidthBlockingProbabilityCsv());
             fw.close();
 
             // External fragmentation
-            fw = new FileWriter(new File(pathResultFiles + "/" + nome + "ExternalFragmentation.csv"));
+            fw = new FileWriter(new File(pathResultFiles + separator + nome + "ExternalFragmentation.csv"));
             fw.write(getExternalFragmentationCsv());
             fw.close();
 
             // Relative fragmentation
-            fw = new FileWriter(new File(pathResultFiles + "/" + nome + "RelativeFragmentation.csv"));
+            fw = new FileWriter(new File(pathResultFiles + separator + nome + "RelativeFragmentation.csv"));
             fw.write(getRelativeFragmentationCsv());
             fw.close();
 
             // Spectrum utilization
-            fw = new FileWriter(new File(pathResultFiles + "/" + nome + "SpectrumUtilization.csv"));
+            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumUtilization.csv"));
             fw.write(getSpectrumUtilizationCsv());
             fw.close();
 
             // Spectrum statistics
-            fw = new FileWriter(new File(pathResultFiles + "/" + nome + "SpectrumSizeStatistics.csv"));
+            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumSizeStatistics.csv"));
             fw.write(getSpectrumStatisticsCsv());
             fw.close();
 
             // Statistics of tx and rx
-            fw = new FileWriter(new File(pathResultFiles + "/" + nome + "TransmitersReceiversUtilization.csv"));
+            fw = new FileWriter(new File(pathResultFiles + separator + nome + "TransmitersReceiversUtilization.csv"));
             fw.write(getTransceiversUtilizationCsv());
             fw.close();
 

@@ -105,11 +105,11 @@ public class Measurements implements Serializable {
     	this.numGeneratedReq = 0.0;
         this.blockingProbabilityMeasurement = new BlockingProbability(loadPoint, replication); 
         this.bandwidthBlockingProbabilityMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
-        this.externalFragmentation = new ExternalFragmentation(loadPoint, replication,mesh);
-        this.spectrumUtilization = new SpectrumUtilization(loadPoint, replication,mesh);
-        this.relativeFragmentation = new RelativeFragmentation(loadPoint, replication,mesh);
+        this.externalFragmentation = new ExternalFragmentation(loadPoint, replication, mesh);
+        this.spectrumUtilization = new SpectrumUtilization(loadPoint, replication, mesh);
+        this.relativeFragmentation = new RelativeFragmentation(loadPoint, replication, mesh);
         this.spectrumSizeStatistics = new SpectrumSizeStatistics(loadPoint, replication);
-        this.transmitersReceiversUtilization = new TransmittersReceiversUtilization(loadPoint, replication,mesh);
+        this.transmitersReceiversUtilization = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
     }
 
     /**

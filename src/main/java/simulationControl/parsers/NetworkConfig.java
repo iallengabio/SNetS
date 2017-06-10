@@ -145,7 +145,7 @@ public class NetworkConfig {
          * 
          * @param transmitters int
          */
-        public void setTransmiters(int transmitters) {
+        public void setTransmitters(int transmitters) {
             this.transmitters = transmitters;
         }
 
@@ -297,19 +297,19 @@ public class NetworkConfig {
     public static class ModulationConfig{
     	
         private String name;
-        private double bitsPerSimbol;
+        private double bitsPerSymbol;
         private double maxRange;
 
         /**
          * Creates a new instance of ModulationConfig
          * 
          * @param name
-         * @param bitsPerSimbol
+         * @param bitsPerSymbol
          * @param maxRange
          */
-        public ModulationConfig(String name, double bitsPerSimbol, double maxRange) {
+        public ModulationConfig(String name, double bitsPerSymbol, double maxRange) {
             this.name = name;
-            this.bitsPerSimbol = bitsPerSimbol;
+            this.bitsPerSymbol = bitsPerSymbol;
             this.maxRange = maxRange;
         }
 
@@ -336,8 +336,8 @@ public class NetworkConfig {
          * 
          * @return double
          */
-        public double getBitsPerSimbol() {
-            return bitsPerSimbol;
+        public double getBitsPerSymbol() {
+            return bitsPerSymbol;
         }
 
         /**
@@ -345,8 +345,8 @@ public class NetworkConfig {
          * 
          * @param bitsPerSymbol
          */
-        public void setBitsPerSimbol(double bitsPerSimbol) {
-            this.bitsPerSimbol = bitsPerSimbol;
+        public void setBitsPerSymbol(double bitsPerSymbol) {
+            this.bitsPerSymbol = bitsPerSymbol;
         }
         
         /**
