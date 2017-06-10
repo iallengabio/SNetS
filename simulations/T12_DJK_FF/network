@@ -13,6 +13,6 @@
       "slots":401,
       "spectrum":1.25E10,
       "size":100.0}],
-"modulations":[{"name":"BPSK", "bitsPerSymbol":12, "maxRange":100},{}],
+"modulations":[{"name":"BPSK", "bitsPerSymbol":12, "maxRange":100},],
 "guardBand":1
 }

@@ -1,6 +1,7 @@
 package network;
 
 import simulationControl.parsers.NetworkConfig;
+import simulationControl.parsers.PhysicalLayerConfig;
 import simulationControl.parsers.TrafficConfig;
 import util.RandGenerator;
 
@@ -21,6 +22,7 @@ public class Mesh implements Serializable {
     private Vector<Link> linkList;
     private Vector<Pair> pairList;
     private int guarBand;
+    private PhysicalLayer physicalLayer;
 
     /**
      * Creates a new instance of Mesh.
@@ -28,7 +30,7 @@ public class Mesh implements Serializable {
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc) {
         this.guarBand = nc.getGuardBand();
         RandGenerator randGenerator = new RandGenerator();
         HashMap<String, Node> nodesAux = new HashMap<>();
@@ -68,6 +70,8 @@ public class Mesh implements Serializable {
             Pair p = pairsAux.get(rgc.getSource()).get(rgc.getDestination());
             p.addRequestGenerator(new RequestGenerator(p, rgc.getBandwidth(), rgc.getHoldRate(), rgc.getArrivalRate(), rgc.getArrivalRateIncrease(), randGenerator));
         }
+        
+        this.physicalLayer = new PhysicalLayer(plc);
     }
 
     /**
@@ -169,4 +173,12 @@ public class Mesh implements Serializable {
     	return max;
     }
     
+    /**
+     * Returns the physical layer configuration of the network
+     * 
+     * @return PhysicalLayer
+     */
+    public PhysicalLayer getPhysicalLayer(){
+    	return physicalLayer;
+    }
 }

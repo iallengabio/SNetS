@@ -4,53 +4,109 @@ import java.util.List;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
-import request.RequestForConnection;
+import simulationControl.parsers.PhysicalLayerConfig;
 
-public class ComputeQoT {
+/**
+ * This class represents the physical layer of the optical network.
+ * 
+ * @author Alexandre
+ */
+public class PhysicalLayer {
 
-	public static boolean activeAse; //ativa o ruido ASE do amplificador
-	public static boolean activeNli; //ativa o ruido nao linear nas fibras
-	public static int typeOfTestQoT; //0, para verificar pelo limiar de SNR, ou outro valor, para verificar pelo limiar de BER
-	public static int typeOfFEC; //0 = 07%, ou 1 = 20%, ou 2 = 28%, outro valor, sem FEC;
+	// Allows you to enable or disable transmission quality computing
+    private boolean activeQoT; // QoTN
+    private boolean activeQoTForOther; // QoTO
 	
-	public static double power; //potencia por canal, dBm
-	public static double L; //tamanho de um span, km
-	public static double NF; //figura de ruido do amplificador, dB
-	public static double pSat; //potencia de saturacao do amplificador, dBm
-	public static double B0; //largura de banda optica, esta com valor 1 porque estamos considerando SNR
-	public static double A1; //parametro do fator de ruido do amplificador
-	public static double A2; //parametro do fator de ruido do amplificador
-	public static double h; //constante de Planck
-	public static double centerFrequency; //frequencia da luz
-	public static double alfa; //dB/km, perda da fibra
-	public static double beta2; //ps^2 = E-24, parametro de dispersao
-	public static double gama; //nao linearidade da fibra
-	public static double C; //taxa de compensacao de dispersao
+    private boolean activeAse; //ativa o ruido ASE do amplificador
+    private boolean activeNli; //ativa o ruido nao linear nas fibras
+    private int typeOfTestQoT; //0, para verificar pelo limiar de SNR, ou outro valor, para verificar pelo limiar de BER
+    private int rateOfFEC; //0 = 07%, ou 1 = 20%, ou 2 = 28%, outro valor, sem FEC;
 	
-	public static double guardBand; //banda de guarda entre canais adjacentes
+    private double guardBand; //banda de guarda entre canais adjacentes
 	
-	public static double getFEC(){
+    private double power; //potencia por canal, dBm
+    private double L; //tamanho de um span, km
+    private double alfa; //dB/km, perda da fibra
+    private double gama; //nao linearidade da fibra
+    private double beta2; //ps^2 = E-24, parametro de dispersao
+    private double C; //taxa de compensacao de dispersao
+    private double centerFrequency; //frequencia da luz
+	
+    private double h; //constante de Planck
+    private double NF; //figura de ruido do amplificador, dB
+    private double pSat; //potencia de saturacao do amplificador, dBm
+    private double A1; //parametro do fator de ruido do amplificador
+    private double A2; //parametro do fator de ruido do amplificador
+    private double B0; //largura de banda optica, esta com valor 1 porque estamos considerando SNR
+
+	
+    public PhysicalLayer(PhysicalLayerConfig plc){
+        this.activeQoT = plc.isActiveQoT();
+        this.activeQoTForOther = plc.isActiveQoTForOther();
+    	
+        this.activeAse = plc.isActiveAse();
+        this.activeNli = plc.isActiveNli();
+        this.typeOfTestQoT = plc.getTypeOfTestQoT();
+        this.rateOfFEC = plc.getRateOfFEC();
+    	
+        this.guardBand = plc.getGuardBand();
+    	
+        this.power = plc.getPower();
+        this.L = plc.getSpanLength();
+        this.alfa = plc.getFiberLoss();
+        this.gama = plc.getFiberNonlinearity();
+        this.beta2 = plc.getFiberDispersion();
+        this.C = plc.getDispersionCompensationRatio();
+        this.centerFrequency = plc.getCenterFrequency();
+    	
+        this.h = plc.getConstantOfPlanck();
+        this.NF = plc.getNoiseFigureOfOpticalAmplifier();
+        this.pSat = plc.getPowerSaturationOfOpticalAmplifier();
+        this.A1 = plc.getNoiseFactorModelParameterA1();
+        this.A2 = plc.getNoiseFactorModelParameterA2();
+        this.B0 = plc.getOpticalNoiseBandwidth();
+    }
+    
+	/**
+	 * Returns if QoTN check is active or not
+	 * 
+	 * @return the activeQoT
+	 */
+	public boolean isActiveQoT() {
+		return activeQoT;
+	}
+
+	/**
+	 * Returns if QoTO check is active or not
+	 * 
+	 * @return the activeQoTForOther
+	 */
+	public boolean isActiveQoTForOther() {
+		return activeQoTForOther;
+	}
+
+	public double getFEC(){
 		double fec = 0.0;
 		
-		if(typeOfFEC == 0){
+		if(rateOfFEC == 0){
 			fec = 0.07; //para FEC = 7%
-		}else if(typeOfFEC == 1){
+		}else if(rateOfFEC == 1){
 			fec = 0.20; //para FEC = 20%
-		}else if(typeOfFEC == 2){
+		}else if(rateOfFEC == 2){
 			fec = 0.28; //para FEC = 28%
 		}
 		
 		return fec;
 	}
 	
-	public static double getBERthreshold(){
+	public double getBERthreshold(){
 		double BERthreshold = 1.0E-5;
 		
-		if(typeOfFEC == 0){
+		if(rateOfFEC == 0){
 			BERthreshold = 3.8E-3; //para FEC = 7%
-		}else if(typeOfFEC == 1){
+		}else if(rateOfFEC == 1){
 			BERthreshold = 2.0E-2; //para FEC = 20%
-		}else if(typeOfFEC == 2){
+		}else if(rateOfFEC == 2){
 			BERthreshold = 4.0E-2; //para FEC = 28%
 		}
 		
@@ -65,16 +121,16 @@ public class ComputeQoT {
 	 * @param modulation
 	 * @return
 	 */
-	public static double getSNRthreshold(Modulation modulation){
+	public double getSNRthreshold(Modulation modulation){
 		double SNRdBthreshold = 3.0 * modulation.getLevel();
 		return SNRdBthreshold;
 	}
 	
-	public static double getGuardBand(){
+	public double getGuardBand(){
 		return guardBand;
 	}
 	
-	public static boolean isAdmissible(Modulation modulation, double SNRdB, double SNRlinear){
+	public boolean isAdmissible(Modulation modulation, double SNRdB, double SNRlinear){
 		if(typeOfTestQoT == 0){ //verificacao pelo limitar de SNR (dB)
 			double SNRdBthreshold = getSNRthreshold(modulation);
 			
@@ -87,7 +143,7 @@ public class ComputeQoT {
 			double k2 = modulation.getK2();
 			double Lm = modulation.getLevel();
 			double M = modulation.getM();
-			double BER = getBER3(SNRlinear, k2, Lm, M);
+			double BER = getBER(SNRlinear, k2, Lm, M);
 			
 			if(BER <= BERthreshold){
 				return true;
@@ -96,22 +152,22 @@ public class ComputeQoT {
 		return false;
 	}
 	
-	public static boolean isAdmissibleModultion(RequestForConnection request, Route route, Modulation modulation, int spectrumAssigned[]){
+	public boolean isAdmissibleModultion(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
 		
-		double SNR = computeSNR3Segment(request, request.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, true);
+		double SNR = computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, true);
 		double SNRdB = ratioForDB(SNR);
-		request.setSNR(SNRdB);
+		circuit.setSNR(SNRdB);
 		
 		boolean QoT = isAdmissible(modulation, SNRdB, SNR);
 		
 		return QoT;
 	}
 	
-	public static boolean isAdmissibleModultionBySegment(RequestForConnection request, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[]){
+	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[]){
 		
-		double SNR = computeSNR3Segment(request, request.getRequiredBandwidth(), route, indexNodeSource, indexNodeDestination, modulation, spectrumAssigned, true);
+		double SNR = computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, indexNodeSource, indexNodeDestination, modulation, spectrumAssigned, true);
 		double SNRdB = ratioForDB(SNR);
-		request.setSNR(SNRdB);
+		circuit.setSNR(SNRdB);
 		
 		boolean QoT = isAdmissible(modulation, SNRdB, SNR);
 		
@@ -133,7 +189,7 @@ public class ComputeQoT {
 	 *                             no calculo da potencia total que entra nos amplificadores (true, considera, ou false, nao considera)
 	 * @return double - SNR (linear)
 	 */
-	public static double computeSNR3Segment(RequestForConnection request, double bandwidth, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[], boolean verifQoT){
+	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[], boolean verifQoT){
 		
 		double Ptx = ratioOfDB(power) * 1.0E-3; //W, potencia do transmissor
 		double Pase = 0.0;
@@ -162,7 +218,7 @@ public class ComputeQoT {
 			noOrigem = route.getNode(i);
 			noDestino = route.getNode(i + 1);
 			enlace = noOrigem.getOxc().linkTo(noDestino.getOxc());
-			double Ns = ComputeQoT.roundUp(enlace.getDistance() / L); //numero de spans
+			double Ns = PhysicalLayer.roundUp(enlace.getDistance() / L); //numero de spans
 			
 			double quantSlotsUsados = enlace.getUsedSlots();
 			if(verifQoT){
@@ -170,7 +226,7 @@ public class ComputeQoT {
 			}
 			
 			if(activeNli){
-				double noiseNli = Ns * getGnli(request, enlace, I, Bsi, fi, gama, beta2, alfa, L, C, Ns, lowerFrequency);
+				double noiseNli = Ns * getGnli(circuit, enlace, I, Bsi, fi, gama, beta2, alfa, L, C, Ns, lowerFrequency);
 				Pnli = Pnli + noiseNli;
 			}
 			
@@ -189,7 +245,7 @@ public class ComputeQoT {
 	
 	//-----------------------------------------------------------------------------
 	//Artigo: Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
-	public static double getGnli(RequestForConnection request, Link link, double I, double Bsi, double fi, double gama, double beta2, double alfa, double L, double C, double Ns, double lowerFrequency){
+	public double getGnli(Circuit circuit, Link link, double I, double Bsi, double fi, double gama, double beta2, double alfa, double L, double C, double Ns, double lowerFrequency){
 		double alfaLinear = ratioOfDB(alfa);
 		if(beta2 < 0.0){
 			beta2 = -1.0 * beta2;
@@ -203,14 +259,14 @@ public class ComputeQoT {
 		double p1 = arcsinh(ro * Bsi * Bsi);
 		double p2 = 0.0;
 		
-		List<RequestForConnection> listRequests = link.getListRequests();
+		List<Circuit> listRequests = link.getCircuitList();
 		int size = listRequests.size();
 		for(int i = 0; i < size; i++){
-			RequestForConnection reqTemp = listRequests.get(i);
+			Circuit cricuitTemp = listRequests.get(i);
 			
-			if(!request.equals(reqTemp)){
+			if(!circuit.equals(cricuitTemp)){
 				double fs = link.getSlotSpectrumBand();
-				int sa[] = reqTemp.getSpectrumAssignedByLink(link);
+				int sa[] = cricuitTemp.getSpectrumAssigned();
 				double numOfSlots = sa[1] - sa[0] + 1;
 				double Bsj = numOfSlots * fs; //largura de banda da requisicao
 				double fj = lowerFrequency + (fs * (sa[0] - 1)) + (Bsj / 2); //frequencia central da requisicao
@@ -249,7 +305,7 @@ public class ComputeQoT {
 	 * - Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats (equacao 4)
      * - On the Extended Relationships Among EVM, BER and SNR as Performance Metrics (equacao 12)
 	 */
-	public static double getBER3(double SNR, double k2, double L, double M){
+	public static double getBER(double SNR, double k2, double L, double M){
 		double p1 = ((3.0 * log2(L)) / ((L * L) - 1.0)) * ((Math.sqrt(2.0) * SNR) / (k2 * log2(M)));
 		double p2 = erfc(Math.sqrt(p1));
 		double ber = ((1.0 - (1.0 / L)) / log2(L)) * p2;

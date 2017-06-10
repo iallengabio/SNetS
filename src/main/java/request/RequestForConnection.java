@@ -21,11 +21,6 @@ public class RequestForConnection {
 	
 	protected Circuit circuit; // Circuit that attends this request
 	
-	
-	protected double SNR; //dB
-	protected boolean QoT;
-	protected boolean QoTForOther;
-
 	/**
 	 * Returns the pair
 	 * 
@@ -131,58 +126,5 @@ public class RequestForConnection {
 	 */
 	public void setRequestGenerator(RequestGenerator rg) {
 		this.rg = rg;
-	}
-
-	/**
-	 * @return the sNR
-	 */
-	public double getSNR() {
-		return SNR;
-	}
-
-	/**
-	 * @param sNR the sNR to set
-	 */
-	public void setSNR(double sNR) {
-		SNR = sNR;
-	}
-
-	/**
-	 * @return the qoT
-	 */
-	public boolean isQoT() {
-		return QoT;
-	}
-
-	/**
-	 * @param qoT the qoT to set
-	 */
-	public void setQoT(boolean qoT) {
-		QoT = qoT;
-	}
-
-	/**
-	 * @return the qoTForOther
-	 */
-	public boolean isQoTForOther() {
-		return QoTForOther;
-	}
-
-	/**
-	 * @param qoTForOther the qoTForOther to set
-	 */
-	public void setQoTForOther(boolean qoTForOther) {
-		QoTForOther = qoTForOther;
-	}
-
-	/**
-	 * Este metodo retorna o espectro alocado pela requisicao em um enlace
-	 * Pode mudar de acordo com o tipo de requisicao
-	 * @param link - Link
-	 * @return int[]
-	 */
-	public int[] getSpectrumAssignedByLink(Link link){
-		int sa[] = circuit.getSpectrumAssigned();
-		return sa;
 	}
 }

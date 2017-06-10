@@ -1,5 +1,8 @@
 package simulationControl.parsers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents the Simulation configuration file, its representation in entity form is 
  * important for the storage and transmission of this type of configuration in the JSON format.
@@ -17,6 +20,7 @@ public class SimulationConfig {
     private String grooming;
     private int loadPoints;
     private int replications;
+    private List<String> measuringMetrics = new ArrayList<String>();
 
     /**
      * Returns the minimum number of requests
@@ -179,4 +183,23 @@ public class SimulationConfig {
     public void setReplications(int replications) {
         this.replications = replications;
     }
+
+	/**
+	 * Returns the measuring metrics
+	 * 
+	 * @return the measuringMetrics
+	 */
+	public List<String> getMeasuringMetrics() {
+		return measuringMetrics;
+	}
+
+	/**
+	 * Sets the measuring metrics
+	 * 
+	 * @param measuringMetrics the measuringMetrics to set
+	 */
+	public void setMeasuringMetrics(List<String> measuringMetrics) {
+		this.measuringMetrics = measuringMetrics;
+	}
+    
 }

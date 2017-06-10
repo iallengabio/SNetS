@@ -64,7 +64,6 @@ public class Simulation implements Serializable {
                 controlPlane.setGrmlsa(new GRMLSA(this.routingAlgorithm, this.spectrumAssignmentAlgorithm, mesh.getLinkList().get(0).getSlotSpectrumBand(), controlPlane));
                 break;
         }
-
     }
 
     /**

@@ -11,13 +11,14 @@ import java.io.Serializable;
 public class Receivers implements Serializable {
 
 	private int rxUtilization;
-	private int numberOfRx = Integer.MAX_VALUE; // Without limitation of receivers
+	private int numberOfRx;
 
 	/**
 	 * Creates a new instance of Receivers
 	 */
 	public Receivers() {
 		this.rxUtilization = 0;
+		this.numberOfRx = Integer.MAX_VALUE; // Without limitation of receivers
 	}
 
 	/**
@@ -33,7 +34,7 @@ public class Receivers implements Serializable {
 	/**
 	 * Increases the number of receivers being used and updates the sum and peak receiver utilization
 	 */
-	public boolean allocateRx() {
+	public boolean allocatesReceivers() {
 		if(this.rxUtilization < this.numberOfRx){
 			this.rxUtilization++;
 			return true;
@@ -45,7 +46,7 @@ public class Receivers implements Serializable {
 	/**
 	 * Decrements the number of receivers being used
 	 */
-	public void freeRx() {
+	public void releasesReceivers() {
 		this.rxUtilization--;
 	}
 
@@ -80,7 +81,16 @@ public class Receivers implements Serializable {
 	 * @return boolean
 	 */
 	public boolean isFullUtilized(){
-		return numberOfRx==rxUtilization;
+		return numberOfRx == rxUtilization;
 	}
 	
+	/**
+	 * Check if there are free receivers.
+	 * Returns true if there are free receivers, otherwise returns false.
+	 * 
+	 * @return boolean
+	 */
+	public boolean hasFreeRecivers(){
+		return (rxUtilization < numberOfRx);
+	}
 }

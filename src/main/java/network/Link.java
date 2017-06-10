@@ -1,9 +1,9 @@
 package network;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-import request.RequestForConnection;
 
 /**
  * This class represents a network link
@@ -18,6 +18,8 @@ public class Link implements Serializable {
     private double cost;
     private Spectrum spectrum;
     private double distance;
+    
+    private List<Circuit> circuitList;
 
     /**
      * Creates a new instance of Link.
@@ -33,6 +35,8 @@ public class Link implements Serializable {
         this.destination = d;
         this.spectrum = new Spectrum(numberOfSlots, spectrumBand);
         this.distance = distance;
+        
+        this.circuitList = new ArrayList<Circuit>();
     }
 
     /**
@@ -65,7 +69,7 @@ public class Link implements Serializable {
      *
      * @param spectrumBand int[]
      */
-    public void freeSpectrum(int spectrumBand[]) {
+    public void liberateSpectrum(int spectrumBand[]) {
         spectrum.freeSpectrum(spectrumBand);
     }
 
@@ -185,12 +189,43 @@ public class Link implements Serializable {
     public Double getUtilization() {
         return this.spectrum.utilization();
     }
-    
-    /**
+	
+	/**
+	 * Returns the list of circuits that use this link
+	 * 
 	 * @return the listRequests
 	 */
-	public List<RequestForConnection> getListRequests() {
-		return null;
+	public List<Circuit> getCircuitList() {
+		return circuitList;
 	}
 
+	/**
+	 * Sets the list of circuits that use this link
+	 * 
+	 * @param listRequests the listRequests to set
+	 */
+	public void setCircuitList(List<Circuit> circuitList) {
+		this.circuitList = circuitList;
+	}
+	
+	/**
+	 * Adds a circuit to the list of circuits that use this link
+	 * 
+	 * @param circuit Circuit
+	 */
+	public void addCircuit(Circuit circuit){
+		if(!circuitList.contains(circuit)){
+			circuitList.add(circuit);
+		}
+	}
+	
+	/**
+	 * Removes a circuit from the list of circuits using this link
+	 * 
+	 * @param circuit Circuit
+	 */
+	public void removeCircuit(Circuit circuit){
+		circuitList.remove(circuit);
+	}
+	
 }

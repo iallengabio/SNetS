@@ -1,12 +1,12 @@
 package network;
 
-import grmlsa.GRMLSA;
-import grmlsa.Route;
-import request.RequestForConnection;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import grmlsa.GRMLSA;
+import grmlsa.Route;
+import request.RequestForConnection;
 
 /**
  * Class that represents the control plane.
@@ -20,7 +20,7 @@ public class ControlPlane {
     private Mesh mesh;
 
     private GRMLSA grmlsa;
-
+    
     /**
      * The first key represents the source node.
      * The second key represents the destination node.
@@ -97,17 +97,17 @@ public class ControlPlane {
     public void releaseCircuit(Circuit circuit) {
         Route r = circuit.getRoute();
 
-        releaseSpectrum(circuit.getSpectrumAssigned(), r.getLinkList());
+        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), r.getLinkList());
 
-        // Release Tx and Rx
-        circuit.getSource().getTxs().freeTx();
-        circuit.getDestination().getRxs().freeRx();
+        // Release transmitter and receiver
+        circuit.getSource().getTxs().releasesTransmitters();
+        circuit.getDestination().getRxs().releasesReceivers();
 
         activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
     }
 
     /**
-     * This method is called after executing RSA algorithms to allocate resources in the network
+     * This method is called after executing RMLSA algorithms to allocate resources in the network
      *
      * @param circuit Circuit
      */
@@ -116,7 +116,13 @@ public class ControlPlane {
         List<Link> links = new ArrayList<>(route.getLinkList());
         int chosen[] = circuit.getSpectrumAssigned();
         
-        allocateSpectrum(chosen, links);
+        allocateSpectrum(circuit, chosen, links);
+        
+        // Allocates transmitter and receiver
+        circuit.getSource().getTxs().allocatesTransmitters();
+        circuit.getDestination().getRxs().allocatesReceivers();
+        
+        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
     }
 
     /**
@@ -126,7 +132,7 @@ public class ControlPlane {
      * @param links List<Link>
      * @return boolean
      */
-    private boolean allocateSpectrum(int chosen[], List<Link> links) {
+    private boolean allocateSpectrum(Circuit circuit, int chosen[], List<Link> links) {
         boolean notAbleAnymore = false;
         Link l;
         int i;
@@ -134,6 +140,9 @@ public class ControlPlane {
         for (i = 0; i < links.size(); i++) {
             l = links.get(i);
             notAbleAnymore = !l.useSpectrum(chosen);
+            
+            l.addCircuit(circuit);
+            
             if (notAbleAnymore) break; // Some resource was no longer available, cancel the allocation
         }
 
@@ -146,10 +155,12 @@ public class ControlPlane {
      * @param chosen int[]
      * @param links List<Link>
      */
-    private void releaseSpectrum(int chosen[], List<Link> links) {
+    private void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
         // Release spectrum
         for (Link link : links) {
-            link.freeSpectrum(chosen);
+            link.liberateSpectrum(chosen);
+            
+            link.removeCircuit(circuit);
         }
     }
     
@@ -161,27 +172,23 @@ public class ControlPlane {
      */
     public boolean establishCircuit(Circuit circuit) {
 
-        if (circuit.getSource().getTxs().allocateTx()) {// Can allocate transmitter
-            if (circuit.getDestination().getRxs().allocateRx()) {// Can allocate receiver
-                if (this.grmlsa.createNewCircuit(circuit)) { // Can allocate spectrum
+    	// Check if there are free transmitters and receivers
+    	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
+    		
+    		// Can allocate spectrum
+            if (this.grmlsa.createNewCircuit(circuit)) {
 
-                	// QoT verification
-
-                    this.allocateCircuit(circuit);
-                    activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
-
-                    return true;
-                    
-                } else {// Release transmitter e receiver
-                    circuit.getSource().getTxs().freeTx();
-                    circuit.getDestination().getRxs().freeRx();
+            	// Pre-admits the circuit for QoT verification
+                this.allocateCircuit(circuit);
+                
+                // QoT verification
+                if(isAdmissibleQualityOfTransmission(circuit)){
+                	return true; // Admits the circuit
                 }
-            } else {// Release transmitter
-                circuit.getSource().getTxs().freeTx();
             }
         }
 
-        return false;
+        return false; // Rejects the circuit
     }
 
     /**
@@ -201,13 +208,13 @@ public class ControlPlane {
         
         if (upperBand != null) {
             chosen = upperBand;
-            allocateSpectrum(chosen, links);
+            allocateSpectrum(circuit, chosen, links);
             specAssigAt[1] = upperBand[1];
         }
         
         if (bottomBand != null) {
             chosen = bottomBand;
-            allocateSpectrum(chosen, links);
+            allocateSpectrum(circuit, chosen, links);
             specAssigAt[0] = bottomBand[0];
         }
         circuit.setSpectrumAssigned(specAssigAt);
@@ -230,13 +237,13 @@ public class ControlPlane {
         
         if (bottomBand != null) {
             chosen = bottomBand;
-            releaseSpectrum(chosen, links);
+            releaseSpectrum(circuit, chosen, links);
             specAssigAt[0] = bottomBand[1] + 1;
         }
         
         if (upperBand != null) {
             chosen = upperBand;
-            releaseSpectrum(chosen, links);
+            releaseSpectrum(circuit, chosen, links);
             specAssigAt[1] = upperBand[0] - 1;
         }
         
@@ -253,5 +260,100 @@ public class ControlPlane {
     public List<Circuit> searchForActiveCircuits(String source, String destination) {
         return this.activeCircuits.get(source).get(destination);
     }
-
+    
+    /**
+     * This method verifies the transmission quality of the circuit in the establishment 
+     * and also verifies the transmission quality of the other already active circuits
+     * 
+     * @param circuit Circuit
+     * @return boolean
+     */
+    public boolean isAdmissibleQualityOfTransmission(Circuit circuit){
+    	
+    	// Check if it is to test the QoT
+    	if(mesh.getPhysicalLayer().isActiveQoT()){
+    		
+    		// Verifies the QoT of the current circuit
+    		if(computeQualityOfTransmission(circuit)){
+    			boolean QoTForOther = true;
+    			
+    			// Check if it is to test the QoT of other already active circuits
+    			if(mesh.getPhysicalLayer().isActiveQoTForOther()){
+    				
+    				// Calculates the QoT of the other circuits
+    				QoTForOther = computeQoTForOther(circuit);
+    				circuit.setQoTForOther(QoTForOther);
+    			}
+    			
+    			if(QoTForOther){
+    				// QoT the other circuits was kept acceptable
+    				return true;
+    			} else {
+    				// QoT the other circuits was not kept acceptable, frees allocated resources
+    				releaseCircuit(circuit);
+    				// Recalculates the QoT of the other circuits
+    				computeQoTForOther(circuit);
+    			}
+    			
+    		} else {
+    			// Circuit QoT is not acceptable, frees allocated resources
+    			releaseCircuit(circuit);
+    		}
+    	} else {
+    		// If it does not check the QoT then it returns acceptable
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /**
+     * This method verifies the quality of the transmission of the circuit
+     * 
+     * @param circuit Circuit
+     * @return boolean - True, if QoT is acceptable, or false, otherwise
+     */
+    public boolean computeQualityOfTransmission(Circuit circuit){
+    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+		double SNRdB = PhysicalLayer.ratioForDB(SNR);
+		circuit.setSNR(SNRdB);
+		
+		boolean QoT = mesh.getPhysicalLayer().isAdmissible(circuit.getModulation(), SNRdB, SNR);
+		circuit.setQoT(QoT);
+		
+		return QoT;
+    }
+    
+    /**
+     * This method verifies the transmission quality of the other already active circuits
+     * 
+     * @param circuit Circuit
+     * @return boolean - True, if it did not affect another circuit, or false otherwise
+     */
+    public boolean computeQoTForOther(Circuit circuit){
+    	List<Circuit> circuits = new ArrayList<Circuit>();
+		
+		Route route = circuit.getRoute();
+		for (Link link : route.getLinkList()) {
+			List<Circuit> requestsAux = link.getCircuitList();
+			
+			for(int i = 0; i < requestsAux.size(); i++){
+				Circuit requestAux = requestsAux.get(i);
+				
+				if(!this.equals(requestAux) && !circuits.contains(requestAux)){
+					circuits.add(requestAux);
+				}
+			}
+		}
+		
+		for(int i = 0; i < circuits.size(); i++){
+			Circuit circuitTemp = circuits.get(i);
+			boolean QoT = computeQualityOfTransmission(circuitTemp);
+			if(!QoT){
+				return false;
+			}
+		}
+		
+		return true;
+    }
 }

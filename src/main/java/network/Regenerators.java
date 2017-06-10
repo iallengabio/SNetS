@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 import request.RequestForConnection;
 
+/**
+ * This class represents a bank of regenerators on a network node.
+ * 
+ * @author Alexandre
+ */
 public class Regenerators implements Serializable {
 
 	private double regenUtilization;
@@ -73,7 +78,7 @@ public class Regenerators implements Serializable {
 	public int getAmountOfRequiredRegenerators(RequestForConnection request){
 		double BR = 100.0; //Gbps
 		double Bn = request.getRequiredBandwidth() / 1073741824.0;
-		int quantRegeneradoresRequeridos = ComputeQoT.roundUp(Bn / BR);
+		int quantRegeneradoresRequeridos = PhysicalLayer.roundUp(Bn / BR);
 		return quantRegeneradoresRequeridos;
 	}
 }
