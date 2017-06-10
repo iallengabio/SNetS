@@ -2,9 +2,20 @@ package util;
 
 import java.util.List;
 
+/**
+ * This class computes external fragmentation and relative fragmentation.
+ * 
+ * @author Iallen
+ */
 public class CalculadorFragmentacao {
 
-    public double fragmentacaoExterna(List<int[]> freeSpectrumBands, int quantSlots) {
+	/**
+	 * This method calculates the external fragmentation
+	 * 
+	 * @param freeSpectrumBands List<int[]> free spectrum band list     
+	 * @return double
+	 */
+    public double fragmentacaoExterna(List<int[]> freeSpectrumBands) {
         int aux[] = {0, 0};
         double totalFree = 0.0;
         for (int[] is : freeSpectrumBands) {
@@ -18,17 +29,17 @@ public class CalculadorFragmentacao {
 
         double fe = 1 - (maior / totalFree);
 
-        if (totalFree == 0.0) fe = 0.0; //se o espectro estiver completamente preenchido ele não está fragmentado
+        if (totalFree == 0.0) fe = 0.0; // If the spectrum is completely filled it is not fragmented
 
         return fe;
     }
 
     /**
-     * Este método calcula a fragmentação relativa
+     * This method calculates the relative fragmentation
      *
-     * @param freeSpectrumBands lista de faixas livres
-     * @param c                 quantidade de slots que serão alocados (valor relativo)
-     * @return
+     * @param freeSpectrumBands free spectrum band list
+     * @param c                 Number of slots to allocate (relative value)
+     * @return					double
      */
     public double fragmentacaoRelativa(List<int[]> freeSpectrumBands, int c) {
 

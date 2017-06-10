@@ -39,9 +39,6 @@ public class GRMLSA {
     public static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
     public static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
     public static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
-    public static final String SPECTRUM_ASSIGNMENT_ZONEFIRSTBESTFIT = "zonefirstbestfit";
-    public static final String SPECTRUM_ASSIGNMENT_ZONEFIRSTFIRSTFIT = "zonefirstfirstfit";
-    public static final String SPECTRUM_ASSIGNMENT_DEDICATEDZONEFIRSTFIT = "dedicatedzonefirstfit";
 
     //Integrados
     public static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -134,15 +131,6 @@ public class GRMLSA {
                 break;
             case SPECTRUM_ASSIGNMENT_EXACTFIT:
                 this.spectrumAssignment = new ExactFit();
-                break;
-            case SPECTRUM_ASSIGNMENT_ZONEFIRSTBESTFIT:
-                this.spectrumAssignment = new ZoneFirstBestFit();
-                break;
-            case SPECTRUM_ASSIGNMENT_ZONEFIRSTFIRSTFIT:
-                this.spectrumAssignment = new ZoneFirstFirstFit();
-                break;
-            case SPECTRUM_ASSIGNMENT_DEDICATEDZONEFIRSTFIT:
-                this.spectrumAssignment = new DedicatedZoneFirstFit();
                 break;
 
             default:

@@ -35,14 +35,14 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithm {
 			//Is it possible to expand the channel?
 			List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 			
-			int[] faixaLivreAdjInferior = IntersectionFreeSpectrum.faixaAdjacenteInferior(circuit.getSpectrumAssigned(), composition);
+			int[] faixaLivreAdjInferior = IntersectionFreeSpectrum.bandAdjacentInferior(circuit.getSpectrumAssigned(), composition);
 			int quantSlotsLivresAbaixo;
 			if(faixaLivreAdjInferior==null){
 				quantSlotsLivresAbaixo = 0;
 			}else{
 				quantSlotsLivresAbaixo = faixaLivreAdjInferior[1]-faixaLivreAdjInferior[0]+1;
 			}
-			int[] faixaLivreAdjSuperior = IntersectionFreeSpectrum.faixaAdjacenteSuperior(circuit.getSpectrumAssigned(), composition);
+			int[] faixaLivreAdjSuperior = IntersectionFreeSpectrum.bandAdjacentSuperior(circuit.getSpectrumAssigned(), composition);
 			int quantSlotsLivresAcima;
 			if(faixaLivreAdjSuperior==null){
 				quantSlotsLivresAcima = 0;

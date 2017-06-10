@@ -23,3 +23,6 @@ hs_err_pid*
 .idea/
 snets.iml
 target/
+.settings/
+.classpath
+.project

@@ -25,25 +25,33 @@ import java.util.Scanner;
 import java.util.Vector;
 
 /**
- * esta classe possui o método main que irá instanciar os parsers para leitura dos arquivos de configuração e iniciar a simulação
- *
+ * This class has the main method that will instantiate the parsers to read the 
+ * configuration files and start the simulation
+ * 
  * @author Iallen
  */
 public class Main {
 
     /**
-     * @param args arg[0] - > path dos arquivos de configura��o
+     * Main method
+     * 
+     * @param args String[] - arg[0] - Path of configuration files
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
         if (args.length > 0) {
             localSimulation(args[0]);
-        } else {//funcionar em modo Servidor
+            
+        } else {// To run in Server mode
             simulationServer();
         }
-
     }
 
+    /**
+     * Simulator runs in server mode
+     * 
+     * @throws IOException
+     */
     private static void simulationServer() throws IOException {
         initFirebase();
         System.out.println("SNetS Simulation Server Running");
@@ -107,7 +115,7 @@ public class Main {
             }
         });
 
-        while(true){//manter o servidor ligado
+        while(true){//Keep the server powered on
             try {
                 Thread.sleep(1000);
                 //System.out.println("thread");
@@ -117,20 +125,29 @@ public class Main {
         }
     }
 
+    /**
+     * Initialize Firebase
+     * 
+     * @throws IOException
+     */
     private static void initFirebase() throws IOException {
-        FileInputStream serviceAccount =
-                new FileInputStream("private-key-firebase.json");
+        FileInputStream serviceAccount = new FileInputStream("private-key-firebase.json");
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
-                .setDatabaseUrl("https://snets-2905e.firebaseio.com")
-                .build();
+                .setDatabaseUrl("https://snets-2905e.firebaseio.com").build();
         FirebaseApp.initializeApp(options);
     }
 
+    /**
+     * Simulator runs in local mode
+     * 
+     * @param path String Paths of the simulations configuration files
+     * @throws Exception
+     */
     private static void localSimulation(String path) throws Exception {
         System.out.println("Reading files");
         List<List<Simulation>> allSimulations = createAllSimulations(path);
-        //agora dar o start nas simulações
+        //Now start the simulations
         System.out.println("Starting simulations");
         SimulationManagement sm = new SimulationManagement(allSimulations);
         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
@@ -149,16 +166,24 @@ public class Main {
         System.out.println("finish!");
     }
 
+    /**
+     * This method creates the simulations from the local mode
+     * 
+     * @param args String Paths of the simulations configuration files
+     * @return List<List<Simulation>>
+     * @throws Exception
+     */
     private static List<List<Simulation>> createAllSimulations(String path) throws Exception {
 
-        //path dos arquivos de configuração da simulação
+        //Path of the simulation configuration files
         String filesPath = path;
         String networkFilePath = filesPath + "/network";
         String simulationFilePath = filesPath + "/simulation";
         String traficFilePath = filesPath + "/traffic";
         String routesFilePath = filesPath + "/fixedRoutes";
         Util.projectPath = filesPath;
-        //ler arquivos
+        
+        //Read files
         Scanner scanner = new Scanner(new File(networkFilePath));
         String networkConfigJSON = "";
         while (scanner.hasNext()) {
@@ -180,16 +205,24 @@ public class Main {
         TrafficConfig tc = gson.fromJson(trafficConfigJSON, TrafficConfig.class);
 
         return createAllSimulations(nc, sc, tc);
-
     }
 
+    /**
+     * This method creates the simulations from server mode
+     * 
+     * @param nc NetworkConfig
+     * @param sc SimulationConfig
+     * @param tc TrafficConfig
+     * @return List<List<Simulation>>
+     * @throws Exception
+     */
     private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc) throws Exception {
-        //criar a lista de simulações
-        List<List<Simulation>> allSimulations = new ArrayList<>(); // cada elemento deste conjunto é uma lista com 10 replicações de um mesmo ponto de carga
+        // Create list of simulations
+        List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
         int i, j;
-        for (i = 0; i < sc.getLoadPoints(); i++) { //criar as simulações para cada ponto de carga
+        for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
             List<Simulation> reps = new ArrayList<>();
-            for (j = 0; j < sc.getReplications(); j++) { //criar as simulações para cada replicação
+            for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
                 Mesh m = new Mesh(nc, tc);
                 incArrivedRate(m.getPairList(), i);
                 Simulation s = new Simulation(sc, m, i, j);
@@ -202,9 +235,10 @@ public class Main {
     }
 
     /**
-     * este método seta o ponto de carga da simulação em cada gerador de requisições
+     * This method sets the loading point of the simulation in each request generator
      *
-     * @param pairs
+     * @param pairs Vector<Pair>
+     * @param mult int
      */
     private static void incArrivedRate(Vector<Pair> pairs, int mult) {
         for (Pair pair : pairs) {

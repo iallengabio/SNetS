@@ -35,7 +35,7 @@ public class FirstFit implements SpectrumAssignmentAlgoritm {
      * @param freeSpectrumBands
      * @return
      */
-    private static int[] firstFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
+    public static int[] firstFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
         for (int[] band : freeSpectrumBands) {
             if (band[1] - band[0] + 1 >= numberOfSlots) {

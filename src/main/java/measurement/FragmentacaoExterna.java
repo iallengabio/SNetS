@@ -93,7 +93,7 @@ public class FragmentacaoExterna extends Measurement {
         for (Link link : mesh.getLinkList()) {
             aux = FELinks.get(link.getSource().getName() + SEP + link.getDestination().getName());
             if (aux == null) aux = 0.0;
-            aux2 = cf.fragmentacaoExterna(link.getFreeSpectrumBands(), link.getNumOfSlots());
+            aux2 = cf.fragmentacaoExterna(link.getFreeSpectrumBands());
             aux += aux2;
             FELinks.put(link.getSource().getName() + SEP + link.getDestination().getName(), aux);
             feMedia += aux2;
@@ -118,7 +118,7 @@ public class FragmentacaoExterna extends Measurement {
         }
         CalculadorFragmentacao cf = new CalculadorFragmentacao();
 
-        FEHorizontal += cf.fragmentacaoExterna(composition, links.get(0).getNumOfSlots());
+        FEHorizontal += cf.fragmentacaoExterna(composition);
 
     }
 

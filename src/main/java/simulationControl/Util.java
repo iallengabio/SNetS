@@ -6,9 +6,10 @@ import java.util.Set;
 import network.Pair;
 
 /**
- * Esta classe deverá gravar os pares, larguras de banda e demais valores necessários para a gravação dos resultados da simulação em arquivo
+ * This class should record the pairs, bandwidths and other values necessary for 
+ * recording the results of the simulation on file
+ * 
  * @author Iallen
- *
  */
 public class Util {
 	
