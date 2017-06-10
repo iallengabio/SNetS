@@ -15,7 +15,7 @@ public class Spectrum {
 	private TreeSet<int[]> freeSpectrumBands;
 	private int numOfSlots;
 	private double slotSpectrumBand;
-	private int slotsUsados;
+	private int usedSlots;
 	
 	/**
 	 * Creates a new instance of Spectrum
@@ -40,7 +40,7 @@ public class Spectrum {
 		fsin[0] = 1;
 		fsin[1] = numOfSlots;		
 		freeSpectrumBands.add(fsin);
-		slotsUsados = 0; 
+		usedSlots = 0; 
 	}
 	
 	/**
@@ -71,7 +71,7 @@ public class Spectrum {
 					this.freeSpectrumBands.add(newSpecBand);
 				}
 				
-				slotsUsados = slotsUsados + (spectrumBand[1] - spectrumBand[0] + 1);
+				usedSlots = usedSlots + (spectrumBand[1] - spectrumBand[0] + 1);
 				
 				return true;
 			}			
@@ -105,7 +105,7 @@ public class Spectrum {
 		
 		this.freeSpectrumBands.add(spectrumBand); //liberando spectro
 		
-		slotsUsados = slotsUsados - (spectrumBand[1] - spectrumBand[0] + 1);
+		usedSlots = usedSlots - (spectrumBand[1] - spectrumBand[0] + 1);
 		
 		// To merge free spectra when necessary
 		int merge[];
@@ -158,7 +158,7 @@ public class Spectrum {
 	 * @return double
 	 */
 	public double utilization(){
-		return ((double)slotsUsados)/((double)numOfSlots);
+		return ((double)usedSlots)/((double)numOfSlots);
 	}
 
 	/**
@@ -177,6 +177,15 @@ public class Spectrum {
 	 */
 	public int getNumOfSlots() {
 		return numOfSlots;
+	}
+	
+	/**
+	 * Returns the number of used slots
+	 * 
+	 * @return the usedSlots
+	 */
+	public int getUsedSlots(){
+		return usedSlots;
 	}
 	
 }

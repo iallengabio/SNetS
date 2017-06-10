@@ -3,6 +3,8 @@ package network;
 import java.io.Serializable;
 import java.util.List;
 
+import request.RequestForConnection;
+
 /**
  * This class represents a network link
  * 
@@ -165,6 +167,15 @@ public class Link implements Serializable {
     public int getNumOfSlots() {
         return spectrum.getNumOfSlots();
     }
+    
+    /**
+     * Returns the number of used slots
+     * 
+	 * @return int
+	 */
+	public int getUsedSlots(){
+		return spectrum.getUsedSlots();
+	}
 
     /**
      * Returns link usage
@@ -174,5 +185,12 @@ public class Link implements Serializable {
     public Double getUtilization() {
         return this.spectrum.utilization();
     }
+    
+    /**
+	 * @return the listRequests
+	 */
+	public List<RequestForConnection> getListRequests() {
+		return null;
+	}
 
 }

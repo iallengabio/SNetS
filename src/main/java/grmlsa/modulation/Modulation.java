@@ -12,6 +12,10 @@ public class Modulation {
     private double maxRange;
 
     private double freqSlot;
+    
+    private double level; //nivel do formato de modulacao
+	public double k2;
+	public double M; //quantidade de simbolos do formato de modulacao
 
 
     public Modulation(String name, double bitsPerSymbol, double freqSlot, double maxRange, int guardBand) {
@@ -68,5 +72,49 @@ public class Modulation {
         return res2;
     }
 
+	/**
+	 * @return the level
+	 */
+	public double getLevel() {
+		return level;
+	}
+
+	/**
+	 * @param level the level to set
+	 */
+	public void setLevel(double level) {
+		this.level = level;
+	}
+
+	/**
+	 * @return the k2
+	 */
+	public double getK2() {
+		return k2;
+	}
+
+	/**
+	 * @param k2 the k2 to set
+	 */
+	public void setK2(double k2) {
+		this.k2 = k2;
+	}
+
+	/**
+	 * @return the m
+	 */
+	public double getM() {
+		return M;
+	}
+
+	/**
+	 * @param m the m to set
+	 */
+	public void setM(double m) {
+		M = m;
+	}
+    
+    
+    
 
 }
