@@ -3,13 +3,16 @@ package network;
 import java.io.Serializable;
 import java.util.Vector;
 
+/**
+ * This class represents the OXC of the network
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
 public class Oxc implements Serializable {
 
     private String name;
     private Vector<Link> linksList;
-
-//------------------------------------------------------------------------------
 
     /**
      * Creates a new instance of Oxc.
@@ -20,8 +23,7 @@ public class Oxc implements Serializable {
         this.linksList = new Vector<Link>();
         this.name = name;
     }
-//------------------------------------------------------------------------------
-
+    
     /**
      * Getter for property name
      *
@@ -31,12 +33,8 @@ public class Oxc implements Serializable {
         return name;
     }
 
-
-
-//------------------------------------------------------------------------------
-
     /**
-     * Add Link l
+     * Add a link to the list of links
      *
      * @param link Link
      * @return true case successufully added Link l; false otherwise.
@@ -48,8 +46,6 @@ public class Oxc implements Serializable {
         }
         return false;
     }
-
-//------------------------------------------------------------------------------
 
     /**
      * Return Link to Oxc n.
@@ -67,8 +63,6 @@ public class Oxc implements Serializable {
         return null;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Getter for property linksList
      *
@@ -77,8 +71,6 @@ public class Oxc implements Serializable {
     public Vector<Link> getLinksList() {
         return linksList;
     }
-
-//------------------------------------------------------------------------------
 
     /**
      * Remove Link to Oxc n
@@ -97,8 +89,6 @@ public class Oxc implements Serializable {
         return false;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Is Oxc x adjacent of this Oxc.
      *
@@ -116,8 +106,6 @@ public class Oxc implements Serializable {
         return false;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Getter for property cost for Oxc x.
      *
@@ -134,7 +122,6 @@ public class Oxc implements Serializable {
         //System.out.println("erro: O nó "+ x.getName()+" nao é adjacente ao "+getName());
         return -1;
     }
-
 
     /**
      * Return all adjacents Oxcs of this node.

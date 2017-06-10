@@ -8,82 +8,97 @@ import java.util.Set;
 import network.Circuit;
 import network.Link;
 
+/**
+ * This class represents the metric that computes the number of requests that use a given number of slots.
+ * 
+ * @author Iallen
+ */
 public class SpectrumSizeStatistics extends Measurement{
 	public final static String SEP = "-";
 	
+	/**
+	 * Stores the number of requests generated based on the number of slots that these requests require
+	 */
+	private HashMap<Integer, Integer> numberReqPerSlotReq;	
+	private int numberRequests;
 	
+	private HashMap<String, HashMap<Integer,Integer>> numberReqPerSlotReqPerLink;
+	private HashMap<String, Integer> numberRequestsPerLink;
 	
 	/**
-	 * armazena a quantidade de requisições geradas em função da quantidade de slots que estas requisições exigem
+	 * Creates a new instance of SpectrumSizeStatistics
+	 * 
+	 * @param loadPoint int
+	 * @param replication int
 	 */
-	private HashMap<Integer, Integer> quantReqPerSlotReq;	
-	private int quantRequisicoes;
-	
-	private HashMap<String, HashMap<Integer,Integer>> quantReqPerSlotReqPerLink;
-	private HashMap<String, Integer> quantRequisicoesPerLink;
-	
-	
 	public SpectrumSizeStatistics(int loadPoint, int replication){
 		super(loadPoint, replication);
 		
-		quantRequisicoes = 0;
-		quantReqPerSlotReq = new HashMap<>();
-		quantRequisicoesPerLink = new HashMap<>();
-		quantReqPerSlotReqPerLink = new HashMap<>();
-		
+		numberRequests = 0;
+		numberReqPerSlotReq = new HashMap<>();
+		numberRequestsPerLink = new HashMap<>();
+		numberReqPerSlotReqPerLink = new HashMap<>();	
 	}
 	
 	/**
-	 * adiciona uma nova observação de utilização
+	 * Adds a new observation of slots utilization
+	 * 
 	 * @param request
 	 */
 	public void addNewObservation(Circuit request){
-		if(request.getModulation()==null) return;//esta métrica pode não ser confiável caso haja bloqueios por falta de transmissor
-		this.newObsReqTamFaixaGeral(request);	
-		this.newObsReqTamFaixaPerLink(request);
+		if(request.getModulation()==null) return;// This metric may not be reliable if there are locks due to lack of transmitter
+		this.newObservationRequestSizeBandwidthGeneral(request);	
+		this.newObservationRequestSizeBandwidthPerLink(request);
 	}
 	
-	/** 
-	 * observação da métrica de Requisições em função do tamanho da faixa requisitado de forma geral
+	/**
+	 * Observation of the Requisition metric according to the size of the band requested in general
+	 * 
 	 * @param request
 	 */
-	private void newObsReqTamFaixaGeral(Circuit request){
-		
-		quantRequisicoes++;			
+	private void newObservationRequestSizeBandwidthGeneral(Circuit request){
+		numberRequests++;			
 		int qSlots = request.getModulation().requiredSlots(request.getRequiredBandwidth());			
-		Integer aux = this.quantReqPerSlotReq.get(qSlots);			
+		Integer aux = this.numberReqPerSlotReq.get(qSlots);			
 		if(aux==null){
 			aux = 0;
 		}			
 		aux++;			
-		this.quantReqPerSlotReq.put(qSlots, aux);		
+		this.numberReqPerSlotReq.put(qSlots, aux);		
 	}
 	
 	/** 
-	 * observação da métrica de Requisições em função do tamanho da faixa requisitado por link
+	 * Observation of the Requisition metric according to the size of the band requested per link
+	 * 
 	 * @param request
 	 */
-	private void newObsReqTamFaixaPerLink(Circuit request){
-		
+	private void newObservationRequestSizeBandwidthPerLink(Circuit request){
 		for (Link link : request.getRoute().getLinkList()) {
-			newObsReqTamFaixaPerLink(link, request);
+			newObsReqSizeBandPerLink(link, request);
 		}	
 	}
 	
-	private void newObsReqTamFaixaPerLink(Link link, Circuit request){
+	/**
+	 * Observation of the Requisition metric according to the size of the band requested per link
+	 * 
+	 * @param link
+	 * @param request
+	 */
+	private void newObsReqSizeBandPerLink(Link link, Circuit request){
 		String l = link.getSource().getName() + SEP + link.getDestination().getName();
-		//incrementar a quantidade de requisições geradas
-		Integer aux = this.quantRequisicoesPerLink.get(l);
+		
+		// Increase the number of requests generated
+		Integer aux = this.numberRequestsPerLink.get(l);
 		if(aux == null) aux = 0;
 		aux++;
-		this.quantRequisicoesPerLink.put(l, aux);
+		this.numberRequestsPerLink.put(l, aux);
 		
-		//incrementar a quantidade de requisições geradas com este tamanho de faixa requisitado
+		// Increase the number of requisitions generated with this requested range size
 		int qSlots = request.getModulation().requiredSlots(request.getRequiredBandwidth());
-		HashMap<Integer, Integer> hashAux = quantReqPerSlotReqPerLink.get(l);
+		HashMap<Integer, Integer> hashAux = numberReqPerSlotReqPerLink.get(l);
 		if(hashAux==null){
 			hashAux = new HashMap<Integer, Integer>();
-			quantReqPerSlotReqPerLink.put(l, hashAux);
+			numberReqPerSlotReqPerLink.put(l, hashAux);
 		}
 		aux = hashAux.get(qSlots);
 		if(aux==null) aux = 0;
@@ -92,50 +107,68 @@ public class SpectrumSizeStatistics extends Measurement{
 	}
 	
 	/**
-	 * retorna uma lista contendo os valores de tamanhos de faixa que tiveram pelo menos uma requisição
-	 * @return
+	 * Returns a list containing the values of range sizes that have had at least one request
+	 * 
+	 * @return List<Integer>
 	 */
-	public List<Integer> getQuantidadesDeSlots(){
-		ArrayList<Integer> res = new ArrayList<Integer>(this.quantReqPerSlotReq.keySet());
+	public List<Integer> getNumberOfSlotsList(){
+		ArrayList<Integer> res = new ArrayList<Integer>(this.numberReqPerSlotReq.keySet());
 		
 		return res;
 	}
 	
 	/**
-	 * retorna o percentual de requisições entre as que foram geradas que exigiram uma faixa livre de tamanho passado por parâmetro
-	 * @param tamanhoFaixaReq
-	 * @return
+	 * Returns the percentage of requests among those that were generated that required a free range of 
+	 * size passed by parameter
+	 * 
+	 * @param sizeOfTheRequestedBand
+	 * @return double
 	 */
-	public double getPercentualReq(int tamanhoFaixaReq){
+	public double getPercentageReq(int tamanhoFaixaReq){
 		try{
-			return ((double)this.quantReqPerSlotReq.get(tamanhoFaixaReq))/((double)this.quantRequisicoes);
+			return ((double)this.numberReqPerSlotReq.get(tamanhoFaixaReq))/((double)this.numberRequests);
 		}catch(NullPointerException npex){
 			return 0.0;
 		}
 	}
 	
+	/**
+	 * Returns the HashMap key set
+     * The key set corresponds to the links that were analyzed by the metric
+     * 
+	 * @return Set<String>
+	 */
 	public Set<String> getLinkSet(){
-		return this.quantReqPerSlotReqPerLink.keySet();		
+		return this.numberReqPerSlotReqPerLink.keySet();		
 	}
 	
-	public List<Integer> getQuantidadesDeSlotsPorLink(String link){
-		ArrayList<Integer> res = new ArrayList<Integer>(this.quantReqPerSlotReqPerLink.get(link).keySet());
+	/**
+	 * Returns the list of the number of slots for a given link
+	 * 
+	 * @param link String
+	 * @return List<Integer>
+	 */
+	public List<Integer> getNumberOfSlotsPerLink(String link){
+		ArrayList<Integer> res = new ArrayList<Integer>(this.numberReqPerSlotReqPerLink.get(link).keySet());
 		
 		return res;
 	}
 	
-	public double getPercentualReq(String link, int tamanhoFaixaReq){
+	/**
+	 * Returns the percentage of slots requested for requests
+	 * 
+	 * @param link String
+	 * @param sizeOfTheRequestedBand int
+	 * @return double
+	 */
+	public double getPercentageReq(String link, int tamanhoFaixaReq){
 		try{
-			double d = this.quantReqPerSlotReqPerLink.get(link).get(tamanhoFaixaReq);
-			double n = this.quantRequisicoesPerLink.get(link);
+			double d = this.numberReqPerSlotReqPerLink.get(link).get(tamanhoFaixaReq);
+			double n = this.numberRequestsPerLink.get(link);
 			return d/n;
 		}catch(NullPointerException npe){
 			return 0.0;
 		}
-		
 	}
-	
-	
-	
 	
 }

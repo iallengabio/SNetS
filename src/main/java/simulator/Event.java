@@ -4,7 +4,11 @@ import simulator.eventListeners.EventListener;
 
 import java.io.Serializable;
 
-
+/**
+ * This class represents the events that are executed by the simulator event machine
+ * 
+ * @author Iallen
+ */
 @SuppressWarnings("serial")
 public class Event implements Serializable {
 
@@ -14,7 +18,7 @@ public class Event implements Serializable {
     private double id;
 
     /**
-     * Constroi um evento.
+     * Build an event.
      *
      * @param r         Object
      * @param eListener EventListener
@@ -26,17 +30,26 @@ public class Event implements Serializable {
         this.timeHours = timeHours;
     }
 
+    /**
+     * Configure event identifier
+     * 
+     * @param x double
+     */
     public void setId(double x) {
         id = x;
     }
 
+    /**
+     * Returns the event identifier
+     * 
+     * @return double
+     */
     public double getId() {
         return id;
     }
-//------------------------------------------------------------------------------
-
+    
     /**
-     * Retorna qual é o escutador do evento.
+     * Returns who is the event listener.
      *
      * @return EventListener
      */
@@ -44,10 +57,8 @@ public class Event implements Serializable {
         return this.eventListener;
     }
 
-//------------------------------------------------------------------------------
-
     /**
-     * Retorna o tempo que o evento será disparado em horas.
+     * Returns the time the event will be triggered in hours.
      *
      * @return double
      */
@@ -55,10 +66,8 @@ public class Event implements Serializable {
         return this.timeHours;
     }
 
-//------------------------------------------------------------------------------
-
     /**
-     * Retorna o Objeto associado ao evento.
+     * Returns the Object associated with the event.
      *
      * @return Object
      */
@@ -67,7 +76,7 @@ public class Event implements Serializable {
     }
 
     /**
-     * setObject
+     * Configures the object associated with the event
      *
      * @param x Object
      */

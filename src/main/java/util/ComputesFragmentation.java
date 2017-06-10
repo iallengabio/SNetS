@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @author Iallen
  */
-public class CalculadorFragmentacao {
+public class ComputesFragmentation {
 
 	/**
 	 * This method calculates the external fragmentation
@@ -15,7 +15,7 @@ public class CalculadorFragmentacao {
 	 * @param freeSpectrumBands List<int[]> free spectrum band list     
 	 * @return double
 	 */
-    public double fragmentacaoExterna(List<int[]> freeSpectrumBands) {
+    public double externalFragmentation(List<int[]> freeSpectrumBands) {
         int aux[] = {0, 0};
         double totalFree = 0.0;
         for (int[] is : freeSpectrumBands) {
@@ -41,19 +41,19 @@ public class CalculadorFragmentacao {
      * @param c                 Number of slots to allocate (relative value)
      * @return					double
      */
-    public double fragmentacaoRelativa(List<int[]> freeSpectrumBands, int c) {
+    public double relativeFragmentation(List<int[]> freeSpectrumBands, int c) {
 
         int freeC = 0;
-        int totalLivre = 0;
+        int totalFree = 0;
         for (int[] faixa : freeSpectrumBands) {
             int auxT = (faixa[1] - faixa[0] + 1);
             int auxF = auxT / c;
             freeC += auxF;
-            totalLivre += auxT;
+            totalFree += auxT;
         }
-        double f_c = 1 - ((double) (c * freeC)) / ((double) totalLivre);
+        double f_c = 1 - ((double) (c * freeC)) / ((double) totalFree);
 
-        if (totalLivre == 0) f_c = 0.0;
+        if (totalFree == 0) f_c = 0.0;
 
         return f_c;
     }

@@ -3,57 +3,59 @@ package simulationControl.resultManagers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
-import measurement.TransmitersReceiversUtilization;
-import measurement.UtilizacaoSpectro;
-import network.Link;
+import measurement.TransmittersReceiversUtilization;
 
 /**
- * esta classe eh responsavel por formatar o arquivo com resultados de utilização de recursos
+ * This class is responsible for formatting the file with results of transmitters and receivers utilization
+ * 
  * @author Iallen
- *
  */
-public class TransmitersReceiversUtilizationResultManager {
+public class TransmittersReceiversUtilizationResultManager {
 	
-	private HashMap<Integer, HashMap<Integer, TransmitersReceiversUtilization>> trus; //contem a metrica probabilidade de bloqueio para todos os pontos de carga e replicacoes
+	private HashMap<Integer, HashMap<Integer, TransmittersReceiversUtilization>> trus; // Contains the transmitter and receivers utilization metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
 	
-	public TransmitersReceiversUtilizationResultManager(List<List<TransmitersReceiversUtilization>> ltru){
+	/**
+	 * Creates a new instance of TransmittersReceiversUtilizationResultManager
+	 * 
+	 * @param ltru List<List<TransmittersReceiversUtilization>>
+	 */
+	public TransmittersReceiversUtilizationResultManager(List<List<TransmittersReceiversUtilization>> ltru){
 		trus = new HashMap<>();
 		
-		for (List<TransmitersReceiversUtilization> loadPoint : ltru) {
+		for (List<TransmittersReceiversUtilization> loadPoint : ltru) {
 			int load = loadPoint.get(0).getLoadPoint();
-			HashMap<Integer, TransmitersReceiversUtilization>  reps = new HashMap<>();
+			HashMap<Integer, TransmittersReceiversUtilization>  reps = new HashMap<>();
 			trus.put(load, reps);
 			
-			for (TransmitersReceiversUtilization su : loadPoint) {
+			for (TransmittersReceiversUtilization su : loadPoint) {
 				reps.put(su.getReplication(), su);
 			}			
 		}
 		loadPoints = new ArrayList<>(trus.keySet());
 		replications = new ArrayList<>(trus.values().iterator().next().keySet());
-		
 	} 
 	
 	/**
-	 * retorna uma string correspondente ao arquivo de resultado para a fragmentacao externa
-	 * @return
+	 * Returns a string corresponding to the result file for transmitters and receivers utilization
+	 * 
+	 * @return String
 	 */
 	public String result(){
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep +"load point"+sep+"node"+sep+" ");
+		res.append("Metrics" + sep + "load point" + sep + "node" + sep + " ");
 		
-		for (Integer rep : replications) { //verifica quantas replicacoes foram feitas e cria o cabecalho de cada coluna
+		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);
 		}
 		res.append("\n");
 		
-		res.append(resultTxUtilizationGeral());
+		res.append(resultTxUtilizationGeneral());
 		res.append("\n\n");
-		res.append(resultRxUtilizationGeral());
+		res.append(resultRxUtilizationGeneral());
 		res.append("\n\n");
 		res.append(resultTxUtilizationPerNode());
 		res.append("\n\n");
@@ -66,14 +68,15 @@ public class TransmitersReceiversUtilizationResultManager {
 		return res.toString();
 	}
 	
-	
-	
-	
-	
-	private String resultTxUtilizationGeral(){
+	/**
+	 * Returns the transmitter utilization general
+	 * 
+	 * @return String
+	 */
+	private String resultTxUtilizationGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Tx Utilization "+sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
+			String aux = "Tx Utilization " + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
 			for (Integer replic : replications) {
 					aux = aux + sep + trus.get(loadPoint).get(replic).getAvgTxUtilizationGen();
 			}
@@ -82,10 +85,15 @@ public class TransmitersReceiversUtilizationResultManager {
 		return res.toString();
 	}
 	
-	private String resultRxUtilizationGeral(){
+	/**
+	 * Returns the receivers utilization general
+	 * 
+	 * @return String
+	 */
+	private String resultRxUtilizationGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Rx Utilization "+sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
+			String aux = "Rx Utilization " + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
 			for (Integer replic : replications) {
 					aux = aux + sep + trus.get(loadPoint).get(replic).getAvgRxUtilizationGen();
 			}
@@ -94,12 +102,16 @@ public class TransmitersReceiversUtilizationResultManager {
 		return res.toString();
 	}
 	
+	/**
+	 * Returns the transmitters utilization per node
+	 * 
+	 * @return String
+	 */
 	private String resultTxUtilizationPerNode(){
-		
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			
-			String aux = "Tx Utilization Per Node"+sep + loadPoint + sep; // "all"+sep+" ";
+			String aux = "Tx Utilization Per Node" + sep + loadPoint + sep; // "all"+sep+" ";
 			
 			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
@@ -113,8 +125,12 @@ public class TransmitersReceiversUtilizationResultManager {
 		return res.toString();
 	}
 	
+	/**
+	 * Returns the receivers utilization per node
+	 * 
+	 * @return String
+	 */
 	private String resultRxUtilizationPerNode(){
-		
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			
@@ -132,12 +148,16 @@ public class TransmitersReceiversUtilizationResultManager {
 		return res.toString();
 	}
 	
+	/**
+	 * Returns the maximum transmitters utilization per node
+	 * 
+	 * @return String
+	 */
 	private String resultMaxTxUtilizationPerNode(){
-		
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			
-			String aux = "Max Tx Utilization Per Node"+sep + loadPoint + sep; // "all"+sep+" ";
+			String aux = "Max Tx Utilization Per Node" + sep + loadPoint + sep; // "all"+sep+" ";
 			
 			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
@@ -151,12 +171,16 @@ public class TransmitersReceiversUtilizationResultManager {
 		return res.toString();
 	}
 	
-private String resultMaxRxUtilizationPerNode(){
-		
+	/**
+	 * Returns the maximum receivers utilization per node
+	 * 
+	 * @return String
+	 */
+    private String resultMaxRxUtilizationPerNode(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			
-			String aux = "Max Rx Utilization Per Node"+sep + loadPoint + sep; // "all"+sep+" ";
+			String aux = "Max Rx Utilization Per Node" + sep + loadPoint + sep; // "all"+sep+" ";
 			
 			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
@@ -169,6 +193,5 @@ private String resultMaxRxUtilizationPerNode(){
 		}
 		return res.toString();
 	}
-
 	
 }

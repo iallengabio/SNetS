@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * This class represents the topology of the network
+ * 
+ * @author Iallen
+ */
 public class Mesh implements Serializable {
 
     private Vector<Node> nodeList;
@@ -17,17 +22,26 @@ public class Mesh implements Serializable {
     private Vector<Pair> pairList;
     private int guarBand;
 
+    /**
+     * Creates a new instance of Mesh.
+     * 
+     * @param nc NetworkConfig
+     * @param tc TrafficConfig
+     */
     public Mesh(NetworkConfig nc, TrafficConfig tc) {
         this.guarBand = nc.getGuardBand();
         RandGenerator randGenerator = new RandGenerator();
         HashMap<String, Node> nodesAux = new HashMap<>();
+        
+        // Create nodes
         this.nodeList = new Vector<>();
         for (NetworkConfig.NodeConfig nodeConf : nc.getNodes()) {
-            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmiters(), nodeConf.getReceivers());
+            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmitters(), nodeConf.getReceivers());
             this.nodeList.add(aux);
             nodesAux.put(aux.getName(), aux);
         }
 
+        // Create links
         this.linkList = new Vector<>();
         for (NetworkConfig.LinkConfig linkConf : nc.getLinks()) {
             Link lAux = new Link(nodesAux.get(linkConf.getSource()).getOxc(), nodesAux.get(linkConf.getDestination()).getOxc(), linkConf.getSlots(), linkConf.getSpectrum(), linkConf.getSize());
@@ -35,7 +49,7 @@ public class Mesh implements Serializable {
             nodesAux.get(linkConf.getSource()).getOxc().addLink(lAux);
         }
 
-        //criar os pares
+        // Create the pairs
         this.pairList = new Vector<>();
         HashMap<String, HashMap<String, Pair>> pairsAux = new HashMap<>();
         for (Node src : this.nodeList) {
@@ -49,61 +63,50 @@ public class Mesh implements Serializable {
             }
         }
 
-        //adicionar os geradores de requisição nos pares
+        // Add request generators in pairs
         for (TrafficConfig.RequestGeneratorConfig rgc : tc.getRequestGenerators()) {
             Pair p = pairsAux.get(rgc.getSource()).get(rgc.getDestination());
             p.addRequestGenerator(new RequestGenerator(p, rgc.getBandwidth(), rgc.getHoldRate(), rgc.getArrivalRate(), rgc.getArrivalRateIncrease(), randGenerator));
         }
-
-
     }
 
-
+    /**
+     * Returns a link to a given pair of source and destination nodes
+     * 
+     * @param source String
+     * @param destination String
+     * @return Link
+     */
     public Link getLink(String source, String destination) {
         for (int i = 0; i < linkList.size(); i++) {
             if ((linkList.get(i).getSource().getName() == source) &&
                     (linkList.get(i).getDestination().getName() == destination)) {
                 return linkList.get(i);
             }
-
         }
         return null;
     }
 
     /**
-     * retorna um Vector com todos os enlaces.
+     * Returns a Vector with all the links.
      *
-     * @return Vector
+     * @return Vector<Link>
      */
     public Vector<Link> getLinkList() {
         return linkList;
     }
-
-    /**
-     * computa todos os enlaces e armazena os enlaces em linkList.
-     */
-    private void coumputeAllLinks() {
-        linkList = new Vector<Link>();
-        for (int i = 0; i < nodeList.size(); i++) {
-            linkList.addAll(nodeList.get(i).getOxc().getLinksList());
-        }
-    }
-
-
+    
     /**
      * Getter for property nodeList.
      *
-     * @return Vector with nodes.
+     * @return Vector<Node> Vector with nodes.
      */
     public Vector<Node> getNodeList() {
         return nodeList;
     }
 
-
-    //------------------------------------------------------------------------------
-
     /**
-     * Localiza um Node em função do nome.
+     * Find a Node based on the name
      *
      * @param name String
      * @return Node
@@ -118,31 +121,34 @@ public class Mesh implements Serializable {
         return null;
     }
 
-
     /**
-     * retorna os nós atingíveis a partir de um determinado nó
+     * Returns the reachable nodes from a given node
      *
-     * @param n
-     * @return
+     * @param n Node
+     * @return List<Node>
      */
     public List<Node> getAdjacents(Node n) {
         List<Node> res = new ArrayList<>();
         for (Oxc o : n.getOxc().getAllAdjacents()) {
             res.add(searchNode(o.getName()));
         }
-
         return res;
     }
-
-
+    
     /**
-     * @return the pairList
+     * Return the list of source and destination node pairs
+     * 
+     * @return Vector<Pair> the pairList
      */
     public Vector<Pair> getPairList() {
         return pairList;
     }
 
-
+    /**
+     * Returns the guard band
+     * 
+     * @return int 
+     */
     public int getGuardBand() {
         return this.guarBand;
     }

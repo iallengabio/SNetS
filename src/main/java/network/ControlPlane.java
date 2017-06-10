@@ -9,61 +9,51 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Classe que representa o plano de controle.
- * Esta classe deverï¿½ fazer as chamadas para os algoritmos RSA, armazenar rotas
- * em caso de roteamento fixo, prover informaï¿½ï¿½es a respeito do estado da rede, etc
+ * Class that represents the control plane.
+ * This class should make calls to RSA algorithms, store routes in case of fixed routing, 
+ * provide information about the state of the network, etc.
  *
  * @author Iallen
  */
 public class ControlPlane {
-
-    //private static ControlPlane singleton;
-
+	
     private Mesh mesh;
 
     private GRMLSA grmlsa;
 
     /**
-     * a primeira chave representa o nó de origem.
-     * a segunda chave representa o nó de destino.
+     * The first key represents the source node.
+     * The second key represents the destination node.
      */
-    private HashMap<String, HashMap<String, List<Circuit>>> circuitosAtivos;
-
-    public ControlPlane() {
-        circuitosAtivos = new HashMap<>();
-    }
-
-	/*
-	/**
-	 *
-	 * mï¿½todo para acessar a ï¿½nica instï¿½ncia de ControlPlane existente (padrï¿½o singleton)
-	 * @return
-	 *
-	public static ControlPlane getControlPlane(){
-		if(singleton==null) singleton = new ControlPlane();
-		
-		return singleton;
-	}
-	*/
-
+    private HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
 
     /**
+     * Instance the control plane with the list of active circuits in empty
+     */
+    public ControlPlane() {
+        activeCircuits = new HashMap<>();
+    }
+
+    /**
+     * Configures the network mesh
+     * 
      * @param mesh the mesh to set
      */
     public void setMesh(Mesh mesh) {
         this.mesh = mesh;
-        //inicializar a lista de circuitos ativos
+        // Initialize the active circuit list
         for (Node node1 : mesh.getNodeList()) {
             HashMap<String, List<Circuit>> hmAux = new HashMap<>();
             for (Node node2 : mesh.getNodeList()) {
                 hmAux.put(node2.getName(), new ArrayList<Circuit>());
             }
-            circuitosAtivos.put(node1.getName(), hmAux);
+            activeCircuits.put(node1.getName(), hmAux);
         }
     }
 
-
     /**
+     * Returns the network mesh
+     * 
      * @return the mesh
      */
     public Mesh getMesh() {
@@ -71,179 +61,197 @@ public class ControlPlane {
     }
 
     /**
+     * Configures the GRMLSA
+     * 
      * @param grmlsa the rsa to set
      */
-    public void setRsa(GRMLSA grmlsa) {
+    public void setGrmlsa(GRMLSA grmlsa) {
         this.grmlsa = grmlsa;
     }
-
-
+    
     /**
-     * Este mï¿½todo tenta atender uma determinada requisiï¿½ï¿½o
-     * alocando recursos caso disponï¿½vel e estabelecer o circuito
+     * This method tries to satisfy a certain request by checking if there are available resources 
+     * for the establishment of the circuit
      *
-     * @return
+     * @param rfc RequestForConnection
+     * @return boolean
      */
-    public boolean atenderRequisicao(RequestForConnection rfc) {
-
-        return this.grmlsa.atenderRequisicao(rfc);
-
-    }
-
-    public void finalizarConexao(RequestForConnection rfc) {
-        this.grmlsa.finalizarConexao(rfc);
+    public boolean handleRequisition(RequestForConnection rfc) {
+        return this.grmlsa.handleRequisition(rfc);
     }
 
     /**
-     * libera os recursos que estï¿½o sendo utilizados por um determinado circuito
+     * This method ends a connection
+     * 
+     * @param rfc RequestForConnection
+     */
+    public void finalizeConnection(RequestForConnection rfc) {
+        this.grmlsa.finalizeConnection(rfc);
+    }
+
+    /**
+     * Releases the resources being used by a given circuit
      *
      * @param circuit
      */
-    public void desalocarCircuito(Circuit circuit) {
+    public void releaseCircuit(Circuit circuit) {
         Route r = circuit.getRoute();
 
-        liberarEspectro(circuit.getSpectrumAssigned(), r.getLinkList());
+        releaseSpectrum(circuit.getSpectrumAssigned(), r.getLinkList());
 
-        //liberar tx e rx
+        // Release Tx and Rx
         circuit.getSource().getTxs().freeTx();
         circuit.getDestination().getRxs().freeRx();
 
-        circuitosAtivos.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
-
+        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
     }
 
     /**
-     * Este metodo eh chamado apos a execucao dos algoritmos RSA para fazer a alocacao de recursos na rede
+     * This method is called after executing RSA algorithms to allocate resources in the network
      *
-     * @param request
+     * @param circuit Circuit
      */
-    private void allocarEspectro(Circuit request) {
-        Route route = request.getRoute();
+    private void allocateCircuit(Circuit circuit) {
+        Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[] = request.getSpectrumAssigned();
-        alocarEspectro(chosen, links);
+        int chosen[] = circuit.getSpectrumAssigned();
+        
+        allocateSpectrum(chosen, links);
     }
 
-    private boolean alocarEspectro(int chosen[], List<Link> links) {
+    /**
+     * This method allocates the spectrum band selected for the circuit in the route links
+     * 
+     * @param chosen int[]
+     * @param links List<Link>
+     * @return boolean
+     */
+    private boolean allocateSpectrum(int chosen[], List<Link> links) {
         boolean notAbleAnymore = false;
         Link l;
         int i;
+        
         for (i = 0; i < links.size(); i++) {
             l = links.get(i);
             notAbleAnymore = !l.useSpectrum(chosen);
-            if (notAbleAnymore) break; //algum recurso nï¿½o estava mais disponï¿½vel,cancelar a alocaï¿½ï¿½o
+            if (notAbleAnymore) break; // Some resource was no longer available, cancel the allocation
         }
-
 
         return notAbleAnymore;
     }
 
-    private void liberarEspectro(int chosen[], List<Link> links) {
-        //liberar espectro
+    /**
+     * This method releases the allocated spectrum for the circuit
+     * 
+     * @param chosen int[]
+     * @param links List<Link>
+     */
+    private void releaseSpectrum(int chosen[], List<Link> links) {
+        // Release spectrum
         for (Link link : links) {
-            link.liberateSpectrum(chosen);
+            link.freeSpectrum(chosen);
         }
     }
-
-
+    
     /**
-     * Este método tenta alocar um novo circuito na rede
+     * This method tries to establish a new circuit in the network
      *
-     * @param circuit
-     * @return true caso o circuito tenha sido alocado com sucesso, false se o circuito não puder ser alocado.
+     * @param circuit Circuit
+     * @return true if the circuit has been successfully allocated, false if the circuit can not be allocated.
      */
-    public boolean allocarCircuito(Circuit circuit) {
+    public boolean establishCircuit(Circuit circuit) {
 
-        if (circuit.getSource().getTxs().alocTx()) {//conseguir alocar transmitter
-            if (circuit.getDestination().getRxs().alocRx()) {//cconseguir alocar receiver
-                if (this.grmlsa.criarNovoCircuito(circuit)) { //conseguir alocar espectro
+        if (circuit.getSource().getTxs().allocateTx()) {// Can allocate transmitter
+            if (circuit.getDestination().getRxs().allocateRx()) {// Can allocate receiver
+                if (this.grmlsa.createNewCircuit(circuit)) { // Can allocate spectrum
 
-                    //colocar a verificacao de QoT aqui
+                	// QoT verification
 
-                    this.allocarEspectro(circuit);
-                    circuitosAtivos.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
+                    this.allocateCircuit(circuit);
+                    activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
 
                     return true;
-                } else {//liberar transmiter e receiver
+                    
+                } else {// Release transmitter e receiver
                     circuit.getSource().getTxs().freeTx();
                     circuit.getDestination().getRxs().freeRx();
                 }
-            } else {//liberar transmitter
+            } else {// Release transmitter
                 circuit.getSource().getTxs().freeTx();
             }
         }
 
         return false;
-
     }
 
-
     /**
-     * aumentar a quantidade de slots usados por um determinado circuito
+     * Increase the number of slots used by a given circuit
      *
-     * @param circuit
-     * @param faixaSup
-     * @param faixaInf
-     * @return
+     * @param circuit Circuit
+     * @param upperBand int[]
+     * @param bottomBand int[]
+     * @return boolean
      */
-    public boolean expandirCircuito(Circuit circuit, int faixaSup[], int faixaInf[]) {
+    public boolean expandCircuit(Circuit circuit, int upperBand[], int bottomBand[]) {
 
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int chosen[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
-        if (faixaSup != null) {
-            chosen = faixaSup;
-            alocarEspectro(chosen, links);
-            specAssigAt[1] = faixaSup[1];
+        
+        if (upperBand != null) {
+            chosen = upperBand;
+            allocateSpectrum(chosen, links);
+            specAssigAt[1] = upperBand[1];
         }
-        if (faixaInf != null) {
-            chosen = faixaInf;
-            alocarEspectro(chosen, links);
-            specAssigAt[0] = faixaInf[0];
+        
+        if (bottomBand != null) {
+            chosen = bottomBand;
+            allocateSpectrum(chosen, links);
+            specAssigAt[0] = bottomBand[0];
         }
         circuit.setSpectrumAssigned(specAssigAt);
-
 
         return true;
     }
 
     /**
-     * reduz a quantidade de slots usados por um determinado circuito
+     * Reduces the number of slots used by a given circuit
      *
-     * @param circuit
-     * @param faixaInf
-     * @param faixaSup
-     * @return
+     * @param circuit Circuit
+     * @param bottomBand int[]
+     * @param upperBand int[]
      */
-    public void retrairCircuito(Circuit circuit, int faixaInf[], int faixaSup[]) {
+    public void retractCircuit(Circuit circuit, int bottomBand[], int upperBand[]) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int chosen[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
-        if (faixaInf != null) {
-            chosen = faixaInf;
-            liberarEspectro(chosen, links);
-            specAssigAt[0] = faixaInf[1] + 1;
+        
+        if (bottomBand != null) {
+            chosen = bottomBand;
+            releaseSpectrum(chosen, links);
+            specAssigAt[0] = bottomBand[1] + 1;
         }
-        if (faixaSup != null) {
-            chosen = faixaSup;
-            liberarEspectro(chosen, links);
-            specAssigAt[1] = faixaSup[0] - 1;
+        
+        if (upperBand != null) {
+            chosen = upperBand;
+            releaseSpectrum(chosen, links);
+            specAssigAt[1] = upperBand[0] - 1;
         }
+        
         circuit.setSpectrumAssigned(specAssigAt);
     }
 
     /**
-     * buscar circuitos ativos na rede com origem e destino especificados
+     * To find active circuits on the network with specified source and destination
      *
-     * @param origem
-     * @param destino
-     * @return
+     * @param source String
+     * @param destination String
+     * @return List<Circuit>
      */
-    public List<Circuit> procurarCircuitosAtivos(String origem, String destino) {
-        return this.circuitosAtivos.get(origem).get(destino);
+    public List<Circuit> searchForActiveCircuits(String source, String destination) {
+        return this.activeCircuits.get(source).get(destination);
     }
-
 
 }

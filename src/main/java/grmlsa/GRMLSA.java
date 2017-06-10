@@ -15,32 +15,34 @@ import network.ControlPlane;
 import request.RequestForConnection;
 
 /**
- * Esta classe devera ser responsavel por executar os algoritmos de RSA, verificando se o algoritmo selecionado eh do tipo
- * integrado ou sequencial, apos acionar o/os algoritmo/s necessarios para alocar o recurso para a requisicao
+ * This class should be responsible for running the RSA algorithms, verifying whether the selected 
+ * algorithm is of the integrated or sequential type, after activating the algorithm (s) necessary 
+ * to allocate the resource to the request
  *
  * @author Iallen
  */
 public class GRMLSA {
-    //Constantes que indicam que tipo são os algoritmos RSA (sequenciais ou integrados)
+	
+	// Constants that indicate which type are the RSA algorithms (sequential or integrated)
     public static final int RSA_SEQUENCIAL = 0;
     public static final int RSA_INTEGRATED = 1;
 
-    //Constantes para indicação dos algoritmos RSA
-    //Agregação óptica de tráfego
+    // Constants for indication of RSA algorithms
+    // Optical traffic aggregation
     public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
 
-    //Roteamento
+    // Routing
     public static final String ROUTING_DJK = "djk";
     public static final String ROUTING_FIXEDROUTES = "fixedroutes";
 
-    //Alocação de espectro
+    // Spectrum assignment
     public static final String SPECTRUM_ASSIGNMENT_FISTFIT = "firstfit";
     public static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
     public static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
     public static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
 
-    //Integrados
+    // Integrados
     public static final String INTEGRATED_COMPLETESHARING = "completesharing";
     public static final String INTEGRATED_PSEUDOPARTITION = "pseudopartition";
     public static final String INTEGRATED_DEDICATEDPARTITION = "dedicatedpartition";
@@ -48,7 +50,7 @@ public class GRMLSA {
     public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
 
-    //fim das constantes
+    // End of constants
 
     private int rsaType;
     private RoutingInterface routing;
@@ -58,6 +60,14 @@ public class GRMLSA {
     private TrafficGroomingAlgorithm grooming;
     private ControlPlane controlPlane;
 
+    /**
+     * Constructor for integrated RSA algorithms
+     * 
+     * @param integrated String
+     * @param slotFrequency double
+     * @param controlPlane ControlPlane
+     * @throws Exception
+     */
     public GRMLSA(String integrated, double slotFrequency, ControlPlane controlPlane) throws Exception {
         this.rsaType = 1;
         instantiateIntegratedRSA(integrated);
@@ -66,6 +76,15 @@ public class GRMLSA {
         this.controlPlane = controlPlane;
     }
 
+    /**
+     * Constructor for sequential RSA algorithms
+     * 
+     * @param routingType String
+     * @param spectrumAssignmentType String
+     * @param spectrumBand double
+     * @param controlPlane ControlPlane
+     * @throws Exception
+     */
     public GRMLSA(String routingType, String spectrumAssignmentType, double spectrumBand, ControlPlane controlPlane) throws Exception {
         this.rsaType = 0;
         instantiateRouting(routingType);
@@ -76,9 +95,9 @@ public class GRMLSA {
     }
 
     /**
-     * instancia o algoritmo de agregação óptica de tráfego
+     * Instance the optical traffic aggregation algorithm
      *
-     * @param groomingAlgo
+     * @param groomingAlgo String
      */
     private void instantiateGrooming(String groomingAlgo) {
         switch (groomingAlgo) {
@@ -92,9 +111,9 @@ public class GRMLSA {
     }
 
     /**
-     * instancia o algoritmo de roteamento
+     * Instance the routing algorithm
      *
-     * @param routingType
+     * @param routingType String
      * @throws Exception
      */
     private void instantiateRouting(String routingType) throws Exception {
@@ -112,9 +131,9 @@ public class GRMLSA {
     }
 
     /**
-     * instancia o algoritmo de alocação de espectro
+     * Instance the spectrum assignment algorithm
      *
-     * @param spectrumAssignmentType
+     * @param spectrumAssignmentType String
      * @throws Exception
      */
     private void instantiateSpectrumAssignment(String spectrumAssignmentType) throws Exception {
@@ -139,9 +158,9 @@ public class GRMLSA {
     }
 
     /**
-     * instancia o algoritmo de RSA integrado
+     * Instance the integrated RSA algorithm
      *
-     * @param integratedRSAType
+     * @param integratedRSAType String
      * @throws Exception
      */
     private void instantiateIntegratedRSA(String integratedRSAType) throws Exception {
@@ -171,21 +190,21 @@ public class GRMLSA {
     }
 
     /**
-     * Este método tenta atender uma determinada requisição alocando os devidos recursos para a mesma
+     * This method tries to answer a given request by allocating the necessary resources to the same one
      *
-     * @param request
-     * @return
+     * @param circuit Circuit
+     * @return boolean
      */
-    public boolean criarNovoCircuito(Circuit request) {
+    public boolean createNewCircuit(Circuit circuit) {
 
         switch (rsaType) {
             case RSA_INTEGRATED:
-                return integrated.rsa(request, controlPlane.getMesh());
+                return integrated.rsa(circuit, controlPlane.getMesh());
             case RSA_SEQUENCIAL:
-                if (routing.findRoute(request, this.controlPlane.getMesh())) {
-                    Modulation mod = modulationSelector.selectModulation(request);
-                    request.setModulation(mod);
-                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(request.getRequiredBandwidth()), request);
+                if (routing.findRoute(circuit, this.controlPlane.getMesh())) {
+                    Modulation mod = modulationSelector.selectModulation(circuit);
+                    circuit.setModulation(mod);
+                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
                 } else {
                     return false;
                 }
@@ -194,14 +213,30 @@ public class GRMLSA {
         return false;
     }
 
-    public boolean atenderRequisicao(RequestForConnection rfc) {
+    /**
+     * This method verifies the possibility of satisfying a circuit request
+     * 
+     * @param rfc RequestForConnection
+     * @return boolean
+     */
+    public boolean handleRequisition(RequestForConnection rfc) {
         return grooming.searchCircuitsForGrooming(rfc, this);
     }
 
-    public void finalizarConexao(RequestForConnection rfc) {
+    /**
+     * This method ends a connection
+     * 
+     * @param rfc RequestForConnection
+     */
+    public void finalizeConnection(RequestForConnection rfc) {
         this.grooming.finishConnection(rfc, this);
     }
 
+    /**
+     * This method returns the control plane
+     * 
+     * @return ControlPlane
+     */
     public ControlPlane getControlPlane() {
         return controlPlane;
     }

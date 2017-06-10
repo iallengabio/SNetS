@@ -3,7 +3,11 @@ package network;
 import java.io.Serializable;
 import java.util.Vector;
 
-
+/**
+ * This class represents a network topology node
+ * 
+ * @author Iallen
+ */
 public class Node implements Serializable {
 
     private String name;
@@ -30,6 +34,13 @@ public class Node implements Serializable {
         this.numberReqGenerated = 0;
     }
 
+    /**
+     * Creates a new instance of Node
+     * 
+     * @param name String
+     * @param numTx int
+     * @param numRx int
+     */
     public Node(String name, int numTx, int numRx) {
         this.name = name;
         this.oxc = new Oxc(name);
@@ -39,6 +50,11 @@ public class Node implements Serializable {
         this.numberReqGenerated = 0;
     }
 
+    /**
+     * Checks whether a given node is equal to this node
+     * 
+     * @param o Object
+     */
     public boolean equals(Object o) {
         if (o instanceof Node) {
             if (name.equals(((Node) o).getName())) {
@@ -47,9 +63,6 @@ public class Node implements Serializable {
         }
         return false;
     }
-
-
-//------------------------------------------------------------------------------
 
     /**
      * Getter for property oxc
@@ -60,8 +73,6 @@ public class Node implements Serializable {
         return this.oxc;
     }
 
-//------------------------------------------------------------------------------
-
     /**
      * Getter for property name
      *
@@ -71,10 +82,8 @@ public class Node implements Serializable {
         return name;
     }
 
-//------------------------------------------------------------------------------
-
     /**
-     * Retorna o privilegio do nó
+     * Returns the weight of the node
      *
      * @return int
      */
@@ -82,25 +91,17 @@ public class Node implements Serializable {
         return this.trafficWeigth;
     }
 
-    //------------------------------------------------------------------------------
-
-
-    //------------------------------------------------------------------------------
-
     /**
-     * Retorna os pares cuja origem e este no.
+     * Returns the pairs whose origin is this node.
      *
-     * @return Vector
+     * @return Vector<Pair>
      */
     public Vector<Pair> getPairs() {
         return pairs;
     }
 
-
-    //------------------------------------------------------------------------------
-
     /**
-     * Retorna o banco de transmissores deste No
+     * Returns the bank of transmitters of this node
      *
      * @return Transmitters
      */
@@ -108,10 +109,8 @@ public class Node implements Serializable {
         return txs;
     }
 
-    //------------------------------------------------------------------------------
-
     /**
-     * Retorna o banco de Receptores deste No
+     * Returns the bank of receivers of this node
      *
      * @return Receivers
      */
@@ -119,10 +118,8 @@ public class Node implements Serializable {
         return rxs;
     }
 
-    //------------------------------------------------------------------------------
-
     /**
-     * Retorna o numero de requisicoes geradas com origem neste No
+     * Returns the number of requests generated with this node
      *
      * @return double
      */
@@ -130,10 +127,8 @@ public class Node implements Serializable {
         return numberReqGenerated;
     }
 
-    //------------------------------------------------------------------------------
-
     /**
-     * Retorna a distancia para deste no para o No Central do Plano de Controle
+     * Returns the distance from this node to the Central Node of the Control Plane
      *
      * @return double
      */
@@ -141,10 +136,8 @@ public class Node implements Serializable {
         return distanceToCentralNodeControlPlane;
     }
 
-    //------------------------------------------------------------------------------
-
     /**
-     * configura o peso do nó
+     * Sets the weight of the node
      *
      * @param weigth int
      */
@@ -152,40 +145,30 @@ public class Node implements Serializable {
         this.trafficWeigth = weigth;
     }
 
-
-    //------------------------------------------------------------------------------
-
     /**
-     * Configura os pares cuja origem e este no
+     * Configures the pairs whose origin and this node
      *
-     * @param pairs Vector
+     * @param pairs Vector<Pair>
      */
     public void setPairs(Vector<Pair> pairs) {
         this.pairs = pairs;
     }
 
-
-    //------------------------------------------------------------------------------
-
     /**
-     * Configura a distancia para deste no para o No Central do Plano de Controle
+     * Configures the distance from this node to the Central Node of the Control Plane
      *
      * @param distanceToCentralNodeControlPlane double
      */
     public void setDistanceToCentralNodeControlPlane(double distanceToCentralNodeControlPlane) {
         this.distanceToCentralNodeControlPlane = distanceToCentralNodeControlPlane;
-
     }
 
-    //------------------------------------------------------------------------------
-
     /**
-     * Incrementa o numero de requisicoes geradas com origem neste No
+     * Increases the number of requests generated with this node
      */
     public void incNumberReqGenerated() {
         this.numberReqGenerated++;
     }
-
 
     /**
      * finish
@@ -196,13 +179,12 @@ public class Node implements Serializable {
         // this.reqQueue.finish(timeHours);
     }
 
-    //restart
+    /**
+     * restart
+     */
     public void reStart() {
-
         this.txs.reStart();
         this.rxs.reStart();
-
-
     }
 
 }

@@ -20,12 +20,12 @@ public class NoTrafficGrooming implements TrafficGroomingAlgorithm {
 		circuit.addRequest(rfc);
 		rfc.setCircuit(circuit);
 		
-		return grmlsa.getControlPlane().allocarCircuito(circuit);
+		return grmlsa.getControlPlane().establishCircuit(circuit);
 	}
 
 	@Override
 	public void finishConnection(RequestForConnection rfc, GRMLSA grmlsa) {
-		grmlsa.getControlPlane().desalocarCircuito(rfc.getCircuit());
+		grmlsa.getControlPlane().releaseCircuit(rfc.getCircuit());
 	}
 	
 	

@@ -6,7 +6,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * This class represents a pair of source (s) and destination (d) nodes
+ * 
+ * @author Iallen
+ */
 public class Pair implements Serializable {
 
     private Node source;
@@ -24,12 +28,9 @@ public class Pair implements Serializable {
         this.destination = d;
         requestGenerators = new ArrayList<RequestGenerator>();
     }
-
-
-    //----------------------------------------------------------------------------
-
+    
     /**
-     * retorna o source
+     * Returns the source node
      *
      * @return Node
      */
@@ -37,11 +38,8 @@ public class Pair implements Serializable {
         return this.source;
     }
 
-
-//----------------------------------------------------------------------------
-
     /**
-     * retorna o destino
+     * Returns the destination node
      *
      * @return Node
      */
@@ -49,11 +47,8 @@ public class Pair implements Serializable {
         return this.destination;
     }
 
-
-    //----------------------------------------------------------------------------
-
     /**
-     * Retorna o nome do par
+     * Returns the name of the pair (s, d)
      *
      * @return String
      */
@@ -61,24 +56,19 @@ public class Pair implements Serializable {
         return "(" + this.source.getName() + "," + this.destination.getName() + ")";
     }
 
-
-    //----------------------------------------------------------------------------
-
     /**
-     * Retorna o nome deste par:(o,d).
-     *
-     * @return Object
+     * Returns the pair name
+     * 
+     * @return String
      */
     public String getName() {
-        return ("(" + this.source.getName() + "," + this.destination.getName() +
-                ")");
+        return ("(" + this.source.getName() + "," + this.destination.getName() + ")");
     }
-
-
+    
     /**
-     * adiciona um gerador de requisiçõe ao par
+     * Add a request generator to the pair
      *
-     * @param rg
+     * @param rg RequestGenerator
      */
     public void addRequestGenerator(RequestGenerator rg) {
         requestGenerators.add(rg);
@@ -86,16 +76,22 @@ public class Pair implements Serializable {
     }
 
     /**
-     * @return the requestGenerators
+     * Returns the request generators
+     * 
+     * @return List<RequestGenerator> the requestGenerators
      */
     public List<RequestGenerator> getRequestGenerators() {
         return requestGenerators;
     }
 
+    /**
+     * Checks whether a given pair is equal to this pair
+     * 
+     * @param o Object
+     */
     @Override
     public boolean equals(Object o) {
         try {
-            System.out.println("ei");
             Pair p = (Pair) o;
             return (this.getSource().equals(p.source) && this.getDestination().equals(p.getDestination()));
 
@@ -103,6 +99,5 @@ public class Pair implements Serializable {
             return false;
         }
     }
-
 
 }

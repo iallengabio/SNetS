@@ -151,9 +151,9 @@ public class SimulationManagement {
 
     public String getBlockingProbabilityCsv(){
         // Circuit blocking probability
-        List<List<ProbabilidadeDeBloqueio>> pbs = new ArrayList<>();
+        List<List<BlockingProbability>> pbs = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<ProbabilidadeDeBloqueio> lpb = new ArrayList<>();
+            List<BlockingProbability> lpb = new ArrayList<>();
             pbs.add(lpb);
             for (Measurements measurements : listMeas) {
                 lpb.add(measurements.getProbabilidadeDeBloqueioMeasurement());
@@ -167,9 +167,9 @@ public class SimulationManagement {
 
     public String getBandwidthBlockingProbabilityCsv(){
         // Bandwidth blocking probability
-        List<List<ProbabilidadeDeBloqueioDeBanda>> pbbs = new ArrayList<>();
+        List<List<BandwidthBlockingProbability>> pbbs = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<ProbabilidadeDeBloqueioDeBanda> lpbb = new ArrayList<>();
+            List<BandwidthBlockingProbability> lpbb = new ArrayList<>();
             pbbs.add(lpbb);
             for (Measurements measurements : listMeas) {
                 lpbb.add(measurements.getProbabilidadeDeBloqueioDeBandaMeasurement());
@@ -182,9 +182,9 @@ public class SimulationManagement {
 
     public String getExternalFragmentationCsv(){
         // External fragmentation
-        List<List<FragmentacaoExterna>> llfe = new ArrayList<>();
+        List<List<ExternalFragmentation>> llfe = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<FragmentacaoExterna> lfe = new ArrayList<>();
+            List<ExternalFragmentation> lfe = new ArrayList<>();
             llfe.add(lfe);
             for (Measurements measurements : listMeas) {
                 lfe.add(measurements.getFragmentacaoExterna());
@@ -196,9 +196,9 @@ public class SimulationManagement {
 
     public String getRelativeFragmentationCsv(){
     	// Relative fragmentation
-        List<List<FragmentacaoRelativa>> llfr = new ArrayList<>();
+        List<List<RelativeFragmentation>> llfr = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<FragmentacaoRelativa> lfr = new ArrayList<>();
+            List<RelativeFragmentation> lfr = new ArrayList<>();
             llfr.add(lfr);
             for (Measurements measurements : listMeas) {
                 lfr.add(measurements.getFragmentacaoRelativa());
@@ -211,9 +211,9 @@ public class SimulationManagement {
 
     public String getSpectrumUtilizationCsv(){
         // Spectrum utilization
-        List<List<UtilizacaoSpectro>> llus = new ArrayList<>();
+        List<List<SpectrumUtilization>> llus = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<UtilizacaoSpectro> lus = new ArrayList<>();
+            List<SpectrumUtilization> lus = new ArrayList<>();
             llus.add(lus);
             for (Measurements measurements : listMeas) {
                 lus.add(measurements.getUtilizacaoSpectro());
@@ -240,15 +240,15 @@ public class SimulationManagement {
 
     public String getTransceiversUtilizationCsv(){
         // Transmitters and receivers utilization
-        List<List<TransmitersReceiversUtilization>> lltru = new ArrayList<>();
+        List<List<TransmittersReceiversUtilization>> lltru = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<TransmitersReceiversUtilization> ltru = new ArrayList<>();
+            List<TransmittersReceiversUtilization> ltru = new ArrayList<>();
             lltru.add(ltru);
             for (Measurements measurements : listMeas) {
                 ltru.add(measurements.getTransmitersReceiversUtilization());
             }
         }
-        TransmitersReceiversUtilizationResultManager trurm = new TransmitersReceiversUtilizationResultManager(lltru);
+        TransmittersReceiversUtilizationResultManager trurm = new TransmittersReceiversUtilizationResultManager(lltru);
         return trurm.result();
     }
 
