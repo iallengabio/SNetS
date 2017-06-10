@@ -1,9 +1,6 @@
 package grmlsa.spectrumAssignment;
 
-import java.util.List;
-
 import network.Circuit;
-import network.Link;
 
 
 /**

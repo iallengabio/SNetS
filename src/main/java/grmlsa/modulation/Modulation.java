@@ -1,10 +1,18 @@
 package grmlsa.modulation;
 
+import network.ControlPlane;
+import network.Mesh;
+import network.PhysicalLayer;
+
+/**
+ * This class represents the modulation formats.
+ * 
+ * @author Iallen
+ */
 public class Modulation {
 
     private final int guardBand;
     private String name;
-
     private double bitsPerSymbol;
     /*
      * max range in Km
@@ -17,13 +25,19 @@ public class Modulation {
 	public double k2;
 	public double M; //quantidade de simbolos do formato de modulacao
 
+	private Mesh mesh;
 
-    public Modulation(String name, double bitsPerSymbol, double freqSlot, double maxRange, int guardBand) {
+    public Modulation(String name, double bitsPerSymbol, double freqSlot, double maxRange, int guardBand, double level, double k2, double M, Mesh mesh) {
         this.name = name;
         this.bitsPerSymbol = bitsPerSymbol;
         this.maxRange = maxRange;
         this.freqSlot = freqSlot;
         this.guardBand = guardBand;
+        this.level = level;
+        this.k2 = k2;
+        this.M = M;
+        
+        this.mesh = mesh;
     }
 
     /**
@@ -46,6 +60,18 @@ public class Modulation {
     public double getMaxRange() {
         return maxRange;
     }
+    
+    public int requiredSlots(double bandwidth){
+		int res = 1;
+		
+		if (mesh.getPhysicalLayer().isActiveQoT()) {
+			res = requiredSlotsByQoT(bandwidth);
+		} else {
+			res = requiredSlots1(bandwidth);
+		}
+		
+		return res;
+	}
 
     /**
      * retorna a quantidade de slots necess�rios de acordo com a largura de banda
@@ -54,7 +80,7 @@ public class Modulation {
      * @param bandwidth
      * @return
      */
-    public int requiredSlots(double bandwidth) {
+    public int requiredSlots1(double bandwidth) {
         //System.out.println("C = " + bandwidth + "    bm = " + this.bitsPerSimbol + "     fslot = " + this.freqSlot);
 
         double res = bandwidth / (this.bitsPerSymbol * this.freqSlot);
@@ -71,6 +97,27 @@ public class Modulation {
 
         return res2;
     }
+    
+    /**
+	 * Baseado no artigo: Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
+	 * @param bandwidth
+	 * @return int
+	 */
+	public int requiredSlotsByQoT(double bandwidth){
+		double F = mesh.getPhysicalLayer().getFEC();
+		double Bn = bandwidth; //(bandwidth / 1073741824.0) * 1.0E+9;
+		double Bs = (1.1 * Bn * (1 + F)) / (2 * PhysicalLayer.log2(this.level)); //single channel bandwidth, Hz
+		double deltaG = 2.0 * mesh.getPhysicalLayer().getGuardBand(); //guard band between adjacent spectrum (Obs.: uma bande guarda para cada ponta da largura de banda requisitada)
+		double deltaB = Bs + deltaG; //channel spacing
+		
+		double res = deltaB / this.freqSlot;
+		int res2 = (int)res;
+		if(res - res2 != 0.0){
+			res2++;
+		}
+		
+		return res2;
+	}
 
 	/**
 	 * @return the level
@@ -114,7 +161,4 @@ public class Modulation {
 		M = m;
 	}
     
-    
-    
-
 }

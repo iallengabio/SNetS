@@ -71,7 +71,7 @@ public class GRMLSA {
     public GRMLSA(String integrated, double slotFrequency, ControlPlane controlPlane) throws Exception {
         this.rsaType = 1;
         instantiateIntegratedRSA(integrated);
-        modulationSelector = new ModulationSelector(slotFrequency, controlPlane.getMesh().getGuardBand());
+        modulationSelector = new ModulationSelector(slotFrequency, controlPlane.getMesh().getGuardBand(), controlPlane);
         instantiateGrooming("notrafficgrooming");
         this.controlPlane = controlPlane;
     }
@@ -89,7 +89,7 @@ public class GRMLSA {
         this.rsaType = 0;
         instantiateRouting(routingType);
         instantiateSpectrumAssignment(spectrumAssignmentType);
-        modulationSelector = new ModulationSelector(spectrumBand, controlPlane.getMesh().getGuardBand());
+        modulationSelector = new ModulationSelector(spectrumBand, controlPlane.getMesh().getGuardBand(), controlPlane);
         instantiateGrooming("notrafficgrooming");
         this.controlPlane = controlPlane;
     }
@@ -200,6 +200,7 @@ public class GRMLSA {
         switch (rsaType) {
             case RSA_INTEGRATED:
                 return integrated.rsa(circuit, controlPlane.getMesh());
+                
             case RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.controlPlane.getMesh())) {
                     Modulation mod = modulationSelector.selectModulation(circuit);

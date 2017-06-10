@@ -195,7 +195,7 @@ public class PhysicalLayer {
 		double Pase = 0.0;
 		double Pnli = 0.0;
 		
-		int quantSlotsRequeridos = modulation.requiredSlots(bandwidth); //quantidade de slots requeridos
+		int quantSlotsRequeridos = spectrumAssigned[1] - spectrumAssigned[0] + 1; //quantidade de slots requeridos
 		double fs = route.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
 		double Bsi = quantSlotsRequeridos * fs; //largura da banda da requisicao
 		

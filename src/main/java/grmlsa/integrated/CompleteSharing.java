@@ -21,7 +21,7 @@ public class CompleteSharing implements IntegratedRSAAlgoritm {
     public boolean rsa(Circuit request, Mesh mesh) {
         if (kMenores == null) kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
         if (modulationSelector == null)
-            modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand());
+            modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 
 
         List<Route> candidateRoutes = kMenores.getRoutes(request.getSource(), request.getDestination());
@@ -31,7 +31,7 @@ public class CompleteSharing implements IntegratedRSAAlgoritm {
         for (Route r : candidateRoutes) {
             //calcular quantos slots são necessários para esta rota
             request.setRoute(r);
-            Modulation mod = modulationSelector.selectModulation(request);
+            Modulation mod = modulationSelector.selectModulation(request, mesh);
 
             List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
