@@ -4,6 +4,7 @@ import java.util.List;
 
 import grmlsa.GRMLSA;
 import network.Circuit;
+import network.ControlPlane;
 import request.RequestForConnection;
 import util.IntersectionFreeSpectrum;
 
@@ -18,10 +19,10 @@ import util.IntersectionFreeSpectrum;
 public class SimpleTrafficGrooming implements TrafficGroomingAlgorithm {
 
 	@Override
-	public boolean searchCircuitsForGrooming(RequestForConnection rfc, GRMLSA grmlsa) {
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane grmlsa) {
 
 		//search for active circuits with the same origin and destination of the new request.
-		List<Circuit> activeCircuits = grmlsa.getControlPlane().searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
+		List<Circuit> activeCircuits = grmlsa.searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
 		
 		for (Circuit circuit : activeCircuits) {
 			
@@ -69,7 +70,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithm {
 					faixaExpSup[1] = faixaExpSup[0]+expansao[1]-1;
 				}
 				
-				if(grmlsa.getControlPlane().expandCircuit(circuit, faixaExpSup, faixaExpInf)){//deu certo a expansão
+				if(grmlsa.expandCircuit(circuit, faixaExpSup, faixaExpInf)){//deu certo a expansão
 					circuit.addRequest(rfc);
 					rfc.setCircuit(circuit);
 					return true;
@@ -87,7 +88,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithm {
 		circuit.addRequest(rfc);
 		rfc.setCircuit(circuit);
 		
-		return grmlsa.getControlPlane().establishCircuit(circuit);
+		return grmlsa.establishCircuit(circuit);
 	}
 	
 	/**
@@ -115,13 +116,13 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithm {
 	}
 
 	@Override
-	public void finishConnection(RequestForConnection rfc, GRMLSA grmlsa) {
+	public void finishConnection(RequestForConnection rfc, ControlPlane grmlsa) {
 		// TODO Auto-generated method stub
 		
 		Circuit circuit = rfc.getCircuit();
 		
 		if(circuit.getRequests().size()==1){//The connection being terminated is the last to use this channel.
-			grmlsa.getControlPlane().releaseCircuit(circuit);
+			grmlsa.releaseCircuit(circuit);
 		}else{//reduce the number of slots allocated for this channel if it is possible.
 
 			int quantSlotsFinal = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth()-rfc.getRequiredBandwidth());
@@ -131,7 +132,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithm {
 			faixaLiberar[1] = circuit.getSpectrumAssigned()[1];
 			faixaLiberar[0] = faixaLiberar[1] - liberar + 1;
 
-			grmlsa.getControlPlane().retractCircuit(circuit, null, faixaLiberar);
+			grmlsa.retractCircuit(circuit, null, faixaLiberar);
 			circuit.removeRequest(rfc);
 		}
 		

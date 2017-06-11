@@ -1,8 +1,5 @@
 package simulationControl.parsers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * This class represents the Simulation configuration file, its representation in entity form is 
  * important for the storage and transmission of this type of configuration in the JSON format.
@@ -22,15 +19,15 @@ public class SimulationConfig {
     private int replications;
     private Metrics activeMetrics = new Metrics();
 
-    public static class Metrics{
+    public static class Metrics {
 
-        public boolean BlockingProbability=true;
-        public boolean BandwidthBlockingProbability=true;
-        public boolean ExternalFragmentation=true;
-        public boolean SpectrumUtilization=true;
-        public boolean RelativeFragmentation=true;
-        public boolean SpectrumSizeStatistics=true;
-        public boolean TransmittersReceiversUtilization=true;
+        public boolean BlockingProbability = true;
+        public boolean BandwidthBlockingProbability = true;
+        public boolean ExternalFragmentation = true;
+        public boolean SpectrumUtilization = true;
+        public boolean RelativeFragmentation = true;
+        public boolean SpectrumSizeStatistics = true;
+        public boolean TransmittersReceiversUtilization = true;
 
     }
 

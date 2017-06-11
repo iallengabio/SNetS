@@ -1,6 +1,6 @@
 package grmlsa.regeneratorAssignment;
 
-import grmlsa.spectrumAssignment.SpectrumAssignmentIterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
 import network.CircuitTranslucent;
 
 /**
@@ -18,6 +18,6 @@ public interface RegeneratorAssignmentIterface {
 	 * @param spectrumAssignment SpectrumAssignmentIterface
 	 * @return boolean
 	 */
-	public boolean assignRegenerator(CircuitTranslucent circuit, SpectrumAssignmentIterface spectrumAssignment);
+	public boolean assignRegenerator(CircuitTranslucent circuit, SpectrumAssignmentInterface spectrumAssignment);
 	
 }

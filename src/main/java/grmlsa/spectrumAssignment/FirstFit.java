@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class FirstFit implements SpectrumAssignmentIterface {
+public class FirstFit implements SpectrumAssignmentInterface {
 
 
     @Override

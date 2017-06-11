@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class DummyFit implements SpectrumAssignmentIterface {
+public class DummyFit implements SpectrumAssignmentInterface {
 
     public DummyFit() {
 

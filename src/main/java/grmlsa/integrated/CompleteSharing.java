@@ -5,7 +5,7 @@ import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentIterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -17,7 +17,7 @@ public class CompleteSharing implements IntegratedRSAAlgoritm {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentIterface spectrumAssignment;
+    private SpectrumAssignmentInterface spectrumAssignment;
 
     @Override
     public boolean rsa(Circuit request, Mesh mesh) {

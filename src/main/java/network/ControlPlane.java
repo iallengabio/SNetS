@@ -6,20 +6,32 @@ import java.util.List;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
+import grmlsa.integrated.IntegratedRSAAlgoritm;
+import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelector;
+import grmlsa.routing.RoutingInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.trafficGrooming.TrafficGroomingAlgorithm;
 import request.RequestForConnection;
 
 /**
- * Class that represents the control plane.
+ * Class that represents the control plane for a Transparent Elastic Optical Network.
  * This class should make calls to RSA algorithms, store routes in case of fixed routing, 
  * provide information about the state of the network, etc.
  *
  * @author Iallen
  */
 public class ControlPlane {
+
+    private int rsaType;
+    private RoutingInterface routing;
+    private SpectrumAssignmentInterface spectrumAssignment;
+    private IntegratedRSAAlgoritm integrated;
+    private ModulationSelector modulationSelector;
+    private TrafficGroomingAlgorithm grooming;
 	
     private Mesh mesh;
 
-    private GRMLSA grmlsa;
     
     /**
      * The first key represents the source node.
@@ -29,9 +41,24 @@ public class ControlPlane {
 
     /**
      * Instance the control plane with the list of active circuits in empty
+     * @param mesh
+     * @param rmlsaType
+     * @param trafficGroomingAlgorithm
+     * @param integratedRSAAlgoritm
+     * @param routingInterface
+     * @param spectrumAssignmentAlgoritm
      */
-    public ControlPlane() {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithm trafficGroomingAlgorithm, IntegratedRSAAlgoritm integratedRSAAlgoritm, RoutingInterface routingInterface, SpectrumAssignmentInterface spectrumAssignmentAlgoritm) {
         activeCircuits = new HashMap<>();
+
+        this.rsaType = rmlsaType;
+        this.grooming = trafficGroomingAlgorithm;
+        this.integrated = integratedRSAAlgoritm;
+        this.routing = routingInterface;
+        this.spectrumAssignment = spectrumAssignmentAlgoritm;
+        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(),mesh.getGuardBand(),mesh);
+
+        setMesh(mesh);
     }
 
     /**
@@ -45,7 +72,7 @@ public class ControlPlane {
         for (Node node1 : mesh.getNodeList()) {
             HashMap<String, List<Circuit>> hmAux = new HashMap<>();
             for (Node node2 : mesh.getNodeList()) {
-                hmAux.put(node2.getName(), new ArrayList<Circuit>());
+                hmAux.put(node2.getName(), new ArrayList<>());
             }
             activeCircuits.put(node1.getName(), hmAux);
         }
@@ -61,34 +88,24 @@ public class ControlPlane {
     }
 
     /**
-     * Configures the GRMLSA
-     * 
-     * @param grmlsa the rsa to set
-     */
-    public void setGrmlsa(GRMLSA grmlsa) {
-        this.grmlsa = grmlsa;
-    }
-    
-    /**
-     * This method tries to satisfy a certain request by checking if there are available resources 
-     * for the establishment of the circuit
+     * This method tries to satisfy a certain request by checking if there are available resources for the establishment of the circuit.
+     * This method verifies the possibility of satisfying a circuit request.
      *
      * @param rfc RequestForConnection
      * @return boolean
      */
     public boolean handleRequisition(RequestForConnection rfc) {
-        return this.grmlsa.handleRequisition(rfc);
+        return grooming.searchCircuitsForGrooming(rfc, this);
     }
 
     /**
      * This method ends a connection
-     * 
+     *
      * @param rfc RequestForConnection
      */
     public void finalizeConnection(RequestForConnection rfc) {
-        this.grmlsa.finalizeConnection(rfc);
+        this.grooming.finishConnection(rfc, this);
     }
-
     /**
      * Releases the resources being used by a given circuit
      *
@@ -130,23 +147,18 @@ public class ControlPlane {
      * 
      * @param chosen int[]
      * @param links List<Link>
-     * @return boolean
      */
-    private boolean allocateSpectrum(Circuit circuit, int chosen[], List<Link> links) {
-        boolean notAbleAnymore = false;
+    private void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+
         Link link;
         int i;
         
         for (i = 0; i < links.size(); i++) {
             link = links.get(i);
-            notAbleAnymore = !link.useSpectrum(chosen);
-            
+            link.useSpectrum(chosen);
             link.addCircuit(circuit);
-            
-            if (notAbleAnymore) break; // Some resource was no longer available, cancel the allocation
         }
 
-        return notAbleAnymore;
     }
 
     /**
@@ -176,7 +188,7 @@ public class ControlPlane {
     	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
     		
     		// Can allocate spectrum
-            if (this.grmlsa.createNewCircuit(circuit)) {
+            if (this.createNewCircuit(circuit)) {
 
             	// Pre-admits the circuit for QoT verification
                 this.allocateCircuit(circuit);
@@ -189,6 +201,31 @@ public class ControlPlane {
         }
 
         return false; // Rejects the circuit
+    }
+
+    /**
+     * This method tries to answer a given request by allocating the necessary resources to the same one
+     *
+     * @param circuit Circuit
+     * @return boolean
+     */
+    private boolean createNewCircuit(Circuit circuit) {
+
+        switch (this.rsaType) {
+            case GRMLSA.RSA_INTEGRATED:
+                return integrated.rsa(circuit, this.getMesh());
+
+            case GRMLSA.RSA_SEQUENCIAL:
+                if (routing.findRoute(circuit, this.getMesh())) {
+                    Modulation mod = modulationSelector.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
+                    circuit.setModulation(mod);
+                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
+                } else {
+                    return false;
+                }
+        }
+
+        return false;
     }
 
     /**
@@ -268,7 +305,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean
      */
-    public boolean isAdmissibleQualityOfTransmission(Circuit circuit){
+    private boolean isAdmissibleQualityOfTransmission(Circuit circuit){
     	
     	// Check if it is to test the QoT
     	if(mesh.getPhysicalLayer().isActiveQoT()){
@@ -313,7 +350,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    public boolean computeQualityOfTransmission(Circuit circuit){
+    private boolean computeQualityOfTransmission(Circuit circuit){
     	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
@@ -330,29 +367,26 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    public boolean computeQoTForOther(Circuit circuit){
-    	List<Circuit> circuits = new ArrayList<Circuit>();
+    private boolean computeQoTForOther(Circuit circuit){
+    	List<Circuit> circuits = new ArrayList<>();
 		
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
 			List<Circuit> circuitsTemp = link.getCircuitList();
-			
-			for(int i = 0; i < circuitsTemp.size(); i++){
-				Circuit circuitTemp = circuitsTemp.get(i);
-				
-				if(!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)){
-					circuits.add(circuitTemp);
-				}
-			}
+
+            for (Circuit circuitTemp : circuitsTemp) {
+                if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {
+                    circuits.add(circuitTemp);
+                }
+            }
 		}
-		
-		for(int i = 0; i < circuits.size(); i++){
-			Circuit circuitTemp = circuits.get(i);
-			boolean QoT = computeQualityOfTransmission(circuitTemp);
-			if(!QoT){
-				return false;
-			}
-		}
+
+        for (Circuit circuitTemp : circuits) {
+            boolean QoT = computeQualityOfTransmission(circuitTemp);
+            if (!QoT) {
+                return false;
+            }
+        }
 		
 		return true;
     }

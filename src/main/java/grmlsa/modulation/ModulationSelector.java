@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import grmlsa.Route;
-import grmlsa.spectrumAssignment.SpectrumAssignmentIterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
 import network.Circuit;
 import network.Mesh;
 
@@ -43,7 +43,7 @@ public class ModulationSelector {
 	 * @param spectrumAssignment - SpectrumAssignmentAlgoritm
 	 * @return Modulation
 	 */
-	public Modulation selectModulation (Circuit circuit, Route route, SpectrumAssignmentIterface spectrumAssignment, Mesh mesh) {
+	public Modulation selectModulation (Circuit circuit, Route route, SpectrumAssignmentInterface spectrumAssignment, Mesh mesh) {
 		Modulation resMod = null;
 		
 		if(mesh.getPhysicalLayer().isActiveQoT()){
@@ -85,7 +85,7 @@ public class ModulationSelector {
 	 * @param spectrumAssignment - SpectrumAssignmentAlgoritm
 	 * @return Modulation
 	 */
-	public Modulation selectModulationByQoT(Circuit circuit, Route route, SpectrumAssignmentIterface spectrumAssignment, Mesh mesh){
+	public Modulation selectModulationByQoT(Circuit circuit, Route route, SpectrumAssignmentInterface spectrumAssignment, Mesh mesh){
 		Modulation resMod = null; //para QoT admissivel
 		Modulation alternativeMod = null; //para alocar espectro
 		

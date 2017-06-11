@@ -154,11 +154,10 @@ public class Measurements implements Serializable {
     
     /**
      * Verify the transient phase
-     * 
-     * @param nodeList Vector<Node>
+     *
      */
     public void transientStepVerify() {
-        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) { // ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
+        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {//ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
             this.transientStep = false;
 
             initializeMetrics(mesh);
