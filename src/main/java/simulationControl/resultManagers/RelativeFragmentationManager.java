@@ -68,7 +68,7 @@ public class RelativeFragmentationManager {
 	private String resultGeneral() {
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			for (Integer c : this.frs.get(1).get(1).getCList()) {
+			for (Integer c : this.frs.get(0).get(0).getCList()) {
 				String aux = "Relative Fragmentation per spectrum size (c)" + sep + loadPoint + sep + "all" + sep + c + sep + " ";
 				for (Integer replication : replications) {
 					aux = aux + sep + frs.get(loadPoint).get(replication).getAverageRelativeFragmentation(c);

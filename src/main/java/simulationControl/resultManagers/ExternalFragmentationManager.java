@@ -108,7 +108,7 @@ public class ExternalFragmentationManager {
 		for (Integer loadPoint : loadPoints) {
 			String aux = "External Fragmentation Per Link" + sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String link : fes.get(1).get(1).getLinkSet()) {
+			for (String link : fes.get(0).get(0).getLinkSet()) {
 				String aux2 = aux + "<" + link + ">" + sep + " ";
 				
 				for (Integer replic : replications) {
