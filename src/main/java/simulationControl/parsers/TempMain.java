@@ -14,7 +14,7 @@ public class TempMain {
 
     public static void main(String args[]){
 
-        String path  = "./simulations/old/nsfnet_djk_dzff/network";
+        String path  = "./simulations/old/usa_cs/network";
 
         try {
             NetworkConfig nc = new NetworkConfig();
