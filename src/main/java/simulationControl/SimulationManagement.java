@@ -102,7 +102,7 @@ public class SimulationManagement {
      * This method is responsible for calling the method of the class responsible for saving 
      * the results associated with each metric
      */
-    public void saveResults(String pathResultFiles){
+    public void saveResults2(String pathResultFiles){
     	//pegar nome da pasta
     	String separador = System.getProperty("file.separator");
     	String aux[] = pathResultFiles.split(Pattern.quote(separador));
@@ -131,7 +131,7 @@ public class SimulationManagement {
 		}
     }
     
-    public void saveResults2(String pathResultFiles) {
+    public void saveResults(String pathResultFiles) {
     	// Pick folder name
     	String separator = System.getProperty("file.separator");
         String aux[] = pathResultFiles.split(Pattern.quote(separator));
