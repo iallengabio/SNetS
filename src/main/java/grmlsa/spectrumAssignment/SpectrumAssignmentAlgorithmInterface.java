@@ -1,5 +1,7 @@
 package grmlsa.spectrumAssignment;
 
+import java.util.List;
+
 import network.Circuit;
 
 
@@ -19,5 +21,15 @@ public interface SpectrumAssignmentAlgorithmInterface {
 	 * @return boolean
 	 */
 	public boolean assignSpectrum(int numberOfSlots, Circuit circuit);
+	
+	/**
+	 * This method applies the specific policy of the spectrum allocation algorithm
+	 * 
+	 * @param numberOfSlots int
+	 * @param freeSpectrumBands List<int[]>
+	 * @param Circuit circuit
+	 * @return int[]
+	 */
+	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit);
 
 }

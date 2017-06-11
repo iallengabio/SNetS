@@ -43,7 +43,7 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 
             List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-            int ff[] = FirstFit.firstFit(mod.requiredSlots(circuit.getRequiredBandwidth()), merge);
+            int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
             if (ff != null && ff[0] < faixaEscolhida[0]) {
                 faixaEscolhida = ff;

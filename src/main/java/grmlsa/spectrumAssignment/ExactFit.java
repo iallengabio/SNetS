@@ -20,8 +20,8 @@ import java.util.List;
 public class ExactFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit request) {
-        Route route = request.getRoute();
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
+        Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
@@ -31,30 +31,32 @@ public class ExactFit implements SpectrumAssignmentAlgorithmInterface {
             composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        int chosen[] = exactFit(numberOfSlots, composition);
+        int chosen[] = policy(numberOfSlots, composition, circuit);
 
         if (chosen == null) return false;
 
-        request.setSpectrumAssigned(chosen);
+        circuit.setSpectrumAssigned(chosen);
 
         return true;
     }
-
+    
     /**
      * Applies the policy of allocation of spectrum ExactFit
-     *
+     * 
      * @param numberOfSlots int
      * @param freeSpectrumBands List<int[]>
+     * @param circuit Circuit
      * @return int[]
      */
-    private static int[] exactFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
-        int chosen[] = null;
+    @Override
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    	int chosen[] = null;
         
         for (int[] band : freeSpectrumBands) {
             int sizeBand = band[1] - band[0] + 1;
             if (chosen == null) {
                 if (sizeBand == numberOfSlots) {
-                    chosen = band;
+                    chosen = band.clone();
                     chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
                 }
             }
@@ -68,7 +70,7 @@ public class ExactFit implements SpectrumAssignmentAlgorithmInterface {
                 int sizeBand = band[1] - band[0] + 1;
                 if (sizeBand >= numberOfSlots) {
                     if (sizeBand - numberOfSlots > greaterDifference) { //Found a band with more slots quantity "different"
-                        chosen = band;
+                        chosen = band.clone();
                         chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
                         greaterDifference = sizeBand - numberOfSlots;
                     }

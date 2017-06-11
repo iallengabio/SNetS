@@ -14,15 +14,15 @@ import java.util.List;
 public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit request) {
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
     	
-        List<int[]> composition = IntersectionFreeSpectrum.merge(request.getRoute());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
-        int chosen[] = firstFit(numberOfSlots, composition);
+        int chosen[] = policy(numberOfSlots, composition, circuit);
 
         if (chosen == null) return false;
 
-        request.setSpectrumAssigned(chosen);
+        circuit.setSpectrumAssigned(chosen);
 
         return true;
     }
@@ -32,19 +32,20 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
      * 
      * @param numberOfSlots int
      * @param freeSpectrumBands List<int[]>
+     * @param circuit Circuit
      * @return int[]
      */
-    public static int[] firstFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
-        int chosen[] = null;
+    @Override
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    	int chosen[] = null;
         for (int[] band : freeSpectrumBands) {
             if (band[1] - band[0] + 1 >= numberOfSlots) {
-                chosen = band;
+                chosen = band.clone();
                 chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
                 break;
             }
         }
         return chosen;
-    }
-
+	}
 }
 

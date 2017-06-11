@@ -32,7 +32,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
     }
 
     @Override
-    public boolean rsa(Circuit request, Mesh mesh) {
+    public boolean rsa(Circuit circuit, Mesh mesh) {
     	if(kMenores==null){
 			kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
 		}
@@ -43,24 +43,24 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 			spectrumAssignment = new FirstFit();
 		}
 		
-        List<Route> candidateRoutes = kMenores.getRoutes(request.getSource(), request.getDestination());
+        List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
         Route rotaEscolhida = null;
         Modulation modEscolhida = null;
         int faixaEscolhida[] = new int[2];
         
         //verificar se o firstfit deve ser aplicado de baixo para cima ou de cima para baixo
-        if (!largBandSuperiores.contains(request.getRequiredBandwidth())) { // alocar de baixo para cima
+        if (!largBandSuperiores.contains(circuit.getRequiredBandwidth())) { // alocar de baixo para cima
             faixaEscolhida[0] = 9999999;
             faixaEscolhida[1] = 9999999;
 
             for (Route r : candidateRoutes) {
                 //calcular quantos slots são necessários para esta rota
-                request.setRoute(r);
-                Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+                circuit.setRoute(r);
+                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-                int ff[] = FirstFit.firstFit(mod.requiredSlots(request.getRequiredBandwidth()), merge);
+                int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
                 if (ff != null && ff[0] < faixaEscolhida[0]) {
                     faixaEscolhida = ff;
@@ -77,12 +77,12 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 
             for (Route r : candidateRoutes) {
                 //calcular quantos slots são necessários para esta rota
-                request.setRoute(r);
-                Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+                circuit.setRoute(r);
+                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-                int lf[] = LastFit.lastFit(mod.requiredSlots(request.getRequiredBandwidth()), merge);
+                int lf[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
                 if (lf != null && lf[1] > faixaEscolhida[1]) {
                     faixaEscolhida = lf;
@@ -94,15 +94,15 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
         }
 
         if (rotaEscolhida != null) { //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-            request.setRoute(rotaEscolhida);
-            request.setModulation(modEscolhida);
-            request.setSpectrumAssigned(faixaEscolhida);
+            circuit.setRoute(rotaEscolhida);
+            circuit.setModulation(modEscolhida);
+            circuit.setSpectrumAssigned(faixaEscolhida);
 
             return true;
 
         } else {
-            request.setRoute(candidateRoutes.get(0));
-            request.setModulation(modulationSelector.getAvaliableModulations().get(0));
+            circuit.setRoute(candidateRoutes.get(0));
+            circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
             return false;
         }
     }

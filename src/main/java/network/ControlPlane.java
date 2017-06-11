@@ -23,14 +23,14 @@ import request.RequestForConnection;
  */
 public class ControlPlane {
 
-    private int rsaType;
-    private RoutingAlgorithmInterface routing;
-    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
-    private IntegratedRMLSAAlgorithmInterface integrated;
-    private ModulationSelector modulationSelector;
-    private TrafficGroomingAlgorithmInterface grooming;
+    protected int rsaType;
+    protected RoutingAlgorithmInterface routing;
+    protected SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+    protected IntegratedRMLSAAlgorithmInterface integrated;
+    protected ModulationSelector modulationSelector;
+    protected TrafficGroomingAlgorithmInterface grooming;
 	
-    private Mesh mesh;
+    protected Mesh mesh;
 
     
     /**

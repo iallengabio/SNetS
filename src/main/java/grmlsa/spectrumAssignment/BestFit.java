@@ -17,8 +17,8 @@ import java.util.List;
 public class BestFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit request) {
-        Route route = request.getRoute();
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
+        Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
@@ -28,11 +28,11 @@ public class BestFit implements SpectrumAssignmentAlgorithmInterface {
             composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        int chosen[] = bestFit(numberOfSlots, composition);
+        int chosen[] = policy(numberOfSlots, composition, circuit);
 
         if (chosen == null) return false;
 
-        request.setSpectrumAssigned(chosen);
+        circuit.setSpectrumAssigned(chosen);
 
         return true;
     }
@@ -42,17 +42,19 @@ public class BestFit implements SpectrumAssignmentAlgorithmInterface {
      * 
      * @param numberOfSlots int
      * @param freeSpectrumBands List<int[]>
+     * @param circuit Circuit
      * @return int[]
      */
-    private static int[] bestFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
-        int chosen[] = null;
+    @Override
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    	int chosen[] = null;
         int lessDifference = 999999999;
         
         for (int[] band : freeSpectrumBands) {
             int sizeBand = band[1] - band[0] + 1;
             if (sizeBand >= numberOfSlots) {
                 if (sizeBand - numberOfSlots < lessDifference) { //Found a range with the number of slots closer to the requested quantity
-                    chosen = band;
+                    chosen = band.clone();
                     chosen[1] = chosen[0] + numberOfSlots - 1; //It is not necessary to allocate the entire band, just the amount of slots required
                     lessDifference = sizeBand - numberOfSlots;
                 }
@@ -60,7 +62,7 @@ public class BestFit implements SpectrumAssignmentAlgorithmInterface {
         }
 
         return chosen;
-    }
+	}
 
 }
 

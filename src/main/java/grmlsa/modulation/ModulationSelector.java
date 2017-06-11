@@ -69,7 +69,7 @@ public class ModulationSelector {
 	 * @param route - Route
 	 * @return Modulation
 	 */
-	public Modulation selectModulationByDistance (Circuit circut, Route route){
+	private Modulation selectModulationByDistance (Circuit circut, Route route){
 		double maxBPS = 0.0;
 		Modulation resMod = null;
 		
@@ -95,7 +95,7 @@ public class ModulationSelector {
 	 * @param mesh - Mesh
 	 * @return Modulation
 	 */
-	public Modulation selectModulationByQoT(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh){
+	private Modulation selectModulationByQoT(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh){
 		Modulation resMod = null; //For admissible QoT
 		Modulation alternativeMod = null; //Which at least allocates spectrum
 		

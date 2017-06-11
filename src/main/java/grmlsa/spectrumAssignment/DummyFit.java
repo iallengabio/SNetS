@@ -28,7 +28,7 @@ public class DummyFit implements SpectrumAssignmentAlgorithmInterface {
             composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        int chosen[] = dummyFit(numberOfSlots, composition);
+        int chosen[] = policy(numberOfSlots, composition, circuit);
 
         if (chosen == null) return false;
 
@@ -39,13 +39,15 @@ public class DummyFit implements SpectrumAssignmentAlgorithmInterface {
 
     /**
      * Applies the policy of allocation of spectrum DummyFit
-     *
+     * 
      * @param numberOfSlots int
      * @param freeSpectrumBands List<int[]>
+     * @param circuit Circuit
      * @return int[]
      */
-    private static int[] dummyFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
-        int chosen[] = new int[2];
+    @Override
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    	int chosen[] = new int[2];
 
         if (freeSpectrumBands.size() >= 1) {
             int band[] = freeSpectrumBands.get(0);
@@ -57,6 +59,5 @@ public class DummyFit implements SpectrumAssignmentAlgorithmInterface {
         }
         return null;
     }
-
 }
 

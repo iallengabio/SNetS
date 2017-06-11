@@ -79,7 +79,7 @@ public class Modulation {
      * @param bandwidth
      * @return
      */
-    public int requiredSlots1(double bandwidth) {
+    private int requiredSlots1(double bandwidth) {
         //System.out.println("C = " + bandwidth + "    bm = " + this.bitsPerSimbol + "     fslot = " + this.freqSlot);
 
         double res = bandwidth / (this.bitsPerSymbol * this.freqSlot);
@@ -104,7 +104,7 @@ public class Modulation {
 	 * @param bandwidth double
 	 * @return int
 	 */
-	public int requiredSlotsByQoT(double bandwidth){
+	private int requiredSlotsByQoT(double bandwidth){
 		double F = mesh.getPhysicalLayer().getFEC();
 		double Bn = bandwidth; //(bandwidth / 1073741824.0) * 1.0E+9;
 		double Bs = (1.1 * Bn * (1 + F)) / (2 * PhysicalLayer.log2(this.level)); //single channel bandwidth, Hz

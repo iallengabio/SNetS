@@ -20,7 +20,8 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 
 	private NewKShortestPaths kMenores;
 	private ModulationSelector modulationSelector;
-	private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+	private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
+	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
 	
 	private HashMap<Integer, int[]> zones; 
 	
@@ -45,18 +46,19 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 	}
 	
 	@Override
-	public boolean rsa(Circuit request, Mesh mesh) {
-		if(kMenores==null){
+	public boolean rsa(Circuit circuit, Mesh mesh) {
+		if(kMenores == null){
 			kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
 		}
-		if(modulationSelector==null){
+		if(modulationSelector == null){
 			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 		}
-		if(spectrumAssignment == null){
-			spectrumAssignment = new FirstFit();
+		if(spectrumAssignment1 == null || spectrumAssignment2 == null){
+			spectrumAssignment1 = new FirstFit();
+			spectrumAssignment2 = new LastFit();
 		}
 		
-		List<Route> candidateRoutes = kMenores.getRoutes(request.getSource(), request.getDestination());
+		List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
 		Route rotaEscolhida = null;
 		Modulation modEscolhida = null;
 		int faixaEscolhida[] = {999999,999999}; //valor jamais atingido
@@ -64,10 +66,10 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		//tentar alocar na zona primária
 		for (Route r : candidateRoutes) {
 			//calcular quantos slots são necessários para esta rota
-			request.setRoute(r);
-			Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+			circuit.setRoute(r);
+			Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment1, mesh);
 			
-			int quantSlots = mod.requiredSlots(request.getRequiredBandwidth());
+			int quantSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			int zone[] = this.zones.get(quantSlots);
 			List<int[]> primaryZone = new ArrayList<>();
 			primaryZone.add(zone);			
@@ -75,7 +77,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 			merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 			
-			int ff[] = FirstFit.firstFit(quantSlots, merge);
+			int ff[] = spectrumAssignment1.policy(quantSlots, merge, circuit);
 			
 			if(ff!=null && ff[0]<faixaEscolhida[0]){
 				faixaEscolhida = ff;
@@ -90,10 +92,10 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			double maisLivre = 0;
 			for (Route r : candidateRoutes) {
 				//calcular quantos slots são necessários para esta rota
-				request.setRoute(r);
-				Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+				circuit.setRoute(r);
+				Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment2, mesh);
 				
-				int quantSlots = mod.requiredSlots(request.getRequiredBandwidth());
+				int quantSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 				int zone[] = this.zones.get(quantSlots);
 				List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 				
@@ -112,7 +114,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 				
 				double aux = ((double) quantLivre(merge)) / ((double)(zones.get(zonaMaisLivre)[1] - zones.get(zonaMaisLivre)[0] + 1));
 				
-				int lf[] = LastFit.lastFit(quantSlots, merge);
+				int lf[] = spectrumAssignment2.policy(quantSlots, merge, circuit);
 				
 				if(lf!=null && aux>maisLivre){
 					faixaEscolhida = lf;
@@ -124,15 +126,15 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		}
 		
 		if(rotaEscolhida!=null){ //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-			request.setRoute(rotaEscolhida);
-			request.setModulation(modEscolhida);
-			request.setSpectrumAssigned(faixaEscolhida);
+			circuit.setRoute(rotaEscolhida);
+			circuit.setModulation(modEscolhida);
+			circuit.setSpectrumAssigned(faixaEscolhida);
 			
 			return true;
 			
 		}else{
-			request.setRoute(candidateRoutes.get(0));
-			request.setModulation(modulationSelector.getAvaliableModulations().get(0));
+			circuit.setRoute(candidateRoutes.get(0));
+			circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
 			return false;
 		}
 		
