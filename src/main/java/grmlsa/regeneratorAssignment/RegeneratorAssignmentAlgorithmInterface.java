@@ -1,7 +1,7 @@
 package grmlsa.regeneratorAssignment;
 
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
-import network.CircuitTranslucent;
+import network.TranslucentCircuit;
 
 /**
  * This interface should be implemented by classes of regenerator assignment algorithms independent of the routing.
@@ -18,6 +18,6 @@ public interface RegeneratorAssignmentAlgorithmInterface {
 	 * @param spectrumAssignment SpectrumAssignmentAlgorithmInterface
 	 * @return boolean
 	 */
-	public boolean assignRegenerator(CircuitTranslucent circuit, SpectrumAssignmentAlgorithmInterface spectrumAssignment);
+	public boolean assignRegenerator(TranslucentCircuit circuit, SpectrumAssignmentAlgorithmInterface spectrumAssignment);
 	
 }

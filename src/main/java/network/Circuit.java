@@ -205,4 +205,27 @@ public class Circuit {
 		QoTForOther = qoTForOther;
 	}
 	
+	/**
+	 * This method returns the spectrum allocated by the circuit on a link
+     * Can change according to the type of circuit
+	 * 
+	 * @param link - Link
+	 * @return int[]
+	 */
+	public int[] getSpectrumAssignedByLink(Link link){
+		int sa[] = getSpectrumAssigned();
+		return sa;
+	}
+	
+	/**
+	 * This method that returns the modulation format used in a given route link
+	 * Can change according to the type of circuit
+	 * 
+	 * @param link - Link
+	 * @return Modulation
+	 */
+	public Modulation getModulationByLink(Link link){
+		Modulation mod = getModulation();
+		return mod;
+	}
 }

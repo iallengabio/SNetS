@@ -61,7 +61,7 @@ public class TransparentControlPlane {
         this.integrated = integratedRSAAlgoritm;
         this.routing = routingInterface;
         this.spectrumAssignment = spectrumAssignmentAlgoritm;
-        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(),mesh.getGuardBand(),mesh);
+        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 
         setMesh(mesh);
     }
@@ -117,9 +117,9 @@ public class TransparentControlPlane {
      * @param circuit
      */
     public void releaseCircuit(Circuit circuit) {
-        Route r = circuit.getRoute();
+        Route route = circuit.getRoute();
 
-        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), r.getLinkList());
+        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), route.getLinkList());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -150,34 +150,31 @@ public class TransparentControlPlane {
     /**
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
+     * @param circuit Circuit
      * @param chosen int[]
      * @param links List<Link>
      */
     private void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
-
-        Link link;
-        int i;
-        
-        for (i = 0; i < links.size(); i++) {
-            link = links.get(i);
-            link.useSpectrum(chosen);
+        for (int i = 0; i < links.size(); i++) {
+            Link link = links.get(i);
             
+            link.useSpectrum(chosen);
             link.addCircuit(circuit);
         }
-
     }
 
     /**
      * This method releases the allocated spectrum for the circuit
      * 
+     * @param circuit Circuit
      * @param chosen int[]
      * @param links List<Link>
      */
     private void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
-        // Release spectrum
-        for (Link link : links) {
+        for (int i = 0; i < links.size(); i++) {
+        	Link link = links.get(i);
+        	
             link.liberateSpectrum(chosen);
-            
             link.removeCircuit(circuit);
         }
     }

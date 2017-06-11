@@ -280,7 +280,7 @@ public class PhysicalLayer {
 			
 			if(!circuit.equals(cricuitTemp)){
 				double fs = link.getSlotSpectrumBand();
-				int sa[] = cricuitTemp.getSpectrumAssigned();
+				int sa[] = cricuitTemp.getSpectrumAssignedByLink(link);
 				double numOfSlots = sa[1] - sa[0] + 1;
 				double Bsj = numOfSlots * fs; //Request bandwidth
 				double fj = lowerFrequency + (fs * (sa[0] - 1)) + (Bsj / 2); //Central frequency of request

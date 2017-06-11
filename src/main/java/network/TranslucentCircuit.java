@@ -5,16 +5,20 @@ import java.util.List;
 
 import grmlsa.modulation.Modulation;
 
-
-public class CircuitTranslucent extends Circuit {
+/**
+ * This class represents an established translucent circuit in an optical network
+ * 
+ * @author Alexandre
+ */
+public class TranslucentCircuit extends Circuit {
 	
 	private HashMap<Link, int[]> spectrumAssignedByLink;
 	protected HashMap<Link, Modulation> modulationByLink;
 	
-	// list of the indices of the ones that regenerated the signal and the noise
+	// list of the indexes of the ones that regenerated the signal and the noise
     protected List<Integer> regeneratorsNodesIndexList;
 
-	public CircuitTranslucent() {
+	public TranslucentCircuit() {
 		super();
 		
 		this.spectrumAssignedByLink = new HashMap<>();
@@ -63,4 +67,27 @@ public class CircuitTranslucent extends Circuit {
 		this.regeneratorsNodesIndexList = regeneratorsNodesIndexList;
 	}
 	
+	/**
+	 * This method returns the spectrum allocated by the circuit on a link
+     * Can change according to the type of circuit
+	 * 
+	 * @param link - Link
+	 * @return int[]
+	 */
+	public int[] getSpectrumAssignedByLink(Link link){
+		int sa[] = getSpectrumAssignedByLink().get(link);
+		return sa;
+	}
+	
+	/**
+	 * This method that returns the modulation format used in a given route link
+	 * Can change according to the type of circuit
+	 * 
+	 * @param link - Link
+	 * @return Modulation
+	 */
+	public Modulation getModulationByLink(Link link){
+		Modulation mod = getModulationByLink().get(link);
+		return mod;
+	}
 }

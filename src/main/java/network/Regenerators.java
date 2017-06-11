@@ -2,8 +2,6 @@ package network;
 
 import java.io.Serializable;
 
-import request.RequestForConnection;
-
 /**
  * This class represents a bank of regenerators on a network node.
  * 

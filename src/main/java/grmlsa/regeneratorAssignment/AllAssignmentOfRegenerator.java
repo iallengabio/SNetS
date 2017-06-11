@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Vector;
 
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
-import network.CircuitTranslucent;
+import network.TranslucentCircuit;
 import network.Node;
 
 /**
@@ -16,7 +16,7 @@ import network.Node;
 public class AllAssignmentOfRegenerator implements RegeneratorAssignmentAlgorithmInterface {
 
 	@Override
-	public boolean assignRegenerator(CircuitTranslucent circuit, SpectrumAssignmentAlgorithmInterface spectrumAssignment){
+	public boolean assignRegenerator(TranslucentCircuit circuit, SpectrumAssignmentAlgorithmInterface spectrumAssignment){
 		Vector<Node> nodeList = circuit.getRoute().getNodeList();
 		List<Integer> regeneratorsNodesIndexList = new ArrayList<Integer>();
 		
