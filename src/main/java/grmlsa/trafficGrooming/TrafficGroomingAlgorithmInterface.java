@@ -1,6 +1,6 @@
 package grmlsa.trafficGrooming;
 
-import network.ControlPlane;
+import network.controlPlane.TransparentControlPlane;
 import request.RequestForConnection;
 
 /**
@@ -17,7 +17,7 @@ public interface TrafficGroomingAlgorithmInterface {
 	 * @param rfc RequestForConnection
 	 * @return boolean if the new request could be met.
 	 */
-	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp);
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, TransparentControlPlane cp);
 	
 	/**
 	 * Defines what should be done at the end of a connection.
@@ -26,5 +26,5 @@ public interface TrafficGroomingAlgorithmInterface {
 	 * @param rfc RequestForConnection
 	 * @param cp ControlPlane
 	 */
-	public void finishConnection(RequestForConnection rfc, ControlPlane cp);
+	public void finishConnection(RequestForConnection rfc, TransparentControlPlane cp);
 }

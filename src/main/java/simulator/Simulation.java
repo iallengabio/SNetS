@@ -2,8 +2,8 @@ package simulator;
 
 import grmlsa.GRMLSA;
 import measurement.Measurements;
-import network.ControlPlane;
 import network.Mesh;
+import network.controlPlane.TransparentControlPlane;
 import simulationControl.parsers.SimulationConfig;
 
 import java.io.Serializable;
@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class Simulation implements Serializable {
 
     private Mesh mesh;
-    private ControlPlane controlPlane;
+    private TransparentControlPlane controlPlane;
     private Measurements measurements;
 
     private int loadPoint;
@@ -38,7 +38,7 @@ public class Simulation implements Serializable {
         this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getActiveMetrics());
         this.mesh = mesh;
         GRMLSA grmlsa = new GRMLSA(sc.getGrooming(),sc.getIntegratedRmlsa(),sc.getRouting(),sc.getModulationSelection(),sc.getSpectrumAssignment());
-        controlPlane = new ControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment());
+        controlPlane = new TransparentControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment());
     }
 
     /**
@@ -82,7 +82,7 @@ public class Simulation implements Serializable {
      * 
      * @return controlPlane
      */
-    public ControlPlane getControlPlane() {
+    public TransparentControlPlane getControlPlane() {
         return controlPlane;
     }
 

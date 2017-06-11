@@ -3,7 +3,7 @@ package grmlsa.trafficGrooming;
 import java.util.List;
 
 import network.Circuit;
-import network.ControlPlane;
+import network.controlPlane.TransparentControlPlane;
 import request.RequestForConnection;
 import util.IntersectionFreeSpectrum;
 
@@ -18,7 +18,7 @@ import util.IntersectionFreeSpectrum;
 public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface {
 
 	@Override
-	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) {
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, TransparentControlPlane cp) {
 
 		//search for active circuits with the same origin and destination of the new request.
 		List<Circuit> activeCircuits = cp.searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
@@ -120,7 +120,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 	}
 
 	@Override
-	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
+	public void finishConnection(RequestForConnection rfc, TransparentControlPlane cp) {
 		
 		Circuit circuit = rfc.getCircuit();
 		

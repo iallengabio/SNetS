@@ -1,4 +1,4 @@
-package network;
+package network.controlPlane;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,16 +12,21 @@ import grmlsa.modulation.ModulationSelector;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
+import network.Circuit;
+import network.Link;
+import network.Mesh;
+import network.Node;
+import network.PhysicalLayer;
 import request.RequestForConnection;
 
 /**
  * Class that represents the control plane for a Transparent Elastic Optical Network.
- * This class should make calls to RSA algorithms, store routes in case of fixed routing, 
+ * This class should make calls to RMLSA algorithms, store routes in case of fixed routing, 
  * provide information about the state of the network, etc.
  *
  * @author Iallen
  */
-public class ControlPlane {
+public class TransparentControlPlane {
 
     private int rsaType;
     private RoutingAlgorithmInterface routing;
@@ -48,7 +53,7 @@ public class ControlPlane {
      * @param routingInterface
      * @param spectrumAssignmentAlgoritm
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
+    public TransparentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
         activeCircuits = new HashMap<>();
 
         this.rsaType = rmlsaType;
@@ -156,6 +161,7 @@ public class ControlPlane {
         for (i = 0; i < links.size(); i++) {
             link = links.get(i);
             link.useSpectrum(chosen);
+            
             link.addCircuit(circuit);
         }
 

@@ -115,9 +115,9 @@ public class ModulationSelector {
 		}
 		
 		if(resMod == null){ //QoT is not acceptable for all modulations
-			if(alternativeMod != null){ //Allocated spectro using some modulation, but the one that was inadmissible
+			if(alternativeMod != null){ //Allocated spectrum using some modulation, but the one that was inadmissible
 				resMod = alternativeMod;
-				circuit.setQoT(false); //To mark that the blockade was by Qto inadmissible
+				circuit.setQoT(false); //To mark that the blockade was by QoT inadmissible
 			}
 		}
 		
