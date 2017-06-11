@@ -118,7 +118,7 @@ public class BandwidthBlockingProbResultManager {
 			String aux = "bandwidth blocking probabilities per bandwidth" + sep + loadPoint;
 			
 			for (Double bandwidth : Util.bandwidths) {
-				String aux2 = aux + sep + (bandwidth/1073741824.0) + "Gbps" + sep + "all" + sep + "all" + sep + " ";
+				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps" + sep + "all" + sep + "all" + sep + " ";
 				for (Integer rep : replications) {
 					aux2 = aux2 + sep + pbs.get(loadPoint).get(rep).getProbBlockBandwidth(bandwidth);
 				}
@@ -139,7 +139,7 @@ public class BandwidthBlockingProbResultManager {
 			String aux = "bandwidth blocking probabilities per pair and bandwidth" + sep + loadPoint;
 			
 			for (Double bandwidth : Util.bandwidths) {
-				String aux2 = aux + sep + (bandwidth/1073741824.0) + "Gbps";
+				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps";
 				for (Pair pair :  Util.pairs) {
 					String aux3 = aux2 + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
 					for(Integer rep :  replications){
