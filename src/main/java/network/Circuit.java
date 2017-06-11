@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents an established circuit in an optical network
+ * This class represents an established transparent circuit in an optical network
  * 
  * @author Iallen
  */

@@ -1,4 +1,4 @@
-package network.controlPlane;
+package network;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,11 +12,6 @@ import grmlsa.modulation.ModulationSelector;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
-import network.Circuit;
-import network.Link;
-import network.Mesh;
-import network.Node;
-import network.PhysicalLayer;
 import request.RequestForConnection;
 
 /**
@@ -26,7 +21,7 @@ import request.RequestForConnection;
  *
  * @author Iallen
  */
-public class TransparentControlPlane {
+public class ControlPlane {
 
     private int rsaType;
     private RoutingAlgorithmInterface routing;
@@ -53,7 +48,7 @@ public class TransparentControlPlane {
      * @param routingInterface
      * @param spectrumAssignmentAlgoritm
      */
-    public TransparentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
         activeCircuits = new HashMap<>();
 
         this.rsaType = rmlsaType;
@@ -64,6 +59,22 @@ public class TransparentControlPlane {
         this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 
         setMesh(mesh);
+    }
+    
+    /**
+     * This method create a new transparent circuit.
+     * 
+     * @param rfc RequestForConnection
+     * @return Circuit
+     */
+    public Circuit createNewCircuit(RequestForConnection rfc){
+    	
+    	Circuit circuit = new Circuit();
+		circuit.setPair(rfc.getPair());
+		circuit.addRequest(rfc);
+		rfc.setCircuit(circuit);
+		
+		return circuit;
     }
 
     /**
@@ -133,7 +144,7 @@ public class TransparentControlPlane {
      *
      * @param circuit Circuit
      */
-    private void allocateCircuit(Circuit circuit) {
+    protected void allocateCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int chosen[] = circuit.getSpectrumAssigned();
@@ -154,7 +165,7 @@ public class TransparentControlPlane {
      * @param chosen int[]
      * @param links List<Link>
      */
-    private void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+    protected void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             
@@ -170,7 +181,7 @@ public class TransparentControlPlane {
      * @param chosen int[]
      * @param links List<Link>
      */
-    private void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
         	Link link = links.get(i);
         	
@@ -191,7 +202,7 @@ public class TransparentControlPlane {
     	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
     		
     		// Can allocate spectrum
-            if (this.createNewCircuit(circuit)) {
+            if (this.tryEstablishNewCircuit(circuit)) {
 
             	// Pre-admits the circuit for QoT verification
                 this.allocateCircuit(circuit);
@@ -212,7 +223,7 @@ public class TransparentControlPlane {
      * @param circuit Circuit
      * @return boolean
      */
-    private boolean createNewCircuit(Circuit circuit) {
+    protected boolean tryEstablishNewCircuit(Circuit circuit) {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
@@ -308,7 +319,7 @@ public class TransparentControlPlane {
      * @param circuit Circuit
      * @return boolean
      */
-    private boolean isAdmissibleQualityOfTransmission(Circuit circuit){
+    protected boolean isAdmissibleQualityOfTransmission(Circuit circuit){
     	
     	// Check if it is to test the QoT
     	if(mesh.getPhysicalLayer().isActiveQoT()){
@@ -353,7 +364,7 @@ public class TransparentControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    private boolean computeQualityOfTransmission(Circuit circuit){
+    protected boolean computeQualityOfTransmission(Circuit circuit){
     	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
@@ -370,7 +381,7 @@ public class TransparentControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    private boolean computeQoTForOther(Circuit circuit){
+    protected boolean computeQoTForOther(Circuit circuit){
     	List<Circuit> circuits = new ArrayList<>();
 		
 		Route route = circuit.getRoute();

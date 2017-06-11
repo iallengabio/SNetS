@@ -1,7 +1,7 @@
 package grmlsa.trafficGrooming;
 
 import network.Circuit;
-import network.controlPlane.TransparentControlPlane;
+import network.ControlPlane;
 import request.RequestForConnection;
 
 /**
@@ -13,18 +13,15 @@ import request.RequestForConnection;
 public class NoTrafficGrooming implements TrafficGroomingAlgorithmInterface {
 
 	@Override
-	public boolean searchCircuitsForGrooming(RequestForConnection rfc, TransparentControlPlane cp) {
-
-		Circuit circuit = new Circuit();
-		circuit.setPair(rfc.getPair());
-		circuit.addRequest(rfc);
-		rfc.setCircuit(circuit);
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) {
+		// Create a new circuit
+		Circuit circuit = cp.createNewCircuit(rfc);
 		
 		return cp.establishCircuit(circuit);
 	}
 
 	@Override
-	public void finishConnection(RequestForConnection rfc, TransparentControlPlane cp) {
+	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
 		cp.releaseCircuit(rfc.getCircuit());
 	}
 

@@ -51,17 +51,17 @@ public class RequestGenerator implements Serializable {
    * @param arriveRequest ArriveRequestForConexionListener
    */
   public void scheduleNextRequest(EventMachine em, ArriveRequestForConexionListener arriveRequest) {
-	RequestForConnection r = new RequestForConnection();
+	RequestForConnection rfc = new RequestForConnection();
 	double arriveTimeHours = randGenerator.negexp(arrivedRate);
     atualTimeHours = atualTimeHours + arriveTimeHours;
-    r.setTimeOfRequestHours(atualTimeHours);
+    rfc.setTimeOfRequestHours(atualTimeHours);
     double holdTimeHours = randGenerator.negexp(getHoldRate());
-  	double finalizeTimeHours = r.getTimeOfRequestHours() + holdTimeHours;
-  	r.setTimeOfFinalizeHours(finalizeTimeHours);
-    r.setPair(pair);
-    r.setRequiredBandwidth(bandwidth);
-    r.setRequestGenerator(this);
-    Event e = new Event(r, arriveRequest, atualTimeHours);
+  	double finalizeTimeHours = rfc.getTimeOfRequestHours() + holdTimeHours;
+  	rfc.setTimeOfFinalizeHours(finalizeTimeHours);
+    rfc.setPair(pair);
+    rfc.setRequiredBandwidth(bandwidth);
+    rfc.setRequestGenerator(this);
+    Event e = new Event(rfc, arriveRequest, atualTimeHours);
     em.insert(e);
   }
 

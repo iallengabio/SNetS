@@ -1,4 +1,4 @@
-package network.controlPlane;
+package network;
 
 import java.util.List;
 
@@ -8,19 +8,14 @@ import grmlsa.modulation.Modulation;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
-import network.Circuit;
-import network.Link;
-import network.Mesh;
-import network.Node;
-import network.PhysicalLayer;
-import network.TranslucentCircuit;
+import request.RequestForConnection;
 
 /**
  * Class that represents the control plane for a Translucent Elastic Optical Network.
  * 
  * @author Alexandre
  */
-public class TranslucentControlPlane extends TransparentControlPlane {
+public class TranslucentControlPlane extends ControlPlane {
 
 	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm,
 			                       IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface,
@@ -30,6 +25,22 @@ public class TranslucentControlPlane extends TransparentControlPlane {
 		
 	}
 
+	/**
+     * This method create a new translucent circuit.
+     * 
+     * @param rfc RequestForConnection
+     * @return Circuit
+     */
+    public Circuit createNewCircuit(RequestForConnection rfc){
+    	
+    	Circuit circuit = new TranslucentCircuit();
+		circuit.setPair(rfc.getPair());
+		circuit.addRequest(rfc);
+		rfc.setCircuit(circuit);
+		
+		return circuit;
+    }
+    
 	/**
 	 * Method that releases the regenerators used by a circuit.
 	 * To avoid an error in the metrics you should not delete the regenerators from the 
@@ -59,19 +70,20 @@ public class TranslucentControlPlane extends TransparentControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-	private boolean computeQualityOfTransmission(TranslucentCircuit circuit){
+	@Override
+	protected boolean computeQualityOfTransmission(Circuit circuit){
     	
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
 		Route route = circuit.getRoute();
 		
-		int mumberTransparentSegments = circuit.getRegeneratorsNodesIndexList().size() + 1;
+		int mumberTransparentSegments = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
 		for(int i = 0; i < mumberTransparentSegments; i++){
 			
 			int destinationNodeIndex = route.getNodeList().size() - 1;
 			if(i < mumberTransparentSegments - 1){
-				destinationNodeIndex = circuit.getRegeneratorsNodesIndexList().get(i);
+				destinationNodeIndex = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
 			}
 			
 			Node noSource = route.getNode(sourceNodeIndex);
@@ -110,7 +122,8 @@ public class TranslucentControlPlane extends TransparentControlPlane {
      * @param chosen int[]
      * @param links List<Link>
      */
-    private void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+	@Override
+	protected void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             chosen = circuit.getSpectrumAssignedByLink(link);
@@ -127,7 +140,8 @@ public class TranslucentControlPlane extends TransparentControlPlane {
      * @param chosen int[]
      * @param links List<Link>
      */
-    private void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+	@Override
+	protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
     	for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
         	chosen = circuit.getSpectrumAssignedByLink(link);
