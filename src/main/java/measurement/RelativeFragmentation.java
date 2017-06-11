@@ -3,6 +3,7 @@ package measurement;
 import network.Circuit;
 import network.Link;
 import network.Mesh;
+import request.RequestForConnection;
 import util.ComputesFragmentation;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class RelativeFragmentation extends Measurement {
      *
      * @param request
      */
-    public void addNewObservation(Circuit request) {
+    public void addNewObservation(boolean success, RequestForConnection request) {
         this.observationLinks();
         numberObservations++;
     }

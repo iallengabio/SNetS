@@ -6,6 +6,7 @@ import java.util.Set;
 import network.Circuit;
 import network.Link;
 import network.Mesh;
+import request.RequestForConnection;
 
 /**
  * This class stored the metrics related to the use of spectrum.
@@ -42,19 +43,9 @@ public class SpectrumUtilization extends Measurement {
     }
 
     /**
-     * Adds a new usage observation of spectrum utilization
-     *
-     * @param request
-     */
-    @Deprecated
-    public void addNewObservation(Circuit request) {
-        this.newObsUtilization();
-    }
-
-    /**
      * Adds a new usage observation of spectrum utilizarion
      */
-    public void addNewObservation() {
+    public void addNewObservation(boolean success, RequestForConnection request) {
         this.newObsUtilization();
     }
 

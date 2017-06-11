@@ -146,8 +146,7 @@ public class SimulationRequest {
      * 
      * @author Iallen
      */
-    public static class Result{
-
+    public static class Result {
         public String blockingProbability;
         public String bandwidthBlockingProbability;
         public String externalFragmentation;

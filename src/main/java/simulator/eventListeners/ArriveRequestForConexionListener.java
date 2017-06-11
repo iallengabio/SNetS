@@ -61,27 +61,25 @@ public class ArriveRequestForConexionListener implements EventListener, Serializ
      */
     private void beforeReq() {
         Measurements m = simulation.getMeasurements();
-
-        m.transientStepVerify(simulation.getControlPlane().getMesh().getNodeList());
-
+        
+        // Transient state check
+        m.transientStepVerify();
+        
+        // Increase in the number of generated circuit requests
         m.incNumGeneratedReq();
     }
 
     /**
      * Update performance metrics
+     * 
      * @param request RequestForConnection
      * @param success boolean
      */
     private void afterReq(RequestForConnection request, boolean success) {
-
         Measurements m = simulation.getMeasurements();
-        m.getProbabilidadeDeBloqueioMeasurement().addNewObservation(success, request);
-        m.getProbabilidadeDeBloqueioDeBandaMeasurement().addNewObservation(success, request);
-        m.getFragmentacaoExterna().addNewObservation(request.getCircuit());
-        m.getUtilizacaoSpectro().addNewObservation();
-        m.getFragmentacaoRelativa().addNewObservation(request.getCircuit());
-        m.getSpectrumSizeStatistics().addNewObservation(request.getCircuit());
-        m.getTransmitersReceiversUtilization().addNewObservation();
+        
+        // Adds a new note for all enabled performance metrics
+        m.addNewObservation(success, request);
     }
 
 }

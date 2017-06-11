@@ -52,7 +52,7 @@ public class Simulation implements Serializable {
         this.integratedRmlsaAlgorithm = sc.getIntegratedRmlsa();
         this.groomingAlgorithm = sc.getGrooming();
         this.modulationSelectionAlgorithm = sc.getModulationSelection();
-        this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh);
+        this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getMeasuringMetrics());
         this.mesh = mesh;
         controlPlane = new ControlPlane();
         controlPlane.setMesh(mesh);
