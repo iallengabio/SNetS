@@ -54,7 +54,7 @@ public class GRMLSA {
 
     private int rsaType;
     private RoutingInterface routing;
-    private SpectrumAssignmentAlgoritm spectrumAssignment;
+    private SpectrumAssignmentIterface spectrumAssignment;
     private IntegratedRSAAlgoritm integrated;
     private ModulationSelector modulationSelector;
     private TrafficGroomingAlgorithm grooming;

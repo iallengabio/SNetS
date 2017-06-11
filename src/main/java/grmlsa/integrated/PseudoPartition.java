@@ -6,7 +6,7 @@ import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgoritm;
+import grmlsa.spectrumAssignment.SpectrumAssignmentIterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -24,7 +24,7 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentAlgoritm spectrumAssignment;
+    private SpectrumAssignmentIterface spectrumAssignment;
 
     public PseudoPartition() {
         largBandSuperiores = new HashSet<>();

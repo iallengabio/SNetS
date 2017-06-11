@@ -20,7 +20,19 @@ public class SimulationConfig {
     private String grooming;
     private int loadPoints;
     private int replications;
-    private List<String> measuringMetrics = new ArrayList<String>();
+    private Metrics activeMetrics = new Metrics();
+
+    public static class Metrics{
+
+        public boolean BlockingProbability=true;
+        public boolean BandwidthBlockingProbability=true;
+        public boolean ExternalFragmentation=true;
+        public boolean SpectrumUtilization=true;
+        public boolean RelativeFragmentation=true;
+        public boolean SpectrumSizeStatistics=true;
+        public boolean TransmittersReceiversUtilization=true;
+
+    }
 
     /**
      * Returns the minimum number of requests
@@ -124,7 +136,7 @@ public class SimulationConfig {
     /**
      * Sets the modulation
      * 
-     * @param modulation String
+     * @param modulationSelection String
      */
     public void setModulationSelection(String modulationSelection) {
         this.modulationSelection = modulationSelection;
@@ -184,22 +196,19 @@ public class SimulationConfig {
         this.replications = replications;
     }
 
-	/**
-	 * Returns the measuring metrics
-	 * 
-	 * @return the measuringMetrics
-	 */
-	public List<String> getMeasuringMetrics() {
-		return measuringMetrics;
-	}
+    /**
+     * get the active metrics in this simulation
+     * @return
+     */
+    public Metrics getActiveMetrics() {
+        return activeMetrics;
+    }
 
-	/**
-	 * Sets the measuring metrics
-	 * 
-	 * @param measuringMetrics the measuringMetrics to set
-	 */
-	public void setMeasuringMetrics(List<String> measuringMetrics) {
-		this.measuringMetrics = measuringMetrics;
-	}
-    
+    /**
+     * set the active metrics in this simulation
+     * @return
+     */
+    public void setActiveMetrics(Metrics activeMetrics) {
+        this.activeMetrics = activeMetrics;
+    }
 }

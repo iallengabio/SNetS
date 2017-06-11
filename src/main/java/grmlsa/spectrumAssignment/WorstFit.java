@@ -13,7 +13,7 @@ import java.util.List;
  * This technique chooses the biggest free spectrum band that accommodates the request.
  * @author Iallen
  */
-public class WorstFit implements SpectrumAssignmentAlgoritm {
+public class WorstFit implements SpectrumAssignmentIterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {

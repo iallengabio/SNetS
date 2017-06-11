@@ -340,7 +340,7 @@ public class ControlPlane {
 			for(int i = 0; i < circuitsTemp.size(); i++){
 				Circuit circuitTemp = circuitsTemp.get(i);
 				
-				if(!this.equals(circuitTemp) && !circuits.contains(circuitTemp)){
+				if(!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)){
 					circuits.add(circuitTemp);
 				}
 			}

@@ -52,7 +52,7 @@ public class Simulation implements Serializable {
         this.integratedRmlsaAlgorithm = sc.getIntegratedRmlsa();
         this.groomingAlgorithm = sc.getGrooming();
         this.modulationSelectionAlgorithm = sc.getModulationSelection();
-        this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getMeasuringMetrics());
+        this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getActiveMetrics());
         this.mesh = mesh;
         controlPlane = new ControlPlane();
         controlPlane.setMesh(mesh);
@@ -229,7 +229,7 @@ public class Simulation implements Serializable {
     /**
      * Sets the replication
      * 
-     * @param replication
+     * @return replication
      */
     public int getReplication() {
         return replication;

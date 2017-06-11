@@ -19,8 +19,8 @@ public class Regenerators implements Serializable {
     	this.numRegenerators = numberOfRegenerators;
     }
     
-    public boolean allocatesRegenerators(RequestForConnection request){
-    	int numberOfRegenerators = getAmountOfRequiredRegenerators(request);
+    public boolean allocatesRegenerators(Circuit circuit){
+    	int numberOfRegenerators = getAmountOfRequiredRegenerators(circuit);
     	
     	if(quantRegeneratorsFree() >= numberOfRegenerators){
     		regenUtilization += numberOfRegenerators;
@@ -30,8 +30,8 @@ public class Regenerators implements Serializable {
 		return false;
 	}
 	
-	public boolean releasesRegenerators(RequestForConnection request){
-		int numberOfRegenerators = getAmountOfRequiredRegenerators(request);
+	public boolean releasesRegenerators(Circuit circuit){
+		int numberOfRegenerators = getAmountOfRequiredRegenerators(circuit);
 		
 		if((regenUtilization - numberOfRegenerators) >= 0){
 			regenUtilization -= numberOfRegenerators;
@@ -69,15 +69,28 @@ public class Regenerators implements Serializable {
 	public void setNumRegenerators(double numRegenerators) {
 		this.numRegenerators = numRegenerators;
 	}
+	
+	/**
+	 * Checks if there are sufficient free regenerators to attend the required amount
+	 * 
+	 * @param numberOfRegenerators int
+	 * @return boolean
+	 */
+	public boolean canRegenerate(int numberOfRegenerators) {
+        if (quantRegeneratorsFree() >= numberOfRegenerators) {
+            return true;
+        }
+        return false;
+    }
     
 	/**
-	 * Retorna a quantidade de regeneradores requeridos pela requisicao
-	 * @param request - Request
-	 * @return int - quantidade de regeneradores
+	 * Returns the amount of regenerators required by the circuit
+	 * @param circuit - Circuit
+	 * @return int - number of regenerators
 	 */
-	public int getAmountOfRequiredRegenerators(RequestForConnection request){
+	public int getAmountOfRequiredRegenerators(Circuit circuit){
 		double BR = 100.0; //Gbps
-		double Bn = request.getRequiredBandwidth() / 1073741824.0;
+		double Bn = circuit.getRequiredBandwidth() / 1073741824.0;
 		int quantRegeneradoresRequeridos = PhysicalLayer.roundUp(Bn / BR);
 		return quantRegeneradoresRequeridos;
 	}

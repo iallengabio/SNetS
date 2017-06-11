@@ -82,14 +82,13 @@ public class Main {
                             public void onSimulationFinished() {//do nothing
                             }
                         });
-
-                        sr.getResult().blockingProbability = sm.getBlockingProbabilityCsv();
-                        sr.getResult().bandwidthBlockingProbability = sm.getBandwidthBlockingProbabilityCsv();
-                        sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
-                        sr.getResult().relativeFragmentation = sm.getRelativeFragmentationCsv();
-                        sr.getResult().spectrumUtilization = sm.getSpectrumUtilizationCsv();
-                        sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
-                        sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().BlockingProbability)sr.getResult().blockingProbability = sm.getBlockingProbabilityCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().BandwidthBlockingProbability)sr.getResult().bandwidthBlockingProbability = sm.getBandwidthBlockingProbabilityCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().ExternalFragmentation)sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().RelativeFragmentation)sr.getResult().relativeFragmentation = sm.getRelativeFragmentationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().SpectrumUtilization)sr.getResult().spectrumUtilization = sm.getSpectrumUtilizationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().TransmittersReceiversUtilization)sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics)sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
                         sr.setProgress(1.0);
                         sr.setStatus("finished");
                         dataSnapshot.getRef().setValue(sr);

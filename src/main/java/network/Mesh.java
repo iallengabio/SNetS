@@ -38,7 +38,7 @@ public class Mesh implements Serializable {
         // Create nodes
         this.nodeList = new Vector<>();
         for (NetworkConfig.NodeConfig nodeConf : nc.getNodes()) {
-            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmitters(), nodeConf.getReceivers());
+            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmitters(), nodeConf.getReceivers(), nodeConf.getRegenerators());
             this.nodeList.add(aux);
             nodesAux.put(aux.getName(), aux);
         }

@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class BestFit implements SpectrumAssignmentAlgoritm {
+public class BestFit implements SpectrumAssignmentIterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {

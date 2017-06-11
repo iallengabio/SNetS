@@ -1,6 +1,5 @@
 package grmlsa.modulation;
 
-import network.ControlPlane;
 import network.Mesh;
 import network.PhysicalLayer;
 

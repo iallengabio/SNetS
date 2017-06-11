@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class LastFit implements SpectrumAssignmentAlgoritm {
+public class LastFit implements SpectrumAssignmentIterface {
 
     public LastFit() {
 

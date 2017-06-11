@@ -5,7 +5,7 @@ import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgoritm;
+import grmlsa.spectrumAssignment.SpectrumAssignmentIterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -19,7 +19,7 @@ public class ZonePartition implements IntegratedRSAAlgoritm {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentAlgoritm spectrumAssignment;
+    private SpectrumAssignmentIterface spectrumAssignment;
 
     private HashMap<Integer, int[]> zones;
 

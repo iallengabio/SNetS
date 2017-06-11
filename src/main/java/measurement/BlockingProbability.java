@@ -26,6 +26,9 @@ public class BlockingProbability extends Measurement {
     private int numReqBlockGeralFragment;
     private int numReqBlockGenLackTransmitters;
     private int numReqBlockGenLackReceivers;
+    private int numRegBlockQoTGeral;
+    private int numRegBlockQoTOtherGeral;
+    private int numRegBlockOtherGeral;
 
     // Blocking probability per pair
     private HashMap<String, Integer> numReqGenPair;

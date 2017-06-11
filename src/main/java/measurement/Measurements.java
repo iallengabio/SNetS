@@ -4,6 +4,7 @@ import java.util.*;
 
 import network.*;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationConfig;
 
 import java.io.Serializable;
 
@@ -48,12 +49,12 @@ public class Measurements implements Serializable {
     /**
      * List of performance metrics
      */
-    List<Measurement> metricsList;
+    private List<Measurement> metricsList;
     
     /**
      * List of metrics to be considered during the simulation
      */
-    List<String> measuringMetrics;
+    private SimulationConfig.Metrics measuringMetrics;
     
     /**
      * Creates a new instance of Measurements
@@ -63,7 +64,7 @@ public class Measurements implements Serializable {
      * @param replication int
      * @param mesh Mesh
      */
-    public Measurements(int numMinRequest, int loadPoint, int replication, Mesh mesh, List<String> measuringMetrics) {
+    public Measurements(int numMinRequest, int loadPoint, int replication, Mesh mesh, SimulationConfig.Metrics measuringMetrics) {
         this.loadPoint = loadPoint;
         this.replication = replication;
     	this.transientStep = true;
@@ -85,40 +86,42 @@ public class Measurements implements Serializable {
     	
         this.metricsList = new ArrayList<Measurement>();
         
-        // Activates the metrics listed in the SimulationConfig file
-        for(int i = 0; i < measuringMetrics.size(); i++){
-        	String metric = measuringMetrics.get(i);
-        	
-        	if(metric.equals("BlockingProbability")){
-		    	BlockingProbability probabilidadeDeBloqueioMeasurement = new BlockingProbability(loadPoint, replication);
-		    	this.metricsList.add(probabilidadeDeBloqueioMeasurement);
-		    	
-        	}else if(metric.equals("BandwidthBlockingProbability")){
-        		BandwidthBlockingProbability probabilidadeDeBloqueioDeBandaMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
-		    	this.metricsList.add(probabilidadeDeBloqueioDeBandaMeasurement);
-		    	
-        	}else if(metric.equals("ExternalFragmentation")){
-        		ExternalFragmentation fragmentacaoExterna = new ExternalFragmentation(loadPoint, replication, mesh);
-		    	this.metricsList.add(fragmentacaoExterna);
-		    	
-        	}else if(metric.equals("SpectrumUtilization")){
-        		SpectrumUtilization utilizacaoSpectro = new SpectrumUtilization(loadPoint, replication, mesh);
-		    	this.metricsList.add(utilizacaoSpectro);
-		    	
-        	}else if(metric.equals("RelativeFragmentation")){
-        		RelativeFragmentation fragmentacaoRelativa = new RelativeFragmentation(loadPoint, replication, mesh);
-		    	this.metricsList.add(fragmentacaoRelativa);
-        	
-        	}else if(metric.equals("SpectrumSizeStatistics")){
-        		SpectrumSizeStatistics metricsOfQoT = new SpectrumSizeStatistics(loadPoint, replication);
-		    	this.metricsList.add(metricsOfQoT);
-		    	
-        	}else if(metric.equals("TransmittersReceiversUtilization")){
-        		TransmittersReceiversUtilization metricsOfBAM = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
-		    	this.metricsList.add(metricsOfBAM);
-		    	
-        	}
-        }
+        // Activates the metrics set up in the SimulationConfig file
+		if(measuringMetrics.BlockingProbability){
+			BlockingProbability probabilidadeDeBloqueioMeasurement = new BlockingProbability(loadPoint, replication);
+			this.metricsList.add(probabilidadeDeBloqueioMeasurement);
+
+		}
+		if(measuringMetrics.BandwidthBlockingProbability){
+			BandwidthBlockingProbability probabilidadeDeBloqueioDeBandaMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
+			this.metricsList.add(probabilidadeDeBloqueioDeBandaMeasurement);
+
+		}
+		if(measuringMetrics.ExternalFragmentation){
+			ExternalFragmentation fragmentacaoExterna = new ExternalFragmentation(loadPoint, replication, mesh);
+			this.metricsList.add(fragmentacaoExterna);
+
+		}
+		if(measuringMetrics.SpectrumUtilization){
+			SpectrumUtilization utilizacaoSpectro = new SpectrumUtilization(loadPoint, replication, mesh);
+			this.metricsList.add(utilizacaoSpectro);
+
+		}
+		if(measuringMetrics.RelativeFragmentation){
+			RelativeFragmentation fragmentacaoRelativa = new RelativeFragmentation(loadPoint, replication, mesh);
+			this.metricsList.add(fragmentacaoRelativa);
+
+		}
+		if(measuringMetrics.SpectrumSizeStatistics){
+			SpectrumSizeStatistics metricsOfQoT = new SpectrumSizeStatistics(loadPoint, replication);
+			this.metricsList.add(metricsOfQoT);
+
+		}
+		if(measuringMetrics.TransmittersReceiversUtilization){
+			TransmittersReceiversUtilization metricsOfBAM = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
+			this.metricsList.add(metricsOfBAM);
+		}
+
     }
     
     /**
@@ -155,7 +158,7 @@ public class Measurements implements Serializable {
      * @param nodeList Vector<Node>
      */
     public void transientStepVerify() {
-        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {//ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
+        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) { // ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
             this.transientStep = false;
 
             initializeMetrics(mesh);

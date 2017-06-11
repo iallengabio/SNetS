@@ -17,7 +17,7 @@ import java.util.List;
  * @author Felipe
  */
 
-public class ExactFit implements SpectrumAssignmentAlgoritm {
+public class ExactFit implements SpectrumAssignmentIterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {
