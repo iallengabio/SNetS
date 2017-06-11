@@ -113,7 +113,7 @@ public class TransmittersReceiversUtilizationResultManager {
 			
 			String aux = "Tx Utilization Per Node" + sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
+			for (String node : trus.get(0).get(0).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
 				
 				for (Integer replic : replications) {
@@ -136,7 +136,7 @@ public class TransmittersReceiversUtilizationResultManager {
 			
 			String aux = "Rx Utilization Per Node"+sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
+			for (String node : trus.get(0).get(0).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
 				
 				for (Integer replic : replications) {
@@ -159,7 +159,7 @@ public class TransmittersReceiversUtilizationResultManager {
 			
 			String aux = "Max Tx Utilization Per Node" + sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
+			for (String node : trus.get(0).get(0).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
 				
 				for (Integer replic : replications) {
@@ -182,7 +182,7 @@ public class TransmittersReceiversUtilizationResultManager {
 			
 			String aux = "Max Rx Utilization Per Node" + sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String node : trus.get(1).get(1).getNodeNamesSet()) {
+			for (String node : trus.get(0).get(0).getNodeNamesSet()) {
 				String aux2 = aux + node + sep + " ";
 				
 				for (Integer replic : replications) {

@@ -92,7 +92,7 @@ public class SpectrumUtilizationResultManager {
 			
 			String aux = "Utilization Per Link" + sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String link : sus.get(1).get(1).getLinkSet()) {
+			for (String link : sus.get(0).get(0).getLinkSet()) {
 				String aux2 = aux + "<"+link+">" + sep + " - " + sep + " - " + sep + " ";
 				
 				for (Integer replic : replications) {

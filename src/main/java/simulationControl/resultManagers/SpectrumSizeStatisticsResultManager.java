@@ -70,7 +70,7 @@ public class SpectrumSizeStatisticsResultManager {
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			String aux = "Requisitons per number of slots" + sep + loadPoint + sep + "all" + sep; // "all"+sep+" ";
-			for (Integer numSlots : ssss.get(1).get(1).getNumberOfSlotsList()) {
+			for (Integer numSlots : ssss.get(0).get(0).getNumberOfSlotsList()) {
 				String aux2 = aux + numSlots + sep + "-" + sep + " ";
 				for (Integer replic : replications) {
 					aux2 = aux2 + sep + ssss.get(loadPoint).get(replic).getPercentageReq(numSlots);
@@ -90,9 +90,9 @@ public class SpectrumSizeStatisticsResultManager {
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			String aux = "Requisitons per number of slots per link" + sep + loadPoint + sep; // "all"+sep+" ";
-			for (String link : ssss.get(1).get(1).getLinkSet()) {
+			for (String link : ssss.get(0).get(0).getLinkSet()) {
 				String aux2 = aux + "<"+link+">" + sep;
-				for (Integer numSlots : ssss.get(1).get(1).getNumberOfSlotsPerLink(link)) {
+				for (Integer numSlots : ssss.get(0).get(0).getNumberOfSlotsPerLink(link)) {
 					String aux3 = aux2 + numSlots + sep + "-" + sep + " ";
 					for (Integer replic : replications) {
 						aux3 = aux3 + sep + ssss.get(loadPoint).get(replic).getPercentageReq(link, numSlots);
