@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class BestFit implements SpectrumAssignmentInterface {
+public class BestFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {
@@ -23,11 +23,10 @@ public class BestFit implements SpectrumAssignmentInterface {
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
         int i;
-        IntersectionFreeSpectrum ifs = new IntersectionFreeSpectrum();
-        for (i = 1; i < links.size(); i++) {
-            composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
-        }
 
+        for (i = 1; i < links.size(); i++) {
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
+        }
 
         int chosen[] = bestFit(numberOfSlots, composition);
 
@@ -38,23 +37,30 @@ public class BestFit implements SpectrumAssignmentInterface {
         return true;
     }
 
+    /**
+     * Applies the policy of allocation of spectrum BestFit
+     * 
+     * @param numberOfSlots int
+     * @param freeSpectrumBands List<int[]>
+     * @return int[]
+     */
     private static int[] bestFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
-        int menorDif = 999999999;
+        int lessDifference = 999999999;
+        
         for (int[] band : freeSpectrumBands) {
-            int tamFaixa = band[1] - band[0] + 1;
-            if (tamFaixa >= numberOfSlots) {
-                if (tamFaixa - numberOfSlots < menorDif) { //encontrou uma faixa com quantidade de slots mais pr�xima da quantidade requisitada
+            int sizeBand = band[1] - band[0] + 1;
+            if (sizeBand >= numberOfSlots) {
+                if (sizeBand - numberOfSlots < lessDifference) { //Found a range with the number of slots closer to the requested quantity
                     chosen = band;
-                    chosen[1] = chosen[0] + numberOfSlots - 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
-                    menorDif = tamFaixa - numberOfSlots;
+                    chosen[1] = chosen[0] + numberOfSlots - 1; //It is not necessary to allocate the entire band, just the amount of slots required
+                    lessDifference = sizeBand - numberOfSlots;
                 }
             }
         }
 
         return chosen;
     }
-
 
 }
 

@@ -10,7 +10,7 @@ import network.Mesh;
  * @author Iallen
  *
  */
-public class Integrated implements IntegratedRSAAlgoritm{
+public class Integrated implements IntegratedRMLSAAlgorithmInterface{
 
 	@Override
 	public boolean rsa(Circuit request, Mesh mesh) {

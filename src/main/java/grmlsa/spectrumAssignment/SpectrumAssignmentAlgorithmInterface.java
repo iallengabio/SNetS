@@ -8,7 +8,7 @@ import network.Circuit;
  * 
  * @author Iallen
  */
-public interface SpectrumAssignmentInterface {
+public interface SpectrumAssignmentAlgorithmInterface {
 	
 	/**
 	 * This method assigns a range of spectrum and returns true.

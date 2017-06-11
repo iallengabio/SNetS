@@ -14,11 +14,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class LastFit implements SpectrumAssignmentInterface {
-
-    public LastFit() {
-
-    }
+public class LastFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {
@@ -27,9 +23,9 @@ public class LastFit implements SpectrumAssignmentInterface {
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
         int i;
-        IntersectionFreeSpectrum ifs = new IntersectionFreeSpectrum();
+
         for (i = 1; i < links.size(); i++) {
-            composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
         int chosen[] = lastFit(numberOfSlots, composition);
@@ -42,21 +38,22 @@ public class LastFit implements SpectrumAssignmentInterface {
     }
 
     /**
+     * Applies the policy of allocation of spectrum LastFit
      *
-     *
-     * @param numberOfSlots
-     * @param freeSpectrumBands
-     * @return
+     * @param numberOfSlots int
+     * @param freeSpectrumBands List<int[]>
+     * @return int[]
      */
     public static int[] lastFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
         int band[] = null;
         int i;
+        
         for (i = freeSpectrumBands.size() - 1; i >= 0; i--) {
             band = freeSpectrumBands.get(i);
             if (band[1] - band[0] + 1 >= numberOfSlots) {
                 chosen = band;
-                chosen[0] = chosen[1] - numberOfSlots + 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
+                chosen[0] = chosen[1] - numberOfSlots + 1;//It is not necessary to allocate the entire band, just the amount of slots required
 
                 break;
             }
@@ -64,7 +61,6 @@ public class LastFit implements SpectrumAssignmentInterface {
 
         return chosen;
     }
-
 
 }
 

@@ -6,12 +6,12 @@ import java.util.List;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
-import grmlsa.integrated.IntegratedRSAAlgoritm;
+import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
-import grmlsa.routing.RoutingInterface;
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
-import grmlsa.trafficGrooming.TrafficGroomingAlgorithm;
+import grmlsa.routing.RoutingAlgorithmInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
 import request.RequestForConnection;
 
 /**
@@ -24,11 +24,11 @@ import request.RequestForConnection;
 public class ControlPlane {
 
     private int rsaType;
-    private RoutingInterface routing;
-    private SpectrumAssignmentInterface spectrumAssignment;
-    private IntegratedRSAAlgoritm integrated;
+    private RoutingAlgorithmInterface routing;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+    private IntegratedRMLSAAlgorithmInterface integrated;
     private ModulationSelector modulationSelector;
-    private TrafficGroomingAlgorithm grooming;
+    private TrafficGroomingAlgorithmInterface grooming;
 	
     private Mesh mesh;
 
@@ -48,7 +48,7 @@ public class ControlPlane {
      * @param routingInterface
      * @param spectrumAssignmentAlgoritm
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithm trafficGroomingAlgorithm, IntegratedRSAAlgoritm integratedRSAAlgoritm, RoutingInterface routingInterface, SpectrumAssignmentInterface spectrumAssignmentAlgoritm) {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
         activeCircuits = new HashMap<>();
 
         this.rsaType = rmlsaType;

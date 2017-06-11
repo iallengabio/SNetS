@@ -3,7 +3,7 @@ package grmlsa.regeneratorAssignment;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.CircuitTranslucent;
 import network.Node;
 
@@ -12,10 +12,10 @@ import network.Node;
  * 
  * @author Alexandre
  */
-public class AllAssignmentOfRegenerator implements RegeneratorAssignmentIterface {
+public class AllAssignmentOfRegenerator implements RegeneratorAssignmentAlgorithmInterface {
 
 	@Override
-	public boolean assignRegenerator(CircuitTranslucent circuit, SpectrumAssignmentInterface spectrumAssignment){
+	public boolean assignRegenerator(CircuitTranslucent circuit, SpectrumAssignmentAlgorithmInterface spectrumAssignment){
 		Vector<Node> nodeList = circuit.getRoute().getNodeList();
 		ArrayList<Node> regeneratorsNodesList = new ArrayList<Node>();
 		

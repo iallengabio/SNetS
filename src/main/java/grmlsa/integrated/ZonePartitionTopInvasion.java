@@ -10,17 +10,17 @@ import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
 
 
-public class ZonePartitionTopInvasion implements IntegratedRSAAlgoritm{
+public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterface{
 
 	private NewKShortestPaths kMenores;
 	private ModulationSelector modulationSelector;
-	private SpectrumAssignmentInterface spectrumAssignment;
+	private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 	
 	private HashMap<Integer, int[]> zones; 
 	

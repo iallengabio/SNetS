@@ -11,8 +11,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class FirstFit implements SpectrumAssignmentInterface {
-
+public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {
@@ -29,24 +28,23 @@ public class FirstFit implements SpectrumAssignmentInterface {
     }
 
     /**
-     *
-     * @param numberOfSlots
-     * @param freeSpectrumBands
-     * @return
+     * Applies the policy of allocation of spectrum FirstFit
+     * 
+     * @param numberOfSlots int
+     * @param freeSpectrumBands List<int[]>
+     * @return int[]
      */
     public static int[] firstFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
         for (int[] band : freeSpectrumBands) {
             if (band[1] - band[0] + 1 >= numberOfSlots) {
                 chosen = band;
-                chosen[1] = chosen[0] + numberOfSlots - 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
+                chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
                 break;
             }
         }
-
         return chosen;
     }
-
 
 }
 

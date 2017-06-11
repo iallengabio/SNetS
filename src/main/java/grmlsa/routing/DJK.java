@@ -11,8 +11,10 @@ import java.util.Vector;
 
 /**
  * This class represents the Dijkstra (Shortest Path) Routing Algorithm.
+ * 
+ * @author Iallen
  */
-public class DJK implements RoutingInterface {
+public class DJK implements RoutingAlgorithmInterface {
 
     private static final String DIV = "-";
 
@@ -36,35 +38,34 @@ public class DJK implements RoutingInterface {
         return false;
     }
 
-
     /**
-     * computa os menores caminhos para cada par
+     * Computes the smallest paths for each pair
      *
-     * @param mesh
+     * @param mesh Mesh
      */
     private void computeAllRoutes(Mesh mesh) {
         routesForAllPairs = new HashMap<String, Route>();
         for (Node n1 : mesh.getNodeList()) {
             shortestPaths(n1, mesh);
         }
-
     }
 
     /**
-     * calcula a menor rota entre um nó de origem e todos os outros nós da rede, algoritmo de Dijkstra
+     * Calculates the smallest route between a source node and all other nodes in the network
+     * Dijkstra's algorithm
      *
-     * @param mesh
-     * @return
+     * @param source Node
+     * @param mesh  Mesh
      */
     private void shortestPaths(Node source, Mesh mesh) {
-        HashMap<Node, Double> undefined = new HashMap<>(); //distâncias atuais dos nós até a origem
-        HashMap<Node, Vector<Node>> routes = new HashMap<>(); //rotas atuais da origem até cada nó
+        HashMap<Node, Double> undefined = new HashMap<>(); //Current distances from the nodes to the origin
+        HashMap<Node, Vector<Node>> routes = new HashMap<>(); //Current routes from source to each node
 
-        for (Node n : mesh.getNodeList()) { //sinalizando distância infinita para todos os nós da rede
+        for (Node n : mesh.getNodeList()) { //Signaling infinite distance to all nodes in the network
             undefined.put(n, 999999999999999.0);
         }
 
-        undefined.put(source, 0.0); //distancia 0 do nó de origem para ele mesmo
+        undefined.put(source, 0.0); //Distance 0 from the source node to itself
         Node nAux1;
         Vector<Node> rAux;
 
@@ -77,34 +78,32 @@ public class DJK implements RoutingInterface {
         while (!undefined.isEmpty()) {
             nAux1 = minDistAt(undefined);
 
-            //abrir a vértice
+            //Open the vertex
             for (Node n : mesh.getAdjacents(nAux1)) {
                 if (!undefined.containsKey(n)) continue;
 
                 rAux = (Vector<Node>) routes.get(nAux1).clone();
                 rAux.add(n);
-                //verificar se é necessário atualizar a rota
+                
+                //Check if it is necessary to update the route
                 if (undefined.get(n) == null || undefined.get(n) > undefined.get(nAux1) + mesh.getLink(nAux1.getName(), n.getName()).getDistance()) {
                     undefined.put(n, undefined.get(nAux1) + mesh.getLink(nAux1.getName(), n.getName()).getDistance());
                     routes.put(n, rAux);
                 }
             }
-            Double removed = undefined.remove(nAux1); //fechando o vértice
+            Double removed = undefined.remove(nAux1); //Closing the vertex
 
             routesForAllPairs.put(source.getName() + DIV + nAux1.getName(), new Route(routes.get(nAux1)));
 
             //System.out.println("closed: " + nAux1.getName() + "    size: " + undefined.keySet().size() + "   removed: " + removed);
         }
-
-
     }
 
-
     /**
-     * seleciona o nó com menor distância atual
+     * Selects the node with the lowest current distance
      *
-     * @param undefined
-     * @return
+     * @param undefined HashMap<Node, Double>
+     * @return Node
      */
     private Node minDistAt(HashMap<Node, Double> undefined) {
 
@@ -118,10 +117,7 @@ public class DJK implements RoutingInterface {
             if (undefined.get(res) > undefined.get(aux)) res = aux;
         }
 
-
         return res;
     }
-
-
 
 }

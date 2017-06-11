@@ -4,25 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import grmlsa.Route;
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Mesh;
 
+/**
+ * This class is responsible for managing the modulation formats.
+ * 
+ * @author Iallen
+ */
 public class ModulationSelector {
 	
 	private List<Modulation> avaliableModulations;
 	
 	/**
-	 * Distancias baseadas nos artigos:
+	 * Distances based on articles:
 	 * "Efficient Resource Allocation for All-Optical Multicasting Over Spectrum-Sliced Elastic Optical Networks"
 	 * "Evaluating Internal Blocking in Noncontentionless Flex-grid ROADMs"
 	 * "On the Complexity of Routing and Spectrum Assignment in Flexible-Grid Ring Networks"
 	 * 
-	 * Os outros valores:
+	 * Other values:
 	 * "Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats"
 	 * 
-	 * @param freqSlot
-	 * @param guardBand
+	 * @param freqSlot double
+	 * @param guardBand int
+	 * @param mesh Mesh
 	 */
 	public ModulationSelector(double freqSlot, int guardBand, Mesh mesh){
 		avaliableModulations = new ArrayList<>();
@@ -36,14 +42,15 @@ public class ModulationSelector {
 	}
 	
 	/**
-	 * Este metodo seleciona o processo de selecao do formato de modulacao
-	 * O formato de modulacao pode ser selecionado pelo seu alcance ou pela QoT
-	 * @param request - Request
+	 * This method selects the process of selecting the modulation format
+     * The modulation format can be selected by its range or QoT
+     * 
+	 * @param circuit - Circuit
 	 * @param route - Route
-	 * @param spectrumAssignment - SpectrumAssignmentAlgoritm
+	 * @param spectrumAssignment - SpectrumAssignmentAlgorithmInterface
 	 * @return Modulation
 	 */
-	public Modulation selectModulation (Circuit circuit, Route route, SpectrumAssignmentInterface spectrumAssignment, Mesh mesh) {
+	public Modulation selectModulation (Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh) {
 		Modulation resMod = null;
 		
 		if(mesh.getPhysicalLayer().isActiveQoT()){
@@ -56,8 +63,9 @@ public class ModulationSelector {
 	}
 
 	/**
-	 * retorna modulacao robusta o suficiente para atender a requisicao com a maior taxa de bits por simbolo possivel
-	 * @param request - Request
+	 * Returns modulation robust enough to satisfy the request with the highest bit rate per possible symbol
+	 * 
+	 * @param circuit - Circuit
 	 * @param route - Route
 	 * @return Modulation
 	 */
@@ -66,8 +74,8 @@ public class ModulationSelector {
 		Modulation resMod = null;
 		
 		for (Modulation mod : avaliableModulations) {
-			if(mod.getMaxRange() >= route.getDistanceAllLinks()){//modulacao robusta o suficiente para esta requisicao
-				if(mod.getBitsPerSymbol() > maxBPS){ //escolher a modulacao com maior quantidade de bits por simbolo possivel
+			if(mod.getMaxRange() >= route.getDistanceAllLinks()){//Modulation robust enough for this requirement
+				if(mod.getBitsPerSymbol() > maxBPS){ //Choose the modulation with the largest number of bits per possible symbol
 					resMod = mod;
 					maxBPS = mod.getBitsPerSymbol();
 				}
@@ -78,36 +86,38 @@ public class ModulationSelector {
 	}
 	
 	/**
-	 * retorna modulacao robusta o suficiente para atender a requisicao com a maior taxa de bits por simbolo possivel
-	 * considera a qualiade de transmissao
-	 * @param request - Request
+	 * Returns enough robust modulation to satisfy the request with the highest bit rate per symbol possible 
+	 * considering the quality of transmission
+	 * 
+	 * @param circuit - Circuit
 	 * @param route - Route
-	 * @param spectrumAssignment - SpectrumAssignmentAlgoritm
+	 * @param spectrumAssignment - SpectrumAssignmentAlgorithmInterface
+	 * @param mesh - Mesh
 	 * @return Modulation
 	 */
-	public Modulation selectModulationByQoT(Circuit circuit, Route route, SpectrumAssignmentInterface spectrumAssignment, Mesh mesh){
-		Modulation resMod = null; //para QoT admissivel
-		Modulation alternativeMod = null; //para alocar espectro
+	public Modulation selectModulationByQoT(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh){
+		Modulation resMod = null; //For admissible QoT
+		Modulation alternativeMod = null; //Which at least allocates spectrum
 		
 		for(int i = 0; i < avaliableModulations.size(); i++){
 			Modulation mod = avaliableModulations.get(i);
 			
 			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit)){
 				if(alternativeMod == null){
-					alternativeMod = mod; //guarda a primeira modulacao que conseguiu alocar espectro
+					alternativeMod = mod; //The first modulation that was able to allocate
 				}
 				
 				boolean flagQoT = mesh.getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, circuit.getSpectrumAssigned());
 				if(flagQoT){
-					resMod = mod; //guarda a modulacao que possui QoT admissivel
+					resMod = mod; //Save the modulation that has admissible QoT
 				}
 			}
 		}
 		
-		if(resMod == null){ //QoT inadimissivel para todas as modulacoes
-			if(alternativeMod != null){ //alocou spectro usando alguma modulacao, mas a QoT estava inadimissivel
+		if(resMod == null){ //QoT is not acceptable for all modulations
+			if(alternativeMod != null){ //Allocated spectro using some modulation, but the one that was inadmissible
 				resMod = alternativeMod;
-				circuit.setQoT(false); //para marcar que o bloqueio foi por QoT inadimissivel
+				circuit.setQoT(false); //To mark that the blockade was by Qto inadmissible
 			}
 		}
 		
@@ -115,7 +125,8 @@ public class ModulationSelector {
 	}
 	
 	/**
-	 * Este metodo retorna os formatos de modulacao disponiveis
+	 * This method returns the available modulation formats
+	 * 
 	 * @return the avaliableModulations - List<Modulation>
 	 */
 	public List<Modulation> getAvaliableModulations() {

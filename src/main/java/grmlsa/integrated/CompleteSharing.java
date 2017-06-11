@@ -5,7 +5,7 @@ import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -13,11 +13,11 @@ import util.IntersectionFreeSpectrum;
 import java.util.List;
 
 
-public class CompleteSharing implements IntegratedRSAAlgoritm {
+public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentInterface spectrumAssignment;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
     @Override
     public boolean rsa(Circuit request, Mesh mesh) {

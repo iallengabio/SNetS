@@ -17,7 +17,7 @@ import java.util.List;
  * @author Felipe
  */
 
-public class ExactFit implements SpectrumAssignmentInterface {
+public class ExactFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit request) {
@@ -26,9 +26,9 @@ public class ExactFit implements SpectrumAssignmentInterface {
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
         int i;
-        IntersectionFreeSpectrum ifs = new IntersectionFreeSpectrum();
+
         for (i = 1; i < links.size(); i++) {
-            composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
         int chosen[] = exactFit(numberOfSlots, composition);
@@ -41,42 +41,42 @@ public class ExactFit implements SpectrumAssignmentInterface {
     }
 
     /**
+     * Applies the policy of allocation of spectrum ExactFit
      *
-     * @param numberOfSlots
-     * @param freeSpectrumBands
-     * @return
+     * @param numberOfSlots int
+     * @param freeSpectrumBands List<int[]>
+     * @return int[]
      */
     private static int[] exactFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
         int chosen[] = null;
+        
         for (int[] band : freeSpectrumBands) {
-            int tamFaixa = band[1] - band[0] + 1;
+            int sizeBand = band[1] - band[0] + 1;
             if (chosen == null) {
-                if (tamFaixa == numberOfSlots) {
+                if (sizeBand == numberOfSlots) {
                     chosen = band;
-                    chosen[1] = chosen[0] + numberOfSlots - 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
-
+                    chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
                 }
             }
         }
 
-        if (chosen == null) {//n�o encontrou nenhuma faixa cont�gua e cont�nua dispon�vel
-            //agora basta buscar a faixa livre com tamanho mais distante da quantidade de slots requisitados
+        if (chosen == null) {// did not find any contiguous tracks and is still available
+            // now just look for the free range with size farthest from the amount of slots required
 
-            int maiorDif = -1;
+            int greaterDifference = -1;
             for (int[] band : freeSpectrumBands) {
-                int tamFaixa = band[1] - band[0] + 1;
-                if (tamFaixa >= numberOfSlots) {
-                    if (tamFaixa - numberOfSlots > maiorDif) { //encontrou uma faixa com quantidade de slots mais "diferente"
+                int sizeBand = band[1] - band[0] + 1;
+                if (sizeBand >= numberOfSlots) {
+                    if (sizeBand - numberOfSlots > greaterDifference) { //Found a band with more slots quantity "different"
                         chosen = band;
-                        chosen[1] = chosen[0] + numberOfSlots - 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
-                        maiorDif = tamFaixa - numberOfSlots;
+                        chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
+                        greaterDifference = sizeBand - numberOfSlots;
                     }
                 }
             }
         }
 
         return chosen;
-
     }
 
 }

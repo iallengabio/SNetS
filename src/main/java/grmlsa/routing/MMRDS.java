@@ -12,12 +12,14 @@ import java.util.*;
 /**
  * This class represents the MMRDS Routing Algorithm.
  * This algorithm is presented in http://sbrc2013.unb.br/files/anais/trilha-principal/artigos/artigo-9.pdf
+ * 
+ * @author Iallen
  */
-public class MMRDS implements RoutingInterface, Serializable {
+public class MMRDS implements RoutingAlgorithmInterface, Serializable {
     private static final String DIV = "-";
 
     private HashMap<String, Route> routesForAllPairs;
-    private Double alfa = 1.0;
+    private Double alpha = 1.0;
 
     @Override
     public boolean findRoute(Circuit request, Mesh mesh) {
@@ -39,6 +41,11 @@ public class MMRDS implements RoutingInterface, Serializable {
         return false;
     }
 
+    /**
+     * Initializes the cost of all network links with the value one.
+     * 
+     * @param mesh
+     */
     public void inicializeLinkCost(Mesh mesh) {
         Vector<Link> linkList = mesh.getLinkList();
         for (int i = 0; i < linkList.size(); i++) {
@@ -46,6 +53,11 @@ public class MMRDS implements RoutingInterface, Serializable {
         }
     }
 
+    /**
+     * Computes the smallest paths for each pair
+     * 
+     * @param mesh Mesh
+     */
     public void computeAllRoutes(Mesh mesh) {
         routesForAllPairs = new HashMap<String, Route>();
         HashMap<String, List<Route>> routesForAllPairs2 = new HashMap<String, List<Route>>();
@@ -59,55 +71,69 @@ public class MMRDS implements RoutingInterface, Serializable {
                     continue;
                 List<Route> listRoutes = computeRoutes(n1, n2, mesh);
                 routesForAllPairs2.put(n1.getName() + DIV + n2.getName(), listRoutes);
-                similarityForAllPairs2.put(n1.getName() + DIV + n2.getName(), similaridade(listRoutes));
+                similarityForAllPairs2.put(n1.getName() + DIV + n2.getName(), similarity(listRoutes));
             }
         }
 
-        escolherRotas(routesForAllPairs2, similarityForAllPairs2, mesh);
+        chooseRoutes(routesForAllPairs2, similarityForAllPairs2, mesh);
     }
 
+    /**
+     * Computes the smallest paths for a given pair
+     * 
+     * @param n1 Node
+     * @param n2 Node
+     * @param mesh Mesh
+     * @return List<Route>
+     */
     private List<Route> computeRoutes(Node n1, Node n2, Mesh mesh) {
-        TreeSet<Route> rotasEscolhidas = new TreeSet<>();
-        TreeSet<Route> rotasEmContrucao = new TreeSet<>();
+        TreeSet<Route> chosenRoutes = new TreeSet<>();
+        TreeSet<Route> routesUnderConstruction = new TreeSet<>();
 
-        Double tamRoute = 999999999999999.9;
+        Double sizeRoute = 999999999999999.9;
         Route r = new Route();
         r.addNode(n1);
-        rotasEmContrucao.add(r);
+        routesUnderConstruction.add(r);
 
-        while (!rotasEmContrucao.isEmpty()) {
-            Route expand = rotasEmContrucao.pollFirst();
+        while (!routesUnderConstruction.isEmpty()) {
+            Route expand = routesUnderConstruction.pollFirst();
 
-            if (possuiLoop(expand))
+            if (hasLoop(expand))
                 continue;
 
-            if (expand.getDestination().equals(n2)) { //rota finalizada
+            if (expand.getDestination().equals(n2)) { //Route completed
 
-                if (expand.getDistanceAllLinks() < tamRoute) { //verifica se encontrou uma rota menor do que as outras ja encontradas
-                    tamRoute = expand.getDistanceAllLinks();
-                    rotasEscolhidas = new TreeSet<>(); //limpa a lista das rotas ja encontradas
+                if (expand.getDistanceAllLinks() < sizeRoute) { //Check if you found a route smaller than the others already found
+                    sizeRoute = expand.getDistanceAllLinks();
+                    chosenRoutes = new TreeSet<>(); //Clears the list of routes already found
                 }
 
-                rotasEscolhidas.add(expand);
+                chosenRoutes.add(expand);
                 continue;
             }
 
-            if (expand.getDistanceAllLinks() >= tamRoute) {//nao adianta continuar procurando nesta rota
+            if (expand.getDistanceAllLinks() >= sizeRoute) {//It's no use keeping looking on this route
                 continue;
             }
 
-            //procurar mais rotas a partir desta
+            //Search more routes from this
             for (Node no : mesh.getAdjacents(expand.getDestination())) {
                 Route rAux = expand.clone();
                 rAux.addNode(no);
-                rotasEmContrucao.add(rAux);
+                routesUnderConstruction.add(rAux);
             }
         }
 
-        return new ArrayList<Route>(rotasEscolhidas);
+        return new ArrayList<Route>(chosenRoutes);
     }
 
-    private boolean possuiLoop(Route r) {
+    /**
+     * Checks whether the specified route has a loop
+     * 
+     * @param r Route
+     * @return boolean
+     */
+    private boolean hasLoop(Route r) {
         HashSet<String> nos = new HashSet<>();
         for (Node n : r.getNodeList()) {
             if (nos.contains(n.getName()))
@@ -117,57 +143,82 @@ public class MMRDS implements RoutingInterface, Serializable {
         return false;
     }
 
-    public void escolherRotas(HashMap<String, List<Route>> routesForAllPairs2, HashMap<String, Double> similarityForAllPairs2, Mesh mesh) {
-        Set<String> pares = routesForAllPairs2.keySet();
-        ArrayList<String> listPares = new ArrayList<String>();
-        for (String parName : pares) {
-            listPares.add(new String(parName));
+    /**
+     * Chooses the best route by similarity for all pairs
+     * 
+     * @param routesForAllPairs2 HashMap<String, List<Route>>
+     * @param similarityForAllPairs2 HashMap<String, Double>
+     * @param mesh Mesh
+     */
+    public void chooseRoutes(HashMap<String, List<Route>> routesForAllPairs2, HashMap<String, Double> similarityForAllPairs2, Mesh mesh) {
+        Set<String> pairs = routesForAllPairs2.keySet();
+        ArrayList<String> pairsList = new ArrayList<String>();
+        for (String pairName : pairs) {
+            pairsList.add(new String(pairName));
         }
 
-        while (!listPares.isEmpty()) {
-            String maxParName = listPares.get(0);
-            Double maxSimilaridade = similarityForAllPairs2.get(maxParName);
+        while (!pairsList.isEmpty()) {
+            String maxPairName = pairsList.get(0);
+            Double maxSimilaridade = similarityForAllPairs2.get(maxPairName);
 
-            for (int i = 1; i < listPares.size(); i++) {
-                String parName = listPares.get(i);
-                Double similaridade = similarityForAllPairs2.get(parName);
+            for (int i = 1; i < pairsList.size(); i++) {
+                String pairName = pairsList.get(i);
+                Double similaridade = similarityForAllPairs2.get(pairName);
+                
                 if (maxSimilaridade < similaridade) {
                     maxSimilaridade = similaridade;
-                    maxParName = parName;
+                    maxPairName = pairName;
                 }
             }
 
-            escolheRotaMenosCustosa(maxParName, routesForAllPairs2);
-            listPares.remove(maxParName);
+            chooseLessCostlyRoute(maxPairName, routesForAllPairs2);
+            pairsList.remove(maxPairName);
         }
     }
 
-    private void escolheRotaMenosCustosa(String parName, HashMap<String, List<Route>> routesForAllPairs2) {
-        Double menorCusto = 999999999999999.0;
-        Route rescolhida = null;
+    /**
+     * Chooses the best route by similarity for a given pair
+     * 
+     * @param parName String
+     * @param routesForAllPairs2 HashMap<String, List<Route>>
+     */
+    private void chooseLessCostlyRoute(String parName, HashMap<String, List<Route>> routesForAllPairs2) {
+        Double lowerCost = 999999999999999.0;
+        Route chosenRoute = null;
 
-        List<Route> rotasPar = routesForAllPairs2.get(parName);
-        for (Route raux : rotasPar) {
-            Double rcost = calcularCustoRota(raux);
-            if (rcost < menorCusto) {
-                menorCusto = rcost;
-                rescolhida = raux;
+        List<Route> pairRoutes = routesForAllPairs2.get(parName);
+        for (Route raux : pairRoutes) {
+            Double rcost = calculeRouteCust(raux);
+            if (rcost < lowerCost) {
+                lowerCost = rcost;
+                chosenRoute = raux;
             }
         }
 
-        routesForAllPairs.put(parName, rescolhida);
-        pesarEnlacesRota(rescolhida);
+        routesForAllPairs.put(parName, chosenRoute);
+        updateRouteLinkCosts(chosenRoute);
     }
 
-    private void pesarEnlacesRota(Route route) {
+    /**
+     * Updates the weight of the links of a given route
+     * 
+     * @param route Route
+     */
+    private void updateRouteLinkCosts(Route route) {
         Vector<Link> linkList = route.getLinkList();
         for (Link laux : linkList) {
             Double cost = laux.getCost();
-            laux.setCost(cost + alfa);
+            laux.setCost(cost + alpha);
         }
     }
 
-    private Double calcularCustoRota(Route route) {
+    /**
+     * This method calculates the cost of a given route
+     * 
+     * @param route Route
+     * @return Double
+     */
+    private Double calculeRouteCust(Route route) {
         Double res = 0.0;
         Vector<Link> linkList = route.getLinkList();
         for (Link laux : linkList) {
@@ -176,7 +227,14 @@ public class MMRDS implements RoutingInterface, Serializable {
         return res;
     }
 
-    private Double similaridade(Route rm1, Route rm2) {
+    /**
+     * This method calculates the similarity between two routes
+     * 
+     * @param rm1 Route
+     * @param rm2 Route
+     * @return Double
+     */
+    private Double similarity(Route rm1, Route rm2) {
         Route r1, r2;
         Double sim = 0.0;
 
@@ -196,33 +254,51 @@ public class MMRDS implements RoutingInterface, Serializable {
         return sim / (rm2.getLinkList().size());
     }
 
-    private Double similaridade(List<Route> lrm, int re) {
+    /**
+     * Computes the similarity for a list of routes and checks with a given value
+     * 
+     * @param lrm List<Route>
+     * @param re int
+     * @return Double
+     */
+    private Double similarity(List<Route> lrm, int re) {
         Double sim = 0.0;
         Route ra = lrm.get(re);
 
         for (int i = 0; i < lrm.size(); i++) {
             if (i == re)
                 continue;
-            sim = sim + similaridade(lrm.get(i), ra);
+            sim = sim + similarity(lrm.get(i), ra);
         }
 
         return sim / (lrm.size() - 1);
     }
 
-    public Double similaridade(List<Route> lrm) {
+    /**
+     * Computes the similarity for a list of routes
+     * 
+     * @param lrm List<Route>
+     * @return Double
+     */
+    public Double similarity(List<Route> lrm) {
         Double sim = 0.0;
 
         if (lrm.size() == 1)
             return 1.0;
 
         for (int i = 0; i < lrm.size(); i++) {
-            sim = sim + similaridade(lrm, i);
+            sim = sim + similarity(lrm, i);
         }
 
         return sim / lrm.size();
     }
 
-    public static void orderArrayOfParesPorSimilaridade(ArrayList<Circuit> array) {
+    /**
+     * This method sort a give array of pairs by required slots
+     * 
+     * @param array ArrayList<Circuit>
+     */
+    public static void sortArrayOfPairsBySlots(ArrayList<Circuit> array) {
         Collections.sort(array, new Comparator<Circuit>() {
             @Override
             public int compare(Circuit r1, Circuit r2) {

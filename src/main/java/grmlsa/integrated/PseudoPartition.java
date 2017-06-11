@@ -6,7 +6,7 @@ import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 
 
-public class PseudoPartition implements IntegratedRSAAlgoritm {
+public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 
     /**
      * Larguras de banda que utilizam o espectro de cima para baixo
@@ -24,7 +24,7 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentInterface spectrumAssignment;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
     public PseudoPartition() {
         largBandSuperiores = new HashSet<>();

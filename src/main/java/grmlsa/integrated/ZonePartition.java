@@ -5,7 +5,7 @@ import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -15,11 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class ZonePartition implements IntegratedRSAAlgoritm {
+public class ZonePartition implements IntegratedRMLSAAlgorithmInterface {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentInterface spectrumAssignment;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
     private HashMap<Integer, int[]> zones;
 
