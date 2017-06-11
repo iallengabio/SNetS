@@ -78,7 +78,17 @@ public class Measurements implements Serializable {
      * The network mesh
      */
     private Mesh mesh;
-
+    
+    /**
+     * List of performance metrics
+     */
+    List<Measurement> metricsList;
+    
+    /**
+     * List of metrics to be considered during the simulation
+     */
+    ArrayList<String> measuringMetrics;
+    
     /**
      * Creates a new instance of Measurements
      * 
@@ -91,9 +101,10 @@ public class Measurements implements Serializable {
         this.loadPoint = loadPoint;
         this.replication = replication;
     	this.transientStep = true;
-        this.numMinRequest = numMinRequest;       
-        initializeMetrics(mesh);
+        this.numMinRequest = numMinRequest;  
         this.mesh = mesh;
+        
+        initializeMetrics(mesh);
     }
     
     /**

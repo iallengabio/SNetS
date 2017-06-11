@@ -12,10 +12,10 @@ import java.util.List;
 public class SimulationConfig {
 
     private int requests;
-    private int rsaType;
+    private int rmlsaType;
     private String routing;
     private String spectrumAssignment;
-    private String integratedRsa;
+    private String integratedRmlsa;
     private String modulationSelection;
     private String grooming;
     private int loadPoints;
@@ -45,17 +45,17 @@ public class SimulationConfig {
      * 
      * @return int
      */
-    public int getRsaType() {
-        return rsaType;
+    public int getRmlsaType() {
+        return rmlsaType;
     }
 
     /**
      * Sets the RMLSA type
      * 
-     * @param rsaType int
+     * @param rmlsaType int
      */
-    public void setRsaType(int rsaType) {
-        this.rsaType = rsaType;
+    public void setRmlsaType(int rmlsaType) {
+        this.rmlsaType = rmlsaType;
     }
 
     /**
@@ -99,8 +99,8 @@ public class SimulationConfig {
      * 
      * @return String
      */
-    public String getIntegratedRsa() {
-        return integratedRsa;
+    public String getIntegratedRmlsa() {
+        return integratedRmlsa;
     }
 
     /**
@@ -108,8 +108,8 @@ public class SimulationConfig {
      * 
      * @param integratedRmlsa String
      */
-    public void setIntegratedRsa(String integratedRsa) {
-        this.integratedRsa = integratedRsa;
+    public void setIntegratedRmlsa(String integratedRmlsa) {
+        this.integratedRmlsa = integratedRmlsa;
     }
 
     /**

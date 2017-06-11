@@ -45,8 +45,7 @@ public class NewKShortestPaths {
                 if (n1 == n2)
                     continue;
 
-                routesForAllPairs.put(n1.getName() + DIV + n2.getName(),
-                        this.computeRoutes(n1, n2, mesh));
+                routesForAllPairs.put(n1.getName() + DIV + n2.getName(), this.computeRoutes(n1, n2, mesh));
             }
         }
     }

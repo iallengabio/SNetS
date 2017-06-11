@@ -134,14 +134,14 @@ public class ControlPlane {
      */
     private boolean allocateSpectrum(Circuit circuit, int chosen[], List<Link> links) {
         boolean notAbleAnymore = false;
-        Link l;
+        Link link;
         int i;
         
         for (i = 0; i < links.size(); i++) {
-            l = links.get(i);
-            notAbleAnymore = !l.useSpectrum(chosen);
+            link = links.get(i);
+            notAbleAnymore = !link.useSpectrum(chosen);
             
-            l.addCircuit(circuit);
+            link.addCircuit(circuit);
             
             if (notAbleAnymore) break; // Some resource was no longer available, cancel the allocation
         }
@@ -335,13 +335,13 @@ public class ControlPlane {
 		
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
-			List<Circuit> requestsAux = link.getCircuitList();
+			List<Circuit> circuitsTemp = link.getCircuitList();
 			
-			for(int i = 0; i < requestsAux.size(); i++){
-				Circuit requestAux = requestsAux.get(i);
+			for(int i = 0; i < circuitsTemp.size(); i++){
+				Circuit circuitTemp = circuitsTemp.get(i);
 				
-				if(!this.equals(requestAux) && !circuits.contains(requestAux)){
-					circuits.add(requestAux);
+				if(!this.equals(circuitTemp) && !circuits.contains(circuitTemp)){
+					circuits.add(circuitTemp);
 				}
 			}
 		}
