@@ -1,6 +1,6 @@
 {
 "requests":100000,
-"rsaType":0,
+"rmlsaType":0,
 "routing":"djk",
 "spectrumAssignment":"firstfit",
 "grooming":"notrafficgrooming",
