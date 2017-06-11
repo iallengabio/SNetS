@@ -19,6 +19,10 @@ public class Circuit {
     protected int spectrumAssigned[];
     protected Modulation modulation;
     protected List<RequestForConnection> requests; // Requests attended by this circuit
+    
+    protected double SNR; //dB
+	protected boolean QoT;
+	protected boolean QoTForOther;
 
     /**
      * Instantiates a circuit with the list of requests answered by it in empty
@@ -158,5 +162,47 @@ public class Circuit {
     public List<RequestForConnection> getRequests() {
         return requests;
     }
+    
+    /**
+	 * @return the sNR
+	 */
+	public double getSNR() {
+		return SNR;
+	}
 
+	/**
+	 * @param sNR the sNR to set
+	 */
+	public void setSNR(double sNR) {
+		SNR = sNR;
+	}
+
+	/**
+	 * @return the qoT
+	 */
+	public boolean isQoT() {
+		return QoT;
+	}
+
+	/**
+	 * @param qoT the qoT to set
+	 */
+	public void setQoT(boolean qoT) {
+		QoT = qoT;
+	}
+
+	/**
+	 * @return the qoTForOther
+	 */
+	public boolean isQoTForOther() {
+		return QoTForOther;
+	}
+
+	/**
+	 * @param qoTForOther the qoTForOther to set
+	 */
+	public void setQoTForOther(boolean qoTForOther) {
+		QoTForOther = qoTForOther;
+	}
+	
 }

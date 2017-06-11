@@ -3,7 +3,7 @@ package network;
 import java.io.Serializable;
 
 /**
- * 
+ * This class represents an optical amplifier in the network.
  * 
  * @author Alexandre
  */
@@ -52,9 +52,9 @@ public class Amplifier implements Serializable {
 		this.A1 = A1;
 		this.A2 = A2;
 		
-        this.gainLinear = ComputeQoT.ratioOfDB(gain);
-        this.noiseFigureLinear = ComputeQoT.ratioOfDB(noiseFigure);
-        this.saturationPowerLinear = ComputeQoT.ratioOfDB(saturationPower) * 1.0E-3; //convertendo para Watt
+        this.gainLinear = PhysicalLayer.ratioOfDB(gain);
+        this.noiseFigureLinear = PhysicalLayer.ratioOfDB(noiseFigure);
+        this.saturationPowerLinear = PhysicalLayer.ratioOfDB(saturationPower) * 1.0E-3; //convertendo para Watt
 	}
 	/**
 	 * Retorna o ganho
@@ -69,7 +69,7 @@ public class Amplifier implements Serializable {
 	 */
 	public void setGain(double gain) {
 		this.gain = gain;
-		this.gainLinear = ComputeQoT.ratioOfDB(gain);
+		this.gainLinear = PhysicalLayer.ratioOfDB(gain);
 	}
 	/**
 	 * Retorna a potencia de saturacao
@@ -84,7 +84,7 @@ public class Amplifier implements Serializable {
 	 */
 	public void setSaturationPower(double saturationPower) {
 		this.saturationPower = saturationPower; //dBm
-		this.saturationPowerLinear = ComputeQoT.ratioOfDB(saturationPower) * 1.0E-3; //Watt
+		this.saturationPowerLinear = PhysicalLayer.ratioOfDB(saturationPower) * 1.0E-3; //Watt
 	}
 	/**
 	 * Retorna a figura de ruido
@@ -99,7 +99,7 @@ public class Amplifier implements Serializable {
 	 */
 	public void setNoiseFigure(double noiseFigure) {
 		this.noiseFigure = noiseFigure;
-		this.noiseFigureLinear = ComputeQoT.ratioOfDB(noiseFigureLinear);
+		this.noiseFigureLinear = PhysicalLayer.ratioOfDB(noiseFigureLinear);
 	}
 	/**
 	 * Retorna a Constante de Planck

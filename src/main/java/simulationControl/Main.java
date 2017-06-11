@@ -1,21 +1,5 @@
 package simulationControl;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.FirebaseCredentials;
-import com.google.firebase.database.*;
-import com.google.firebase.tasks.Task;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import network.Mesh;
-import network.Pair;
-import network.RequestGenerator;
-import simulationControl.parsers.NetworkConfig;
-import simulationControl.parsers.SimulationConfig;
-import simulationControl.parsers.SimulationRequest;
-import simulationControl.parsers.TrafficConfig;
-import simulator.Simulation;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,6 +7,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseCredentials;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import network.Mesh;
+import network.Pair;
+import network.RequestGenerator;
+import simulationControl.parsers.NetworkConfig;
+import simulationControl.parsers.PhysicalLayerConfig;
+import simulationControl.parsers.SimulationConfig;
+import simulationControl.parsers.SimulationRequest;
+import simulationControl.parsers.TrafficConfig;
+import simulator.Simulation;
 
 /**
  * This class has the main method that will instantiate the parsers to read the 
@@ -59,13 +63,13 @@ public class Main {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Gson gson = new GsonBuilder().create();
-                SimulationRequest sr = gson.fromJson(dataSnapshot.getValue(false).toString(),SimulationRequest.class);
+                SimulationRequest sr = gson.fromJson(dataSnapshot.getValue(false).toString(), SimulationRequest.class);
                 //SimulationRequest sr = (SimulationRequest) dataSnapshot.getValue();
                 if(sr.getStatus().equals("new")) {
                     try {
                         dataSnapshot.getRef().child("status").setValue("started");
                         dataSnapshot.getRef().child("progress").setValue(0.0);
-                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig());
+                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig(), sr.getPhysicalLayerConfig());
                         //remember to implement with thread
                         SimulationManagement sm = new SimulationManagement(allSimulations);
                         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
@@ -176,11 +180,13 @@ public class Main {
     private static List<List<Simulation>> createAllSimulations(String path) throws Exception {
 
         //Path of the simulation configuration files
+    	String separator = System.getProperty("file.separator");
         String filesPath = path;
-        String networkFilePath = filesPath + "/network";
-        String simulationFilePath = filesPath + "/simulation";
-        String traficFilePath = filesPath + "/traffic";
-        String routesFilePath = filesPath + "/fixedRoutes";
+        String networkFilePath = filesPath + separator + "network";
+        String simulationFilePath = filesPath + separator + "simulation";
+        String traficFilePath = filesPath + separator + "traffic";
+        //String routesFilePath = filesPath + separator + "fixedRoutes";
+        String physicalLayerFilePath = filesPath + separator + "physicalLayer";
         Util.projectPath = filesPath;
         
         //Read files
@@ -199,12 +205,21 @@ public class Main {
         while (scanner.hasNext()) {
             trafficConfigJSON += scanner.next();
         }
+        scanner = new Scanner(new File(physicalLayerFilePath));
+        String physicalLayerConfigJSON = "";
+        while (scanner.hasNext()) {
+        	physicalLayerConfigJSON += scanner.next();
+        }
+        
         Gson gson = new GsonBuilder().create();
         NetworkConfig nc = gson.fromJson(networkConfigJSON, NetworkConfig.class);
         SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
         TrafficConfig tc = gson.fromJson(trafficConfigJSON, TrafficConfig.class);
-
-        return createAllSimulations(nc, sc, tc);
+        PhysicalLayerConfig plc = gson.fromJson(physicalLayerConfigJSON, PhysicalLayerConfig.class);
+        
+        scanner.close();
+        
+        return createAllSimulations(nc, sc, tc, plc);
     }
 
     /**
@@ -216,14 +231,14 @@ public class Main {
      * @return List<List<Simulation>>
      * @throws Exception
      */
-    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc) throws Exception {
+    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc, PhysicalLayerConfig plc) throws Exception {
         // Create list of simulations
         List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
         int i, j;
         for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
             List<Simulation> reps = new ArrayList<>();
             for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
-                Mesh m = new Mesh(nc, tc);
+                Mesh m = new Mesh(nc, tc, plc);
                 incArrivedRate(m.getPairList(), i);
                 Simulation s = new Simulation(sc, m, i, j);
                 reps.add(s);

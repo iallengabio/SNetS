@@ -46,16 +46,17 @@ public class Simulation implements Serializable {
         this.replication = replication;
         this.numReply = sc.getReplications();
         this.totalNumberOfRequests = sc.getRequests();
-        this.rmlsaType = sc.getRsaType();
+        this.rmlsaType = sc.getRmlsaType();
         this.routingAlgorithm = sc.getRouting();
         this.spectrumAssignmentAlgorithm = sc.getSpectrumAssignment();
-        this.integratedRmlsaAlgorithm = sc.getIntegratedRsa();
+        this.integratedRmlsaAlgorithm = sc.getIntegratedRmlsa();
         this.groomingAlgorithm = sc.getGrooming();
         this.modulationSelectionAlgorithm = sc.getModulationSelection();
-        this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh);
+        this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getMeasuringMetrics());
         this.mesh = mesh;
         controlPlane = new ControlPlane();
         controlPlane.setMesh(mesh);
+        
         switch (rmlsaType) {
             case GRMLSA.RSA_INTEGRATED:
                 controlPlane.setGrmlsa(new GRMLSA(this.integratedRmlsaAlgorithm, mesh.getLinkList().get(0).getSlotSpectrumBand(), controlPlane));
@@ -63,8 +64,10 @@ public class Simulation implements Serializable {
             case GRMLSA.RSA_SEQUENCIAL:
                 controlPlane.setGrmlsa(new GRMLSA(this.routingAlgorithm, this.spectrumAssignmentAlgorithm, mesh.getLinkList().get(0).getSlotSpectrumBand(), controlPlane));
                 break;
+                
+            default:
+                throw new Exception("unknow RMLSA type");
         }
-
     }
 
     /**

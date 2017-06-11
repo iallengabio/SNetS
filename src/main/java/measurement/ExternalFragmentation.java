@@ -7,6 +7,8 @@ import java.util.Set;
 import network.Circuit;
 import network.Link;
 import network.Mesh;
+import request.RequestForConnection;
+import simulationControl.resultManagers.ExternalFragmentationManager;
 import util.ComputesFragmentation;
 import util.IntersectionFreeSpectrum;
 
@@ -40,7 +42,10 @@ public class ExternalFragmentation extends Measurement {
         this.loadPoint = loadPoint;
         this.replication = rep;
         this.numberObservations = 0;
-        ExternalFragLinks = new HashMap<>();
+        this.ExternalFragLinks = new HashMap<>();
+        
+        fileName = "_ExternalFragmentation.csv";
+		//resultManager = new ExternalFragmentationManager();
     }
 
     /**
@@ -48,9 +53,9 @@ public class ExternalFragmentation extends Measurement {
      *
      * @param request
      */
-    public void addNewObservation(Circuit request) {
+    public void addNewObservation(boolean success, RequestForConnection request) {
         this.observationExternalFragVertical();
-        this.observationExternalFragHorizontal(request);
+        this.observationExternalFragHorizontal(request.getCircuit());
 
         numberObservations++;
     }
@@ -111,9 +116,9 @@ public class ExternalFragmentation extends Measurement {
      * the external fragmentation observed at the intersection of the free spectrum 
      * bands in a given route of a request
      */
-    private void observationExternalFragHorizontal(Circuit request) {
-        if (request.getRoute() == null) return;
-        List<Link> links = request.getRoute().getLinkList();
+    private void observationExternalFragHorizontal(Circuit circuit) {
+        if (circuit.getRoute() == null) return;
+        List<Link> links = circuit.getRoute().getLinkList();
 
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();

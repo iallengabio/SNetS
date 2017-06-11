@@ -10,6 +10,7 @@ public class SimulationRequest {
     private NetworkConfig networkConfig;
     private TrafficConfig trafficConfig;
     private SimulationConfig simulationConfig;
+    private PhysicalLayerConfig physicalLayerConfig;
     private String status;
     private Double progress = 0.0;
     private Result result = new Result();
@@ -87,6 +88,24 @@ public class SimulationRequest {
     }
 
     /**
+     * Returns the physicalLayerConfig
+     * 
+	 * @return the physicalLayerConfig
+	 */
+	public PhysicalLayerConfig getPhysicalLayerConfig() {
+		return physicalLayerConfig;
+	}
+
+	/**
+	 * Sets the physicalLayerConfig
+	 * 
+	 * @param physicalLayerConfig the physicalLayerConfig to set
+	 */
+	public void setPhysicalLayerConfig(PhysicalLayerConfig physicalLayerConfig) {
+		this.physicalLayerConfig = physicalLayerConfig;
+	}
+
+	/**
      * Returns the status
      * 
      * @return String
@@ -127,8 +146,7 @@ public class SimulationRequest {
      * 
      * @author Iallen
      */
-    public static class Result{
-
+    public static class Result {
         public String blockingProbability;
         public String bandwidthBlockingProbability;
         public String externalFragmentation;

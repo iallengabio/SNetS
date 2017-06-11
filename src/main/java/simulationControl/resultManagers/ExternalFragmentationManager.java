@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import measurement.ExternalFragmentation;
+import measurement.Measurement;
 
 /**
  * This class is responsible for formatting the file with results of external fragmentation

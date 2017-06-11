@@ -11,13 +11,14 @@ import java.io.Serializable;
 public class Transmitters implements Serializable {
 
 	private int txUtilization;
-	private int numberOfTx = Integer.MAX_VALUE; // Without limitation of transmitters
+	private int numberOfTx;
 
 	/**
 	 * Creates a new instance of Transmitters
 	 */
 	public Transmitters() {
 		this.txUtilization = 0;
+		this.numberOfTx = Integer.MAX_VALUE; // Without limitation of transmitters
 	}
 
 	/**
@@ -33,7 +34,7 @@ public class Transmitters implements Serializable {
 	/**
 	 * Increases the number of transmitters being used and updates the sum and peak transmitter utilization
 	 */
-	public boolean allocateTx() {
+	public boolean allocatesTransmitters() {
 		if(this.txUtilization < this.numberOfTx){
 			this.txUtilization++;
 			return true;
@@ -46,7 +47,7 @@ public class Transmitters implements Serializable {
 	 * Decrements the number of transmitters being used
 	 * This method should be invoked when a connection originating from this node source is terminated
 	 */
-	public void freeTx() {
+	public void releasesTransmitters() {
 		this.txUtilization--;
 	}
 
@@ -90,7 +91,16 @@ public class Transmitters implements Serializable {
 	 * @return boolean
 	 */
 	public boolean isFullUtilized(){
-		return numberOfTx==txUtilization;
+		return numberOfTx == txUtilization;
 	}
 	
+	/**
+	 * Check if there are free transmitters.
+	 * Returns true if there are free transmitters, otherwise returns false.
+	 * 
+	 * @return boolean
+	 */
+	public boolean hasFreeTransmitters(){
+		return (txUtilization < numberOfTx);
+	}
 }

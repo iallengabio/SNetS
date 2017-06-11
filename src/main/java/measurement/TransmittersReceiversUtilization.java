@@ -6,6 +6,7 @@ import java.util.Set;
 
 import network.Mesh;
 import network.Node;
+import request.RequestForConnection;
 
 /**
  * This class stores the measures regarding the use of transmitters and receivers for 
@@ -52,7 +53,7 @@ public class TransmittersReceiversUtilization extends Measurement {
     /**
      * Adds a new observation to the use of transmitters and receivers
      */
-    public void addNewObservation() {
+    public void addNewObservation(boolean success, RequestForConnection request) {
         ArrayList<Node> nodes = new ArrayList<>(mesh.getNodeList());
 
         for (Node node : nodes) {

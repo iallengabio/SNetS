@@ -3,6 +3,8 @@ package measurement;
 import java.util.*;
 
 import network.*;
+import request.RequestForConnection;
+
 import java.io.Serializable;
 
 /**
@@ -39,46 +41,20 @@ public class Measurements implements Serializable {
     private int loadPoint;
     
     /**
-     * Calculates the blocking probability of the circuits
-     */
-    private BlockingProbability blockingProbabilityMeasurement;    
-    
-    /**
-     * Calculates the bandwidth blocking probability of ghe circuits
-     */
-    private BandwidthBlockingProbability bandwidthBlockingProbabilityMeasurement;
-    
-    /**
-     * Calculates the external fragmentation
-     */
-    private ExternalFragmentation externalFragmentation;
-    
-    /**
-     * Calculates the relative fragmentation
-     */
-    private RelativeFragmentation relativeFragmentation;
-    
-    /**
-     * Calculates metrics for spectrum usage
-     */
-    private SpectrumUtilization spectrumUtilization;
-    
-    /**
-     * Currently used only to analyze the percentage of generated requests that require 
-     * each free spectrum band size
-     */
-    private SpectrumSizeStatistics spectrumSizeStatistics;
-    
-    /**
-     * Calculates metrics for the use of transmitters and receivers
-     */
-    private TransmittersReceiversUtilization transmitersReceiversUtilization;
-
-    /**
      * The network mesh
      */
     private Mesh mesh;
-
+    
+    /**
+     * List of performance metrics
+     */
+    List<Measurement> metricsList;
+    
+    /**
+     * List of metrics to be considered during the simulation
+     */
+    List<String> measuringMetrics;
+    
     /**
      * Creates a new instance of Measurements
      * 
@@ -87,13 +63,16 @@ public class Measurements implements Serializable {
      * @param replication int
      * @param mesh Mesh
      */
-    public Measurements(int numMinRequest, int loadPoint, int replication, Mesh mesh) {
+    public Measurements(int numMinRequest, int loadPoint, int replication, Mesh mesh, List<String> measuringMetrics) {
         this.loadPoint = loadPoint;
         this.replication = replication;
     	this.transientStep = true;
-        this.numMinRequest = numMinRequest;       
-        initializeMetrics(mesh);
+        this.numMinRequest = numMinRequest;  
         this.mesh = mesh;
+        
+        this.measuringMetrics = measuringMetrics;
+        
+        initializeMetrics(mesh);
     }
     
     /**
@@ -103,13 +82,55 @@ public class Measurements implements Serializable {
      */
     private void initializeMetrics(Mesh mesh){
     	this.numGeneratedReq = 0.0;
-        this.blockingProbabilityMeasurement = new BlockingProbability(loadPoint, replication); 
-        this.bandwidthBlockingProbabilityMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
-        this.externalFragmentation = new ExternalFragmentation(loadPoint, replication, mesh);
-        this.spectrumUtilization = new SpectrumUtilization(loadPoint, replication, mesh);
-        this.relativeFragmentation = new RelativeFragmentation(loadPoint, replication, mesh);
-        this.spectrumSizeStatistics = new SpectrumSizeStatistics(loadPoint, replication);
-        this.transmitersReceiversUtilization = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
+    	
+        this.metricsList = new ArrayList<Measurement>();
+        
+        // Activates the metrics listed in the SimulationConfig file
+        for(int i = 0; i < measuringMetrics.size(); i++){
+        	String metric = measuringMetrics.get(i);
+        	
+        	if(metric.equals("BlockingProbability")){
+		    	BlockingProbability probabilidadeDeBloqueioMeasurement = new BlockingProbability(loadPoint, replication);
+		    	this.metricsList.add(probabilidadeDeBloqueioMeasurement);
+		    	
+        	}else if(metric.equals("BandwidthBlockingProbability")){
+        		BandwidthBlockingProbability probabilidadeDeBloqueioDeBandaMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
+		    	this.metricsList.add(probabilidadeDeBloqueioDeBandaMeasurement);
+		    	
+        	}else if(metric.equals("ExternalFragmentation")){
+        		ExternalFragmentation fragmentacaoExterna = new ExternalFragmentation(loadPoint, replication, mesh);
+		    	this.metricsList.add(fragmentacaoExterna);
+		    	
+        	}else if(metric.equals("SpectrumUtilization")){
+        		SpectrumUtilization utilizacaoSpectro = new SpectrumUtilization(loadPoint, replication, mesh);
+		    	this.metricsList.add(utilizacaoSpectro);
+		    	
+        	}else if(metric.equals("RelativeFragmentation")){
+        		RelativeFragmentation fragmentacaoRelativa = new RelativeFragmentation(loadPoint, replication, mesh);
+		    	this.metricsList.add(fragmentacaoRelativa);
+        	
+        	}else if(metric.equals("SpectrumSizeStatistics")){
+        		SpectrumSizeStatistics metricsOfQoT = new SpectrumSizeStatistics(loadPoint, replication);
+		    	this.metricsList.add(metricsOfQoT);
+		    	
+        	}else if(metric.equals("TransmittersReceiversUtilization")){
+        		TransmittersReceiversUtilization metricsOfBAM = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
+		    	this.metricsList.add(metricsOfBAM);
+		    	
+        	}
+        }
+    }
+    
+    /**
+     * Adds a new note for all enabled performance metrics
+     * 
+     * @param success boolean
+     * @param request RequestForConnection
+     */
+    public void addNewObservation(boolean success, RequestForConnection request){
+    	for(Measurement metric : metricsList){
+    		metric.addNewObservation(success, request);
+    	}
     }
 
     /**
@@ -133,12 +154,11 @@ public class Measurements implements Serializable {
      * 
      * @param nodeList Vector<Node>
      */
-    public void transientStepVerify(Vector<Node> nodeList) {
+    public void transientStepVerify() {
         if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {//ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
             this.transientStep = false;
 
             initializeMetrics(mesh);
-            numGeneratedReq = 0;
         }
     }
 
@@ -154,68 +174,77 @@ public class Measurements implements Serializable {
         }
         return false;
     }
-
+    
     /**
-     * Returns the blocking probability measurement
+     * Request the list of performance metrics
      * 
-	 * @return the blockingProbabilityMeasurement
-	 */
-	public BlockingProbability getProbabilidadeDeBloqueioMeasurement() {
-		return blockingProbabilityMeasurement;
+ 	 * @return List<Measurement> metrics
+ 	 */
+ 	public List<Measurement> getMetrics(){
+ 		return metricsList;
+ 	}
+ 	
+ 	public BlockingProbability getProbabilidadeDeBloqueioMeasurement(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof BlockingProbability){
+				return (BlockingProbability)metric;
+			}
+		}
+		return null;
 	}
-
-	/**
-	 * Returns the bandwidth blocking probability measurement
-	 * 
-	 * @return the bandwidthBlockingProbabilityMeasurement
-	 */
-	public BandwidthBlockingProbability getProbabilidadeDeBloqueioDeBandaMeasurement() {
-		return bandwidthBlockingProbabilityMeasurement;
+ 	
+ 	public BandwidthBlockingProbability getProbabilidadeDeBloqueioDeBandaMeasurement(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof BandwidthBlockingProbability){
+				return (BandwidthBlockingProbability)metric;
+			}
+		}
+		return null;
 	}
-
-	/**
-	 * Returns the external fragmentation
-	 * 
-	 * @return the externalFragmentation
-	 */
-	public ExternalFragmentation getFragmentacaoExterna() {
-		return externalFragmentation;
+ 	
+ 	public ExternalFragmentation getFragmentacaoExterna(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof ExternalFragmentation){
+				return (ExternalFragmentation)metric;
+			}
+		}
+		return null;
 	}
-	
-	/**
-	 * Returns the relative fragmentation
-	 * 
-	 * @return the relativeFragmentation
-	 */
-	public RelativeFragmentation getFragmentacaoRelativa() {
-		return relativeFragmentation;
+ 	
+ 	public RelativeFragmentation getFragmentacaoRelativa(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof RelativeFragmentation){
+				return (RelativeFragmentation)metric;
+			}
+		}
+		return null;
 	}
-
-	/**
-	 * Returns the spectrum utilization
-	 * 
-	 * @return the SpectrumUtilization
-	 */
-	public SpectrumUtilization getUtilizacaoSpectro() {
-		return spectrumUtilization;
+ 	
+ 	public SpectrumUtilization getUtilizacaoSpectro(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof SpectrumUtilization){
+				return (SpectrumUtilization)metric;
+			}
+		}
+		return null;
 	}
-
-	/**
-	 * Returns the spectrum size statistics
-	 * 
-	 * @return spectrumSizeStatistics
-	 */
-	public SpectrumSizeStatistics getSpectrumSizeStatistics() {
-		return spectrumSizeStatistics;
+ 	
+ 	public SpectrumSizeStatistics getSpectrumSizeStatistics(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof SpectrumSizeStatistics){
+				return (SpectrumSizeStatistics)metric;
+			}
+		}
+		return null;
 	}
-
-	/**
-	 * Returns the transmitters receivers utilization
-	 * 
-	 * @return transmitersReceiversUtilization
-	 */
-	public TransmittersReceiversUtilization getTransmitersReceiversUtilization() {
-		return transmitersReceiversUtilization;
+ 	
+ 	public TransmittersReceiversUtilization getTransmitersReceiversUtilization(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof TransmittersReceiversUtilization){
+				return (TransmittersReceiversUtilization)metric;
+			}
+		}
+		return null;
 	}
-	
+ 	
 }

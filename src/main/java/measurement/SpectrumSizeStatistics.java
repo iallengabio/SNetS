@@ -7,6 +7,7 @@ import java.util.Set;
 
 import network.Circuit;
 import network.Link;
+import request.RequestForConnection;
 
 /**
  * This class represents the metric that computes the number of requests that use a given number of slots.
@@ -45,10 +46,11 @@ public class SpectrumSizeStatistics extends Measurement{
 	 * 
 	 * @param request
 	 */
-	public void addNewObservation(Circuit request){
-		if(request.getModulation()==null) return;// This metric may not be reliable if there are locks due to lack of transmitter
-		this.newObservationRequestSizeBandwidthGeneral(request);	
-		this.newObservationRequestSizeBandwidthPerLink(request);
+	public void addNewObservation(boolean success, RequestForConnection request){
+		if(request.getCircuit().getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
+			return;
+		this.newObservationRequestSizeBandwidthGeneral(request.getCircuit());	
+		this.newObservationRequestSizeBandwidthPerLink(request.getCircuit());
 	}
 	
 	/**

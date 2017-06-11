@@ -1,0 +1,11 @@
+{
+"loadPoints":5,
+"replications":3,
+"requests":100000,
+"grooming":"notrafficgrooming",
+"rmlsaType":1,
+"routing":"djk",
+"spectrumAssignment":"firstfit",
+"integratedRmlsa":"completesharing",
+"modulationSelection":"modulationbydistance"
+}

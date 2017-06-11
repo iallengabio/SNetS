@@ -26,7 +26,6 @@ public class SimulationManagement {
     private List<List<Simulation>> simulations;
     private int done;
     private int numOfSimulations;
-
     /**
      * Stores the results for all points with all replicas
      */
@@ -103,7 +102,36 @@ public class SimulationManagement {
      * This method is responsible for calling the method of the class responsible for saving 
      * the results associated with each metric
      */
-    public void saveResults(String pathResultFiles) {
+    public void saveResults(String pathResultFiles){
+    	//pegar nome da pasta
+    	String separador = System.getProperty("file.separator");
+    	String aux[] = pathResultFiles.split(Pattern.quote(separador));
+    	String nomePasta = aux[aux.length-1];
+    	
+    	try {
+    		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
+    		for(int m = 0; m < numMetrics; m++){
+    			Measurement metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
+    			
+				List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
+				for (List<Measurements> listMeasurements : this.mainMeasuremens) {
+					List<Measurement> lms = new ArrayList<Measurement>();
+					llms.add(lms);
+					for (Measurements measurements : listMeasurements) {
+						lms.add(measurements.getMetrics().get(m));
+					}
+				}
+				
+				String path = pathResultFiles + separador + nomePasta;
+				metric.result(path, llms);
+    		}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public void saveResults2(String pathResultFiles) {
     	// Pick folder name
     	String separator = System.getProperty("file.separator");
         String aux[] = pathResultFiles.split(Pattern.quote(separator));
@@ -260,7 +288,6 @@ public class SimulationManagement {
         public void onSimulationProgressUpdate(double progress);
 
         public void onSimulationFinished();
-
     }
 
 }
