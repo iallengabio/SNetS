@@ -84,6 +84,15 @@ public class PhysicalLayer {
 	public boolean isActiveQoTForOther() {
 		return activeQoTForOther;
 	}
+	
+	/**
+	 * Returns the Size of a span (km)
+	 * 
+	 * @return the L
+	 */
+	public double getSpanLength() {
+		return L;
+	}
 
 	public double getFEC(){
 		double fec = 0.0;

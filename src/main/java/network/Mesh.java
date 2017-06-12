@@ -71,6 +71,7 @@ public class Mesh implements Serializable {
             p.addRequestGenerator(new RequestGenerator(p, rgc.getBandwidth(), rgc.getHoldRate(), rgc.getArrivalRate(), rgc.getArrivalRateIncrease(), randGenerator));
         }
         
+        // Information related to the physical layer of the network
         this.physicalLayer = new PhysicalLayer(plc);
     }
 

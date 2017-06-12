@@ -429,4 +429,42 @@ public class TranslucentControlPlane extends ControlPlane {
 		return resChosen;
 	}
 	
+	/**
+	 * This method returns the power consumption of a given circuit.
+	 * 
+	 * @return double - power consumption (W)
+	 */
+	@Override
+	public double getPowerConsumption(Circuit circuit){
+		double PCtotal = 0.0;
+		
+		int sourceNodeIndex = 0;
+		Route route = circuit.getRoute();
+		
+		int numberOfTransparentSegments = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
+		for(int i = 0; i < numberOfTransparentSegments; i++){
+			
+			int destinationNodeIndex = route.getNodeList().size() - 1;
+			if(i < numberOfTransparentSegments - 1){
+				destinationNodeIndex = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
+			}
+			
+			Node sourceNode = route.getNode(sourceNodeIndex);
+			Node destinationNode = route.getNode(sourceNodeIndex + 1);
+			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+			
+			Modulation mod = circuit.getModulationByLink(link);
+			int sa[] = circuit.getSpectrumAssignedByLink(link);
+			
+			double PCsegment = EnergyConsumption.computePowerConsumptionBySegment(this, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, mod, sa);
+			PCtotal += PCsegment;
+			
+			sourceNodeIndex = destinationNodeIndex;
+		}
+		
+		circuit.setPowerConsumption(PCtotal);
+		
+		return PCtotal;
+	}
+	
 }
