@@ -1,6 +1,7 @@
 package simulationControl;
 
 import measurement.*;
+import simulationControl.parsers.SimulationConfig;
 import simulationControl.resultManagers.*;
 import simulator.Simulation;
 import simulator.Simulator;
@@ -101,77 +102,67 @@ public class SimulationManagement {
     /**
      * This method is responsible for calling the method of the class responsible for saving 
      * the results associated with each metric
-     */
-    public void saveResults2(String pathResultFiles){
-    	//pegar nome da pasta
-    	String separador = System.getProperty("file.separator");
-    	String aux[] = pathResultFiles.split(Pattern.quote(separador));
-    	String nomePasta = aux[aux.length-1];
-    	
-    	try {
-    		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
-    		for(int m = 0; m < numMetrics; m++){
-    			Measurement metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
-    			
-				List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
-				for (List<Measurements> listMeasurements : this.mainMeasuremens) {
-					List<Measurement> lms = new ArrayList<Measurement>();
-					llms.add(lms);
-					for (Measurements measurements : listMeasurements) {
-						lms.add(measurements.getMetrics().get(m));
-					}
-				}
-				
-				String path = pathResultFiles + separador + nomePasta;
-				metric.result(path, llms);
-    		}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-    
+     */    
     public void saveResults(String pathResultFiles) {
     	// Pick folder name
     	String separator = System.getProperty("file.separator");
         String aux[] = pathResultFiles.split(Pattern.quote(separator));
         String nome = aux[aux.length - 1];
+        
+        SimulationConfig.Metrics measuringMetrics = this.mainMeasuremens.get(0).get(0).getMeasuringMetrics();
+        
         try {
             //List<Pair> pairs = new ArrayList(this.simulations.get(0).get(0).getMesh().getPairList());
+        	FileWriter fw = null;
+        	
             // Circuit blocking probability
-            FileWriter fw = new FileWriter(new File(pathResultFiles + separator + nome + "BlockingProb.csv"));
-            fw.write(getBlockingProbabilityCsv());
-            fw.close();
+        	if(measuringMetrics.BlockingProbability){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "BlockingProb.csv"));
+	            fw.write(getBlockingProbabilityCsv());
+	            fw.close();
+        	}
 
             // Bandwidth blocking probability
-            fw = new FileWriter(new File(pathResultFiles + separator + nome + "BandwidthBlockingProb.csv"));
-            fw.write(getBandwidthBlockingProbabilityCsv());
-            fw.close();
+        	if(measuringMetrics.BandwidthBlockingProbability){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "BandwidthBlockingProb.csv"));
+	            fw.write(getBandwidthBlockingProbabilityCsv());
+	            fw.close();
+        	}
 
             // External fragmentation
-            fw = new FileWriter(new File(pathResultFiles + separator + nome + "ExternalFragmentation.csv"));
-            fw.write(getExternalFragmentationCsv());
-            fw.close();
+            if(measuringMetrics.ExternalFragmentation){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "ExternalFragmentation.csv"));
+	            fw.write(getExternalFragmentationCsv());
+	            fw.close();
+            }
 
             // Relative fragmentation
-            fw = new FileWriter(new File(pathResultFiles + separator + nome + "RelativeFragmentation.csv"));
-            fw.write(getRelativeFragmentationCsv());
-            fw.close();
+            if(measuringMetrics.RelativeFragmentation){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "RelativeFragmentation.csv"));
+	            fw.write(getRelativeFragmentationCsv());
+	            fw.close();
+            }
 
             // Spectrum utilization
-            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumUtilization.csv"));
-            fw.write(getSpectrumUtilizationCsv());
-            fw.close();
+            if(measuringMetrics.SpectrumUtilization){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumUtilization.csv"));
+	            fw.write(getSpectrumUtilizationCsv());
+	            fw.close();
+            }
 
             // Spectrum statistics
-            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumSizeStatistics.csv"));
-            fw.write(getSpectrumStatisticsCsv());
-            fw.close();
+            if(measuringMetrics.SpectrumSizeStatistics){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumSizeStatistics.csv"));
+	            fw.write(getSpectrumStatisticsCsv());
+	            fw.close();
+            }
 
             // Statistics of tx and rx
-            fw = new FileWriter(new File(pathResultFiles + separator + nome + "TransmitersReceiversUtilization.csv"));
-            fw.write(getTransceiversUtilizationCsv());
-            fw.close();
+            if(measuringMetrics.TransmittersReceiversUtilization){
+	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "TransmitersReceiversUtilization.csv"));
+	            fw.write(getTransceiversUtilizationCsv());
+	            fw.close();
+            }
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -191,7 +182,6 @@ public class SimulationManagement {
         }
 
         BlockingProbResultManager bprm = new BlockingProbResultManager(pbs);
-
         return bprm.result();
     }
 

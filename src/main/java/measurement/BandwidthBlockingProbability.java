@@ -175,8 +175,13 @@ public class BandwidthBlockingProbability extends Measurement{
 		double res;
 		String or = p.getSource().getName();
 		String dest = p.getDestination().getName();
-		Double gen = this.requestedBandwidthPairBW.get(or + SEP + dest).get(bw);
-		if(gen==null) return 0; // No requests generated for this pair
+		
+		Double gen = null;
+		if(this.requestedBandwidthPairBW.get(or + SEP + dest) != null){
+			gen = this.requestedBandwidthPairBW.get(or + SEP + dest).get(bw);
+		}
+		
+		if(gen == null) return 0; // No requests generated for this pair
 		Double block = 0.0;
 		
 		HashMap<Double, Double> hashAux = this.bandwidthBlockedPairBW.get(or + SEP + dest);

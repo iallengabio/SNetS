@@ -9,7 +9,6 @@ import grmlsa.GRMLSA;
 import grmlsa.Route;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
-import grmlsa.modulation.ModulationSelector;
 import grmlsa.regeneratorAssignment.RegeneratorAssignmentAlgorithmInterface;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -27,12 +26,10 @@ public class TranslucentControlPlane extends ControlPlane {
 	protected RegeneratorAssignmentAlgorithmInterface regeneratorAssignment;
 	
 
-	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm,
-			                       IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface,
-			                       SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
+	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm, RegeneratorAssignmentAlgorithmInterface regeneratorAssignment) {
 		super(mesh, rmlsaType, trafficGroomingAlgorithm, integratedRSAAlgoritm, routingInterface, spectrumAssignmentAlgoritm);
 
-		
+		this.regeneratorAssignment = regeneratorAssignment;
 	}
 
 	/**
@@ -51,14 +48,34 @@ public class TranslucentControlPlane extends ControlPlane {
 		return circuit;
     }
     
+    /**
+     * 
+     * 
+     * @param circuit TranslucentCircuit
+     */
+    public void allocateRegenerators(TranslucentCircuit circuit){
+    	// Verifies that the list of regenerators is not empty
+		if(circuit.getRegeneratorsNodesIndexList() != null && circuit.getRegeneratorsNodesIndexList().size() > 0){
+			
+			// Releases regenerators
+			for(int i = 0; i < circuit.getRegeneratorsNodesIndexList().size(); i++){
+				Node node = circuit.getRoute().getNode(circuit.getRegeneratorsNodesIndexList().get(i));
+				
+				if(!node.getRegenerators().allocatesRegenerators(circuit)){
+					System.err.println("ERROR: RequestTranslucent class. Method liberateNodesRegenerators(). Trying to allocate non-free regenerator!");
+				}
+			}
+		}	
+    }
+    
 	/**
 	 * Method that releases the regenerators used by a circuit.
 	 * To avoid an error in the metrics you should not delete the regenerators from the 
 	 * list of regenerators used by a circuit.
 	 * 
-	 * @param TranslucentCircuit circuit
+	 * @param circuit TranslucentCircuit
 	 */
-	public void liberateNodesRegenerators(TranslucentCircuit circuit) {
+	public void releasesRegenerators(TranslucentCircuit circuit) {
 		
 		// Verifies that the list of regenerators is not empty
 		if(circuit.getRegeneratorsNodesIndexList() != null && circuit.getRegeneratorsNodesIndexList().size() > 0){
@@ -126,35 +143,75 @@ public class TranslucentControlPlane extends ControlPlane {
     }
 	
 	/**
+     * This method is called after executing RMLSA algorithms to allocate resources in the network
+     *
+     * @param circuit Circuit
+     */
+	@Override
+    protected void allocateCircuit(Circuit circuit) {
+        Route route = circuit.getRoute();
+        List<Link> links = new ArrayList<>(route.getLinkList());
+        
+        allocateSpectrum(circuit, links);
+        
+        // Allocates transmitter and receiver
+        circuit.getSource().getTxs().allocatesTransmitters();
+        circuit.getDestination().getRxs().allocatesReceivers();
+        
+        // Allocates regenerators
+        allocateRegenerators((TranslucentCircuit)circuit);
+        
+        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
+    }
+    
+	/**
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
      * @param circuit Circuit
      * @param chosen int[]
      * @param links List<Link>
      */
-	@Override
-	protected void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+	protected void allocateSpectrum(Circuit circuit, List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-            chosen = circuit.getSpectrumAssignedByLink(link);
+            int[] chosen = circuit.getSpectrumAssignedByLink(link);
             
             link.useSpectrum(chosen);
             link.addCircuit(circuit);
         }
     }
     
+	/**
+     * Releases the resources being used by a given circuit
+     *
+     * @param circuit
+     */
+	@Override
+    public void releaseCircuit(Circuit circuit) {
+        Route route = circuit.getRoute();
+
+        releaseSpectrum(circuit, route.getLinkList());
+
+        // Release transmitter and receiver
+        circuit.getSource().getTxs().releasesTransmitters();
+        circuit.getDestination().getRxs().releasesReceivers();
+        
+        // Release regenerators
+        releasesRegenerators((TranslucentCircuit)circuit);
+
+        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
+    }
+    
     /**
      * This method releases the allocated spectrum for the circuit
      * 
      * @param circuit Circuit
-     * @param chosen int[]
      * @param links List<Link>
      */
-	@Override
-	protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+	protected void releaseSpectrum(Circuit circuit, List<Link> links) {
     	for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-        	chosen = circuit.getSpectrumAssignedByLink(link);
+            int chosen[] = circuit.getSpectrumAssignedByLink(link);
         	
             link.liberateSpectrum(chosen);
             link.removeCircuit(circuit);
@@ -175,24 +232,31 @@ public class TranslucentControlPlane extends ControlPlane {
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
-                	
-                	if(regeneratorAssignment.assignRegenerator((TranslucentCircuit)circuit, spectrumAssignment)){
-                		
-                		if(((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() == 0){
-                			return withoutRegenerator((TranslucentCircuit)circuit, circuit.getRoute(), spectrumAssignment, modulationSelector);
-                			
-                		}else{
-                			return withRegenerator((TranslucentCircuit)circuit, circuit.getRoute(), spectrumAssignment, modulationSelector, ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList());
-                		}
-                	}
-                } else {
-                    return false;
+                	return regeneratorAssignment.assignRegenerator((TranslucentCircuit)circuit, this);
                 }
         }
 
         return false;
     }
 	
+    /**
+     * Selects the form of modulation format selection and spectrum allocation.
+     * 
+     * @param circuit TranslucentCircuit
+     * @return boolean
+     */
+    public boolean strategySelection(TranslucentCircuit circuit){
+    	// Releases the regenerators allocated so that they can be later allocated to the other network resources
+		releasesRegenerators(circuit);
+		
+		if(circuit.getRegeneratorsNodesIndexList().size() == 0){
+			return withoutRegenerator(circuit, circuit.getRoute());
+			
+		} else {
+			return withRegenerator(circuit, circuit.getRoute(), circuit.getRegeneratorsNodesIndexList());
+		}
+    }
+    
     /**
 	 * This method attempts to define the modulation format and the spectrum to be allocated in each link of the route selected for the request
 	 * 
@@ -202,7 +266,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * @param modulationSelector - ModulationSelector
 	 * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
 	 */
-	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ModulationSelector modulationSelector){
+	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route){
 		Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment, mesh);
 		
 		if(mod != null){
@@ -235,14 +299,12 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * This method tries to define the modulation format and the spectrum to be allocated in each link of the route 
 	 * selected for the request taking into account the transparent segments among the regenerators selected for the request
 	 * 
-	 * @param request - Request
+	 * @param circuit - TranslucentCircuit
 	 * @param route - Route
-	 * @param spectrumAssignment - SpectrumAssignmentAlgorithmInterface
-	 * @param modulationSelector - ModulationSelector
-	 * @param regeneratorsNodesIndexList - ArrayList<Integer>
-	 * @return true, se conguiu definir o fomato de modulação e colcar o espectro, ou false, caso contrario
+	 * @param regeneratorsNodesIndexList - List<Integer>
+	 * @return True, if you could define the modulation format and put the spectrum, or false, otherwise
 	 */
-	public boolean withRegenerator(TranslucentCircuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ModulationSelector modulationSelector, List<Integer> regeneratorsNodesIndexList){
+	public boolean withRegenerator(TranslucentCircuit circuit, Route route, List<Integer> regeneratorsNodesIndexList){
 		HashMap<Link, int[]> spectrumAssignedByLink = new HashMap<Link, int[]>();
 		HashMap<Link, Modulation> modulationByLink = new HashMap<Link, Modulation>();
 		
@@ -269,7 +331,7 @@ public class TranslucentControlPlane extends ControlPlane {
 				composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
 			}
 			
-			int chosen[] = tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, spectrumAssignment, modulationSelector, true, false);
+			int chosen[] = tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, true);
 			
 			if(chosen == null){
 				// Steps to avoid error in the metrics
@@ -284,7 +346,7 @@ public class TranslucentControlPlane extends ControlPlane {
 					modulationByLink.put(link, mod);
 				}
 				
-				circuit.setModulationByLink(modulationByLink);;
+				circuit.setModulationByLink(modulationByLink);
 				return false;
 			}
 			
@@ -314,18 +376,15 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * This method attempts to choose a modulation format according to the QoT of the transmission also tries to choose 
 	 * a range of spectrum for the request according to the selected modulation
 	 * 
-	 * @param circuit - Circuit
+	 * @param circuit - TranslucentCircuit
 	 * @param route - Route
 	 * @param sourceNodeIndex - int
 	 * @param destinationNodeIndex - int
 	 * @param composition - List<int[]>
-	 * @param spectrumAssignment - SpectrumAssignmentAlgorithmInterface
-	 * @param modulationSelector - ModulationSelector
 	 * @param checkAssignSpectrum - boolean (True, to save the first range of allocated spectrum, or false, otherwise)
-	 * @param checkSigma - boolean
 	 * @return int[]
 	 */
-	public int[] tryAssignSpectrum(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, List<int[]> composition, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ModulationSelector modulationSelector, boolean checkAssignSpectrum, boolean checkSigma){
+	public int[] tryAssignSpectrum(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, List<int[]> composition, boolean checkAssignSpectrum){
 		int resChosen[] = null;
 		int alternativeChosen[] = null; //Used to avoid error in metrics
 		Modulation resMod = null;
@@ -340,7 +399,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			if(chosen != null){
 				if(alternativeMod == null){
 					alternativeMod = mod;
-					if(checkAssignSpectrum){
+					if(checkAssignSpectrum){ //
 						alternativeChosen = chosen;
 					}
 				}

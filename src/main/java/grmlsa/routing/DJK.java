@@ -4,7 +4,10 @@ import grmlsa.Route;
 import network.Circuit;
 import network.Mesh;
 import network.Node;
+import simulationControl.Util;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -22,16 +25,19 @@ public class DJK implements RoutingAlgorithmInterface {
 
 
     @Override
-    public boolean findRoute(Circuit request, Mesh mesh) {
-        if (routesForAllPairs == null) computeAllRoutes(mesh);
+    public boolean findRoute(Circuit circuit, Mesh mesh) {
+        if (routesForAllPairs == null) {
+        	computeAllRoutes(mesh);
+        	salveRoutesByPar(mesh.getNodeList());
+        }
 
-        Node source = request.getSource();
-        Node destination = request.getDestination();
+        Node source = circuit.getSource();
+        Node destination = circuit.getDestination();
 
         Route r = routesForAllPairs.get(source.getName() + DIV + destination.getName());
 
         if (r != null) {
-            request.setRoute(r);
+            circuit.setRoute(r);
             return true;
         }
 
@@ -73,7 +79,6 @@ public class DJK implements RoutingAlgorithmInterface {
         rAux = new Vector<>();
         rAux.add(nAux1);
         routes.put(nAux1, rAux);
-
 
         while (!undefined.isEmpty()) {
             nAux1 = minDistAt(undefined);
@@ -118,6 +123,41 @@ public class DJK implements RoutingAlgorithmInterface {
         }
 
         return res;
+    }
+    
+    private void salveRoutesByPar(Vector<Node> nodeList) {
+        try {
+        	FileWriter fw = new FileWriter(Util.projectPath + "/routesByPar.txt");
+			BufferedWriter out = new BufferedWriter(fw);
+            
+			int quantNodes = nodeList.size();
+	        for(int i = 1; i <= quantNodes; i++){
+	    	    for(int j = 1; j <= quantNodes; j++){
+	    		    
+	    		    if(i != j){
+		      		    String par = i + DIV + j;
+		      		    
+			        	//out.println("Par " + par);
+			        	
+			        	Route rota = routesForAllPairs.get(par);
+			        	StringBuilder sb = new StringBuilder();
+			        	for(int n = 0; n < rota.getNodeList().size(); n++){
+			        		sb.append(rota.getNodeList().get(n).getName());
+			        		if(n < rota.getNodeList().size() - 1){
+			        			sb.append("\t");
+			        		}
+			        	}
+			        	out.append(sb.toString());
+			        	out.append("\n");
+	    		    }
+	    	    }
+	        }
+	        
+	        out.close();
+			fw.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }

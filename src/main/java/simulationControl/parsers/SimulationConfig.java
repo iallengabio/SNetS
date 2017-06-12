@@ -18,6 +18,8 @@ public class SimulationConfig {
     private int loadPoints;
     private int replications;
     private Metrics activeMetrics = new Metrics();
+    private String regeneratorAssignment;
+    private int networkType;
 
     public static class Metrics {
 
@@ -28,7 +30,6 @@ public class SimulationConfig {
         public boolean RelativeFragmentation = true;
         public boolean SpectrumSizeStatistics = true;
         public boolean TransmittersReceiversUtilization = true;
-
     }
 
     /**
@@ -195,6 +196,7 @@ public class SimulationConfig {
 
     /**
      * get the active metrics in this simulation
+     * 
      * @return
      */
     public Metrics getActiveMetrics() {
@@ -203,9 +205,47 @@ public class SimulationConfig {
 
     /**
      * set the active metrics in this simulation
+     * 
      * @return
      */
     public void setActiveMetrics(Metrics activeMetrics) {
         this.activeMetrics = activeMetrics;
     }
+
+	/**
+	 * Returns the regenerators assignment algorithm
+	 * 
+	 * @return the regeneratorAssignment
+	 */
+	public String getRegeneratorAssignment() {
+		return regeneratorAssignment;
+	}
+
+	/**
+	 * Sets the regenerators assignment algorithm
+	 * 
+	 * @param regeneratorAssignment the regeneratorAssignment to set
+	 */
+	public void setRegeneratorAssignment(String regeneratorAssignment) {
+		this.regeneratorAssignment = regeneratorAssignment;
+	}
+
+	/**
+	 * Returns the network type
+	 * 
+	 * @return the networkType
+	 */
+	public int getNetworkType() {
+		return networkType;
+	}
+
+	/**
+	 * Sets the network type
+	 * 
+	 * @param networkType the networkType to set
+	 */
+	public void setNetworkType(int networkType) {
+		this.networkType = networkType;
+	}
+	
 }

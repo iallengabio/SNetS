@@ -53,7 +53,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		if(modulationSelector == null){
 			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 		}
-		if(spectrumAssignment1 == null || spectrumAssignment2 == null){
+		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
 			spectrumAssignment1 = new FirstFit();
 			spectrumAssignment2 = new LastFit();
 		}

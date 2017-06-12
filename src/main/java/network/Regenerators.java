@@ -88,7 +88,7 @@ public class Regenerators implements Serializable {
 	 */
 	public int getAmountOfRequiredRegenerators(Circuit circuit){
 		double BR = 100.0; //Gbps
-		double Bn = circuit.getRequiredBandwidth() / 1073741824.0;
+		double Bn = circuit.getRequiredBandwidth() / 1000000000.0;
 		int quantRegeneradoresRequeridos = PhysicalLayer.roundUp(Bn / BR);
 		return quantRegeneradoresRequeridos;
 	}

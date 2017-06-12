@@ -186,7 +186,14 @@ public class Measurements implements Serializable {
  		return metricsList;
  	}
  	
- 	public BlockingProbability getProbabilidadeDeBloqueioMeasurement(){
+ 	/**
+	 * @return the measuringMetrics
+	 */
+	public SimulationConfig.Metrics getMeasuringMetrics() {
+		return measuringMetrics;
+	}
+
+	public BlockingProbability getProbabilidadeDeBloqueioMeasurement(){
 		for(Measurement metric : metricsList){
 			if(metric instanceof BlockingProbability){
 				return (BlockingProbability)metric;

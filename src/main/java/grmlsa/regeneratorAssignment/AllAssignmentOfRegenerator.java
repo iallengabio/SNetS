@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
-import network.TranslucentCircuit;
 import network.Node;
+import network.TranslucentCircuit;
+import network.TranslucentControlPlane;
 
 /**
  * This class applies the allocation policy of all available regenerators.
@@ -16,11 +16,12 @@ import network.Node;
 public class AllAssignmentOfRegenerator implements RegeneratorAssignmentAlgorithmInterface {
 
 	@Override
-	public boolean assignRegenerator(TranslucentCircuit circuit, SpectrumAssignmentAlgorithmInterface spectrumAssignment){
+	public boolean assignRegenerator(TranslucentCircuit circuit, TranslucentControlPlane controlPlane){
 		Vector<Node> nodeList = circuit.getRoute().getNodeList();
 		List<Integer> regeneratorsNodesIndexList = new ArrayList<Integer>();
 		
-		for(int i = 1; i < nodeList.size(); i++){ // Starting from the second node
+		int size = nodeList.size() - 1; // Number of nodes of the route without considering the last
+		for(int i = 1; i < size; i++){ // Starting from the second node
 			Node node = nodeList.get(i);
 			
 			int numberRegeneratorsRequired = node.getRegenerators().getAmountOfRequiredRegenerators(circuit);
@@ -35,8 +36,9 @@ public class AllAssignmentOfRegenerator implements RegeneratorAssignmentAlgorith
 			}
 		}
 		
+		// Configures the list of circuit regenerators nodes
 		circuit.setRegeneratorsNodesIndexList(regeneratorsNodesIndexList);
 		
-		return true;
+		return controlPlane.strategySelection(circuit);
 	}
 }

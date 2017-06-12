@@ -24,7 +24,8 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
+	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
 
     public PseudoPartition() {
         largBandSuperiores = new HashSet<>();
@@ -39,8 +40,9 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 		if(modulationSelector==null){
 			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 		}
-		if(spectrumAssignment == null){
-			spectrumAssignment = new FirstFit();
+		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
+			spectrumAssignment1 = new FirstFit();
+			spectrumAssignment2 = new LastFit();
 		}
 		
         List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
@@ -56,11 +58,11 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
             for (Route r : candidateRoutes) {
                 //calcular quantos slots são necessários para esta rota
                 circuit.setRoute(r);
-                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
+                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment1, mesh);
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-                int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
+                int ff[] = spectrumAssignment1.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
                 if (ff != null && ff[0] < faixaEscolhida[0]) {
                     faixaEscolhida = ff;
@@ -78,11 +80,11 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
             for (Route r : candidateRoutes) {
                 //calcular quantos slots são necessários para esta rota
                 circuit.setRoute(r);
-                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
+                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment2, mesh);
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-                int lf[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
+                int lf[] = spectrumAssignment2.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
                 if (lf != null && lf[1] > faixaEscolhida[1]) {
                     faixaEscolhida = lf;

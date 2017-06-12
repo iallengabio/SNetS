@@ -28,7 +28,10 @@ public class Circuit {
      * Instantiates a circuit with the list of requests answered by it in empty
      */
     public Circuit() {
-        requests = new ArrayList<>();
+        this.requests = new ArrayList<>();
+        
+        this.QoT = true; //Assuming that a request always starts with admissible QoT
+        this.QoTForOther = true; //Assuming that it is admissible for the other requirements
     }
 
     /**

@@ -37,7 +37,7 @@ public class ControlPlane {
      * The first key represents the source node.
      * The second key represents the destination node.
      */
-    private HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
+    protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
 
     /**
      * Instance the control plane with the list of active circuits in empty
@@ -102,7 +102,26 @@ public class ControlPlane {
     public Mesh getMesh() {
         return mesh;
     }
+    
+    /**
+     * Returns the modulation selector
+     * 
+     * @return ModulationSelector
+     */
+    public ModulationSelector getModulationSelector(){
+    	return modulationSelector;
+    }
 
+    /**
+     * Returns the spectrum assignment
+     * 
+     * @return SpectrumAssignmentAlgorithmInterface
+     */
+    public SpectrumAssignmentAlgorithmInterface getSpectrumAssignment(){
+    	return spectrumAssignment;
+    }
+    
+    
     /**
      * This method tries to satisfy a certain request by checking if there are available resources for the establishment of the circuit.
      * This method verifies the possibility of satisfying a circuit request.
@@ -122,6 +141,7 @@ public class ControlPlane {
     public void finalizeConnection(RequestForConnection rfc) {
         this.grooming.finishConnection(rfc, this);
     }
+    
     /**
      * Releases the resources being used by a given circuit
      *
@@ -129,14 +149,31 @@ public class ControlPlane {
      */
     public void releaseCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
-
-        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), route.getLinkList());
+        int chosen[] = circuit.getSpectrumAssigned();
+        
+        releaseSpectrum(circuit, chosen, route.getLinkList());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
         circuit.getDestination().getRxs().releasesReceivers();
 
         activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
+    }
+    
+    /**
+     * This method releases the allocated spectrum for the circuit
+     * 
+     * @param circuit Circuit
+     * @param chosen int[]
+     * @param links List<Link>
+     */
+    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+        for (int i = 0; i < links.size(); i++) {
+        	Link link = links.get(i);
+        	
+            link.liberateSpectrum(chosen);
+            link.removeCircuit(circuit);
+        }
     }
 
     /**
@@ -171,22 +208,6 @@ public class ControlPlane {
             
             link.useSpectrum(chosen);
             link.addCircuit(circuit);
-        }
-    }
-
-    /**
-     * This method releases the allocated spectrum for the circuit
-     * 
-     * @param circuit Circuit
-     * @param chosen int[]
-     * @param links List<Link>
-     */
-    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
-        for (int i = 0; i < links.size(); i++) {
-        	Link link = links.get(i);
-        	
-            link.liberateSpectrum(chosen);
-            link.removeCircuit(circuit);
         }
     }
     
@@ -232,10 +253,10 @@ public class ControlPlane {
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
                     Modulation mod = modulationSelector.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
-                    circuit.setModulation(mod);
-                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
-                } else {
-                    return false;
+                    if(mod != null){
+	                    circuit.setModulation(mod);
+	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
+                    }
                 }
         }
 
