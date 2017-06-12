@@ -462,6 +462,8 @@ public class TranslucentControlPlane extends ControlPlane {
 			sourceNodeIndex = destinationNodeIndex;
 		}
 		
+		circuit.setPowerConsumption(PCtotal);
+		
 		return PCtotal;
 	}
 	
