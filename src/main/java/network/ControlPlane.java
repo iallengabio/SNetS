@@ -425,4 +425,15 @@ public class ControlPlane {
 		
 		return true;
     }
+    
+    /**
+	 * This method returns the power consumption of a given circuit.
+	 * 
+	 * @return double - power consumption (W)
+	 */
+	public double getPowerConsumption(Circuit circuit){
+		double powerConsumption = EnergyConsumption.computePowerConsumptionBySegment(this, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
+		circuit.setPowerConsumption(powerConsumption);
+		return powerConsumption;
+	}
 }

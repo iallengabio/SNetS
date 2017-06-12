@@ -23,6 +23,8 @@ public class Circuit {
     protected double SNR; //dB
 	protected boolean QoT;
 	protected boolean QoTForOther;
+	
+	protected double powerConsumption;
 
     /**
      * Instantiates a circuit with the list of requests answered by it in empty
@@ -231,4 +233,23 @@ public class Circuit {
 		Modulation mod = getModulation();
 		return mod;
 	}
+
+	/**
+	 * Returns the power consumption by circuit
+	 * 
+	 * @return the powerConsumption
+	 */
+	public double getPowerConsumption() {
+		return powerConsumption;
+	}
+
+	/**
+	 * Sets the power consumption by circuit
+	 * 
+	 * @param powerConsumption the powerConsumption to set
+	 */
+	public void setPowerConsumption(double powerConsumption) {
+		this.powerConsumption = powerConsumption;
+	}
+	
 }
