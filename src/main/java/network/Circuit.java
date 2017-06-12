@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents an established circuit in an optical network
+ * This class represents an established transparent circuit in an optical network
  * 
  * @author Iallen
  */
@@ -28,7 +28,10 @@ public class Circuit {
      * Instantiates a circuit with the list of requests answered by it in empty
      */
     public Circuit() {
-        requests = new ArrayList<>();
+        this.requests = new ArrayList<>();
+        
+        this.QoT = true; //Assuming that a request always starts with admissible QoT
+        this.QoTForOther = true; //Assuming that it is admissible for the other requirements
     }
 
     /**
@@ -205,4 +208,27 @@ public class Circuit {
 		QoTForOther = qoTForOther;
 	}
 	
+	/**
+	 * This method returns the spectrum allocated by the circuit on a link
+     * Can change according to the type of circuit
+	 * 
+	 * @param link - Link
+	 * @return int[]
+	 */
+	public int[] getSpectrumAssignedByLink(Link link){
+		int sa[] = getSpectrumAssigned();
+		return sa;
+	}
+	
+	/**
+	 * This method that returns the modulation format used in a given route link
+	 * Can change according to the type of circuit
+	 * 
+	 * @param link - Link
+	 * @return Modulation
+	 */
+	public Modulation getModulationByLink(Link link){
+		Modulation mod = getModulation();
+		return mod;
+	}
 }

@@ -26,6 +26,9 @@ public class BlockingProbability extends Measurement {
     private int numReqBlockGeralFragment;
     private int numReqBlockGenLackTransmitters;
     private int numReqBlockGenLackReceivers;
+    private int numRegBlockQoTGeral;
+    private int numRegBlockQoTOtherGeral;
+    private int numRegBlockOtherGeral;
 
     // Blocking probability per pair
     private HashMap<String, Integer> numReqGenPair;
@@ -248,8 +251,13 @@ public class BlockingProbability extends Measurement {
         double res;
         String source = p.getSource().getName();
         String destination = p.getDestination().getName();
-        Integer gen = this.numReqGenPairBW.get(source + SEP + destination).get(bw);
-        if(gen==null) return 0; // No requests generated for this pair and bandwidth
+        
+        Integer gen = null;
+        if(this.numReqGenPairBW.get(source + SEP + destination) != null){
+        	gen = this.numReqGenPairBW.get(source + SEP + destination).get(bw);
+        }
+        
+        if(gen == null) return 0; // No requests generated for this pair and bandwidth
         Integer block = 0;
 
         HashMap<Double, Integer> hashAux = this.numReqBlockPairBW.get(source + SEP + destination);

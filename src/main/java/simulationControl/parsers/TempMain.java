@@ -26,9 +26,9 @@ public class TempMain {
             while(!descNode.equals("links:")){// Description of nodes
                 String[] split = descNode.split(";");
                 if(split.length==3) {
-                    nc.getNodes().add(new NetworkConfig.NodeConfig(split[0], Integer.parseInt(split[1]), Integer.parseInt(split[2])));
+                    nc.getNodes().add(new NetworkConfig.NodeConfig(split[0], Integer.parseInt(split[1]), Integer.parseInt(split[2]), 0));
                 }else{//tx and rx infinite
-                    nc.getNodes().add(new NetworkConfig.NodeConfig(descNode, 100000, 100000));
+                    nc.getNodes().add(new NetworkConfig.NodeConfig(descNode, 100000, 100000, 0));
                 }
 
                 descNode = sc.nextLine();

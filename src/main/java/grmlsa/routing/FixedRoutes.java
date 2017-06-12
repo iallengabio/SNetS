@@ -11,8 +11,10 @@ import java.util.Vector;
 
 /**
  * This class allow to configure a set of pre-established routes for each pair of origin and destination.
+ * 
+ * @author Iallen
  */
-public class FixedRoutes implements RoutingInterface {
+public class FixedRoutes implements RoutingAlgorithmInterface {
 
     private static final String DIV = "-";
 
@@ -55,11 +57,10 @@ public class FixedRoutes implements RoutingInterface {
         return false;
     }
 
-
     /**
-     * computa os menores caminhos para cada par
+     * Computes the smallest paths for each pair
      *
-     * @param mesh
+     * @param mesh Mesh
      */
     private void computeAllRoutes(Mesh mesh) {
         routesForAllPairs = new HashMap<String, Route>();
@@ -69,7 +70,6 @@ public class FixedRoutes implements RoutingInterface {
             nos.put(no.getName(), no);
         }
 
-
         for (String key : routesIndex.keySet()) {
             Vector<Node> r = new Vector<Node>();
             for (String index : routesIndex.get(key)) {
@@ -77,15 +77,13 @@ public class FixedRoutes implements RoutingInterface {
             }
             routesForAllPairs.put(key, new Route(r));
         }
-
     }
 
-
     /**
-     * Retorna as rotas para cada par(o,d) na rede
-     * método utilizado apenas para roteamento fixo
+     * Returns the routes for each pair (o, d) in the network
+     * Method used only for fixed routing
      *
-     * @return
+     * @return Vector<Route>
      */
     private Vector<Route> getRoutesForAllPairs() {
         return new Vector<>(routesForAllPairs.values());

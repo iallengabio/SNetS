@@ -14,55 +14,50 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class DummyFit implements SpectrumAssignmentAlgoritm {
-
-    public DummyFit() {
-
-    }
+public class DummyFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit request) {
-        Route route = request.getRoute();
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
+        Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
         int i;
-        IntersectionFreeSpectrum ifs = new IntersectionFreeSpectrum();
+
         for (i = 1; i < links.size(); i++) {
-            composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        int chosen[] = dummyFit(numberOfSlots, composition);
+        int chosen[] = policy(numberOfSlots, composition, circuit);
 
         if (chosen == null) return false;
 
-        request.setSpectrumAssigned(chosen);
+        circuit.setSpectrumAssigned(chosen);
 
         return true;
     }
 
     /**
-     *
-     * @param numberOfSlots
-     * @param freeSpectrumBands
-     * @return
+     * Applies the policy of allocation of spectrum DummyFit
+     * 
+     * @param numberOfSlots int
+     * @param freeSpectrumBands List<int[]>
+     * @param circuit Circuit
+     * @return int[]
      */
-    private static int[] dummyFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
-        int chosen[] = new int[2];
+    @Override
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    	int chosen[] = new int[2];
 
         if (freeSpectrumBands.size() >= 1) {
-            int faixa[] = freeSpectrumBands.get(0);
-            if (faixa[1] - faixa[0] + 1 >= numberOfSlots) {
-                chosen[0] = faixa[0];
+            int band[] = freeSpectrumBands.get(0);
+            if (band[1] - band[0] + 1 >= numberOfSlots) {
+                chosen[0] = band[0];
                 chosen[1] = chosen[0] + numberOfSlots - 1;
                 return chosen;
             }
-
-
         }
         return null;
     }
-
-
 }
 

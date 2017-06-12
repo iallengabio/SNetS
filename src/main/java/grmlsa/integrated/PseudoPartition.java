@@ -6,7 +6,7 @@ import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgoritm;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 
 
-public class PseudoPartition implements IntegratedRSAAlgoritm {
+public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 
     /**
      * Larguras de banda que utilizam o espectro de cima para baixo
@@ -24,7 +24,8 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentAlgoritm spectrumAssignment;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
+	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
 
     public PseudoPartition() {
         largBandSuperiores = new HashSet<>();
@@ -32,35 +33,36 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
     }
 
     @Override
-    public boolean rsa(Circuit request, Mesh mesh) {
+    public boolean rsa(Circuit circuit, Mesh mesh) {
     	if(kMenores==null){
 			kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
 		}
 		if(modulationSelector==null){
 			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 		}
-		if(spectrumAssignment == null){
-			spectrumAssignment = new FirstFit();
+		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
+			spectrumAssignment1 = new FirstFit();
+			spectrumAssignment2 = new LastFit();
 		}
 		
-        List<Route> candidateRoutes = kMenores.getRoutes(request.getSource(), request.getDestination());
+        List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
         Route rotaEscolhida = null;
         Modulation modEscolhida = null;
         int faixaEscolhida[] = new int[2];
         
         //verificar se o firstfit deve ser aplicado de baixo para cima ou de cima para baixo
-        if (!largBandSuperiores.contains(request.getRequiredBandwidth())) { // alocar de baixo para cima
+        if (!largBandSuperiores.contains(circuit.getRequiredBandwidth())) { // alocar de baixo para cima
             faixaEscolhida[0] = 9999999;
             faixaEscolhida[1] = 9999999;
 
             for (Route r : candidateRoutes) {
                 //calcular quantos slots são necessários para esta rota
-                request.setRoute(r);
-                Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+                circuit.setRoute(r);
+                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment1, mesh);
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-                int ff[] = FirstFit.firstFit(mod.requiredSlots(request.getRequiredBandwidth()), merge);
+                int ff[] = spectrumAssignment1.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
                 if (ff != null && ff[0] < faixaEscolhida[0]) {
                     faixaEscolhida = ff;
@@ -77,12 +79,12 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
 
             for (Route r : candidateRoutes) {
                 //calcular quantos slots são necessários para esta rota
-                request.setRoute(r);
-                Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+                circuit.setRoute(r);
+                Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment2, mesh);
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 
-                int lf[] = LastFit.lastFit(mod.requiredSlots(request.getRequiredBandwidth()), merge);
+                int lf[] = spectrumAssignment2.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
                 if (lf != null && lf[1] > faixaEscolhida[1]) {
                     faixaEscolhida = lf;
@@ -94,15 +96,15 @@ public class PseudoPartition implements IntegratedRSAAlgoritm {
         }
 
         if (rotaEscolhida != null) { //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-            request.setRoute(rotaEscolhida);
-            request.setModulation(modEscolhida);
-            request.setSpectrumAssigned(faixaEscolhida);
+            circuit.setRoute(rotaEscolhida);
+            circuit.setModulation(modEscolhida);
+            circuit.setSpectrumAssigned(faixaEscolhida);
 
             return true;
 
         } else {
-            request.setRoute(candidateRoutes.get(0));
-            request.setModulation(modulationSelector.getAvaliableModulations().get(0));
+            circuit.setRoute(candidateRoutes.get(0));
+            circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
             return false;
         }
     }

@@ -5,7 +5,7 @@ import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgoritm;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.Link;
 import network.Mesh;
@@ -16,11 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class LoadBalancedDedicatedPartition implements IntegratedRSAAlgoritm {
+public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmInterface {
 
     private NewKShortestPaths kMenores;
     private ModulationSelector modulationSelector;
-    private SpectrumAssignmentAlgoritm spectrumAssignment;
+    private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
     private HashMap<Integer, int[]> zones;
 
@@ -45,7 +45,7 @@ public class LoadBalancedDedicatedPartition implements IntegratedRSAAlgoritm {
     }
 
     @Override
-    public boolean rsa(Circuit request, Mesh mesh) {
+    public boolean rsa(Circuit circuit, Mesh mesh) {
     	if(kMenores==null){
 			kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
 		}
@@ -56,7 +56,7 @@ public class LoadBalancedDedicatedPartition implements IntegratedRSAAlgoritm {
 			spectrumAssignment = new FirstFit();
 		}
 
-        List<Route> candidateRoutes = kMenores.getRoutes(request.getSource(), request.getDestination());
+        List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
         Route rotaEscolhida = null;
         Modulation modEscolhida = null;
         int faixaEscolhida[] = {999999, 999999}; //valor jamais atingido
@@ -64,10 +64,10 @@ public class LoadBalancedDedicatedPartition implements IntegratedRSAAlgoritm {
 
         for (Route r : candidateRoutes) {
             //calcular quantos slots são necessários para esta rota
-            request.setRoute(r);
-            Modulation mod = modulationSelector.selectModulation(request, r, spectrumAssignment, mesh);
+            circuit.setRoute(r);
+            Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
 
-            int quantSlots = mod.requiredSlots(request.getRequiredBandwidth());
+            int quantSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
             int zone[] = this.zones.get(quantSlots);
             List<int[]> primaryZone = new ArrayList<>();
             primaryZone.add(zone);
@@ -75,7 +75,7 @@ public class LoadBalancedDedicatedPartition implements IntegratedRSAAlgoritm {
             List<int[]> merge = IntersectionFreeSpectrum.merge(r);
             merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 
-            int ff[] = FirstFit.firstFit(quantSlots, merge);
+            int ff[] = spectrumAssignment.policy(quantSlots, merge, circuit);
 
             int ut = this.quantSlotsUsadosZona(r, zone);
 
@@ -88,15 +88,15 @@ public class LoadBalancedDedicatedPartition implements IntegratedRSAAlgoritm {
         }
 
         if (rotaEscolhida != null) { //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-            request.setRoute(rotaEscolhida);
-            request.setModulation(modEscolhida);
-            request.setSpectrumAssigned(faixaEscolhida);
+            circuit.setRoute(rotaEscolhida);
+            circuit.setModulation(modEscolhida);
+            circuit.setSpectrumAssigned(faixaEscolhida);
 
             return true;
 
         } else {
-            request.setRoute(candidateRoutes.get(0));
-            request.setModulation(modulationSelector.getAvaliableModulations().get(0));
+            circuit.setRoute(candidateRoutes.get(0));
+            circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
             return false;
         }
 

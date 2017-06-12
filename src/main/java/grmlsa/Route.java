@@ -290,6 +290,8 @@ public class Route implements Serializable, Comparable<Route> {
 
     /**
      * Returns a clone of the route
+     * 
+     * @return Route
      */
     public Route clone() {
         Route res = new Route();

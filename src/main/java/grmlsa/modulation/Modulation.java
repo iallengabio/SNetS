@@ -1,6 +1,5 @@
 package grmlsa.modulation;
 
-import network.ControlPlane;
 import network.Mesh;
 import network.PhysicalLayer;
 
@@ -21,9 +20,9 @@ public class Modulation {
 
     private double freqSlot;
     
-    private double level; //nivel do formato de modulacao
+    private double level; //Level of modulation format
 	public double k2;
-	public double M; //quantidade de simbolos do formato de modulacao
+	public double M; //Number of modulation format symbols
 
 	private Mesh mesh;
 
@@ -74,13 +73,13 @@ public class Modulation {
 	}
 
     /**
-     * retorna a quantidade de slots necessï¿½rios de acordo com a largura de banda
-     * adiciona a banda de guarda
+     * Returns the number of slots required according to the bandwidth
+     * Adds guard band
      *
      * @param bandwidth
      * @return
      */
-    public int requiredSlots1(double bandwidth) {
+    private int requiredSlots1(double bandwidth) {
         //System.out.println("C = " + bandwidth + "    bm = " + this.bitsPerSimbol + "     fslot = " + this.freqSlot);
 
         double res = bandwidth / (this.bitsPerSymbol * this.freqSlot);
@@ -93,21 +92,23 @@ public class Modulation {
             res2++;
         }
 
-        res2 = res2 + guardBand; //adiciona mais um slot necessário para ser usado como banda de guarda
+        res2 = res2 + guardBand; //Adds another slot needed to be used as a guard band
 
         return res2;
     }
     
     /**
-	 * Baseado no artigo: Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
-	 * @param bandwidth
+	 * Based on article: Influence of Physical Layer Configuration on Performance of 
+	 * Elastic Optical OFDM Networks (2014)
+	 * 
+	 * @param bandwidth double
 	 * @return int
 	 */
-	public int requiredSlotsByQoT(double bandwidth){
+	private int requiredSlotsByQoT(double bandwidth){
 		double F = mesh.getPhysicalLayer().getFEC();
 		double Bn = bandwidth; //(bandwidth / 1073741824.0) * 1.0E+9;
 		double Bs = (1.1 * Bn * (1 + F)) / (2 * PhysicalLayer.log2(this.level)); //single channel bandwidth, Hz
-		double deltaG = 2.0 * mesh.getPhysicalLayer().getGuardBand(); //guard band between adjacent spectrum (Obs.: uma bande guarda para cada ponta da largura de banda requisitada)
+		double deltaG = 2.0 * mesh.getPhysicalLayer().getGuardBand(); //guard band between adjacent spectrum (Obs.: A guard band for each edge of the required bandwidth)
 		double deltaB = Bs + deltaG; //channel spacing
 		
 		double res = deltaB / this.freqSlot;

@@ -1,14 +1,27 @@
 package grmlsa;
 
-import grmlsa.integrated.*;
-import grmlsa.modulation.ModulationSelector;
+import grmlsa.integrated.CompleteSharing;
+import grmlsa.integrated.DedicatedPartition;
+import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
+import grmlsa.integrated.LoadBalancedDedicatedPartition;
+import grmlsa.integrated.PseudoPartition;
+import grmlsa.integrated.ZonePartition;
+import grmlsa.integrated.ZonePartitionTopInvasion;
+import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
+import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
+import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
+import grmlsa.regeneratorAssignment.RegeneratorAssignmentAlgorithmInterface;
 import grmlsa.routing.DJK;
 import grmlsa.routing.FixedRoutes;
-import grmlsa.routing.RoutingInterface;
-import grmlsa.spectrumAssignment.*;
+import grmlsa.routing.RoutingAlgorithmInterface;
+import grmlsa.spectrumAssignment.BestFit;
+import grmlsa.spectrumAssignment.ExactFit;
+import grmlsa.spectrumAssignment.FirstFit;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.WorstFit;
 import grmlsa.trafficGrooming.NoTrafficGrooming;
 import grmlsa.trafficGrooming.SimpleTrafficGrooming;
-import grmlsa.trafficGrooming.TrafficGroomingAlgorithm;
+import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
 
 /**
  * This class should be responsible for running the RSA algorithms, verifying whether the selected 
@@ -19,11 +32,15 @@ import grmlsa.trafficGrooming.TrafficGroomingAlgorithm;
  */
 public class GRMLSA {
 	
+	// Network type
+	public static final int TRANSPARENT = 0;
+	public static final int TRANSLUCENT = 1;
+	
 	// Constants that indicate which type are the RSA algorithms (sequential or integrated)
     public static final int RSA_SEQUENCIAL = 0;
     public static final int RSA_INTEGRATED = 1;
 
-    // Constants for indication of RSA algorithms
+    // Constants for indication of RMLSA algorithms
     // Optical traffic aggregation
     public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
@@ -37,7 +54,7 @@ public class GRMLSA {
     public static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
     public static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
     public static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
-
+    
     // Integrados
     public static final String INTEGRATED_COMPLETESHARING = "completesharing";
     public static final String INTEGRATED_PSEUDOPARTITION = "pseudopartition";
@@ -45,6 +62,11 @@ public class GRMLSA {
     public static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
     public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
+    
+    // Regenerator assignment
+    public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
+    public static final String FLR_REGENERATOR_ASSIGNMENT = "flrra";
+	public static final String FNS_REGENERATOR_ASSIGNMENT = "fnsra";
 
     // End of constants
 
@@ -53,36 +75,40 @@ public class GRMLSA {
     private String routing;
     private String modulationSelection;
     private String spectrumAssignmentType;
+    private String regeneratorAssignment;
 
     /**
-     *
-     * @param grooming
-     * @param integrated
-     * @param routing
-     * @param modulationSelection
-     * @param spectrumAssignmentType
+     * Creates a new instance of GRMLSA
+     * 
+     * @param grooming String
+     * @param integrated String
+     * @param routing String
+     * @param modulationSelection String
+     * @param spectrumAssignmentType String
      */
-    public GRMLSA(String grooming, String integrated, String routing, String modulationSelection, String spectrumAssignmentType) {
+    public GRMLSA(String grooming, String integrated, String routing, String modulationSelection, String spectrumAssignmentType, String regeneratorAssignment) {
         this.grooming = grooming;
         this.integrated = integrated;
         this.routing = routing;
         this.modulationSelection = modulationSelection;
         this.spectrumAssignmentType = spectrumAssignmentType;
+        this.regeneratorAssignment = regeneratorAssignment;
 
-        if(grooming==null) this.grooming ="";
-        if(integrated==null) this.integrated ="";
-        if(routing==null) this.routing ="";
-        if(modulationSelection==null) this.modulationSelection ="";
-        if(spectrumAssignmentType==null) this.spectrumAssignmentType ="";
+        if(grooming == null) this.grooming ="";
+        if(integrated == null) this.integrated ="";
+        if(routing == null) this.routing ="";
+        if(modulationSelection == null) this.modulationSelection ="";
+        if(spectrumAssignmentType == null) this.spectrumAssignmentType ="";
+        if(regeneratorAssignment == null) this.regeneratorAssignment = "";
     }
-
-
 
     /**
      * Instance the optical traffic aggregation algorithm
-     *
+     * 
+     * @throws Exception
+     * @return TrafficGroomingAlgorithm
      */
-    public TrafficGroomingAlgorithm instantiateGrooming() throws Exception {
+    public TrafficGroomingAlgorithmInterface instantiateGrooming() throws Exception {
         switch (this.grooming) {
             case GROOMING_OPT_NOTRAFFICGROOMING:
                 return new NoTrafficGrooming();
@@ -97,8 +123,9 @@ public class GRMLSA {
      * Instance the routing algorithm
      *
      * @throws Exception
+     * @return RoutingInterface
      */
-    public RoutingInterface instantiateRouting() throws Exception {
+    public RoutingAlgorithmInterface instantiateRouting() throws Exception {
         switch (this.routing) {
             case ROUTING_DJK:
                 return new DJK();
@@ -113,8 +140,9 @@ public class GRMLSA {
      * Instance the spectrum assignment algorithm
      *
      * @throws Exception
+     * @return SpectrumAssignmentInterface
      */
-    public SpectrumAssignmentAlgoritm instantiateSpectrumAssignment() throws Exception {
+    public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment() throws Exception {
 
         switch (this.spectrumAssignmentType) {
             case SPECTRUM_ASSIGNMENT_FISTFIT:
@@ -131,11 +159,12 @@ public class GRMLSA {
     }
 
     /**
-     * Instance the integrated RSA algorithm
+     * Instance the integrated RMLSA algorithm
      *
      * @throws Exception
+     * @return IntegratedRSAAlgoritm
      */
-    public IntegratedRSAAlgoritm instantiateIntegratedRSA() throws Exception {
+    public IntegratedRMLSAAlgorithmInterface instantiateIntegratedRSA() throws Exception {
         switch (this.integrated) {
             case INTEGRATED_COMPLETESHARING:
                 return new CompleteSharing();
@@ -153,6 +182,24 @@ public class GRMLSA {
                 return null;
         }
     }
-
+    
+    /**
+     * Instance the regenerators assignment algorithm
+     * 
+     * @throws Exception
+     * @return RegeneratorAssignmentAlgorithmInterface
+     */
+    public RegeneratorAssignmentAlgorithmInterface instantiateRegeneratorAssignment() throws Exception {
+    	switch (this.regeneratorAssignment) {
+    		case ALL_ASSIGNMENT_OF_REGENERATOR:
+    			return new AllAssignmentOfRegenerator();
+    		case FLR_REGENERATOR_ASSIGNMENT:
+				return new FLRRegeneratorAssignment();
+			case FNS_REGENERATOR_ASSIGNMENT:
+				return new FNSRegeneratorAssignment();
+    		default:
+    			return null;
+    	}
+    }
 
 }

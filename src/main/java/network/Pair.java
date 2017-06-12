@@ -72,7 +72,7 @@ public class Pair implements Serializable {
      */
     public void addRequestGenerator(RequestGenerator rg) {
         requestGenerators.add(rg);
-        Util.bandwidths.add(rg.getBandwidth()); //utilizado na hora de gravar em arquivo os resultados da simulação
+        Util.bandwidths.add(rg.getBandwidth()); //Used to write to the archive the results of the simulation
     }
 
     /**

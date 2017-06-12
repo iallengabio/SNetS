@@ -17,27 +17,27 @@ public class PhysicalLayer {
     private boolean activeQoT; // QoTN
     private boolean activeQoTForOther; // QoTO
 	
-    private boolean activeAse; //ativa o ruido ASE do amplificador
-    private boolean activeNli; //ativa o ruido nao linear nas fibras
-    private int typeOfTestQoT; //0, para verificar pelo limiar de SNR, ou outro valor, para verificar pelo limiar de BER
-    private int rateOfFEC; //0 = 07%, ou 1 = 20%, ou 2 = 28%, outro valor, sem FEC;
+    private boolean activeAse; // Active the ASE noise of the amplifier
+    private boolean activeNli; // Active nonlinear noise in the fibers
+    private int typeOfTestQoT; //0, To check for the SNR threshold, or another value, to check for the BER threshold
+    private int rateOfFEC; //0 = 07%, or 1 = 20%, or 2 = 28%, other value, without FEC;
 	
-    private double guardBand; //banda de guarda entre canais adjacentes
+    private double guardBand; // Guard band between adjacent channels
 	
-    private double power; //potencia por canal, dBm
-    private double L; //tamanho de um span, km
-    private double alfa; //dB/km, perda da fibra
-    private double gama; //nao linearidade da fibra
-    private double beta2; //ps^2 = E-24, parametro de dispersao
-    private double C; //taxa de compensacao de dispersao
-    private double centerFrequency; //frequencia da luz
+    private double power; // Power per channel, dBm
+    private double L; // Size of a span, km
+    private double alpha; //dB/km, Fiber loss
+    private double gamma; //Fiber nonlinearity
+    private double beta2; //ps^2 = E-24, Dispersion parameter
+    private double C; //Dispersion compensation rate
+    private double centerFrequency; //Frequency of light
 	
-    private double h; //constante de Planck
-    private double NF; //figura de ruido do amplificador, dB
-    private double pSat; //potencia de saturacao do amplificador, dBm
-    private double A1; //parametro do fator de ruido do amplificador
-    private double A2; //parametro do fator de ruido do amplificador
-    private double B0; //largura de banda optica, esta com valor 1 porque estamos considerando SNR
+    private double h; // Constant of Planck
+    private double NF; // Amplifier noise figure, dB
+    private double pSat; // Saturation power of the amplifier, dBm
+    private double A1; // Amplifier noise factor parameter, a1
+    private double A2; // Amplifier noise factor parameter, A2
+    private double B0; // Optical bandwidth, it has a value of 1 because we are considering SNR
 
 	
     public PhysicalLayer(PhysicalLayerConfig plc){
@@ -53,8 +53,8 @@ public class PhysicalLayer {
     	
         this.power = plc.getPower();
         this.L = plc.getSpanLength();
-        this.alfa = plc.getFiberLoss();
-        this.gama = plc.getFiberNonlinearity();
+        this.alpha = plc.getFiberLoss();
+        this.gamma = plc.getFiberNonlinearity();
         this.beta2 = plc.getFiberDispersion();
         this.C = plc.getDispersionCompensationRatio();
         this.centerFrequency = plc.getCenterFrequency();
@@ -89,11 +89,11 @@ public class PhysicalLayer {
 		double fec = 0.0;
 		
 		if(rateOfFEC == 0){
-			fec = 0.07; //para FEC = 7%
+			fec = 0.07; // FEC = 7%
 		}else if(rateOfFEC == 1){
-			fec = 0.20; //para FEC = 20%
+			fec = 0.20; // FEC = 20%
 		}else if(rateOfFEC == 2){
-			fec = 0.28; //para FEC = 28%
+			fec = 0.28; // FEC = 28%
 		}
 		
 		return fec;
@@ -103,23 +103,23 @@ public class PhysicalLayer {
 		double BERthreshold = 1.0E-5;
 		
 		if(rateOfFEC == 0){
-			BERthreshold = 3.8E-3; //para FEC = 7%
+			BERthreshold = 3.8E-3; // FEC = 7%
 		}else if(rateOfFEC == 1){
-			BERthreshold = 2.0E-2; //para FEC = 20%
+			BERthreshold = 2.0E-2; // FEC = 20%
 		}else if(rateOfFEC == 2){
-			BERthreshold = 4.0E-2; //para FEC = 28%
+			BERthreshold = 4.0E-2; // FEC = 28%
 		}
 		
 		return BERthreshold;
 	}
 	
 	/**
-	 * Artigos:
-	 * Physical Layer Transmitter and Routing Optimization to Maximize the Traffic Throughput of a Nonlinear Optical Mesh Network
-	 * Quantifying the Impact of Non-linear Impairments on Blocking Load in Elastic Optical Networks
+	 * Based on articles:
+	 *  - Physical Layer Transmitter and Routing Optimization to Maximize the Traffic Throughput of a Nonlinear Optical Mesh Network
+	 *  - Quantifying the Impact of Non-linear Impairments on Blocking Load in Elastic Optical Networks
 	 * 
-	 * @param modulation
-	 * @return
+	 * @param modulation Modulation
+	 * @return double
 	 */
 	public double getSNRthreshold(Modulation modulation){
 		double SNRdBthreshold = 3.0 * modulation.getLevel();
@@ -131,13 +131,13 @@ public class PhysicalLayer {
 	}
 	
 	public boolean isAdmissible(Modulation modulation, double SNRdB, double SNRlinear){
-		if(typeOfTestQoT == 0){ //verificacao pelo limitar de SNR (dB)
+		if(typeOfTestQoT == 0){ //Check by SNR limit (dB)
 			double SNRdBthreshold = getSNRthreshold(modulation);
 			
 			if(SNRdB >= SNRdBthreshold){
 				return true;
 			}
-		} else { //verificacao pelo limiar de BER
+		} else { //BER threshold check
 			double BERthreshold = getBERthreshold();
 			
 			double k2 = modulation.getK2();
@@ -163,9 +163,9 @@ public class PhysicalLayer {
 		return QoT;
 	}
 	
-	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[]){
+	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[]){
 		
-		double SNR = computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, indexNodeSource, indexNodeDestination, modulation, spectrumAssigned, true);
+		double SNR = computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, true);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -174,65 +174,65 @@ public class PhysicalLayer {
 		return QoT;
 	}
 	
-	
 	/**
-	 * Artigo: Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
-	 *         Modeling of Nonlinear Signal Distortion in Fiber-Optic Networks (2014)
+	 * Based on articles: 
+	 *  - Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
+	 *  - Modeling of Nonlinear Signal Distortion in Fiber-Optic Networks (2014)
 	 * @param request - Request
 	 * @param bandwidth - double
 	 * @param route - Route
-	 * @param indexNodeSource - int - Indice do node do inicio do segmento
-	 * @param indexNodeDestination - int - Indice do node do final do segmento
+	 * @param sourceNodeIndex - int - Segment start node index
+	 * @param destinationNodeIndex - int - Segment end node index
 	 * @param modulation - Modulation
 	 * @param spectrumAssigned - int[]
-	 * @param verifQoT - boolean - Utilizado para verificar se o espectro alocado pela requisicao eh considerado ou nao 
-	 *                             no calculo da potencia total que entra nos amplificadores (true, considera, ou false, nao considera)
+	 * @param checksOnTotalPower - boolean - Used to verify if the spectrum allocated by the request is considered or not in the calculation 
+	 *                             of the total power that enters the amplifiers (true, considers, or false, does not consider)
 	 * @return double - SNR (linear)
 	 */
-	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[], boolean verifQoT){
+	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
 		
-		double Ptx = ratioOfDB(power) * 1.0E-3; //W, potencia do transmissor
+		double Ptx = ratioOfDB(power) * 1.0E-3; //W, Transmitter power
 		double Pase = 0.0;
 		double Pnli = 0.0;
 		
-		int quantSlotsRequeridos = spectrumAssigned[1] - spectrumAssigned[0] + 1; //quantidade de slots requeridos
+		int numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
 		double fs = route.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
-		double Bsi = quantSlotsRequeridos * fs; //largura da banda da requisicao
+		double Bsi = numSlotsRequired * fs; // Request bandwidth
 		
-		double totalSlots = route.getLinkList().firstElement().getNumOfSlots();
-		double lowerFrequency = centerFrequency - (fs * (totalSlots / 2.0)); //Hz, retira-se a metade de slots porque centerFrequency = 193.0E+12 eh a frequencia central do espectro optico
-		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1)) + (Bsi / 2); //frequencia central da requisicao
+		double slotsTotal = route.getLinkList().firstElement().getNumOfSlots();
+		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); //Hz, Half slots are removed because center Frequency = 193.0E + 12 is the central frequency of the optical spectrum
+		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1)) + (Bsi / 2); // Central frequency of request
 		
-		double I = Ptx / (fs * 4); //densidade de potencia do sinal para 4 slots
+		double I = Ptx / (fs * 4); // Signal power density for 4 slots
 		
-		Node noOrigem = null;
-		Node noDestino = null;
-		Link enlace = null;
+		Node sourceNode = null;
+		Node destinationNode = null;
+		Link link = null;
 		
-		double G0 = alfa * L; //ganho em dB do amplificador
+		double G0 = alpha * L; // Gain in dB of the amplifier
 		Amplifier amp = new Amplifier(G0, pSat, NF, h, centerFrequency, B0, 0.0, A1, A2);
-		amp.setActiveAse(1); //ativa o ruido ASE
-		amp.setTypeGainAmplifier(1); //seta o tipo de ganho como fixo
+		amp.setActiveAse(1); // Active the ASE noise
+		amp.setTypeGainAmplifier(1); // Sets the gain type to fixed
 		
-		for(int i = indexNodeSource; i < indexNodeDestination; i++){
-			noOrigem = route.getNode(i);
-			noDestino = route.getNode(i + 1);
-			enlace = noOrigem.getOxc().linkTo(noDestino.getOxc());
-			double Ns = PhysicalLayer.roundUp(enlace.getDistance() / L); //numero de spans
+		for(int i = sourceNodeIndex; i < destinationNodeIndex; i++){
+			sourceNode = route.getNode(i);
+			destinationNode = route.getNode(i + 1);
+			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+			double Ns = PhysicalLayer.roundUp(link.getDistance() / L); // Number of spans
 			
-			double quantSlotsUsados = enlace.getUsedSlots();
-			if(verifQoT){
-				quantSlotsUsados += quantSlotsRequeridos;
+			double numSlotsUsed = link.getUsedSlots();
+			if(checksOnTotalPower){
+				numSlotsUsed += numSlotsRequired;
 			}
 			
 			if(activeNli){
-				double noiseNli = Ns * getGnli(circuit, enlace, I, Bsi, fi, gama, beta2, alfa, L, C, Ns, lowerFrequency);
+				double noiseNli = Ns * getGnli(circuit, link, I, Bsi, fi, gamma, beta2, alpha, L, C, Ns, lowerFrequency);
 				Pnli = Pnli + noiseNli;
 			}
 			
 			if(activeAse){
-				double pinTotal = quantSlotsUsados * fs * I;
-				double noiseAse = Ns * 2.0 * amp.getAseByTypeGain(pinTotal, centerFrequency);
+				double totalPower = numSlotsUsed * fs * I;
+				double noiseAse = Ns * 2.0 * amp.getAseByTypeGain(totalPower, centerFrequency);
 				Pase = Pase + noiseAse;
 			}
 		}
@@ -242,9 +242,23 @@ public class PhysicalLayer {
 		return SNR;
 	}
 	
-	
-	//-----------------------------------------------------------------------------
-	//Artigo: Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
+	/**
+	 * Based on article: Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
+	 * 
+	 * @param circuit Circuit
+	 * @param link Link
+	 * @param I double
+	 * @param Bsi double
+	 * @param fi double
+	 * @param gama double
+	 * @param beta2 double
+	 * @param alfa double
+	 * @param L double
+	 * @param C double
+	 * @param Ns double
+	 * @param lowerFrequency double
+	 * @return double
+	 */
 	public double getGnli(Circuit circuit, Link link, double I, double Bsi, double fi, double gama, double beta2, double alfa, double L, double C, double Ns, double lowerFrequency){
 		double alfaLinear = ratioOfDB(alfa);
 		if(beta2 < 0.0){
@@ -266,10 +280,10 @@ public class PhysicalLayer {
 			
 			if(!circuit.equals(cricuitTemp)){
 				double fs = link.getSlotSpectrumBand();
-				int sa[] = cricuitTemp.getSpectrumAssigned();
+				int sa[] = cricuitTemp.getSpectrumAssignedByLink(link);
 				double numOfSlots = sa[1] - sa[0] + 1;
-				double Bsj = numOfSlots * fs; //largura de banda da requisicao
-				double fj = lowerFrequency + (fs * (sa[0] - 1)) + (Bsj / 2); //frequencia central da requisicao
+				double Bsj = numOfSlots * fs; //Request bandwidth
+				double fj = lowerFrequency + (fs * (sa[0] - 1)) + (Bsj / 2); //Central frequency of request
 				
 				double deltaFij = fi - fj;
 				if(deltaFij < 0.0)
@@ -288,8 +302,9 @@ public class PhysicalLayer {
 	}
 	
 	/**
-	 * Funcao que retorna o seno hiperbolico inverso do argumento
+	 * Function that returns the inverse hyperbolic sine of the argument
 	 * asinh == arcsinh
+	 * 
 	 * @param x - double
 	 * @return double
 	 */
@@ -297,13 +312,10 @@ public class PhysicalLayer {
 		return Math.log(x + Math.sqrt(x * x + 1.0));
 	}
 	
-	
-	
-	
 	/**
-	 * Artigos:
-	 * - Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats (equacao 4)
-     * - On the Extended Relationships Among EVM, BER and SNR as Performance Metrics (equacao 12)
+	 * Based on articles:
+	 * - Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats (equation 4)
+     * - On the Extended Relationships Among EVM, BER and SNR as Performance Metrics (equation 12)
 	 */
 	public static double getBER(double SNR, double k2, double L, double M){
 		double p1 = ((3.0 * log2(L)) / ((L * L) - 1.0)) * ((Math.sqrt(2.0) * SNR) / (k2 * log2(M)));
@@ -312,20 +324,35 @@ public class PhysicalLayer {
 		return ber;
 	}
 	
-	//complementary error function
+	/**
+	 * complementary error function
+	 * 
+	 * @param x double
+	 * @return double
+	 */
 	public static double erfc(double x){
 		return (1.0 - erf(x));
 	}
 	
-	//error function - aproximacao
-	//http://www.galileu.esalq.usp.br/mostra_topico.php?cod=240
+	/**
+	 * error function - approximation
+	 * http://www.galileu.esalq.usp.br/mostra_topico.php?cod=240
+	 * 
+	 * @param x double
+	 * @return double
+	 */
 	public static double erf(double x){
 		double a = 0.140012;
 		double v = sgn(x) * Math.sqrt(1.0 - Math.exp(-1.0 * (x * x) * (((4.0 / Math.PI) + (a * x * x)) / (1.0 + (a * x * x)))));
 		return v;
 	}
 	
-	//funcao sinal
+	/**
+	 * Signal function
+	 * 
+	 * @param x double
+	 * @return double
+	 */
 	public static double sgn(double x){
 		double s = 1.0;
 		if(x < 0.0){
@@ -336,11 +363,11 @@ public class PhysicalLayer {
 		return s;
 	}
 	
-	
 	/**
-	 * Converte uma razao (linear) para decibel
-	 * @param ratio
-	 * @return dB
+	 * Converts a ratio (linear) to decibel
+	 * 
+	 * @param ratio double
+	 * @return double dB
 	 */
 	public static double ratioForDB(double ratio) {
 		double dB;
@@ -349,9 +376,10 @@ public class PhysicalLayer {
 	}
 
 	/**
-	 * Converte um valor em dB para um valor linear (ratio)
-	 * @param dB
-	 * @return ratio
+	 * Converts a value in dB to a linear value (ratio)
+	 * 
+	 * @param dB double
+	 * @return double ratio
 	 */
 	public static double ratioOfDB(double dB) {
 		double ratio;
@@ -360,7 +388,8 @@ public class PhysicalLayer {
 	}
 	
 	/**
-	 * Logaritmo na base 2
+	 * Logarithm in base 2
+	 * 
 	 * @param x
 	 * @return double
 	 */
@@ -369,8 +398,9 @@ public class PhysicalLayer {
 	}
 	
 	/**
-	 * Arredonda para cima um valor double para int
-	 * @param res
+	 * Rounds up a double value for int
+	 * 
+	 * @param res double
 	 * @return int
 	 */
 	public static int roundUp(double res){

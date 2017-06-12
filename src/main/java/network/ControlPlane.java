@@ -6,38 +6,38 @@ import java.util.List;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
-import grmlsa.integrated.IntegratedRSAAlgoritm;
+import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
-import grmlsa.routing.RoutingInterface;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgoritm;
-import grmlsa.trafficGrooming.TrafficGroomingAlgorithm;
+import grmlsa.routing.RoutingAlgorithmInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
 import request.RequestForConnection;
 
 /**
  * Class that represents the control plane for a Transparent Elastic Optical Network.
- * This class should make calls to RSA algorithms, store routes in case of fixed routing, 
+ * This class should make calls to RMLSA algorithms, store routes in case of fixed routing, 
  * provide information about the state of the network, etc.
  *
  * @author Iallen
  */
 public class ControlPlane {
 
-    private int rsaType;
-    private RoutingInterface routing;
-    private SpectrumAssignmentAlgoritm spectrumAssignment;
-    private IntegratedRSAAlgoritm integrated;
-    private ModulationSelector modulationSelector;
-    private TrafficGroomingAlgorithm grooming;
+    protected int rsaType;
+    protected RoutingAlgorithmInterface routing;
+    protected SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+    protected IntegratedRMLSAAlgorithmInterface integrated;
+    protected ModulationSelector modulationSelector;
+    protected TrafficGroomingAlgorithmInterface grooming;
 	
-    private Mesh mesh;
+    protected Mesh mesh;
 
     
     /**
      * The first key represents the source node.
      * The second key represents the destination node.
      */
-    private HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
+    protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
 
     /**
      * Instance the control plane with the list of active circuits in empty
@@ -48,7 +48,7 @@ public class ControlPlane {
      * @param routingInterface
      * @param spectrumAssignmentAlgoritm
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithm trafficGroomingAlgorithm, IntegratedRSAAlgoritm integratedRSAAlgoritm, RoutingInterface routingInterface, SpectrumAssignmentAlgoritm spectrumAssignmentAlgoritm) {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
         activeCircuits = new HashMap<>();
 
         this.rsaType = rmlsaType;
@@ -56,9 +56,25 @@ public class ControlPlane {
         this.integrated = integratedRSAAlgoritm;
         this.routing = routingInterface;
         this.spectrumAssignment = spectrumAssignmentAlgoritm;
-        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(),mesh.getGuardBand(),mesh);
+        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 
         setMesh(mesh);
+    }
+    
+    /**
+     * This method create a new transparent circuit.
+     * 
+     * @param rfc RequestForConnection
+     * @return Circuit
+     */
+    public Circuit createNewCircuit(RequestForConnection rfc){
+    	
+    	Circuit circuit = new Circuit();
+		circuit.setPair(rfc.getPair());
+		circuit.addRequest(rfc);
+		rfc.setCircuit(circuit);
+		
+		return circuit;
     }
 
     /**
@@ -86,7 +102,26 @@ public class ControlPlane {
     public Mesh getMesh() {
         return mesh;
     }
+    
+    /**
+     * Returns the modulation selector
+     * 
+     * @return ModulationSelector
+     */
+    public ModulationSelector getModulationSelector(){
+    	return modulationSelector;
+    }
 
+    /**
+     * Returns the spectrum assignment
+     * 
+     * @return SpectrumAssignmentAlgorithmInterface
+     */
+    public SpectrumAssignmentAlgorithmInterface getSpectrumAssignment(){
+    	return spectrumAssignment;
+    }
+    
+    
     /**
      * This method tries to satisfy a certain request by checking if there are available resources for the establishment of the circuit.
      * This method verifies the possibility of satisfying a circuit request.
@@ -106,15 +141,17 @@ public class ControlPlane {
     public void finalizeConnection(RequestForConnection rfc) {
         this.grooming.finishConnection(rfc, this);
     }
+    
     /**
      * Releases the resources being used by a given circuit
      *
      * @param circuit
      */
     public void releaseCircuit(Circuit circuit) {
-        Route r = circuit.getRoute();
-
-        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), r.getLinkList());
+        Route route = circuit.getRoute();
+        int chosen[] = circuit.getSpectrumAssigned();
+        
+        releaseSpectrum(circuit, chosen, route.getLinkList());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -122,13 +159,29 @@ public class ControlPlane {
 
         activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
     }
+    
+    /**
+     * This method releases the allocated spectrum for the circuit
+     * 
+     * @param circuit Circuit
+     * @param chosen int[]
+     * @param links List<Link>
+     */
+    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+        for (int i = 0; i < links.size(); i++) {
+        	Link link = links.get(i);
+        	
+            link.liberateSpectrum(chosen);
+            link.removeCircuit(circuit);
+        }
+    }
 
     /**
      * This method is called after executing RMLSA algorithms to allocate resources in the network
      *
      * @param circuit Circuit
      */
-    private void allocateCircuit(Circuit circuit) {
+    protected void allocateCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int chosen[] = circuit.getSpectrumAssigned();
@@ -145,34 +198,16 @@ public class ControlPlane {
     /**
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
+     * @param circuit Circuit
      * @param chosen int[]
      * @param links List<Link>
      */
-    private void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
-
-        Link link;
-        int i;
-        
-        for (i = 0; i < links.size(); i++) {
-            link = links.get(i);
+    protected void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+        for (int i = 0; i < links.size(); i++) {
+            Link link = links.get(i);
+            
             link.useSpectrum(chosen);
             link.addCircuit(circuit);
-        }
-
-    }
-
-    /**
-     * This method releases the allocated spectrum for the circuit
-     * 
-     * @param chosen int[]
-     * @param links List<Link>
-     */
-    private void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
-        // Release spectrum
-        for (Link link : links) {
-            link.liberateSpectrum(chosen);
-            
-            link.removeCircuit(circuit);
         }
     }
     
@@ -188,7 +223,7 @@ public class ControlPlane {
     	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
     		
     		// Can allocate spectrum
-            if (this.createNewCircuit(circuit)) {
+            if (this.tryEstablishNewCircuit(circuit)) {
 
             	// Pre-admits the circuit for QoT verification
                 this.allocateCircuit(circuit);
@@ -209,7 +244,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean
      */
-    private boolean createNewCircuit(Circuit circuit) {
+    protected boolean tryEstablishNewCircuit(Circuit circuit) {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
@@ -218,10 +253,10 @@ public class ControlPlane {
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
                     Modulation mod = modulationSelector.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
-                    circuit.setModulation(mod);
-                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
-                } else {
-                    return false;
+                    if(mod != null){
+	                    circuit.setModulation(mod);
+	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
+                    }
                 }
         }
 
@@ -305,7 +340,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean
      */
-    private boolean isAdmissibleQualityOfTransmission(Circuit circuit){
+    protected boolean isAdmissibleQualityOfTransmission(Circuit circuit){
     	
     	// Check if it is to test the QoT
     	if(mesh.getPhysicalLayer().isActiveQoT()){
@@ -350,7 +385,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    private boolean computeQualityOfTransmission(Circuit circuit){
+    protected boolean computeQualityOfTransmission(Circuit circuit){
     	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
@@ -367,7 +402,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    private boolean computeQoTForOther(Circuit circuit){
+    protected boolean computeQoTForOther(Circuit circuit){
     	List<Circuit> circuits = new ArrayList<>();
 		
 		Route route = circuit.getRoute();

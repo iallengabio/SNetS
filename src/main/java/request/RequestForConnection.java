@@ -1,7 +1,6 @@
 package request;
 
 import network.Circuit;
-import network.Link;
 import network.Pair;
 import network.RequestGenerator;
 

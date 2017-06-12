@@ -33,8 +33,7 @@ public class EventMachine implements Serializable {
         e.setId(this.countEvent);
         this.countEvent++;
         int i = 0;
-        while (i < eventList.size() &&
-                (eventList.elementAt(i)).getTimeHours() < e.getTimeHours()) {
+        while (i < eventList.size() && (eventList.elementAt(i)).getTimeHours() < e.getTimeHours()) {
             i++;
         }
         eventList.insertElementAt(e, i);

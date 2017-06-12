@@ -99,6 +99,7 @@ public class NetworkConfig {
         private String name;
         private int transmitters;
         private int receivers;
+        private int regenerators;
 
         /**
          * Creates a new instance of NodeConfig
@@ -107,10 +108,11 @@ public class NetworkConfig {
          * @param transeivers int
          * @param receivers int
          */
-        public NodeConfig(String name, int transmiters, int receivers) {
+        public NodeConfig(String name, int transmiters, int receivers, int regenerators) {
             this.name = name;
             this.transmitters = transmiters;
             this.receivers = receivers;
+            this.regenerators = regenerators;
         }
 
         /**
@@ -165,6 +167,24 @@ public class NetworkConfig {
          */
         public void setReceivers(int receivers) {
             this.receivers = receivers;
+        }
+        
+        /**
+         * Returns the number of regenerators
+         * 
+         * @return int
+         */
+        public int getRegenerators() {
+            return regenerators;
+        }
+
+        /**
+         * Sets the number of regenerators
+         * 
+         * @param regenerators int
+         */
+        public void setRegenerators(int regenerators) {
+            this.regenerators = regenerators;
         }
     }
 

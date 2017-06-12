@@ -14,49 +14,48 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class LastFit implements SpectrumAssignmentAlgoritm {
-
-    public LastFit() {
-
-    }
+public class LastFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit request) {
-        Route route = request.getRoute();
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
+        Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         List<int[]> composition;
         composition = links.get(0).getFreeSpectrumBands();
         int i;
-        IntersectionFreeSpectrum ifs = new IntersectionFreeSpectrum();
+
         for (i = 1; i < links.size(); i++) {
-            composition = ifs.merge(composition, links.get(i).getFreeSpectrumBands());
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
-        int chosen[] = lastFit(numberOfSlots, composition);
+        int chosen[] = policy(numberOfSlots, composition, circuit);
 
         if (chosen == null) return false;
 
-        request.setSpectrumAssigned(chosen);
+        circuit.setSpectrumAssigned(chosen);
 
         return true;
     }
-
+    
     /**
-     *
-     *
-     * @param numberOfSlots
-     * @param freeSpectrumBands
-     * @return
+     * Applies the policy of allocation of spectrum LastFit
+     * 
+     * @param numberOfSlots int
+     * @param freeSpectrumBands List<int[]>
+     * @param circuit Circuit
+     * @return int[]
      */
-    public static int[] lastFit(int numberOfSlots, List<int[]> freeSpectrumBands) {
-        int chosen[] = null;
+    @Override
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    	int chosen[] = null;
         int band[] = null;
         int i;
+        
         for (i = freeSpectrumBands.size() - 1; i >= 0; i--) {
             band = freeSpectrumBands.get(i);
             if (band[1] - band[0] + 1 >= numberOfSlots) {
-                chosen = band;
-                chosen[0] = chosen[1] - numberOfSlots + 1;//n�o � necess�rio alocar a faixa inteira, apenas a quantidade de slots necess�ria
+                chosen = band.clone();
+                chosen[0] = chosen[1] - numberOfSlots + 1;//It is not necessary to allocate the entire band, just the amount of slots required
 
                 break;
             }
@@ -64,7 +63,6 @@ public class LastFit implements SpectrumAssignmentAlgoritm {
 
         return chosen;
     }
-
 
 }
 
