@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import network.Circuit;
+import network.ControlPlane;
 import network.Link;
 import request.RequestForConnection;
-import simulationControl.resultManagers.RelativeFragmentationManager;
 import simulationControl.resultManagers.SpectrumSizeStatisticsResultManager;
 
 /**
@@ -49,9 +49,11 @@ public class SpectrumSizeStatistics extends Measurement{
 	/**
 	 * Adds a new observation of slots utilization
 	 * 
-	 * @param request
+	 * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
 	 */
-	public void addNewObservation(boolean success, RequestForConnection request){
+	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
 		if(request.getCircuit().getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
 			return;
 		this.newObservationRequestSizeBandwidthGeneral(request.getCircuit());	

@@ -3,6 +3,7 @@ package network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
@@ -31,13 +32,14 @@ public class ControlPlane {
     protected TrafficGroomingAlgorithmInterface grooming;
 	
     protected Mesh mesh;
-
     
     /**
      * The first key represents the source node.
      * The second key represents the destination node.
      */
     protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
+    
+    private TreeSet<Circuit> connectionList;
 
     /**
      * Instance the control plane with the list of active circuits in empty
@@ -49,8 +51,9 @@ public class ControlPlane {
      * @param spectrumAssignmentAlgoritm
      */
     public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
-        activeCircuits = new HashMap<>();
-
+        this.activeCircuits = new HashMap<>();
+        this.connectionList = new TreeSet<>();
+        
         this.rsaType = rmlsaType;
         this.grooming = trafficGroomingAlgorithm;
         this.integrated = integratedRSAAlgoritm;
@@ -84,11 +87,15 @@ public class ControlPlane {
      */
     public void setMesh(Mesh mesh) {
         this.mesh = mesh;
+        
         // Initialize the active circuit list
         for (Node node1 : mesh.getNodeList()) {
             HashMap<String, List<Circuit>> hmAux = new HashMap<>();
+            
             for (Node node2 : mesh.getNodeList()) {
-                hmAux.put(node2.getName(), new ArrayList<>());
+            	if(!node1.equals(node2)){
+	                hmAux.put(node2.getName(), new ArrayList<>());
+            	}
             }
             activeCircuits.put(node1.getName(), hmAux);
         }
@@ -141,40 +148,6 @@ public class ControlPlane {
     public void finalizeConnection(RequestForConnection rfc) {
         this.grooming.finishConnection(rfc, this);
     }
-    
-    /**
-     * Releases the resources being used by a given circuit
-     *
-     * @param circuit
-     */
-    public void releaseCircuit(Circuit circuit) {
-        Route route = circuit.getRoute();
-        int chosen[] = circuit.getSpectrumAssigned();
-        
-        releaseSpectrum(circuit, chosen, route.getLinkList());
-
-        // Release transmitter and receiver
-        circuit.getSource().getTxs().releasesTransmitters();
-        circuit.getDestination().getRxs().releasesReceivers();
-
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
-    }
-    
-    /**
-     * This method releases the allocated spectrum for the circuit
-     * 
-     * @param circuit Circuit
-     * @param chosen int[]
-     * @param links List<Link>
-     */
-    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
-        for (int i = 0; i < links.size(); i++) {
-        	Link link = links.get(i);
-        	
-            link.liberateSpectrum(chosen);
-            link.removeCircuit(circuit);
-        }
-    }
 
     /**
      * This method is called after executing RMLSA algorithms to allocate resources in the network
@@ -192,7 +165,7 @@ public class ControlPlane {
         circuit.getSource().getTxs().allocatesTransmitters();
         circuit.getDestination().getRxs().allocatesReceivers();
         
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
+        addConnection(circuit);
     }
 
     /**
@@ -208,6 +181,40 @@ public class ControlPlane {
             
             link.useSpectrum(chosen);
             link.addCircuit(circuit);
+        }
+    }
+    
+    /**
+     * Releases the resources being used by a given circuit
+     *
+     * @param circuit
+     */
+    public void releaseCircuit(Circuit circuit) {
+        Route route = circuit.getRoute();
+        int chosen[] = circuit.getSpectrumAssigned();
+        
+        releaseSpectrum(circuit, chosen, route.getLinkList());
+
+        // Release transmitter and receiver
+        circuit.getSource().getTxs().releasesTransmitters();
+        circuit.getDestination().getRxs().releasesReceivers();
+
+        removeConnection(circuit);
+    }
+    
+    /**
+     * This method releases the allocated spectrum for the circuit
+     * 
+     * @param circuit Circuit
+     * @param chosen int[]
+     * @param links List<Link>
+     */
+    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+        for (int i = 0; i < links.size(); i++) {
+        	Link link = links.get(i);
+        	
+            link.liberateSpectrum(chosen);
+            link.removeCircuit(circuit);
         }
     }
     
@@ -436,4 +443,40 @@ public class ControlPlane {
 		circuit.setPowerConsumption(powerConsumption);
 		return powerConsumption;
 	}
+	
+	/**
+	 * This method returns the list of active circuits
+	 * 
+	 * @return Circuit
+	 */
+	public TreeSet<Circuit> getConnections(){
+		return connectionList;
+	}
+	
+	/**
+	 * This method adds a circuit to the list of active circuits
+	 * 
+	 * @param circuit Circuit
+	 */
+	public void addConnection(Circuit circuit){
+		activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
+		
+		if(!connectionList.contains(circuit)){
+			connectionList.add(circuit);
+		}
+	}
+	
+	/**
+	 * This method removes a circuit from the active circuit list
+	 * 
+	 * @param circuit Circuit
+	 */
+	public void removeConnection(Circuit circuit){
+		activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
+		
+		if(connectionList.contains(circuit)){
+			connectionList.remove(circuit);
+		}
+	}
+	
 }

@@ -3,6 +3,7 @@ package measurement;
 import java.io.IOException;
 import java.util.List;
 
+import network.ControlPlane;
 import request.RequestForConnection;
 import simulationControl.resultManagers.ResultManagerInterface;
 
@@ -34,10 +35,11 @@ public abstract class Measurement {
 	/**
 	 * Adds a new observation of performance metrics
 	 * 
+	 * @param cp ControlPlane
 	 * @param success boolean
 	 * @param request RequestForConnection
 	 */
-	public abstract void addNewObservation(boolean success, RequestForConnection request);
+	public abstract void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request);
 
 	/**
 	 * Returns the load point

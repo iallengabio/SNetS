@@ -18,5 +18,5 @@ public interface ResultManagerInterface {
 	 * @param llms List<List<Measurement>>
 	 * @throws IOException
 	 */
-	public String result(List<List<Measurement>> llms) throws IOException;
+	public String result(List<List<Measurement>> llms);
 }

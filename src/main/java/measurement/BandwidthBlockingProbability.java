@@ -2,6 +2,7 @@ package measurement;
 
 import java.util.HashMap;
 
+import network.ControlPlane;
 import network.Pair;
 import request.RequestForConnection;
 import simulationControl.resultManagers.BandwidthBlockingProbResultManager;
@@ -43,8 +44,8 @@ public class BandwidthBlockingProbability extends Measurement{
 		super(loadPoint, rep);
 		
 		// bandwidth blocking probability general
-		this.generalRequestedBandwidth = 0;
-		this.generalBandwidthBlockingProbability = 0;
+		this.generalRequestedBandwidth = 0.0;
+		this.generalBandwidthBlockingProbability = 0.0;
 
 		this.requestedBandwidthPerBW = new HashMap<>();
 		this.bandwidthBlockedPerBW = new HashMap<>();
@@ -60,10 +61,11 @@ public class BandwidthBlockingProbability extends Measurement{
 	/**
 	 * Adds a new observation of block or not a request
 	 * 
+	 * @param cp ControlPlane
 	 * @param success boolean
 	 * @param request RequestForConnection
 	 */
-	public void addNewObservation(boolean success, RequestForConnection request){
+	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
 		// Calculate the amount of band requested by the circuit
 		Double time = request.getTimeOfFinalizeHours() - request.getTimeOfRequestHours();
 		Double banda = time * request.getRequiredBandwidth();

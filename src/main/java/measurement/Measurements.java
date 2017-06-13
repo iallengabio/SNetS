@@ -88,51 +88,49 @@ public class Measurements implements Serializable {
         
         // Activates the metrics set up in the SimulationConfig file
 		if(measuringMetrics.BlockingProbability){
-			BlockingProbability probabilidadeDeBloqueioMeasurement = new BlockingProbability(loadPoint, replication);
-			this.metricsList.add(probabilidadeDeBloqueioMeasurement);
-
+			BlockingProbability probabilidadeDeBloqueio = new BlockingProbability(loadPoint, replication);
+			this.metricsList.add(probabilidadeDeBloqueio);
 		}
 		if(measuringMetrics.BandwidthBlockingProbability){
-			BandwidthBlockingProbability probabilidadeDeBloqueioDeBandaMeasurement = new BandwidthBlockingProbability(loadPoint, replication);
-			this.metricsList.add(probabilidadeDeBloqueioDeBandaMeasurement);
-
+			BandwidthBlockingProbability probabilidadeDeBloqueioDeBanda = new BandwidthBlockingProbability(loadPoint, replication);
+			this.metricsList.add(probabilidadeDeBloqueioDeBanda);
 		}
 		if(measuringMetrics.ExternalFragmentation){
-			ExternalFragmentation fragmentacaoExterna = new ExternalFragmentation(loadPoint, replication, mesh);
+			ExternalFragmentation fragmentacaoExterna = new ExternalFragmentation(loadPoint, replication);
 			this.metricsList.add(fragmentacaoExterna);
-
 		}
 		if(measuringMetrics.SpectrumUtilization){
 			SpectrumUtilization utilizacaoSpectro = new SpectrumUtilization(loadPoint, replication, mesh);
 			this.metricsList.add(utilizacaoSpectro);
-
 		}
 		if(measuringMetrics.RelativeFragmentation){
-			RelativeFragmentation fragmentacaoRelativa = new RelativeFragmentation(loadPoint, replication, mesh);
+			RelativeFragmentation fragmentacaoRelativa = new RelativeFragmentation(loadPoint, replication);
 			this.metricsList.add(fragmentacaoRelativa);
-
 		}
 		if(measuringMetrics.SpectrumSizeStatistics){
-			SpectrumSizeStatistics metricsOfQoT = new SpectrumSizeStatistics(loadPoint, replication);
-			this.metricsList.add(metricsOfQoT);
-
+			SpectrumSizeStatistics spectrumSizeStatistics = new SpectrumSizeStatistics(loadPoint, replication);
+			this.metricsList.add(spectrumSizeStatistics);
 		}
-		if(measuringMetrics.TransmittersReceiversUtilization){
-			TransmittersReceiversUtilization metricsOfBAM = new TransmittersReceiversUtilization(loadPoint, replication, mesh);
-			this.metricsList.add(metricsOfBAM);
+		if(measuringMetrics.TransmittersReceiversRegeneratorsUtilization){
+			TransmittersReceiversRegeneratorsUtilization transmittersReceiversUtilization = new TransmittersReceiversRegeneratorsUtilization(loadPoint, replication);
+			this.metricsList.add(transmittersReceiversUtilization);
 		}
-
+		if(measuringMetrics.EnergyConsumption){
+			MetricsOfEnergyConsumption energyConsumption = new MetricsOfEnergyConsumption(loadPoint, replication);
+			this.metricsList.add(energyConsumption);
+		}
     }
     
     /**
      * Adds a new note for all enabled performance metrics
      * 
+     * @param cp ControlPlane
      * @param success boolean
      * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request){
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
     	for(Measurement metric : metricsList){
-    		metric.addNewObservation(success, request);
+    		metric.addNewObservation(cp, success, request);
     	}
     }
 
@@ -247,10 +245,19 @@ public class Measurements implements Serializable {
 		return null;
 	}
  	
- 	public TransmittersReceiversUtilization getTransmitersReceiversUtilization(){
+ 	public TransmittersReceiversRegeneratorsUtilization getTransmitersReceiversUtilization(){
 		for(Measurement metric : metricsList){
-			if(metric instanceof TransmittersReceiversUtilization){
-				return (TransmittersReceiversUtilization)metric;
+			if(metric instanceof TransmittersReceiversRegeneratorsUtilization){
+				return (TransmittersReceiversRegeneratorsUtilization)metric;
+			}
+		}
+		return null;
+	}
+ 	
+ 	public MetricsOfEnergyConsumption getMetricsOfEnergyConsumption(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof MetricsOfEnergyConsumption){
+				return (MetricsOfEnergyConsumption)metric;
 			}
 		}
 		return null;

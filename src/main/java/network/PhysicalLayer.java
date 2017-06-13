@@ -274,8 +274,6 @@ public class PhysicalLayer {
 			beta2 = -1.0 * beta2;
 		}
 		
-		//double he = getHe(Ns, alfa, L, Math.E, C);
-		//double mi = (3.0 * gama * gama * I * I * I * he) / (2.0 * Math.PI * alfaLinear * beta2);
 		double mi = (3.0 * gama * gama * I * I * I) / (2.0 * Math.PI * alfaLinear * beta2);
 		
 		double ro = (Math.PI * Math.PI * beta2) / (2.0 * alfaLinear);

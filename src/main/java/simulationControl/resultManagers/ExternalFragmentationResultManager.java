@@ -12,7 +12,7 @@ import measurement.Measurement;
  * 
  * @author Iallen
  */
-public class ExternalFragmentationManager implements ResultManagerInterface {
+public class ExternalFragmentationResultManager implements ResultManagerInterface {
 	
 	private HashMap<Integer, HashMap<Integer, ExternalFragmentation>> efs; // Contains the external fragmentation metric for all load points and replications
 	private List<Integer> loadPoints;

@@ -1,7 +1,6 @@
 package simulationControl;
 
 import measurement.*;
-import simulationControl.parsers.SimulationConfig;
 import simulationControl.resultManagers.*;
 import simulator.Simulation;
 import simulator.Simulator;
@@ -177,7 +176,7 @@ public class SimulationManagement {
                 lfe.add(measurements.getFragmentacaoExterna());
             }
         }
-        ExternalFragmentationManager efm = new ExternalFragmentationManager();
+        ExternalFragmentationResultManager efm = new ExternalFragmentationResultManager();
         return efm.result(llfe);
     }
 
@@ -192,7 +191,7 @@ public class SimulationManagement {
             }
         }
 
-        RelativeFragmentationManager rfm = new RelativeFragmentationManager();
+        RelativeFragmentationResultManager rfm = new RelativeFragmentationResultManager();
         return rfm.result(llfr);
     }
 
@@ -235,8 +234,22 @@ public class SimulationManagement {
                 ltru.add(measurements.getTransmitersReceiversUtilization());
             }
         }
-        TransmittersReceiversUtilizationResultManager trurm = new TransmittersReceiversUtilizationResultManager();
+        TransmittersReceiversRegeneratorsUtilizationResultManager trurm = new TransmittersReceiversRegeneratorsUtilizationResultManager();
         return trurm.result(lltru);
+    }
+    
+    public String getEnergyConsumptionCsv(){
+        // Energy consumption
+        List<List<Measurement>> llec = new ArrayList<>();
+        for (List<Measurements> listMeas : this.mainMeasuremens) {
+            List<Measurement> lec = new ArrayList<>();
+            llec.add(lec);
+            for (Measurements measurements : listMeas) {
+                lec.add(measurements.getMetricsOfEnergyConsumption());
+            }
+        }
+        MetricsOfEnergyConsumptionResultManager mecm = new MetricsOfEnergyConsumptionResultManager();
+        return mecm.result(llec);
     }
 
 

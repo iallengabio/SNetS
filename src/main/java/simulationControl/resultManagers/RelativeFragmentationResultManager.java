@@ -12,7 +12,7 @@ import measurement.RelativeFragmentation;
  * 
  * @author Iallen
  */
-public class RelativeFragmentationManager implements ResultManagerInterface {
+public class RelativeFragmentationResultManager implements ResultManagerInterface {
 	
 	private HashMap<Integer, HashMap<Integer, RelativeFragmentation>> rfs; // Contains the relative fragmentation metric for all load points and replications
 	private List<Integer> loadPoints;

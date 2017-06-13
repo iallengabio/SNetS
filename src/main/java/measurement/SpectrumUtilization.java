@@ -3,7 +3,7 @@ package measurement;
 import java.util.HashMap;
 import java.util.Set;
 
-import network.Circuit;
+import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
@@ -48,8 +48,12 @@ public class SpectrumUtilization extends Measurement {
 
     /**
      * Adds a new usage observation of spectrum utilizarion
+     * 
+     * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request) {
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
         this.newObsUtilization();
     }
 

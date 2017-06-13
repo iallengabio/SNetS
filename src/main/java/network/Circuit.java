@@ -12,7 +12,10 @@ import java.util.List;
  * 
  * @author Iallen
  */
-public class Circuit {
+public class Circuit implements Comparable<Object>{
+	
+	protected static int quantidade = 0;
+    protected Integer id;
 
     protected Pair pair;
     protected Route route;
@@ -30,6 +33,7 @@ public class Circuit {
      * Instantiates a circuit with the list of requests answered by it in empty
      */
     public Circuit() {
+    	this.id = quantidade++;
         this.requests = new ArrayList<>();
         
         this.QoT = true; //Assuming that a request always starts with admissible QoT
@@ -252,4 +256,37 @@ public class Circuit {
 		this.powerConsumption = powerConsumption;
 	}
 	
+	/**
+	 * @return the id
+	 */
+	public Integer getId(){
+		return this.id;
+	}
+	
+	/**
+	 * @return int
+	 */
+	@Override
+	public int compareTo(Object o) {
+		return this.id.compareTo(((Circuit)o).getId());
+	}
+	
+	/**
+	 * @return the hash code
+	 */
+	@Override
+	public int hashCode(){
+		return this.id * 31;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(o != null){
+			return this.id == ((Circuit)o).getId();
+		}
+		return false;
+	}
 }

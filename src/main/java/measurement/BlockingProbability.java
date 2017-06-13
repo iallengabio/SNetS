@@ -1,6 +1,7 @@
 package measurement;
 
 import network.Circuit;
+import network.ControlPlane;
 import network.Link;
 import network.Pair;
 import request.RequestForConnection;
@@ -75,16 +76,17 @@ public class BlockingProbability extends Measurement {
     /**
      * Adds a new observation of block or not a request
      *
+     * @param cp ControlPlane
      * @param success boolean
      * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request) {
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
     	
-    	StringBuilder sbPar = new StringBuilder();
-		sbPar.append(request.getPair().getSource().getName());
-		sbPar.append(SEP);
-		sbPar.append(request.getPair().getDestination().getName());
-		String pairName = sbPar.toString();
+    	StringBuilder sbPair = new StringBuilder();
+		sbPair.append(request.getPair().getSource().getName());
+		sbPair.append(SEP);
+		sbPair.append(request.getPair().getDestination().getName());
+		String pairName = sbPair.toString();
     	
         // Increment generated general requisitions
         this.numReqGenGeral++;

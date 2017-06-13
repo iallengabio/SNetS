@@ -83,7 +83,7 @@ public class ArriveRequestForConexionListener implements EventListener, Serializ
         Measurements m = simulation.getMeasurements();
         
         // Adds a new note for all enabled performance metrics
-        m.addNewObservation(success, request);
+        m.addNewObservation(simulation.getControlPlane(), success, request);
     }
     
     

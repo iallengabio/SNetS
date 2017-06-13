@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
-import simulationControl.resultManagers.RelativeFragmentationManager;
+import simulationControl.resultManagers.RelativeFragmentationResultManager;
 import util.ComputesFragmentation;
 
 /**
@@ -22,7 +23,6 @@ public class RelativeFragmentation extends Measurement {
 
     private HashMap<Integer, Double> relativeFrag;
     private int numberObservations;
-    private Mesh mesh;
 
     /**
      * Creates a new instance of RelativeFragmentation
@@ -31,9 +31,9 @@ public class RelativeFragmentation extends Measurement {
      * @param rep int
      * @param mesh Mesh
      */
-    public RelativeFragmentation(int loadPoint, int rep, Mesh mesh) {
+    public RelativeFragmentation(int loadPoint, int rep) {
         super(loadPoint, rep);
-        this.mesh = mesh;
+
         relativeFrag = new HashMap<>();
         numberObservations = 0;
         // Configure the desired relative fragmentations
@@ -43,25 +43,27 @@ public class RelativeFragmentation extends Measurement {
         relativeFrag.put(5, 0.0);
         
         fileName = "_RelativeFragmentation.csv";
-		resultManager = new RelativeFragmentationManager();
+		resultManager = new RelativeFragmentationResultManager();
     }
 
     /**
      * Adds a new observation of external fragmentation of the network
      *
-     * @param request
+     * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request) {
-        this.observationLinks();
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
+        this.observationLinks(cp.getMesh());
         numberObservations++;
     }
 
     /**
      * Makes a observation of the average relative fragmentation on all links for each configured c value
      */
-    private void observationLinks() {
+    private void observationLinks(Mesh mesh) {
         for (Integer c : relativeFrag.keySet()) {
-            this.observationAllLinks(c);
+            this.observationAllLinks(c, mesh);
         }
     }
 
@@ -70,7 +72,7 @@ public class RelativeFragmentation extends Measurement {
      *
      * @param c
      */
-    private void observationAllLinks(Integer c) {
+    private void observationAllLinks(Integer c, Mesh mesh) {
         double averageFragLink = 0.0;
         ComputesFragmentation cf = new ComputesFragmentation();
         for (Link link : mesh.getLinkList()) {

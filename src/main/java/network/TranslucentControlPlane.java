@@ -158,10 +158,10 @@ public class TranslucentControlPlane extends ControlPlane {
         circuit.getSource().getTxs().allocatesTransmitters();
         circuit.getDestination().getRxs().allocatesReceivers();
         
+        addConnection(circuit);
+        
         // Allocates regenerators
         allocateRegenerators((TranslucentCircuit)circuit);
-        
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
     }
     
 	/**
@@ -196,10 +196,10 @@ public class TranslucentControlPlane extends ControlPlane {
         circuit.getSource().getTxs().releasesTransmitters();
         circuit.getDestination().getRxs().releasesReceivers();
         
+        removeConnection(circuit);
+        
         // Release regenerators
         releasesRegenerators((TranslucentCircuit)circuit);
-
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
     }
     
     /**
@@ -399,7 +399,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			if(chosen != null){
 				if(alternativeMod == null){
 					alternativeMod = mod;
-					if(checkAssignSpectrum){ //
+					if(checkAssignSpectrum){
 						alternativeChosen = chosen;
 					}
 				}
