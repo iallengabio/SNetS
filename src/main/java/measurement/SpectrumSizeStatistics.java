@@ -8,6 +8,8 @@ import java.util.Set;
 import network.Circuit;
 import network.Link;
 import request.RequestForConnection;
+import simulationControl.resultManagers.RelativeFragmentationManager;
+import simulationControl.resultManagers.SpectrumSizeStatisticsResultManager;
 
 /**
  * This class represents the metric that computes the number of requests that use a given number of slots.
@@ -38,7 +40,10 @@ public class SpectrumSizeStatistics extends Measurement{
 		numberRequests = 0;
 		numberReqPerSlotReq = new HashMap<>();
 		numberRequestsPerLink = new HashMap<>();
-		numberReqPerSlotReqPerLink = new HashMap<>();	
+		numberReqPerSlotReqPerLink = new HashMap<>();
+		
+		fileName = "_SpectrumSizeStatistics.csv";
+		resultManager = new SpectrumSizeStatisticsResultManager();
 	}
 	
 	/**

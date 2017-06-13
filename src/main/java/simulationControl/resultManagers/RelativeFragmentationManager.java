@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import measurement.Measurement;
 import measurement.RelativeFragmentation;
 
 /**
@@ -11,32 +12,32 @@ import measurement.RelativeFragmentation;
  * 
  * @author Iallen
  */
-public class RelativeFragmentationManager {
+public class RelativeFragmentationManager implements ResultManagerInterface {
 	
-	private HashMap<Integer, HashMap<Integer, RelativeFragmentation>> frs; // Contains the relative fragmentation metric for all load points and replications
+	private HashMap<Integer, HashMap<Integer, RelativeFragmentation>> rfs; // Contains the relative fragmentation metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of RelativeFragmentationManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param lfr List<List<RelativeFragmentation>>
+	 * @param llms List<List<Measurement>>
 	 */
-	public RelativeFragmentationManager(List<List<RelativeFragmentation>> lfr){
-		frs = new HashMap<>();
+	public void config(List<List<Measurement>> llms){
+		rfs = new HashMap<>();
 		
-		for (List<RelativeFragmentation> loadPoint : lfr) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, RelativeFragmentation>  reps = new HashMap<>();
-			frs.put(load, reps);
+			rfs.put(load, reps);
 			
-			for (RelativeFragmentation fr : loadPoint) {
-				reps.put(fr.getReplication(), fr);
+			for (Measurement rf : loadPoint) {
+				reps.put(rf.getReplication(), (RelativeFragmentation)rf);
 			}			
 		}
-		loadPoints = new ArrayList<>(frs.keySet());
-		replications = new ArrayList<>(frs.values().iterator().next().keySet());
+		loadPoints = new ArrayList<>(rfs.keySet());
+		replications = new ArrayList<>(rfs.values().iterator().next().keySet());
 		
 	} 
 	
@@ -45,7 +46,9 @@ public class RelativeFragmentationManager {
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "LoadPoint" + sep + "link" + sep + "spectrum size (c)" + sep + " ");
 		
@@ -68,10 +71,10 @@ public class RelativeFragmentationManager {
 	private String resultGeneral() {
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			for (Integer c : this.frs.get(0).get(0).getCList()) {
+			for (Integer c : this.rfs.get(0).get(0).getCList()) {
 				String aux = "Relative Fragmentation per spectrum size (c)" + sep + loadPoint + sep + "all" + sep + c + sep + " ";
 				for (Integer replication : replications) {
-					aux = aux + sep + frs.get(loadPoint).get(replication).getAverageRelativeFragmentation(c);
+					aux = aux + sep + rfs.get(loadPoint).get(replication).getAverageRelativeFragmentation(c);
 				}
 				res.append(aux + "\n");
 			}

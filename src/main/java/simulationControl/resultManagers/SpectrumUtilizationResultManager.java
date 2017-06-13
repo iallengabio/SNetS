@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import measurement.Measurement;
 import measurement.SpectrumUtilization;
 
 /**
@@ -11,7 +12,7 @@ import measurement.SpectrumUtilization;
  * 
  * @author Iallen
  */
-public class SpectrumUtilizationResultManager {
+public class SpectrumUtilizationResultManager implements ResultManagerInterface {
 	
 	private HashMap<Integer, HashMap<Integer, SpectrumUtilization>> sus; // Contains the spectrum utilization metric for all load points and replications
 	private List<Integer> loadPoints;
@@ -19,20 +20,20 @@ public class SpectrumUtilizationResultManager {
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of SpectrumUtilizationResultManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param lsu List<List<SpectrumUtilization>> 
+	 * @param llms List<List<Measurement>>
 	 */
-	public SpectrumUtilizationResultManager(List<List<SpectrumUtilization>> lsu){
+	public void config(List<List<Measurement>> llms){
 		sus = new HashMap<>();
 		
-		for (List<SpectrumUtilization> loadPoint : lsu) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, SpectrumUtilization>  reps = new HashMap<>();
 			sus.put(load, reps);
 			
-			for (SpectrumUtilization su : loadPoint) {
-				reps.put(su.getReplication(), su);
+			for (Measurement su : loadPoint) {
+				reps.put(su.getReplication(), (SpectrumUtilization)su);
 			}			
 		}
 		loadPoints = new ArrayList<>(sus.keySet());
@@ -44,7 +45,9 @@ public class SpectrumUtilizationResultManager {
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "load point" + sep + "link" + sep + "number of slots" + sep + "slot" + sep + " ");
 		

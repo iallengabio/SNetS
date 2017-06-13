@@ -7,6 +7,7 @@ import java.util.Set;
 import network.Mesh;
 import network.Node;
 import request.RequestForConnection;
+import simulationControl.resultManagers.TransmittersReceiversUtilizationResultManager;
 
 /**
  * This class stores the measures regarding the use of transmitters and receivers for 
@@ -48,6 +49,9 @@ public class TransmittersReceiversUtilization extends Measurement {
 
         maxTxUtilizationPerNode = new HashMap<>();
         maxRxUtilizationPerNode = new HashMap<>();
+        
+        fileName = "_TransmittersReceiversRegeneratorsUtilization.csv";
+		resultManager = new TransmittersReceiversUtilizationResultManager();
     }
 
     /**

@@ -45,7 +45,7 @@ public class ExternalFragmentation extends Measurement {
         this.ExternalFragLinks = new HashMap<>();
         
         fileName = "_ExternalFragmentation.csv";
-		//resultManager = new ExternalFragmentationManager();
+		resultManager = new ExternalFragmentationManager();
     }
 
     /**

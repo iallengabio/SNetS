@@ -1,14 +1,14 @@
 package measurement;
 
-import network.Circuit;
-import network.Link;
-import network.Mesh;
-import request.RequestForConnection;
-import util.ComputesFragmentation;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import network.Link;
+import network.Mesh;
+import request.RequestForConnection;
+import simulationControl.resultManagers.RelativeFragmentationManager;
+import util.ComputesFragmentation;
 
 /**
  * This class represents the relative fragmentation metric
@@ -41,6 +41,9 @@ public class RelativeFragmentation extends Measurement {
         relativeFrag.put(2, 0.0);
         relativeFrag.put(3, 0.0);
         relativeFrag.put(5, 0.0);
+        
+        fileName = "_RelativeFragmentation.csv";
+		resultManager = new RelativeFragmentationManager();
     }
 
     /**

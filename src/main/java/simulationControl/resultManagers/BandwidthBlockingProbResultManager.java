@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import measurement.BandwidthBlockingProbability;
+import measurement.Measurement;
 import network.Pair;
 import simulationControl.Util;
 
@@ -13,33 +14,33 @@ import simulationControl.Util;
  * 
  * @author Iallen
  */
-public class BandwidthBlockingProbResultManager {
+public class BandwidthBlockingProbResultManager implements ResultManagerInterface {
 	
-	private HashMap<Integer, HashMap<Integer, BandwidthBlockingProbability>> pbs; // Contains the bandwidth blocking probability metric for all load points and replications
+	private HashMap<Integer, HashMap<Integer, BandwidthBlockingProbability>> bbps; // Contains the bandwidth blocking probability metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private List<Pair> pairs;
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of BandwidthBlockingProbResultManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param lpdb List<List<BandwidthBlockingProbability>>
+	 * @param llms List<List<Measurement>>
 	 */
-	public BandwidthBlockingProbResultManager(List<List<BandwidthBlockingProbability>> lpdb){
-		pbs = new HashMap<>();
+	public void config(List<List<Measurement>> llms){
+		bbps = new HashMap<>();
 		
-		for (List<BandwidthBlockingProbability> loadPoint : lpdb) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, BandwidthBlockingProbability>  reps = new HashMap<>();
-			pbs.put(load, reps);
+			bbps.put(load, reps);
 			
-			for (BandwidthBlockingProbability pb : loadPoint) {
-				reps.put(pb.getReplication(), pb);
+			for (Measurement bbp : loadPoint) {
+				reps.put(bbp.getReplication(), (BandwidthBlockingProbability)bbp);
 			}			
 		}
-		loadPoints = new ArrayList<>(pbs.keySet());
-		replications = new ArrayList<>(pbs.values().iterator().next().keySet());
+		loadPoints = new ArrayList<>(bbps.keySet());
+		replications = new ArrayList<>(bbps.values().iterator().next().keySet());
 		this.pairs = new ArrayList<>(Util.pairs);
 	}
 	
@@ -48,7 +49,9 @@ public class BandwidthBlockingProbResultManager {
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "LoadPoint" + sep + "Bandwidth" + sep + "src" + sep + "dest" + sep + " ");
 		
@@ -79,7 +82,7 @@ public class BandwidthBlockingProbResultManager {
 		for (Integer loadPoint : loadPoints) {
 			res.append("bandwidth blocking probability" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + pbs.get(loadPoint).get(replic).getProbBlockGeneral());
+				res.append(sep + bbps.get(loadPoint).get(replic).getProbBlockGeneral());
 			}
 			res.append("\n");
 		}
@@ -99,7 +102,7 @@ public class BandwidthBlockingProbResultManager {
 			for (Pair pair : this.pairs) {
 				String aux2 = aux + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
 				for (Integer replic : replications) {
-					aux2 = aux2 + sep + pbs.get(loadPoint).get(replic).getProbBlockPair(pair);
+					aux2 = aux2 + sep + bbps.get(loadPoint).get(replic).getProbBlockPair(pair);
 				}
 				res.append(aux2 + "\n");	
 			}
@@ -120,7 +123,7 @@ public class BandwidthBlockingProbResultManager {
 			for (Double bandwidth : Util.bandwidths) {
 				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps" + sep + "all" + sep + "all" + sep + " ";
 				for (Integer rep : replications) {
-					aux2 = aux2 + sep + pbs.get(loadPoint).get(rep).getProbBlockBandwidth(bandwidth);
+					aux2 = aux2 + sep + bbps.get(loadPoint).get(rep).getProbBlockBandwidth(bandwidth);
 				}
 				res.append(aux2 + "\n");
 			}
@@ -143,7 +146,7 @@ public class BandwidthBlockingProbResultManager {
 				for (Pair pair :  Util.pairs) {
 					String aux3 = aux2 + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
 					for(Integer rep :  replications){
-						aux3 = aux3 + sep + pbs.get(loadPoint).get(rep).getProbBlockPairBandwidth(pair, bandwidth);
+						aux3 = aux3 + sep + bbps.get(loadPoint).get(rep).getProbBlockPairBandwidth(pair, bandwidth);
 					}
 					res.append(aux3 + "\n");
 				}				

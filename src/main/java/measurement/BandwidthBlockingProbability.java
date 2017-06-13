@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import network.Pair;
 import request.RequestForConnection;
+import simulationControl.resultManagers.BandwidthBlockingProbResultManager;
 
 /**
  * This class represents the bandwidth blocking probability metric (general, per pair, per bandwidth, 
@@ -51,6 +52,9 @@ public class BandwidthBlockingProbability extends Measurement{
 		this.bandwidthBlockedPerPair = new HashMap<>();
 		this.requestedBandwidthPairBW = new HashMap<>();
 		this.bandwidthBlockedPairBW = new HashMap<>();
+		
+		fileName = "_BandwidthBlockingProbability.csv";
+		resultManager = new BandwidthBlockingProbResultManager();
 	}
 	
 	/**

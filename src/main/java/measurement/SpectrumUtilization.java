@@ -7,6 +7,7 @@ import network.Circuit;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
+import simulationControl.resultManagers.SpectrumUtilizationResultManager;
 
 /**
  * This class stored the metrics related to the use of spectrum.
@@ -40,6 +41,9 @@ public class SpectrumUtilization extends Measurement {
 
         int maxSlotsByLinks = mesh.maximumSlotsByLinks();
         desUtilizationPerSlot = new int[maxSlotsByLinks];
+        
+        fileName = "_SpectrumUtilization.csv";
+		resultManager = new SpectrumUtilizationResultManager();
     }
 
     /**

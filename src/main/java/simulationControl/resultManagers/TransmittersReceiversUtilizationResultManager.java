@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import measurement.Measurement;
 import measurement.TransmittersReceiversUtilization;
 
 /**
@@ -11,7 +12,7 @@ import measurement.TransmittersReceiversUtilization;
  * 
  * @author Iallen
  */
-public class TransmittersReceiversUtilizationResultManager {
+public class TransmittersReceiversUtilizationResultManager implements ResultManagerInterface {
 	
 	private HashMap<Integer, HashMap<Integer, TransmittersReceiversUtilization>> trus; // Contains the transmitter and receivers utilization metric for all load points and replications
 	private List<Integer> loadPoints;
@@ -19,20 +20,20 @@ public class TransmittersReceiversUtilizationResultManager {
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of TransmittersReceiversUtilizationResultManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param ltru List<List<TransmittersReceiversUtilization>>
+	 * @param llms List<List<Measurement>>
 	 */
-	public TransmittersReceiversUtilizationResultManager(List<List<TransmittersReceiversUtilization>> ltru){
+	public void config(List<List<Measurement>> llms){
 		trus = new HashMap<>();
 		
-		for (List<TransmittersReceiversUtilization> loadPoint : ltru) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, TransmittersReceiversUtilization>  reps = new HashMap<>();
 			trus.put(load, reps);
 			
-			for (TransmittersReceiversUtilization su : loadPoint) {
-				reps.put(su.getReplication(), su);
+			for (Measurement tru : loadPoint) {
+				reps.put(tru.getReplication(), (TransmittersReceiversUtilization)tru);
 			}			
 		}
 		loadPoints = new ArrayList<>(trus.keySet());
@@ -44,7 +45,9 @@ public class TransmittersReceiversUtilizationResultManager {
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "load point" + sep + "node" + sep + " ");
 		
