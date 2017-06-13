@@ -68,6 +68,12 @@ public class BlockingProbResultManager implements ResultManagerInterface {
 		res.append("\n\n");
 		res.append(resultGeneralFrag());
 		res.append("\n\n");
+		res.append(resultGeneralQoTN());
+		res.append("\n\n");
+		res.append(resultGeneralQoTO());
+		res.append("\n\n");
+		res.append(resultGeneralOther());
+		res.append("\n\n");
 		
 		res.append(resultPair());
 		res.append("\n\n");
@@ -89,7 +95,7 @@ public class BlockingProbResultManager implements ResultManagerInterface {
 		for (Integer loadPoint : loadPoints) {
 			res.append("blocking probability" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + bps.get(loadPoint).get(replic).getProbBlockGeneral());
+				res.append(sep + bps.get(loadPoint).get(replic).getGeneralBlockProb());
 			}
 			res.append("\n");
 		}
@@ -106,7 +112,7 @@ public class BlockingProbResultManager implements ResultManagerInterface {
 		for (Integer loadPoint : loadPoints) {
 			res.append("blocking probability per lack of transmitters" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + bps.get(loadPoint).get(replic).getProbBlockLackTxGen());
+				res.append(sep + bps.get(loadPoint).get(replic).getReqBlockByLackTx());
 			}
 			res.append("\n");
 		}
@@ -123,7 +129,7 @@ public class BlockingProbResultManager implements ResultManagerInterface {
 		for (Integer loadPoint : loadPoints) {
 			res.append("blocking probability per lack of receivers" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + bps.get(loadPoint).get(replic).getProbBlockLackRxGen());
+				res.append(sep + bps.get(loadPoint).get(replic).getReqBlockByLackRx());
 			}
 			res.append("\n");
 		}
@@ -140,7 +146,58 @@ public class BlockingProbResultManager implements ResultManagerInterface {
 		for (Integer loadPoint : loadPoints) {
 			res.append("blocking probability per fragmentation" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + bps.get(loadPoint).get(replic).getProbBlockFragGeneral());
+				res.append(sep + bps.get(loadPoint).get(replic).getBlockProbByFragmentation());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability per QoTN
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralQoTN(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("blocking probability per QoTN" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bps.get(loadPoint).get(replic).getRegBlockByQoTN());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability per QoTO
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralQoTO(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("blocking probability per QoTO" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bps.get(loadPoint).get(replic).getRegBlockByQoTO());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability per other
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralOther(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("blocking probability per other" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bps.get(loadPoint).get(replic).getRegBlockByOther());
 			}
 			res.append("\n");
 		}

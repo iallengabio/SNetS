@@ -104,7 +104,7 @@ public class ModulationSelector {
 			
 			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit)){
 				if(alternativeMod == null){
-					alternativeMod = mod; //The first modulation that was able to allocate
+					alternativeMod = mod; //The first modulation that was able to allocate spectrum
 				}
 				
 				boolean flagQoT = mesh.getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, circuit.getSpectrumAssigned());

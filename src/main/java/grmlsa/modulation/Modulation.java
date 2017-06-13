@@ -26,6 +26,19 @@ public class Modulation {
 
 	private Mesh mesh;
 
+	/**
+	 * Creates a new instance of Modulation
+	 * 
+	 * @param name String
+	 * @param bitsPerSymbol double
+	 * @param freqSlot double
+	 * @param maxRange double
+	 * @param guardBand int
+	 * @param level double
+	 * @param k2 double
+	 * @param M double
+	 * @param mesh Mesh
+	 */
     public Modulation(String name, double bitsPerSymbol, double freqSlot, double maxRange, int guardBand, double level, double k2, double M, Mesh mesh) {
         this.name = name;
         this.bitsPerSymbol = bitsPerSymbol;

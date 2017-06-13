@@ -14,6 +14,7 @@ import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
 import request.RequestForConnection;
+import util.IntersectionFreeSpectrum;
 
 /**
  * Class that represents the control plane for a Transparent Elastic Optical Network.
@@ -43,22 +44,23 @@ public class ControlPlane {
 
     /**
      * Instance the control plane with the list of active circuits in empty
-     * @param mesh
-     * @param rmlsaType
-     * @param trafficGroomingAlgorithm
-     * @param integratedRSAAlgoritm
-     * @param routingInterface
-     * @param spectrumAssignmentAlgoritm
+     * 
+     * @param mesh Mesh
+     * @param rmlsaType int
+     * @param trafficGroomingAlgorithm TrafficGroomingAlgorithmInterface
+     * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
+     * @param routingAlgorithm RoutingAlgorithmInterface
+     * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm) {
         this.activeCircuits = new HashMap<>();
         this.connectionList = new TreeSet<>();
         
         this.rsaType = rmlsaType;
         this.grooming = trafficGroomingAlgorithm;
-        this.integrated = integratedRSAAlgoritm;
-        this.routing = routingInterface;
-        this.spectrumAssignment = spectrumAssignmentAlgoritm;
+        this.integrated = integratedRMLSAAlgorithm;
+        this.routing = routingAlgorithm;
+        this.spectrumAssignment = spectrumAssignmentAlgorithm;
         this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 
         setMesh(mesh);
@@ -479,4 +481,71 @@ public class ControlPlane {
 		}
 	}
 	
+	/**
+	 * This method checks whether the circuit blocking was by QoTN
+	 * Returns true if the blocking was by QoTN and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean isBlockingByQoTN(Circuit circuit){
+		// Check if it is to test the QoT
+		if(mesh.getPhysicalLayer().isActiveQoT()){
+			// Check if it is possible to compute the circuit QoT
+			if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
+				return !computeQualityOfTransmission(circuit);
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * This method checks whether the circuit blocking was by QoTO
+	 * Returns true if the blocking was by QoTO and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean isBlockingByQoTO(Circuit circuit){
+		// Check if it is to test the QoT of other already active circuits
+		if(mesh.getPhysicalLayer().isActiveQoTForOther()){
+			return !circuit.isQoTForOther();
+		}
+		return false;
+	}
+	
+	/**
+	 * This method checks whether the circuit blocking was by fragmentation
+	 * Returns true if the blocking was by fragmentation and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean isBlockingByFragmentation(Circuit circuit){
+		if (circuit.getRoute() == null) return false;
+        
+        List<Link> links = circuit.getRoute().getLinkList();
+        List<int[]> merge = links.get(0).getFreeSpectrumBands();
+
+        for (int i = 1; i < links.size(); i++) {
+            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
+        }
+
+        int totalFree = 0;
+        for (int[] band : merge) {
+            totalFree += (band[1] - band[0] + 1);
+        }
+        
+        Modulation mod = circuit.getModulation();
+        if(mod == null){
+        	mod = modulationSelector.getAvaliableModulations().get(0);
+        }
+
+        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+        if (totalFree > numSlotsRequired) {
+            return true;
+        }
+
+        return false;
+	}
 }
