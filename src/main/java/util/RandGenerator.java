@@ -10,7 +10,7 @@ public class RandGenerator extends java.util.Random {
      * time as its seed value.
      */
     public RandGenerator() {
-        super(31);
+        super();
     }
 
     /**

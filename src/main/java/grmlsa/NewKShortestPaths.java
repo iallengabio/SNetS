@@ -166,7 +166,7 @@ public class NewKShortestPaths {
 		      			    for (int n = 0; n < rAux.getNodeList().size(); n++) {
 		      			        sb.append(rAux.getNodeList().get(n).getName());
 			      			    if(n < rAux.getNodeList().size() - 1){
-			  						sb.append("\t");
+			  						sb.append("-");
 			  					}
 		      			    }
 		      			    
