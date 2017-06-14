@@ -15,10 +15,14 @@ import network.Circuit;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
 
-
+/**
+ * This class presents a proposal for modification in the Zone Partition algorithm.
+ * 
+ * @author Iallen
+ */
 public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterface{
 
-	private NewKShortestPaths kMenores;
+	private NewKShortestPaths kShortestsPaths;
 	private ModulationSelector modulationSelector;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
@@ -26,13 +30,14 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 	private HashMap<Integer, int[]> zones; 
 	
 	public ZonePartitionTopInvasion(){
-		List<int[]> zones=null;
+		List<int[]> zones = null;
+		
 		try {
 			//zones = ZonesFileReader.readTrafic(Util.projectPath + "/zones");
 		} catch (Exception e) {
-			System.out.println("não foi possível ler o arquivo com a especificação das zonas!");
+			System.err.println("It was not possible to read the file with the zones specification!");
 			
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		this.zones = new HashMap<>();
 		int aux[];
@@ -42,13 +47,12 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			aux[1] = zone[2];
 			this.zones.put(zone[0], aux);			
 		}
-		
 	}
 	
 	@Override
 	public boolean rsa(Circuit circuit, Mesh mesh) {
-		if(kMenores == null){
-			kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
+		if(kShortestsPaths == null){
+			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
 		}
 		if(modulationSelector == null){
 			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
@@ -58,118 +62,134 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			spectrumAssignment2 = new LastFit();
 		}
 		
-		List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
-		Route rotaEscolhida = null;
-		Modulation modEscolhida = null;
-		int faixaEscolhida[] = {999999,999999}; //valor jamais atingido
+		List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
+		Route chosenRoute = null;
+		Modulation chosenMod = null;
+		int chosenBand[] = {999999,999999}; // Value never reached
 		
-		//tentar alocar na zona primária
-		for (Route r : candidateRoutes) {
-			//calcular quantos slots são necessários para esta rota
-			circuit.setRoute(r);
-			Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment1, mesh);
+		// Try to allocate in the primary zone
+		for (Route route : candidateRoutes) {
 			
-			int quantSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-			int zone[] = this.zones.get(quantSlots);
+			circuit.setRoute(route);
+			Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment1, mesh);
+			
+			// Calculate how many slots are needed for this route
+			int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
+			int zone[] = this.zones.get(numSlots);
 			List<int[]> primaryZone = new ArrayList<>();
 			primaryZone.add(zone);			
 			
-			List<int[]> merge = IntersectionFreeSpectrum.merge(r);
+			List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 			merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 			
-			int ff[] = spectrumAssignment1.policy(quantSlots, merge, circuit);
+			int ff[] = spectrumAssignment1.policy(numSlots, merge, circuit);
 			
-			if(ff!=null && ff[0]<faixaEscolhida[0]){
-				faixaEscolhida = ff;
-				rotaEscolhida = r;	
-				modEscolhida = mod;
+			if(ff != null && ff[0] < chosenBand[0]){
+				chosenBand = ff;
+				chosenRoute = route;	
+				chosenMod = mod;
 			}
 		}
-		//se não foi possível alocar nenhum recurso, tentar uma invasão na zona mais disponível
-		if(rotaEscolhida==null){
-			faixaEscolhida[0] = -1;
-			faixaEscolhida[1] = -1;
-			double maisLivre = 0;
-			for (Route r : candidateRoutes) {
-				//calcular quantos slots são necessários para esta rota
-				circuit.setRoute(r);
-				Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment2, mesh);
+		
+		// If it was not possible to allocate any resources, try an invasion in the most available zone
+		if(chosenRoute == null){
+			
+			chosenBand[0] = -1;
+			chosenBand[1] = -1;
+			double moreFree = 0;
+			
+			for (Route route : candidateRoutes) {
 				
-				int quantSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-				int zone[] = this.zones.get(quantSlots);
-				List<int[]> merge = IntersectionFreeSpectrum.merge(r);
+				circuit.setRoute(route);
+				Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment2, mesh);
 				
-				int zonaMaisLivre = this.buscarZonaMaisLivre(quantSlots, merge);
+				// Calculate how many slots are needed for this route
+				int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
+				int zone[] = this.zones.get(numSlots);
+				List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 				
-				if(zonaMaisLivre == -1){
-					//System.out.println("impossível invasão");
+				int zoneMoreFree = this.searchMoreFreeZone(numSlots, merge);
+				
+				if(zoneMoreFree == -1){
+					//System.out.println("Impossible invasion!");
 					continue;
 				};
 				
 				//System.out.println("invasão viável");
 				List<int[]> secondaryZone = new ArrayList<>();
-				secondaryZone.add(zones.get(zonaMaisLivre));
+				secondaryZone.add(zones.get(zoneMoreFree));
 				
 				merge = IntersectionFreeSpectrum.merge(merge, secondaryZone);
 				
-				double aux = ((double) quantLivre(merge)) / ((double)(zones.get(zonaMaisLivre)[1] - zones.get(zonaMaisLivre)[0] + 1));
+				double aux = ((double) numberFree(merge)) / ((double)(zones.get(zoneMoreFree)[1] - zones.get(zoneMoreFree)[0] + 1));
 				
-				int lf[] = spectrumAssignment2.policy(quantSlots, merge, circuit);
+				int lf[] = spectrumAssignment2.policy(numSlots, merge, circuit);
 				
-				if(lf!=null && aux>maisLivre){
-					faixaEscolhida = lf;
-					rotaEscolhida = r;		
-					maisLivre = aux;
-					modEscolhida = mod;
+				if(lf != null && aux > moreFree){
+					chosenBand = lf;
+					chosenRoute = route;
+					chosenMod = mod;
+					moreFree = aux;
 				}
 			}	
 		}
 		
-		if(rotaEscolhida!=null){ //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-			circuit.setRoute(rotaEscolhida);
-			circuit.setModulation(modEscolhida);
-			circuit.setSpectrumAssigned(faixaEscolhida);
+		if(chosenRoute!=null){ // If there is no route chosen is why no available resource was found on any of the candidate routes
+			circuit.setRoute(chosenRoute);
+			circuit.setModulation(chosenMod);
+			circuit.setSpectrumAssigned(chosenBand);
 			
 			return true;
 			
 		}else{
 			circuit.setRoute(candidateRoutes.get(0));
 			circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
+			circuit.setSpectrumAssigned(null);
+			
 			return false;
 		}
 		
 	}
 	
 	/**
-	 * Este método retorna a zona mais livre onde será feita a invasão.
-	 * O método irá retornar a zona que couber mais requisições do tipo dela mesma
-	 * O inteiro retornado corresponde à quantidade de slots por requisição da zona selecionada
+	 * This method returns the freer zone where the invasion will be made.
+	 * The method will return the zone that will fit more requests of the same type
+	 * The returned integer corresponds to the number of slots per request of the selected zone
 	 * 
-	 * @return
+	 * @param numSlotsInvader in
+	 * @param merge List<int[]>
+	 * @return int
 	 */
-	private int buscarZonaMaisLivre(int quantSlotsInvasor, List<int[]> merge){
+	private int searchMoreFreeZone(int numSlotsInvader, List<int[]> merge){
 		int res = -1;
-		double maiorDisponibilidade = 0;
+		double greaterAvailability = 0;
+		
 		List<int[]> aux1, aux2;
 		for (Integer z : zones.keySet()) {
 			aux1 = new ArrayList<>();
 			aux1.add(zones.get(z));
-			aux2 = IntersectionFreeSpectrum.merge(merge, aux1);
-			int quantLivre = quantLivre(aux2);
-			double aux = ((double) quantLivre) / ((double)(zones.get(z)[1] - zones.get(z)[0] + 1));
 			
-			if(aux > maiorDisponibilidade && quantLivre >= quantSlotsInvasor){
-				maiorDisponibilidade = aux;
+			aux2 = IntersectionFreeSpectrum.merge(merge, aux1);
+			int numFree = numberFree(aux2);
+			
+			double aux = ((double) numFree) / ((double)(zones.get(z)[1] - zones.get(z)[0] + 1));
+			
+			if(aux > greaterAvailability && numFree >= numSlotsInvader){
+				greaterAvailability = aux;
 				res = z;
 			}
 		}
 		
-		//System.out.println("buscando zona para invasão, request: " + quantSlotsInvasor + ", zona: " + res);
-		
 		return res;
 	}
 	
-	private int quantLivre(List<int[]> lF){
+	/**
+	 * Returns the number of free slots
+	 * 
+	 * @param lF List<int[]>
+	 * @return int
+	 */
+	private int numberFree(List<int[]> lF){
 		int res = 0;
 		
 		if(lF.size()>0){

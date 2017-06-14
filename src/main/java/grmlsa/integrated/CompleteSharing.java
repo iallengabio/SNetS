@@ -12,17 +12,25 @@ import util.IntersectionFreeSpectrum;
 
 import java.util.List;
 
-
+/**
+ * This class represents the implementation of the Complete Sharing algorithm presented in the article:
+ *  - Spectrum management in heterogeneous bandwidth optical networks (2014)
+ *  
+ * In the Complete Sharing the route and the frequency slots are selected in order to allocate a range of 
+ * spectrum closer to the beginning of the optical spectrum.
+ * 
+ * @author Iallen
+ */
 public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 
-    private NewKShortestPaths kMenores;
+    private NewKShortestPaths kShortestsPaths;
     private ModulationSelector modulationSelector;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
     @Override
     public boolean rsa(Circuit circuit, Mesh mesh) {
-        if (kMenores == null){
-        	kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
+        if (kShortestsPaths == null){
+        	kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
         }
         if (modulationSelector == null){
             modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
@@ -31,37 +39,40 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 			spectrumAssignment = new FirstFit();
 		}
 
-        List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
-        Route rotaEscolhida = null;
-        Modulation modEscolhida = null;
-        int faixaEscolhida[] = {999999, 999999}; //valor jamais atingido
+        List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
+        Route chosenRoute = null;
+        Modulation chosenMod = null;
+        int chosenBand[] = {999999, 999999}; // Value never reached
 
-        for (Route r : candidateRoutes) {
-            //calcular quantos slots são necessários para esta rota
-            circuit.setRoute(r);
-            Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
+        for (Route route : candidateRoutes) {
+            
+            circuit.setRoute(route);
+            Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment, mesh);
 
-            List<int[]> merge = IntersectionFreeSpectrum.merge(r);
+            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 
+            // Calculate how many slots are needed for this route
             int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit);
 
-            if (ff != null && ff[0] < faixaEscolhida[0]) {
-                faixaEscolhida = ff;
-                rotaEscolhida = r;
-                modEscolhida = mod;
+            if (ff != null && ff[0] < chosenBand[0]) {
+                chosenBand = ff;
+                chosenRoute = route;
+                chosenMod = mod;
             }
         }
 
-        if (rotaEscolhida != null) { //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-            circuit.setRoute(rotaEscolhida);
-            circuit.setModulation(modEscolhida);
-            circuit.setSpectrumAssigned(faixaEscolhida);
+        if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
+            circuit.setRoute(chosenRoute);
+            circuit.setModulation(chosenMod);
+            circuit.setSpectrumAssigned(chosenBand);
 
             return true;
 
         } else {
             circuit.setRoute(candidateRoutes.get(0));
             circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
+            circuit.setSpectrumAssigned(null);
+            
             return false;
         }
 
