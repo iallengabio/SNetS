@@ -15,10 +15,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
+/**
+ * This class presents a proposal for modification in the Dedicated Partition algorithm.
+ * 
+ * @author Iallen
+ */
 public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmInterface {
 
-    private NewKShortestPaths kMenores;
+    private NewKShortestPaths kShortestsPaths;
     private ModulationSelector modulationSelector;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
@@ -29,9 +33,9 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
         try {
             //zones = ZonesFileReader.readTrafic(Util.projectPath + "/zones");
         } catch (Exception e) {
-            System.out.println("não foi possível ler o arquivo com a especificação das zonas!");
-
-            //e.printStackTrace();
+            System.err.println("It was not possible to read the file with the zones specification!");
+            
+            e.printStackTrace();
         }
         this.zones = new HashMap<>();
         int aux[];
@@ -41,89 +45,90 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
             aux[1] = zone[2];
             this.zones.put(zone[0], aux);
         }
-
     }
 
     @Override
     public boolean rsa(Circuit circuit, Mesh mesh) {
-    	if(kMenores==null){
-			kMenores = new NewKShortestPaths(mesh, 3); //este algoritmo utiliza 3 caminhos alternativos
+    	if(kShortestsPaths == null){
+			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
 		}
-		if(modulationSelector==null){
+		if(modulationSelector == null){
 			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 		}
 		if(spectrumAssignment == null){
 			spectrumAssignment = new FirstFit();
 		}
 
-        List<Route> candidateRoutes = kMenores.getRoutes(circuit.getSource(), circuit.getDestination());
-        Route rotaEscolhida = null;
-        Modulation modEscolhida = null;
-        int faixaEscolhida[] = {999999, 999999}; //valor jamais atingido
-        int menosUsado = 999999999;
+        List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
+        Route chosenRoute = null;
+        Modulation chosenMod = null;
+        int chosenBand[] = {999999, 999999}; // Value never reached
+        int leastUsed = 999999999;
 
-        for (Route r : candidateRoutes) {
-            //calcular quantos slots são necessários para esta rota
-            circuit.setRoute(r);
-            Modulation mod = modulationSelector.selectModulation(circuit, r, spectrumAssignment, mesh);
+        for (Route route : candidateRoutes) {
+            
+            circuit.setRoute(route);
+            Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment, mesh);
 
-            int quantSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-            int zone[] = this.zones.get(quantSlots);
+            // Calculate how many slots are needed for this route
+            int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
+            int zone[] = this.zones.get(numSlots);
             List<int[]> primaryZone = new ArrayList<>();
             primaryZone.add(zone);
 
-            List<int[]> merge = IntersectionFreeSpectrum.merge(r);
+            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
             merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 
-            int ff[] = spectrumAssignment.policy(quantSlots, merge, circuit);
+            int ff[] = spectrumAssignment.policy(numSlots, merge, circuit);
 
-            int ut = this.quantSlotsUsadosZona(r, zone);
+            int ut = this.numSlotsUsedZone(route, zone);
 
-            if (ff != null && ut < menosUsado) {
-                faixaEscolhida = ff;
-                rotaEscolhida = r;
-                menosUsado = ut;
-                modEscolhida = mod;
+            if (ff != null && ut < leastUsed) {
+                chosenBand = ff;
+                chosenRoute = route;
+                leastUsed = ut;
+                chosenMod = mod;
             }
         }
 
-        if (rotaEscolhida != null) { //se não houver rota escolhida é por que não foi encontrado recurso disponível em nenhuma das rotas candidatas
-            circuit.setRoute(rotaEscolhida);
-            circuit.setModulation(modEscolhida);
-            circuit.setSpectrumAssigned(faixaEscolhida);
+        if (chosenRoute != null) { // If there is no route chosen is why no available resource was found on any of the candidate routes
+            circuit.setRoute(chosenRoute);
+            circuit.setModulation(chosenMod);
+            circuit.setSpectrumAssigned(chosenBand);
 
             return true;
 
         } else {
             circuit.setRoute(candidateRoutes.get(0));
             circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
+            circuit.setSpectrumAssigned(null);
+            
             return false;
         }
-
     }
 
     /**
-     * retorna o somatório do quadrado da quantidade de slots utilizados em cada link de uma rota em uma determinada zona
+     * Returns the sum of the square of the number of slots used in each link of a route in a given zone
      *
-     * @param r
-     * @param zone
-     * @return
+     * @param route Route
+     * @param zone int[]
+     * @return int
      */
-    private int quantSlotsUsadosZona(Route r, int zone[]) {
+    private int numSlotsUsedZone(Route route, int zone[]) {
         int res = 0;
         List<int[]> zoneAux = new ArrayList<int[]>();
         zoneAux.add(zone);
 
-        for (Link link : r.getLinkList()) {
+        for (Link link : route.getLinkList()) {
             List<int[]> merge = IntersectionFreeSpectrum.merge(link.getFreeSpectrumBands(), zoneAux);
 
-            int livres = 0;
+            int free = 0;
             for (int[] is : merge) {
-                livres += (is[1] - is[0] + 1);
+                free += (is[1] - is[0] + 1);
             }
-            int usados = link.getNumOfSlots() - livres;
+            int used = link.getNumOfSlots() - free;
 
-            res += (usados * usados);
+            res += (used * used);
 
         }
 
