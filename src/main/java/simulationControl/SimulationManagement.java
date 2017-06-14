@@ -41,10 +41,11 @@ public class SimulationManagement {
         done = 0;
         numOfSimulations = 0;
         mainMeasuremens = new ArrayList<>();
+        
         for(List<Simulation> loadPoint : simulations){
             List<Measurements> aux = new ArrayList<>();
             mainMeasuremens.add(aux);
-            for(Simulation replication : loadPoint){
+            for(int replication = 0; replication < loadPoint.size(); replication++){
                 aux.add(null);
                 numOfSimulations++;
             }

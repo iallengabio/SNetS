@@ -242,7 +242,6 @@ public class Route implements Serializable, Comparable<Route> {
     }
 
     /**
-     * Method used only for tests
      * Configures the links list of route
      * 
      * @param linkList the linkList to set
@@ -250,6 +249,15 @@ public class Route implements Serializable, Comparable<Route> {
     public void setLinkList(Vector<Link> linkList) {
         this.linkList = linkList;
     }
+    
+    /**
+     * Configures the nodes of route
+     * 
+     * @param nodeList the nodeList to set
+     */
+    public void setNodeList(Vector<Node> nodeList) {
+		this.nodeList = nodeList;
+	}
 
     /**
      * Checks if a given route is equal to the current route
@@ -293,12 +301,12 @@ public class Route implements Serializable, Comparable<Route> {
      * 
      * @return Route
      */
-    public Route clone() {
+    @SuppressWarnings("unchecked")
+	public Route clone() {
         Route res = new Route();
         res.distanceAllLinks = this.distanceAllLinks;
         res.nodeList = (Vector<Node>) this.nodeList.clone();
         res.linkList = (Vector<Link>) this.linkList.clone();
-
         return res;
     }
 

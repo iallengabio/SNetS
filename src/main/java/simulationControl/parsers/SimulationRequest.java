@@ -14,6 +14,23 @@ public class SimulationRequest {
     private String status;
     private Double progress = 0.0;
     private Result result = new Result();
+    
+    /**
+     * This class represents the results obtained by the performance metrics in the execution of the simulation
+     * 
+     * @author Iallen
+     */
+    public static class Result {
+        public String blockingProbability;
+        public String bandwidthBlockingProbability;
+        public String externalFragmentation;
+        public String relativeFragmentation;
+        public String spectrumUtilization;
+        public String transceiversUtilization;
+        public String spectrumStatistics;
+        public String energyConsumption;
+        public String modulationUtilization;
+    }
 
     /**
      * Return the result
@@ -141,20 +158,4 @@ public class SimulationRequest {
         this.progress = progress;
     }
 
-    /**
-     * This class represents the results obtained by the performance metrics in the execution of the simulation
-     * 
-     * @author Iallen
-     */
-    public static class Result {
-        public String blockingProbability;
-        public String bandwidthBlockingProbability;
-        public String externalFragmentation;
-        public String relativeFragmentation;
-        public String spectrumUtilization;
-        public String transceiversUtilization;
-        public String spectrumStatistics;
-        public String energyConsumption;
-        public String modulationUtilization;
-    }
 }

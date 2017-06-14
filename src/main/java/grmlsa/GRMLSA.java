@@ -7,6 +7,7 @@ import grmlsa.integrated.LoadBalancedDedicatedPartition;
 import grmlsa.integrated.PseudoPartition;
 import grmlsa.integrated.ZonePartition;
 import grmlsa.integrated.ZonePartitionTopInvasion;
+import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
 import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
@@ -201,5 +202,18 @@ public class GRMLSA {
     			return null;
     	}
     }
-
+    
+    /**
+     * Instance the modulation selection algorithm
+     * 
+     * @return ModulationSelectionAlgorithmInterface
+     * @throws Exception
+     */
+    public ModulationSelectionAlgorithmInterface instantiateModulationSelection() throws Exception {
+    	switch (this.modulationSelection) {
+	    	
+	    	default:
+	    		return null;
+    	}
+    }
 }
