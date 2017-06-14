@@ -9,11 +9,11 @@ import java.io.Serializable;
  */
 public class Regenerators implements Serializable {
 
-	private double regenUtilization;
-    private double numRegenerators;
+	private int regenUtilization;
+    private int numRegenerators;
     
     public Regenerators(int numberOfRegenerators){
-    	this.regenUtilization = 0.0;
+    	this.regenUtilization = 0;
     	this.numRegenerators = numberOfRegenerators;
     }
     
@@ -43,28 +43,28 @@ public class Regenerators implements Serializable {
 		return (regenUtilization < numRegenerators);
 	}
 	
-	public double quantRegeneratorsFree(){
+	public int quantRegeneratorsFree(){
 		return numRegenerators - regenUtilization;
 	}
 
 	/**
 	 * @return the regenUtilization
 	 */
-	public double getRegenUtilization() {
+	public int getRegenUtilization() {
 		return regenUtilization;
 	}
 
 	/**
 	 * @return the numRegenerators
 	 */
-	public double getNumRegenerators() {
+	public int getNumRegenerators() {
 		return numRegenerators;
 	}
 
 	/**
 	 * @param numRegenerators the numRegenerators to set
 	 */
-	public void setNumRegenerators(double numRegenerators) {
+	public void setNumRegenerators(int numRegenerators) {
 		this.numRegenerators = numRegenerators;
 	}
 	

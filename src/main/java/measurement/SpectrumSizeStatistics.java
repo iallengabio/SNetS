@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import network.Circuit;
+import network.ControlPlane;
 import network.Link;
 import request.RequestForConnection;
+import simulationControl.resultManagers.SpectrumSizeStatisticsResultManager;
 
 /**
  * This class represents the metric that computes the number of requests that use a given number of slots.
@@ -38,15 +40,20 @@ public class SpectrumSizeStatistics extends Measurement{
 		numberRequests = 0;
 		numberReqPerSlotReq = new HashMap<>();
 		numberRequestsPerLink = new HashMap<>();
-		numberReqPerSlotReqPerLink = new HashMap<>();	
+		numberReqPerSlotReqPerLink = new HashMap<>();
+		
+		fileName = "_SpectrumSizeStatistics.csv";
+		resultManager = new SpectrumSizeStatisticsResultManager();
 	}
 	
 	/**
 	 * Adds a new observation of slots utilization
 	 * 
-	 * @param request
+	 * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
 	 */
-	public void addNewObservation(boolean success, RequestForConnection request){
+	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
 		if(request.getCircuit().getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
 			return;
 		this.newObservationRequestSizeBandwidthGeneral(request.getCircuit());	

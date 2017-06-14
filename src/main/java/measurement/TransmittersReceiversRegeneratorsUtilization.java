@@ -4,30 +4,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import network.ControlPlane;
 import network.Mesh;
 import network.Node;
 import request.RequestForConnection;
+import simulationControl.resultManagers.TransmittersReceiversRegeneratorsUtilizationResultManager;
 
 /**
- * This class stores the measures regarding the use of transmitters and receivers for 
- * a load point / replication
+ * This class stores the measures regarding the use of transmitters, receivers, and 
+ * regenerators for a load point / replication
  *
  * @author Iallen
  */
-public class TransmittersReceiversUtilization extends Measurement {
-
-    private Mesh mesh;
+public class TransmittersReceiversRegeneratorsUtilization extends Measurement {
 
     private double numberObservations;
 
     private double avgTxUtilization;
     private double avgRxUtilization;
+    private double avgRegenUtilization;
 
     private HashMap<String, Double> avgTxUtilizationPerNode;
     private HashMap<String, Double> avgRxUtilizationPerNode;
+    private HashMap<String, Double> avgRegenUtilizationPerNode;
 
     private HashMap<String, Integer> maxTxUtilizationPerNode;
     private HashMap<String, Integer> maxRxUtilizationPerNode;
+    private HashMap<String, Integer> maxRegenUtilizationPerNode;
 
     /**
      * Creates a new instance of TransmitersReceiversUtilization
@@ -36,29 +39,40 @@ public class TransmittersReceiversUtilization extends Measurement {
      * @param replication int
      * @param mesh Mesh
      */
-    public TransmittersReceiversUtilization(int loadPoint, int replication, Mesh mesh) {
+    public TransmittersReceiversRegeneratorsUtilization(int loadPoint, int replication) {
         super(loadPoint, replication);
-        this.mesh = mesh;
+        
         numberObservations = 0;
         avgTxUtilization = 0.0;
         avgRxUtilization = 0.0;
+        avgRegenUtilization = 0.0;
 
         avgTxUtilizationPerNode = new HashMap<>();
         avgRxUtilizationPerNode = new HashMap<>();
+        avgRegenUtilizationPerNode = new HashMap<>();
 
         maxTxUtilizationPerNode = new HashMap<>();
         maxRxUtilizationPerNode = new HashMap<>();
+        maxRegenUtilizationPerNode = new HashMap<>();
+        
+        fileName = "_TransmittersReceiversRegeneratorsUtilization.csv";
+		resultManager = new TransmittersReceiversRegeneratorsUtilizationResultManager();
     }
 
     /**
-     * Adds a new observation to the use of transmitters and receivers
+     * Adds a new observation to the use of transmitters, receivers and regenerators
+     * 
+     * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request) {
-        ArrayList<Node> nodes = new ArrayList<>(mesh.getNodeList());
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
+        ArrayList<Node> nodes = new ArrayList<>(cp.getMesh().getNodeList());
 
         for (Node node : nodes) {
             avgTxUtilization += node.getTxs().getTxUtilization();
             avgRxUtilization += node.getRxs().getRxUtilization();
+            avgRegenUtilization += node.getRegenerators().getRegenUtilization();
 
             Double txUtNo = avgTxUtilizationPerNode.get(node.getName());
             if (txUtNo == null) txUtNo = 0.0;
@@ -69,6 +83,11 @@ public class TransmittersReceiversUtilization extends Measurement {
             if (rxUtNo == null) rxUtNo = 0.0;
             rxUtNo += node.getRxs().getRxUtilization();
             avgRxUtilizationPerNode.put(node.getName(), txUtNo);
+            
+            Double regenUtNo = avgRegenUtilizationPerNode.get(node.getName());
+			if(regenUtNo == null) regenUtNo = 0.0;
+			regenUtNo += node.getRegenerators().getRegenUtilization();
+			avgRegenUtilizationPerNode.put(node.getName(), regenUtNo);
 
             Integer maxTxUtNo = maxTxUtilizationPerNode.get(node.getName());
             if (maxTxUtNo == null) maxTxUtNo = 0;
@@ -79,7 +98,11 @@ public class TransmittersReceiversUtilization extends Measurement {
             if (maxRxUtNo == null) maxRxUtNo = 0;
             if (node.getRxs().getRxUtilization() >= maxRxUtNo)
                 maxRxUtilizationPerNode.put(node.getName(), node.getRxs().getRxUtilization());
-
+            
+            Integer maxRegenUtNo = maxRegenUtilizationPerNode.get(node.getName());
+			if(maxRegenUtNo == null) maxRegenUtNo = 0;
+			if(node.getRegenerators().getRegenUtilization() >= maxRegenUtNo)
+				maxRegenUtilizationPerNode.put(node.getName(), node.getRegenerators().getRegenUtilization());
         }
         
         numberObservations++;
@@ -91,7 +114,7 @@ public class TransmittersReceiversUtilization extends Measurement {
      * @return double
      */
     public double getAvgTxUtilizationGen() {
-        return avgTxUtilization / numberObservations;
+        return avgTxUtilization / (double)numberObservations;
     }
 
     /**
@@ -100,7 +123,16 @@ public class TransmittersReceiversUtilization extends Measurement {
      * @return double
      */
     public double getAvgRxUtilizationGen() {
-        return avgRxUtilization / numberObservations;
+        return avgRxUtilization / (double)numberObservations;
+    }
+    
+    /**
+     * Returns the average renerators utilization
+     * 
+     * @return double
+     */
+    public double getAvgRegenUtilizationGen (){
+    	return avgRegenUtilization / (double)numberObservations;
     }
 
     /**
@@ -110,7 +142,7 @@ public class TransmittersReceiversUtilization extends Measurement {
      * @return double
      */
     public double getAvgTxUtilizationPerNode(String node) {
-        return avgTxUtilizationPerNode.get(node) / numberObservations;
+        return avgTxUtilizationPerNode.get(node) / (double)numberObservations;
     }
 
     /**
@@ -120,7 +152,17 @@ public class TransmittersReceiversUtilization extends Measurement {
      * @return double
      */
     public double getAvgRxUtilizationPerNode(String node) {
-        return avgRxUtilizationPerNode.get(node) / numberObservations;
+        return avgRxUtilizationPerNode.get(node) / (double)numberObservations;
+    }
+    
+    /**
+     * Returns the average regenerators utilization for the node reported as parameter
+     * 
+     * @param node String
+     * @return double
+     */
+    public double getAvgRegenUtilizationPerNode(String node) {
+        return avgRegenUtilizationPerNode.get(node) / (double)numberObservations;
     }
 
     /**
@@ -141,6 +183,16 @@ public class TransmittersReceiversUtilization extends Measurement {
      */
     public int getMaxRxUtilizationPerNode(String node) {
         return maxRxUtilizationPerNode.get(node);
+    }
+    
+    /**
+     * Returns the maximum regenerators utilization for the node reported as parameter
+     * 
+     * @param node String
+     * @return int
+     */
+    public int getMaxRegenUtilizationPerNode(String node) {
+        return maxRegenUtilizationPerNode.get(node);
     }
 
     /**

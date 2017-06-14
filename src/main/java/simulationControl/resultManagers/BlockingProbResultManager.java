@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import measurement.BlockingProbability;
+import measurement.Measurement;
 import network.Pair;
 import simulationControl.Util;
 
@@ -13,42 +14,44 @@ import simulationControl.Util;
  * 
  * @author Iallen
  */
-public class BlockingProbResultManager {
+public class BlockingProbResultManager implements ResultManagerInterface {
 	
-	private HashMap<Integer, HashMap<Integer, BlockingProbability>> pbs; // Contains the blocking probability metric for all load points and replications
+	private HashMap<Integer, HashMap<Integer, BlockingProbability>> bps; // Contains the blocking probability metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private List<Pair> pairs;
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of BlockingProbResultManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param lpdb List<List<BlockingProbability>> 
+	 * @param llms List<List<Measurement>>
 	 */
-	public BlockingProbResultManager(List<List<BlockingProbability>> lpdb){
-		pbs = new HashMap<>();
+	public void config(List<List<Measurement>> llms){
+		bps = new HashMap<>();
 		
-		for (List<BlockingProbability> loadPoint : lpdb) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, BlockingProbability>  reps = new HashMap<>();
-			pbs.put(load, reps);
+			bps.put(load, reps);
 			
-			for (BlockingProbability pb : loadPoint) {
-				reps.put(pb.getReplication(), pb);
+			for (Measurement bp : loadPoint) {
+				reps.put(bp.getReplication(), (BlockingProbability)bp);
 			}			
 		}
-		loadPoints = new ArrayList<>(pbs.keySet());
-		replications = new ArrayList<>(pbs.values().iterator().next().keySet());
-		this.pairs = new ArrayList<>(Util.pairs);
-	} 
+		loadPoints = new ArrayList<>(bps.keySet());
+		replications = new ArrayList<>(bps.values().iterator().next().keySet());
+		pairs = new ArrayList<>(Util.pairs);
+	}
 	
 	/**
 	 * Returns a string corresponding to the result file for blocking probabilities
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "LoadPoint" + sep + "Bandwidth" + sep + "src" + sep + "dest" + sep + " ");
 		
@@ -64,6 +67,12 @@ public class BlockingProbResultManager {
 		res.append(resultGeneralLackRx());
 		res.append("\n\n");
 		res.append(resultGeneralFrag());
+		res.append("\n\n");
+		res.append(resultGeneralQoTN());
+		res.append("\n\n");
+		res.append(resultGeneralQoTO());
+		res.append("\n\n");
+		res.append(resultGeneralOther());
 		res.append("\n\n");
 		
 		res.append(resultPair());
@@ -86,7 +95,7 @@ public class BlockingProbResultManager {
 		for (Integer loadPoint : loadPoints) {
 			res.append("blocking probability" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + pbs.get(loadPoint).get(replic).getProbBlockGeneral());
+				res.append(sep + bps.get(loadPoint).get(replic).getGeneralBlockProb());
 			}
 			res.append("\n");
 		}
@@ -94,16 +103,16 @@ public class BlockingProbResultManager {
 	}
 	
 	/**
-	 * Returns the blocking probability per lack of transmitters
+	 * Returns the blocking probability by lack of transmitters
 	 * 
 	 * @return String
 	 */
 	private String resultGeneralLackTx(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("blocking probability per lack of transmitters" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("blocking probability by lack of transmitters" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + pbs.get(loadPoint).get(replic).getProbBlockLackTxGen());
+				res.append(sep + bps.get(loadPoint).get(replic).getReqBlockByLackTx());
 			}
 			res.append("\n");
 		}
@@ -111,16 +120,16 @@ public class BlockingProbResultManager {
 	}
 	
 	/**
-	 * Returns the blocking probability per lack of receivers
+	 * Returns the blocking probability by lack of receivers
 	 * 
 	 * @return String
 	 */
 	private String resultGeneralLackRx(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("blocking probability per lack of receivers" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("blocking probability by lack of receivers" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + pbs.get(loadPoint).get(replic).getProbBlockLackRxGen());
+				res.append(sep + bps.get(loadPoint).get(replic).getReqBlockByLackRx());
 			}
 			res.append("\n");
 		}
@@ -128,16 +137,67 @@ public class BlockingProbResultManager {
 	}
 	
 	/**
-	 * Returns the blocking probability per fragmentation
+	 * Returns the blocking probability by fragmentation
 	 * 
 	 * @return String
 	 */
 	private String resultGeneralFrag(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("blocking probability per fragmentation" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("blocking probability by fragmentation" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + pbs.get(loadPoint).get(replic).getProbBlockFragGeneral());
+				res.append(sep + bps.get(loadPoint).get(replic).getBlockProbByFragmentation());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by QoTN
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralQoTN(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("blocking probability by QoTN" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bps.get(loadPoint).get(replic).getRegBlockByQoTN());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by QoTO
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralQoTO(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("blocking probability by QoTO" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bps.get(loadPoint).get(replic).getRegBlockByQoTO());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by other
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralOther(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("blocking probability by other" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bps.get(loadPoint).get(replic).getRegBlockByOther());
 			}
 			res.append("\n");
 		}
@@ -157,7 +217,7 @@ public class BlockingProbResultManager {
 			for (Pair pair : this.pairs) {
 				String aux2 = aux + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
 				for (Integer replic : replications) {
-					aux2 = aux2 + sep + pbs.get(loadPoint).get(replic).getProbBlockPair(pair);
+					aux2 = aux2 + sep + bps.get(loadPoint).get(replic).getProbBlockPair(pair);
 				}
 				res.append(aux2 + "\n");		
 			}
@@ -178,7 +238,7 @@ public class BlockingProbResultManager {
 			for (Double bandwidth : Util.bandwidths) {
 				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps" + sep + "all" + sep + "all" + sep + " ";
 				for (Integer rep : replications) {
-					aux2 = aux2 + sep + pbs.get(loadPoint).get(rep).getProbBlockBandwidth(bandwidth);
+					aux2 = aux2 + sep + bps.get(loadPoint).get(rep).getProbBlockBandwidth(bandwidth);
 				}
 				res.append(aux2 + "\n");
 			}	
@@ -201,7 +261,7 @@ public class BlockingProbResultManager {
 				for (Pair pair :  Util.pairs) {
 					String aux3 = aux2 + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
 					for(Integer rep :  replications){
-						aux3 = aux3 + sep + pbs.get(loadPoint).get(rep).getProbBlockPairBandwidth(pair, bandwidth);
+						aux3 = aux3 + sep + bps.get(loadPoint).get(rep).getProbBlockPairBandwidth(pair, bandwidth);
 					}
 					res.append(aux3 + "\n");
 				}				

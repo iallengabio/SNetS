@@ -25,9 +25,19 @@ public class TranslucentControlPlane extends ControlPlane {
 	
 	protected RegeneratorAssignmentAlgorithmInterface regeneratorAssignment;
 	
-
-	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm, RegeneratorAssignmentAlgorithmInterface regeneratorAssignment) {
-		super(mesh, rmlsaType, trafficGroomingAlgorithm, integratedRSAAlgoritm, routingInterface, spectrumAssignmentAlgoritm);
+	/**
+	 * Creates a new instance of TranslucentControlPlane
+	 * 
+	 * @param mesh Mesh
+	 * @param rmlsaType int
+	 * @param trafficGroomingAlgorithm TrafficGroomingAlgorithmInterface
+	 * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
+	 * @param routingAlgorithm RoutingAlgorithmInterface
+	 * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
+	 * @param regeneratorAssignment regeneratorAssignment
+	 */
+	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, RegeneratorAssignmentAlgorithmInterface regeneratorAssignment) {
+		super(mesh, rmlsaType, trafficGroomingAlgorithm, integratedRMLSAAlgorithm, routingAlgorithm, spectrumAssignmentAlgorithm);
 
 		this.regeneratorAssignment = regeneratorAssignment;
 	}
@@ -49,7 +59,7 @@ public class TranslucentControlPlane extends ControlPlane {
     }
     
     /**
-     * 
+     * Method that allocate the regenerators used by a circuit
      * 
      * @param circuit TranslucentCircuit
      */
@@ -99,7 +109,6 @@ public class TranslucentControlPlane extends ControlPlane {
      */
 	@Override
 	protected boolean computeQualityOfTransmission(Circuit circuit){
-    	
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
@@ -158,10 +167,10 @@ public class TranslucentControlPlane extends ControlPlane {
         circuit.getSource().getTxs().allocatesTransmitters();
         circuit.getDestination().getRxs().allocatesReceivers();
         
+        addConnection(circuit);
+        
         // Allocates regenerators
         allocateRegenerators((TranslucentCircuit)circuit);
-        
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
     }
     
 	/**
@@ -196,10 +205,10 @@ public class TranslucentControlPlane extends ControlPlane {
         circuit.getSource().getTxs().releasesTransmitters();
         circuit.getDestination().getRxs().releasesReceivers();
         
+        removeConnection(circuit);
+        
         // Release regenerators
         releasesRegenerators((TranslucentCircuit)circuit);
-
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
     }
     
     /**
@@ -240,10 +249,10 @@ public class TranslucentControlPlane extends ControlPlane {
     }
 	
     /**
-     * Selects the form of modulation format selection and spectrum allocation.
+     * This method selects how modulation format selection and spectrum allocation will be applied.
      * 
      * @param circuit TranslucentCircuit
-     * @return boolean
+     * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
      */
     public boolean strategySelection(TranslucentCircuit circuit){
     	// Releases the regenerators allocated so that they can be later allocated to the other network resources
@@ -258,7 +267,7 @@ public class TranslucentControlPlane extends ControlPlane {
     }
     
     /**
-	 * This method attempts to define the modulation format and the spectrum to be allocated in each link of the route selected for the request
+	 * This method attempts to define the modulation format and the spectrum to be allocated in each link of the route selected for the circuit
 	 * 
 	 * @param circuit - Circuit
 	 * @param route - Route
@@ -297,7 +306,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	
 	/**
 	 * This method tries to define the modulation format and the spectrum to be allocated in each link of the route 
-	 * selected for the request taking into account the transparent segments among the regenerators selected for the request
+	 * selected for the circuit taking into account the transparent segments among the regenerators selected for the circuit
 	 * 
 	 * @param circuit - TranslucentCircuit
 	 * @param route - Route
@@ -331,26 +340,30 @@ public class TranslucentControlPlane extends ControlPlane {
 				composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
 			}
 			
-			int chosen[] = tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, true);
+			tryAssignModulationAndSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition);
+			int chosen[] = circuit.getSpectrumAssigned();
+			Modulation mod = circuit.getModulation();
 			
 			if(chosen == null){
+				// The circuit will be blocked since it was not possible to allocate spectrum
 				// Steps to avoid error in the metrics
 				destinationNodeIndex = route.getNodeList().size() - 1;
-				Modulation mod = circuit.getModulation();
 				
 				for(int l = sourceNodeIndex; l < destinationNodeIndex; l++){
 					sourceNode = route.getNode(l);
 					destinationNode = route.getNode(l + 1);
 					link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 					
+					spectrumAssignedByLink.put(link, chosen);
 					modulationByLink.put(link, mod);
 				}
 				
+				circuit.setSpectrumAssignedByLink(spectrumAssignedByLink);
 				circuit.setModulationByLink(modulationByLink);
+				
 				return false;
 			}
 			
-			Modulation mod = circuit.getModulation();
 			for(int l = sourceNodeIndex; l < destinationNodeIndex; l++){
 				sourceNode = route.getNode(l);
 				destinationNode = route.getNode(l + 1);
@@ -381,14 +394,20 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * @param sourceNodeIndex - int
 	 * @param destinationNodeIndex - int
 	 * @param composition - List<int[]>
-	 * @param checkAssignSpectrum - boolean (True, to save the first range of allocated spectrum, or false, otherwise)
-	 * @return int[]
+	 * @return boolean
 	 */
-	public int[] tryAssignSpectrum(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, List<int[]> composition, boolean checkAssignSpectrum){
-		int resChosen[] = null;
-		int alternativeChosen[] = null; //Used to avoid error in metrics
+	public boolean tryAssignModulationAndSpectrum(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, List<int[]> composition){
+		boolean flagQoT = true; // Assuming that the circuit QoT starts as acceptable
+		boolean flagSuccess = false;
+		
+		// Modulation and spectrum selected
 		Modulation resMod = null;
+		int resChosen[] = null;
+		
+		// Used to avoid error in metrics
 		Modulation alternativeMod = null;
+		int alternativeChosen[] = null;
+		
 		List<Modulation> avaliableModulations = modulationSelector.getAvaliableModulations();
 		
 		for(int i = 0; i < avaliableModulations.size(); i++){
@@ -398,35 +417,38 @@ public class TranslucentControlPlane extends ControlPlane {
 			int chosen[] = spectrumAssignment.policy(numberOfSlots, composition, circuit);
 			if(chosen != null){
 				if(alternativeMod == null){
-					alternativeMod = mod;
-					if(checkAssignSpectrum){ //
-						alternativeChosen = chosen;
-					}
+					alternativeMod = mod; // The first modulation that was able to allocate spectrum
+					alternativeChosen = chosen;
 				}
 				
 				boolean flag = mesh.getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, chosen);
 				if(flag){
+					resMod = mod; // Save the modulation that has admissible QoT
 					resChosen = chosen;
-					resMod = mod;
+					
+					flagSuccess = true;
 				}
 			}
 		}
 		
-		if(resMod == null){ //QoT is not acceptable for all modulations
-			resMod = avaliableModulations.get(0); //To avoid metric error
+		if(resMod == null){ // QoT is not acceptable for all modulations
+			resMod = avaliableModulations.get(0); // To avoid metric error
+			resChosen = null;
 			
-			if(alternativeMod != null){ //Allocated spectro using some modulation, but the one that was inadmissible
+			if(alternativeMod != null){ // Allocated spectrum using some modulation, but the one that was inadmissible
 				resMod = alternativeMod;
-				if(checkAssignSpectrum){
-					resChosen = alternativeChosen;
-				}
-				circuit.setQoT(false); //To mark that the blockade was by Qto inadmissible
+				resChosen = alternativeChosen;
+				
+				flagQoT = false; // To mark that the blockade was by QoT inadmissible
 			}
 		}
 		
+		// Configures the circuit information
 		circuit.setModulation(resMod);
+		circuit.setSpectrumAssigned(resChosen);
+		circuit.setQoT(flagQoT);
 		
-		return resChosen;
+		return flagSuccess;
 	}
 	
 	/**
@@ -467,4 +489,125 @@ public class TranslucentControlPlane extends ControlPlane {
 		return PCtotal;
 	}
 	
+	/**
+	 * This method checks whether the circuit blocking was by QoTN
+	 * Returns true if the blocking was by QoTN and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	@Override
+	public boolean isBlockingByQoTN(Circuit circuit){
+		// Check if it is to test the QoT
+		if(mesh.getPhysicalLayer().isActiveQoT()){
+			
+			if(circuit.getRoute() == null) return false;
+			
+			Route route = circuit.getRoute();
+			int sourceNodeIndex = 0;
+			int mumberTransparentSegments = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
+			
+			// Verifies by transparent segment if they have modulation and spectrum selected
+			for(int i = 0; i < mumberTransparentSegments; i++){
+				
+				int destinationNodeIndex = route.getNodeList().size() - 1;
+				if(i < mumberTransparentSegments - 1){
+					destinationNodeIndex = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
+				}
+				
+				Node noSource = route.getNode(sourceNodeIndex);
+				Node noDestination = route.getNode(sourceNodeIndex + 1);
+				Link link = noSource.getOxc().linkTo(noDestination.getOxc());
+				
+				Modulation mod = circuit.getModulationByLink(link);
+				int sa[] = circuit.getSpectrumAssignedByLink(link);
+				
+				// If it does not have modulation or spectrum by segment the blockade is not by QoT
+				if(mod == null || sa == null){
+					return false;
+				}
+				
+				sourceNodeIndex = destinationNodeIndex;
+			}
+			
+			// Now you can check the QoT by transparent segment
+			return !computeQualityOfTransmission(circuit);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * This method checks whether the circuit blocking was by fragmentation
+	 * Returns true if the blocking was by fragmentation and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	@Override
+	public boolean isBlockingByFragmentation(Circuit circuit){
+		if (circuit.getRoute() == null) return false;
+        
+		Route route = circuit.getRoute();
+		int sourceNodeIndex = 0;
+		int mumberTransparentSegments = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
+		
+		for(int i = 0; i < mumberTransparentSegments; i++){
+			
+			int destinationNodeIndex = route.getNodeList().size() - 1;
+			if(i < mumberTransparentSegments - 1){
+				destinationNodeIndex = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
+			}
+			
+			Node sourceNode = route.getNode(sourceNodeIndex);
+			Node destinationNode = route.getNode(sourceNodeIndex + 1);
+			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+			
+			List<int[]> merge = link.getFreeSpectrumBands();
+	        for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
+	            sourceNode = route.getNode(n);
+	            destinationNode = route.getNode(n + 1);
+	            link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+	        	
+	        	merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
+	        }
+			
+			int totalFree = 0;
+	        for (int[] band : merge) {
+	            totalFree += (band[1] - band[0] + 1);
+	        }
+	        
+	        Modulation mod = circuit.getModulationByLink(link);
+			if(mod == null){
+				mod = modulationSelector.getAvaliableModulations().get(0);
+			}
+	        
+	        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+	        if(totalFree > numSlotsRequired){
+	        	return true;
+	        }
+			
+			sourceNodeIndex = destinationNodeIndex;
+		}
+
+        return false;
+	}
+	
+	/**
+	 * Returns the list of modulation used by the circuit
+	 * 
+	 * @param circuit
+	 * @return List<Modulation>
+	 */
+	@Override
+	public List<Modulation> getModulationsUsedByCircuit(Circuit circuit){
+		List<Modulation> modList = new ArrayList<>();
+		
+		HashMap<Link, Modulation> modLink = ((TranslucentCircuit)circuit).getModulationByLink();
+		for(Link link : modLink.keySet()){
+			modList.add(((TranslucentCircuit)circuit).getModulationByLink(link));
+		}
+		
+		return modList;
+	}
 }

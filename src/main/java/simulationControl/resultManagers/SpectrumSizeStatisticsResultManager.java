@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import measurement.Measurement;
 import measurement.SpectrumSizeStatistics;
 
 /**
@@ -11,7 +12,7 @@ import measurement.SpectrumSizeStatistics;
  * 
  * @author Iallen
  */
-public class SpectrumSizeStatisticsResultManager {
+public class SpectrumSizeStatisticsResultManager implements ResultManagerInterface {
 	
 	private HashMap<Integer, HashMap<Integer, SpectrumSizeStatistics>> ssss; // Contains the spectrum size statistics metric for all load points and replications
 	private List<Integer> loadPoints;
@@ -19,20 +20,20 @@ public class SpectrumSizeStatisticsResultManager {
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of SpectrumSizeStatisticsResultManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param lsu List<List<SpectrumSizeStatistics>>
+	 * @param llms List<List<Measurement>>
 	 */
-	public SpectrumSizeStatisticsResultManager(List<List<SpectrumSizeStatistics>> lsu){
+	public void config(List<List<Measurement>> llms){
 		ssss = new HashMap<>();
 		
-		for (List<SpectrumSizeStatistics> loadPoint : lsu) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, SpectrumSizeStatistics>  reps = new HashMap<>();
 			ssss.put(load, reps);
 			
-			for (SpectrumSizeStatistics su : loadPoint) {
-				reps.put(su.getReplication(), su);
+			for (Measurement sss : loadPoint) {
+				reps.put(sss.getReplication(), (SpectrumSizeStatistics)sss);
 			}			
 		}
 		loadPoints = new ArrayList<>(ssss.keySet());
@@ -44,7 +45,9 @@ public class SpectrumSizeStatisticsResultManager {
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "load point" + sep + "link" + sep + "number of slots" + sep + "slot" + sep + " ");
 		

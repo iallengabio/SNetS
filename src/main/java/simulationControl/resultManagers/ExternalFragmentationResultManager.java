@@ -12,32 +12,32 @@ import measurement.Measurement;
  * 
  * @author Iallen
  */
-public class ExternalFragmentationManager {
+public class ExternalFragmentationResultManager implements ResultManagerInterface {
 	
-	private HashMap<Integer, HashMap<Integer, ExternalFragmentation>> fes; // Contains the external fragmentation metric for all load points and replications
+	private HashMap<Integer, HashMap<Integer, ExternalFragmentation>> efs; // Contains the external fragmentation metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
 	
 	/**
-	 * Creates a new instance of ExternalFragmentationManager
+	 * This method organizes the data by load point and replication.
 	 * 
-	 * @param lfe List<List<ExternalFragmentation>>
+	 * @param llms List<List<Measurement>>
 	 */
-	public ExternalFragmentationManager(List<List<ExternalFragmentation>> lfe){
-		fes = new HashMap<>();
+	public void config(List<List<Measurement>> llms){
+		efs = new HashMap<>();
 		
-		for (List<ExternalFragmentation> loadPoint : lfe) {
+		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
 			HashMap<Integer, ExternalFragmentation>  reps = new HashMap<>();
-			fes.put(load, reps);
+			efs.put(load, reps);
 			
-			for (ExternalFragmentation fe : loadPoint) {
-				reps.put(fe.getReplication(), fe);
+			for (Measurement ef : loadPoint) {
+				reps.put(ef.getReplication(), (ExternalFragmentation)ef);
 			}			
 		}
-		loadPoints = new ArrayList<>(fes.keySet());
-		replications = new ArrayList<>(fes.values().iterator().next().keySet());
+		loadPoints = new ArrayList<>(efs.keySet());
+		replications = new ArrayList<>(efs.values().iterator().next().keySet());
 	} 
 	
 	/**
@@ -45,7 +45,9 @@ public class ExternalFragmentationManager {
 	 * 
 	 * @return String
 	 */
-	public String result(){
+	public String result(List<List<Measurement>> llms){
+		config(llms);
+		
 		StringBuilder res = new StringBuilder();
 		res.append("Metrics" + sep + "LoadPoint" + sep + "link" + sep + " ");
 		
@@ -74,7 +76,7 @@ public class ExternalFragmentationManager {
 		for (Integer loadPoint : loadPoints) {
 			res.append("External Fragmentation (Vertical)" + sep + loadPoint + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + fes.get(loadPoint).get(replic).getExternalFragVertical());
+				res.append(sep + efs.get(loadPoint).get(replic).getExternalFragVertical());
 			}
 			res.append("\n");
 		}
@@ -91,7 +93,7 @@ public class ExternalFragmentationManager {
 		for (Integer loadPoint : loadPoints) {
 			res.append("External Fragmentation (Horizontal)" + sep + loadPoint + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + fes.get(loadPoint).get(replic).getExternalFragHorizontal());
+				res.append(sep + efs.get(loadPoint).get(replic).getExternalFragHorizontal());
 			}
 			res.append("\n");
 		}
@@ -108,11 +110,11 @@ public class ExternalFragmentationManager {
 		for (Integer loadPoint : loadPoints) {
 			String aux = "External Fragmentation Per Link" + sep + loadPoint + sep; // "all"+sep+" ";
 			
-			for (String link : fes.get(0).get(0).getLinkSet()) {
+			for (String link : efs.get(0).get(0).getLinkSet()) {
 				String aux2 = aux + "<" + link + ">" + sep + " ";
 				
 				for (Integer replic : replications) {
-					aux2 = aux2 + sep + fes.get(loadPoint).get(replic).getExternalFragLink(link);
+					aux2 = aux2 + sep + efs.get(loadPoint).get(replic).getExternalFragLink(link);
 				}
 				res.append(aux2 + "\n");
 			}

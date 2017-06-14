@@ -2,7 +2,11 @@ package grmlsa;
 
 import network.Mesh;
 import network.Node;
+import simulationControl.Util;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -31,6 +35,7 @@ public class NewKShortestPaths {
     public NewKShortestPaths(Mesh mesh, int k) {
         this.k = k;
         this.computeAllRoutes(mesh);
+        salveRoutesByPar(mesh.getNodeList());
     }
 
     /**
@@ -129,6 +134,54 @@ public class NewKShortestPaths {
      */
     public List<Route> getRoutes(Node n1, Node n2) {
         return this.routesForAllPairs.get(n1.getName() + DIV + n2.getName());
+    }
+    
+    /**
+     * This method saves in files all the routes for all the pairs.
+     * 
+     * @param nodeList Vector<Node>
+     */
+    private void salveRoutesByPar(Vector<Node> nodeList) {
+        try {
+        	
+        	FileWriter fw = new FileWriter(Util.projectPath + "/routesByPar.txt");
+			BufferedWriter out = new BufferedWriter(fw);
+        	
+			for(int i = 0; i < nodeList.size(); i++){
+	    	    Node source = nodeList.get(i);
+	    	    
+	    	    for(int j = 0; j < nodeList.size(); j++){
+	    		    Node destination = nodeList.get(j);
+	    		    
+	    		    if(!source.getName().equals(destination.getName())){
+		      		    String pair = source.getName() + "-" + destination.getName();
+		      		  
+		      		    out.append("Pair " + pair + "\n");
+		      		    
+		      		    List<Route> routes = routesForAllPairs.get(pair);
+		      		    for(int r = 0; r < routes.size(); r++){
+		      			    Route rAux = routes.get(r);
+		      			  
+		      			    StringBuilder sb = new StringBuilder();
+		      			    for (int n = 0; n < rAux.getNodeList().size(); n++) {
+		      			        sb.append(rAux.getNodeList().get(n).getName());
+			      			    if(n < rAux.getNodeList().size() - 1){
+			  						sb.append("-");
+			  					}
+		      			    }
+		      			    
+		      			    out.append(sb.toString());
+		      			    out.append("\n");
+		      		    }
+	    		    }
+	    	    }
+	        }
+			
+			out.close();
+			fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

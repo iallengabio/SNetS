@@ -110,26 +110,21 @@ public class FLRRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 	 * @return boolean
 	 */
 	public boolean isThereSpectrumAndQoT(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, TranslucentControlPlane cp){
-		Node noOrigem = route.getNode(sourceNodeIndex);
-		Node noDestino = route.getNode(sourceNodeIndex + 1);
-		Link link = noOrigem.getOxc().linkTo(noDestino.getOxc());
+		Node sourceNode = route.getNode(sourceNodeIndex);
+		Node destinationNode = route.getNode(sourceNodeIndex + 1);
+		Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 		
 		List<int[]> composition = link.getFreeSpectrumBands();
 		
 		for(int l = sourceNodeIndex + 1; l < destinationNodeIndex; l++){
-			noOrigem = route.getNode(l);
-			noDestino = route.getNode(l + 1);
-			link = noOrigem.getOxc().linkTo(noDestino.getOxc());
+			sourceNode = route.getNode(l);
+			destinationNode = route.getNode(l + 1);
+			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			
 			composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
 		}
 		
-		int chosen[] = cp.tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, false);
-		if(chosen == null){
-			return false;
-		}
-		
-		return true;
+		return cp.tryAssignModulationAndSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition);
 	}
 
 }

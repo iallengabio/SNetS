@@ -1,16 +1,21 @@
 package grmlsa.routing;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import grmlsa.Route;
 import network.Circuit;
 import network.Mesh;
 import network.Node;
 import simulationControl.Util;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Vector;
 
 /**
  * This class represents the Dijkstra (Shortest Path) Routing Algorithm.
@@ -34,10 +39,10 @@ public class DJK implements RoutingAlgorithmInterface {
         Node source = circuit.getSource();
         Node destination = circuit.getDestination();
 
-        Route r = routesForAllPairs.get(source.getName() + DIV + destination.getName());
+        Route route = routesForAllPairs.get(source.getName() + DIV + destination.getName());
 
-        if (r != null) {
-            circuit.setRoute(r);
+        if (route != null) {
+            circuit.setRoute(route);
             return true;
         }
 
@@ -125,38 +130,51 @@ public class DJK implements RoutingAlgorithmInterface {
         return res;
     }
     
+    /**
+     * This method saves in files the routes for all the pairs.
+     * 
+     * @param nodeList Vector<Node>
+     */
     private void salveRoutesByPar(Vector<Node> nodeList) {
+    	List<String> routesList = new ArrayList<String>();
+    	
+    	int numNodes = nodeList.size();
+        for(int i = 1; i <= numNodes; i++){
+    	    for(int j = 1; j <= numNodes; j++){
+    		    
+    		    if(i != j){
+	      		    String pair = i + DIV + j;
+	      		    
+		        	Route rota = routesForAllPairs.get(pair);
+		        	StringBuilder sb = new StringBuilder();
+		        	for(int n = 0; n < rota.getNodeList().size(); n++){
+		        		sb.append(rota.getNodeList().get(n).getName());
+		        		if(n < rota.getNodeList().size() - 1){
+		        			sb.append("-");
+		        		}
+		        	}
+		        	
+		        	routesList.add(sb.toString());
+    		    }
+    	    }
+        }
+        
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(routesList);
+        
         try {
-        	FileWriter fw = new FileWriter(Util.projectPath + "/routesByPar.txt");
+        	String separator = System.getProperty("file.separator");
+        	
+        	FileWriter fw = new FileWriter(Util.projectPath + separator + "routesByPar.txt");
 			BufferedWriter out = new BufferedWriter(fw);
             
-			int quantNodes = nodeList.size();
-	        for(int i = 1; i <= quantNodes; i++){
-	    	    for(int j = 1; j <= quantNodes; j++){
-	    		    
-	    		    if(i != j){
-		      		    String par = i + DIV + j;
-		      		    
-			        	//out.println("Par " + par);
-			        	
-			        	Route rota = routesForAllPairs.get(par);
-			        	StringBuilder sb = new StringBuilder();
-			        	for(int n = 0; n < rota.getNodeList().size(); n++){
-			        		sb.append(rota.getNodeList().get(n).getName());
-			        		if(n < rota.getNodeList().size() - 1){
-			        			sb.append("\t");
-			        		}
-			        	}
-			        	out.append(sb.toString());
-			        	out.append("\n");
-	    		    }
-	    	    }
-	        }
-	        
-	        out.close();
+			out.append(json);
+			
+			out.close();
 			fw.close();
+            
         } catch (Exception ex) {
-            ex.printStackTrace();
+        	ex.printStackTrace();
         }
     }
 

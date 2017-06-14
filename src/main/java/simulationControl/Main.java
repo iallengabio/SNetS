@@ -87,8 +87,10 @@ public class Main {
                         if(sr.getSimulationConfig().getActiveMetrics().ExternalFragmentation)sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().RelativeFragmentation)sr.getResult().relativeFragmentation = sm.getRelativeFragmentationCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().SpectrumUtilization)sr.getResult().spectrumUtilization = sm.getSpectrumUtilizationCsv();
-                        if(sr.getSimulationConfig().getActiveMetrics().TransmittersReceiversUtilization)sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().TransmittersReceiversRegeneratorsUtilization)sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics)sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption)sr.getResult().energyConsumption = sm.getEnergyConsumptionCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization)sr.getResult().modulationUtilization = sm.getModulationUtilizationCsv();
                         sr.setProgress(1.0);
                         sr.setStatus("finished");
                         dataSnapshot.getRef().setValue(sr);

@@ -158,16 +158,12 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 			composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
 		}
 		
-		int chosen[] = tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, cp, modulation);
-		if(chosen == null){
-			return false;
-		}
-		
-		return true;
+		return tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, cp, modulation);
 	}
 	
 	/**
 	 * This method attempts to choose a range of spectrum for the request according to a modulation format
+	 * Returns true if false and false otherwise
 	 * 
 	 * @param circuit - TranslucentCircuit
 	 * @param route - Route
@@ -176,32 +172,28 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 	 * @param composition - List<int[]>
 	 * @param cp - TranslucentControlPlane
 	 * @param modulation - Modulation
-	 * @return int[]
+	 * @return boolean
 	 */
-	public int[] tryAssignSpectrum(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinatinNodeIndex, List<int[]> composition, TranslucentControlPlane cp, Modulation modulation){
-		int resChosen[] = null;
+	public boolean tryAssignSpectrum(TranslucentCircuit circuit, Route route, int sourceNodeIndex, int destinatinNodeIndex, List<int[]> composition, TranslucentControlPlane cp, Modulation modulation){
+		boolean flagQoT = true; // Assuming that the circuit QoT starts as acceptable
+		boolean flagSuccess = false;
 		
-		boolean flagSpectrumAssignemnt = false;
-		boolean flagQoT = true;
 		int numberOfSlots = modulation.requiredSlots(circuit.getRequiredBandwidth());
-		
 		int chosen[] = cp.getSpectrumAssignment().policy(numberOfSlots, composition, circuit);
 		if(chosen != null){
-			flagSpectrumAssignemnt = true;
 			
 			flagQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinatinNodeIndex, modulation, chosen);
 			if(flagQoT){
-				resChosen = chosen;
+				flagSuccess = true;
 			}
 		}
 		
-		if(flagSpectrumAssignemnt && !flagQoT){ // Allocated spectro using modulation format, but QoT was unacceptable
-			circuit.setQoT(false); // To mark that the problem was by Qto inadmissible
-		}
-		
+		// Configures the circuit information
 		circuit.setModulation(modulation);
+		circuit.setSpectrumAssigned(chosen);
+		circuit.setQoT(flagQoT);
 		
-		return resChosen;
+		return flagSuccess;
 	}
 
 }

@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import network.Circuit;
+import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
-import simulationControl.resultManagers.ExternalFragmentationManager;
+import simulationControl.resultManagers.ExternalFragmentationResultManager;
 import util.ComputesFragmentation;
 import util.IntersectionFreeSpectrum;
 
@@ -25,7 +26,6 @@ public class ExternalFragmentation extends Measurement {
     private int numberObservations;
     private double ExternalFragVertical;
     private double ExternalFragHorizontal;
-    private Mesh mesh;
 
     private HashMap<String, Double> ExternalFragLinks;
 
@@ -36,25 +36,26 @@ public class ExternalFragmentation extends Measurement {
      * @param rep int
      * @param mesh Mesh
      */
-    public ExternalFragmentation(int loadPoint, int rep, Mesh mesh) {
+    public ExternalFragmentation(int loadPoint, int rep) {
         super(loadPoint, rep);
-        this.mesh = mesh;
         this.loadPoint = loadPoint;
         this.replication = rep;
         this.numberObservations = 0;
         this.ExternalFragLinks = new HashMap<>();
         
         fileName = "_ExternalFragmentation.csv";
-		//resultManager = new ExternalFragmentationManager();
+		resultManager = new ExternalFragmentationResultManager();
     }
 
     /**
      * Adds a new observation of external fragmentation of the network
      *
-     * @param request
+     * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request) {
-        this.observationExternalFragVertical();
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
+        this.observationExternalFragVertical(cp.getMesh());
         this.observationExternalFragHorizontal(request.getCircuit());
 
         numberObservations++;
@@ -95,7 +96,7 @@ public class ExternalFragmentation extends Measurement {
      * This method sums the fragmentation observed in each link and also the average 
      * external fragmentation of the network
      */
-    private void observationExternalFragVertical() {
+    private void observationExternalFragVertical(Mesh mesh) {
         Double aux, aux2;
         double externalFragAverage = 0.0;
         ComputesFragmentation cf = new ComputesFragmentation();

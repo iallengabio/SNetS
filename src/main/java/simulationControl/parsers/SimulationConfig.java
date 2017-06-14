@@ -29,7 +29,9 @@ public class SimulationConfig {
         public boolean SpectrumUtilization = true;
         public boolean RelativeFragmentation = true;
         public boolean SpectrumSizeStatistics = true;
-        public boolean TransmittersReceiversUtilization = true;
+        public boolean TransmittersReceiversRegeneratorsUtilization = true;
+        public boolean EnergyConsumption = true;
+        public boolean ModulationUtilization = true;
     }
 
     /**

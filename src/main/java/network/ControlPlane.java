@@ -3,6 +3,7 @@ package network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
@@ -13,6 +14,7 @@ import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
 import request.RequestForConnection;
+import util.IntersectionFreeSpectrum;
 
 /**
  * Class that represents the control plane for a Transparent Elastic Optical Network.
@@ -31,31 +33,34 @@ public class ControlPlane {
     protected TrafficGroomingAlgorithmInterface grooming;
 	
     protected Mesh mesh;
-
     
     /**
      * The first key represents the source node.
      * The second key represents the destination node.
      */
     protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
+    
+    private TreeSet<Circuit> connectionList;
 
     /**
      * Instance the control plane with the list of active circuits in empty
-     * @param mesh
-     * @param rmlsaType
-     * @param trafficGroomingAlgorithm
-     * @param integratedRSAAlgoritm
-     * @param routingInterface
-     * @param spectrumAssignmentAlgoritm
+     * 
+     * @param mesh Mesh
+     * @param rmlsaType int
+     * @param trafficGroomingAlgorithm TrafficGroomingAlgorithmInterface
+     * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
+     * @param routingAlgorithm RoutingAlgorithmInterface
+     * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRSAAlgoritm, RoutingAlgorithmInterface routingInterface, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgoritm) {
-        activeCircuits = new HashMap<>();
-
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm) {
+        this.activeCircuits = new HashMap<>();
+        this.connectionList = new TreeSet<>();
+        
         this.rsaType = rmlsaType;
         this.grooming = trafficGroomingAlgorithm;
-        this.integrated = integratedRSAAlgoritm;
-        this.routing = routingInterface;
-        this.spectrumAssignment = spectrumAssignmentAlgoritm;
+        this.integrated = integratedRMLSAAlgorithm;
+        this.routing = routingAlgorithm;
+        this.spectrumAssignment = spectrumAssignmentAlgorithm;
         this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
 
         setMesh(mesh);
@@ -84,11 +89,15 @@ public class ControlPlane {
      */
     public void setMesh(Mesh mesh) {
         this.mesh = mesh;
+        
         // Initialize the active circuit list
         for (Node node1 : mesh.getNodeList()) {
             HashMap<String, List<Circuit>> hmAux = new HashMap<>();
+            
             for (Node node2 : mesh.getNodeList()) {
-                hmAux.put(node2.getName(), new ArrayList<>());
+            	if(!node1.equals(node2)){
+	                hmAux.put(node2.getName(), new ArrayList<>());
+            	}
             }
             activeCircuits.put(node1.getName(), hmAux);
         }
@@ -141,40 +150,6 @@ public class ControlPlane {
     public void finalizeConnection(RequestForConnection rfc) {
         this.grooming.finishConnection(rfc, this);
     }
-    
-    /**
-     * Releases the resources being used by a given circuit
-     *
-     * @param circuit
-     */
-    public void releaseCircuit(Circuit circuit) {
-        Route route = circuit.getRoute();
-        int chosen[] = circuit.getSpectrumAssigned();
-        
-        releaseSpectrum(circuit, chosen, route.getLinkList());
-
-        // Release transmitter and receiver
-        circuit.getSource().getTxs().releasesTransmitters();
-        circuit.getDestination().getRxs().releasesReceivers();
-
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
-    }
-    
-    /**
-     * This method releases the allocated spectrum for the circuit
-     * 
-     * @param circuit Circuit
-     * @param chosen int[]
-     * @param links List<Link>
-     */
-    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
-        for (int i = 0; i < links.size(); i++) {
-        	Link link = links.get(i);
-        	
-            link.liberateSpectrum(chosen);
-            link.removeCircuit(circuit);
-        }
-    }
 
     /**
      * This method is called after executing RMLSA algorithms to allocate resources in the network
@@ -192,7 +167,7 @@ public class ControlPlane {
         circuit.getSource().getTxs().allocatesTransmitters();
         circuit.getDestination().getRxs().allocatesReceivers();
         
-        activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
+        addConnection(circuit);
     }
 
     /**
@@ -208,6 +183,40 @@ public class ControlPlane {
             
             link.useSpectrum(chosen);
             link.addCircuit(circuit);
+        }
+    }
+    
+    /**
+     * Releases the resources being used by a given circuit
+     *
+     * @param circuit
+     */
+    public void releaseCircuit(Circuit circuit) {
+        Route route = circuit.getRoute();
+        int chosen[] = circuit.getSpectrumAssigned();
+        
+        releaseSpectrum(circuit, chosen, route.getLinkList());
+
+        // Release transmitter and receiver
+        circuit.getSource().getTxs().releasesTransmitters();
+        circuit.getDestination().getRxs().releasesReceivers();
+
+        removeConnection(circuit);
+    }
+    
+    /**
+     * This method releases the allocated spectrum for the circuit
+     * 
+     * @param circuit Circuit
+     * @param chosen int[]
+     * @param links List<Link>
+     */
+    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+        for (int i = 0; i < links.size(); i++) {
+        	Link link = links.get(i);
+        	
+            link.liberateSpectrum(chosen);
+            link.removeCircuit(circuit);
         }
     }
     
@@ -435,5 +444,120 @@ public class ControlPlane {
 		double powerConsumption = EnergyConsumption.computePowerConsumptionBySegment(this, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
 		circuit.setPowerConsumption(powerConsumption);
 		return powerConsumption;
+	}
+	
+	/**
+	 * This method returns the list of active circuits
+	 * 
+	 * @return Circuit
+	 */
+	public TreeSet<Circuit> getConnections(){
+		return connectionList;
+	}
+	
+	/**
+	 * This method adds a circuit to the list of active circuits
+	 * 
+	 * @param circuit Circuit
+	 */
+	public void addConnection(Circuit circuit){
+		activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).add(circuit);
+		
+		if(!connectionList.contains(circuit)){
+			connectionList.add(circuit);
+		}
+	}
+	
+	/**
+	 * This method removes a circuit from the active circuit list
+	 * 
+	 * @param circuit Circuit
+	 */
+	public void removeConnection(Circuit circuit){
+		activeCircuits.get(circuit.getSource().getName()).get(circuit.getDestination().getName()).remove(circuit);
+		
+		if(connectionList.contains(circuit)){
+			connectionList.remove(circuit);
+		}
+	}
+	
+	/**
+	 * This method checks whether the circuit blocking was by QoTN
+	 * Returns true if the blocking was by QoTN and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean isBlockingByQoTN(Circuit circuit){
+		// Check if it is to test the QoT
+		if(mesh.getPhysicalLayer().isActiveQoT()){
+			// Check if it is possible to compute the circuit QoT
+			if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
+				return !computeQualityOfTransmission(circuit);
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * This method checks whether the circuit blocking was by QoTO
+	 * Returns true if the blocking was by QoTO and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean isBlockingByQoTO(Circuit circuit){
+		// Check if it is to test the QoT of other already active circuits
+		if(mesh.getPhysicalLayer().isActiveQoTForOther()){
+			return !circuit.isQoTForOther();
+		}
+		return false;
+	}
+	
+	/**
+	 * This method checks whether the circuit blocking was by fragmentation
+	 * Returns true if the blocking was by fragmentation and false otherwise
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean isBlockingByFragmentation(Circuit circuit){
+		if (circuit.getRoute() == null) return false;
+        
+        List<Link> links = circuit.getRoute().getLinkList();
+        List<int[]> merge = links.get(0).getFreeSpectrumBands();
+
+        for (int i = 1; i < links.size(); i++) {
+            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
+        }
+
+        int totalFree = 0;
+        for (int[] band : merge) {
+            totalFree += (band[1] - band[0] + 1);
+        }
+        
+        Modulation mod = circuit.getModulation();
+        if(mod == null){
+        	mod = modulationSelector.getAvaliableModulations().get(0);
+        }
+
+        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+        if (totalFree > numSlotsRequired) {
+            return true;
+        }
+
+        return false;
+	}
+	
+	/**
+	 * Returns the list of modulation used by the circuit
+	 * 
+	 * @param circuit
+	 * @return List<Modulation>
+	 */
+	public List<Modulation> getModulationsUsedByCircuit(Circuit circuit){
+		List<Modulation> modList = new ArrayList<>();
+		modList.add(circuit.getModulation());
+		return modList;
 	}
 }

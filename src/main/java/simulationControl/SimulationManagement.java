@@ -1,7 +1,6 @@
 package simulationControl;
 
 import measurement.*;
-import simulationControl.parsers.SimulationConfig;
 import simulationControl.resultManagers.*;
 import simulator.Simulation;
 import simulator.Simulator;
@@ -42,10 +41,11 @@ public class SimulationManagement {
         done = 0;
         numOfSimulations = 0;
         mainMeasuremens = new ArrayList<>();
+        
         for(List<Simulation> loadPoint : simulations){
             List<Measurements> aux = new ArrayList<>();
             mainMeasuremens.add(aux);
-            for(Simulation replication : loadPoint){
+            for(int replication = 0; replication < loadPoint.size(); replication++){
                 aux.add(null);
                 numOfSimulations++;
             }
@@ -102,174 +102,205 @@ public class SimulationManagement {
     /**
      * This method is responsible for calling the method of the class responsible for saving 
      * the results associated with each metric
-     */    
-    public void saveResults(String pathResultFiles) {
+     * 
+     * @param pathResultFiles String
+     */
+    public void saveResults(String pathResultFiles){
     	// Pick folder name
-    	String separator = System.getProperty("file.separator");
-        String aux[] = pathResultFiles.split(Pattern.quote(separator));
-        String nome = aux[aux.length - 1];
-        
-        SimulationConfig.Metrics measuringMetrics = this.mainMeasuremens.get(0).get(0).getMeasuringMetrics();
-        
-        try {
-            //List<Pair> pairs = new ArrayList(this.simulations.get(0).get(0).getMesh().getPairList());
-        	FileWriter fw = null;
-        	
-            // Circuit blocking probability
-        	if(measuringMetrics.BlockingProbability){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "BlockingProb.csv"));
-	            fw.write(getBlockingProbabilityCsv());
+    	String separador = System.getProperty("file.separator");
+    	String aux[] = pathResultFiles.split(Pattern.quote(separador));
+    	String nomePasta = aux[aux.length - 1];
+    	
+    	try {
+    		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
+    		for(int m = 0; m < numMetrics; m++){
+    			Measurement metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
+    			
+				List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
+				for (List<Measurements> listMeasurements : this.mainMeasuremens) {
+					List<Measurement> lms = new ArrayList<Measurement>();
+					llms.add(lms);
+					for (Measurements measurements : listMeasurements) {
+						lms.add(measurements.getMetrics().get(m));
+					}
+				}
+				
+				String path = pathResultFiles + separador + nomePasta + metric.getFileName();
+				
+				FileWriter fw = new FileWriter(new File(path));
+				fw.write(metric.result(llms));
 	            fw.close();
-        	}
-
-            // Bandwidth blocking probability
-        	if(measuringMetrics.BandwidthBlockingProbability){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "BandwidthBlockingProb.csv"));
-	            fw.write(getBandwidthBlockingProbabilityCsv());
-	            fw.close();
-        	}
-
-            // External fragmentation
-            if(measuringMetrics.ExternalFragmentation){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "ExternalFragmentation.csv"));
-	            fw.write(getExternalFragmentationCsv());
-	            fw.close();
-            }
-
-            // Relative fragmentation
-            if(measuringMetrics.RelativeFragmentation){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "RelativeFragmentation.csv"));
-	            fw.write(getRelativeFragmentationCsv());
-	            fw.close();
-            }
-
-            // Spectrum utilization
-            if(measuringMetrics.SpectrumUtilization){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumUtilization.csv"));
-	            fw.write(getSpectrumUtilizationCsv());
-	            fw.close();
-            }
-
-            // Spectrum statistics
-            if(measuringMetrics.SpectrumSizeStatistics){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "SpectrumSizeStatistics.csv"));
-	            fw.write(getSpectrumStatisticsCsv());
-	            fw.close();
-            }
-
-            // Statistics of tx and rx
-            if(measuringMetrics.TransmittersReceiversUtilization){
-	            fw = new FileWriter(new File(pathResultFiles + separator + nome + "TransmitersReceiversUtilization.csv"));
-	            fw.write(getTransceiversUtilizationCsv());
-	            fw.close();
-            }
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    		}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
+    /**
+     * Returns a string with the results file of the metric of circuit blocking probability
+     * 
+     * @return String
+     */
     public String getBlockingProbabilityCsv(){
-        // Circuit blocking probability
-        List<List<BlockingProbability>> pbs = new ArrayList<>();
+        List<List<Measurement>> pbs = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<BlockingProbability> lpb = new ArrayList<>();
+            List<Measurement> lpb = new ArrayList<>();
             pbs.add(lpb);
             for (Measurements measurements : listMeas) {
                 lpb.add(measurements.getProbabilidadeDeBloqueioMeasurement());
             }
         }
 
-        BlockingProbResultManager bprm = new BlockingProbResultManager(pbs);
-        return bprm.result();
+        BlockingProbResultManager bprm = new BlockingProbResultManager();
+        return bprm.result(pbs);
     }
 
+    /**
+     * Returns a string with the results file of the metric of bandwidth blocking probability
+     * 
+     * @return String
+     */
     public String getBandwidthBlockingProbabilityCsv(){
-        // Bandwidth blocking probability
-        List<List<BandwidthBlockingProbability>> pbbs = new ArrayList<>();
+        List<List<Measurement>> pbbs = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<BandwidthBlockingProbability> lpbb = new ArrayList<>();
+            List<Measurement> lpbb = new ArrayList<>();
             pbbs.add(lpbb);
             for (Measurements measurements : listMeas) {
                 lpbb.add(measurements.getProbabilidadeDeBloqueioDeBandaMeasurement());
             }
         }
 
-        BandwidthBlockingProbResultManager bbprm = new BandwidthBlockingProbResultManager(pbbs);
-        return bbprm.result();
+        BandwidthBlockingProbResultManager bbprm = new BandwidthBlockingProbResultManager();
+        return bbprm.result(pbbs);
     }
 
+    /**
+     * Returns a string with the results file of the metric of external fragmentation
+     * 
+     * @return String
+     */
     public String getExternalFragmentationCsv(){
-        // External fragmentation
-        List<List<ExternalFragmentation>> llfe = new ArrayList<>();
+        List<List<Measurement>> llfe = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<ExternalFragmentation> lfe = new ArrayList<>();
+            List<Measurement> lfe = new ArrayList<>();
             llfe.add(lfe);
             for (Measurements measurements : listMeas) {
                 lfe.add(measurements.getFragmentacaoExterna());
             }
         }
-        ExternalFragmentationManager efm = new ExternalFragmentationManager(llfe);
-        return efm.result();
+        ExternalFragmentationResultManager efm = new ExternalFragmentationResultManager();
+        return efm.result(llfe);
     }
 
+    /**
+     * Returns a string with the results file of the metric of relative fragmentation
+     * 
+     * @return String
+     */
     public String getRelativeFragmentationCsv(){
-    	// Relative fragmentation
-        List<List<RelativeFragmentation>> llfr = new ArrayList<>();
+        List<List<Measurement>> llfr = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<RelativeFragmentation> lfr = new ArrayList<>();
+            List<Measurement> lfr = new ArrayList<>();
             llfr.add(lfr);
             for (Measurements measurements : listMeas) {
                 lfr.add(measurements.getFragmentacaoRelativa());
             }
         }
 
-        RelativeFragmentationManager rfm = new RelativeFragmentationManager(llfr);
-        return rfm.result();
+        RelativeFragmentationResultManager rfm = new RelativeFragmentationResultManager();
+        return rfm.result(llfr);
     }
 
+    /**
+     * Returns a string with the results file of the metric of spectrum utilization
+     * 
+     * @return String
+     */
     public String getSpectrumUtilizationCsv(){
-        // Spectrum utilization
-        List<List<SpectrumUtilization>> llus = new ArrayList<>();
+        List<List<Measurement>> llus = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<SpectrumUtilization> lus = new ArrayList<>();
+            List<Measurement> lus = new ArrayList<>();
             llus.add(lus);
             for (Measurements measurements : listMeas) {
                 lus.add(measurements.getUtilizacaoSpectro());
             }
         }
 
-        SpectrumUtilizationResultManager surm = new SpectrumUtilizationResultManager(llus);
-        return surm.result();
+        SpectrumUtilizationResultManager surm = new SpectrumUtilizationResultManager();
+        return surm.result(llus);
     }
 
+    /**
+     * Returns a string with the results file of the metric of spectrum size statistics
+     * 
+     * @return String
+     */
     public String getSpectrumStatisticsCsv(){
-        // Spectrum size statistics
-        List<List<SpectrumSizeStatistics>> llsss = new ArrayList<>();
+        List<List<Measurement>> llsss = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<SpectrumSizeStatistics> lsss = new ArrayList<>();
+            List<Measurement> lsss = new ArrayList<>();
             llsss.add(lsss);
             for (Measurements measurements : listMeas) {
                 lsss.add(measurements.getSpectrumSizeStatistics());
             }
         }
-        SpectrumSizeStatisticsResultManager sssrm = new SpectrumSizeStatisticsResultManager(llsss);
-        return sssrm.result();
+        SpectrumSizeStatisticsResultManager sssrm = new SpectrumSizeStatisticsResultManager();
+        return sssrm.result(llsss);
     }
 
+    /**
+     * Returns a string with the results file of the metric of transmitters, receivers, and regenerators utilization
+     * 
+     * @return String
+     */
     public String getTransceiversUtilizationCsv(){
-        // Transmitters and receivers utilization
-        List<List<TransmittersReceiversUtilization>> lltru = new ArrayList<>();
+        List<List<Measurement>> lltru = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<TransmittersReceiversUtilization> ltru = new ArrayList<>();
+            List<Measurement> ltru = new ArrayList<>();
             lltru.add(ltru);
             for (Measurements measurements : listMeas) {
                 ltru.add(measurements.getTransmitersReceiversUtilization());
             }
         }
-        TransmittersReceiversUtilizationResultManager trurm = new TransmittersReceiversUtilizationResultManager(lltru);
-        return trurm.result();
+        TransmittersReceiversRegeneratorsUtilizationResultManager trurm = new TransmittersReceiversRegeneratorsUtilizationResultManager();
+        return trurm.result(lltru);
+    }
+    
+    /**
+     * Returns a string with the results file of the metric of energy consumption
+     * 
+     * @return String
+     */
+    public String getEnergyConsumptionCsv(){
+        List<List<Measurement>> llec = new ArrayList<>();
+        for (List<Measurements> listMeas : this.mainMeasuremens) {
+            List<Measurement> lec = new ArrayList<>();
+            llec.add(lec);
+            for (Measurements measurements : listMeas) {
+                lec.add(measurements.getMetricsOfEnergyConsumption());
+            }
+        }
+        MetricsOfEnergyConsumptionResultManager mecm = new MetricsOfEnergyConsumptionResultManager();
+        return mecm.result(llec);
+    }
+    
+    /**
+     * Returns a string with the results file of the metric of modulation utilization
+     * 
+     * @return String
+     */
+    public String getModulationUtilizationCsv(){
+        List<List<Measurement>> llmu = new ArrayList<>();
+        for (List<Measurements> listMeas : this.mainMeasuremens) {
+            List<Measurement> lmu = new ArrayList<>();
+            llmu.add(lmu);
+            for (Measurements measurements : listMeas) {
+                lmu.add(measurements.getModulationUtilization());
+            }
+        }
+        ModulationUtilizationResultManager murm = new ModulationUtilizationResultManager();
+        return murm.result(llmu);
     }
 
 

@@ -3,10 +3,11 @@ package measurement;
 import java.util.HashMap;
 import java.util.Set;
 
-import network.Circuit;
+import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
+import simulationControl.resultManagers.SpectrumUtilizationResultManager;
 
 /**
  * This class stored the metrics related to the use of spectrum.
@@ -40,12 +41,19 @@ public class SpectrumUtilization extends Measurement {
 
         int maxSlotsByLinks = mesh.maximumSlotsByLinks();
         desUtilizationPerSlot = new int[maxSlotsByLinks];
+        
+        fileName = "_SpectrumUtilization.csv";
+		resultManager = new SpectrumUtilizationResultManager();
     }
 
     /**
-     * Adds a new usage observation of spectrum utilizarion
+     * Adds a new usage observation of spectrum utilization
+     * 
+     * @param cp ControlPlane
+     * @param success boolean
+     * @param request RequestForConnection
      */
-    public void addNewObservation(boolean success, RequestForConnection request) {
+    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
         this.newObsUtilization();
     }
 
