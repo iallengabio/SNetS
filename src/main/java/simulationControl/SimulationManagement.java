@@ -109,7 +109,7 @@ public class SimulationManagement {
     	// Pick folder name
     	String separador = System.getProperty("file.separator");
     	String aux[] = pathResultFiles.split(Pattern.quote(separador));
-    	String nomePasta = aux[aux.length-1];
+    	String nomePasta = aux[aux.length - 1];
     	
     	try {
     		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
@@ -137,8 +137,12 @@ public class SimulationManagement {
 		}
     }
 
+    /**
+     * Returns a string with the results file of the metric of circuit blocking probability
+     * 
+     * @return String
+     */
     public String getBlockingProbabilityCsv(){
-        // Circuit blocking probability
         List<List<Measurement>> pbs = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lpb = new ArrayList<>();
@@ -152,8 +156,12 @@ public class SimulationManagement {
         return bprm.result(pbs);
     }
 
+    /**
+     * Returns a string with the results file of the metric of bandwidth blocking probability
+     * 
+     * @return String
+     */
     public String getBandwidthBlockingProbabilityCsv(){
-        // Bandwidth blocking probability
         List<List<Measurement>> pbbs = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lpbb = new ArrayList<>();
@@ -167,8 +175,12 @@ public class SimulationManagement {
         return bbprm.result(pbbs);
     }
 
+    /**
+     * Returns a string with the results file of the metric of external fragmentation
+     * 
+     * @return String
+     */
     public String getExternalFragmentationCsv(){
-        // External fragmentation
         List<List<Measurement>> llfe = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lfe = new ArrayList<>();
@@ -181,8 +193,12 @@ public class SimulationManagement {
         return efm.result(llfe);
     }
 
+    /**
+     * Returns a string with the results file of the metric of relative fragmentation
+     * 
+     * @return String
+     */
     public String getRelativeFragmentationCsv(){
-    	// Relative fragmentation
         List<List<Measurement>> llfr = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lfr = new ArrayList<>();
@@ -196,8 +212,12 @@ public class SimulationManagement {
         return rfm.result(llfr);
     }
 
+    /**
+     * Returns a string with the results file of the metric of spectrum utilization
+     * 
+     * @return String
+     */
     public String getSpectrumUtilizationCsv(){
-        // Spectrum utilization
         List<List<Measurement>> llus = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lus = new ArrayList<>();
@@ -211,8 +231,12 @@ public class SimulationManagement {
         return surm.result(llus);
     }
 
+    /**
+     * Returns a string with the results file of the metric of spectrum size statistics
+     * 
+     * @return String
+     */
     public String getSpectrumStatisticsCsv(){
-        // Spectrum size statistics
         List<List<Measurement>> llsss = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lsss = new ArrayList<>();
@@ -225,8 +249,12 @@ public class SimulationManagement {
         return sssrm.result(llsss);
     }
 
+    /**
+     * Returns a string with the results file of the metric of transmitters, receivers, and regenerators utilization
+     * 
+     * @return String
+     */
     public String getTransceiversUtilizationCsv(){
-        // Transmitters and receivers utilization
         List<List<Measurement>> lltru = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> ltru = new ArrayList<>();
@@ -239,8 +267,12 @@ public class SimulationManagement {
         return trurm.result(lltru);
     }
     
+    /**
+     * Returns a string with the results file of the metric of energy consumption
+     * 
+     * @return String
+     */
     public String getEnergyConsumptionCsv(){
-        // Energy consumption
         List<List<Measurement>> llec = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lec = new ArrayList<>();
@@ -253,8 +285,12 @@ public class SimulationManagement {
         return mecm.result(llec);
     }
     
+    /**
+     * Returns a string with the results file of the metric of modulation utilization
+     * 
+     * @return String
+     */
     public String getModulationUtilizationCsv(){
-        // Modulation utilization
         List<List<Measurement>> llmu = new ArrayList<>();
         for (List<Measurements> listMeas : this.mainMeasuremens) {
             List<Measurement> lmu = new ArrayList<>();

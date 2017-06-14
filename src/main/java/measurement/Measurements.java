@@ -160,7 +160,7 @@ public class Measurements implements Serializable {
      */
     public void transientStepVerify() {
     	// // when it reaches 10% of the number of simulation requests, the system must be stabilized
-        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {
+        if (transientStep && (numGeneratedReq >= 0.1 * numMinRequest)) {
             this.transientStep = false;
 
             initializeMetrics(mesh);

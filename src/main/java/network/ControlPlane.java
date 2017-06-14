@@ -548,4 +548,16 @@ public class ControlPlane {
 
         return false;
 	}
+	
+	/**
+	 * Returns the list of modulation used by the circuit
+	 * 
+	 * @param circuit
+	 * @return List<Modulation>
+	 */
+	public List<Modulation> getModulationsUsedByCircuit(Circuit circuit){
+		List<Modulation> modList = new ArrayList<>();
+		modList.add(circuit.getModulation());
+		return modList;
+	}
 }

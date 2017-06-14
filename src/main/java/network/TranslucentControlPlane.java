@@ -592,4 +592,22 @@ public class TranslucentControlPlane extends ControlPlane {
 
         return false;
 	}
+	
+	/**
+	 * Returns the list of modulation used by the circuit
+	 * 
+	 * @param circuit
+	 * @return List<Modulation>
+	 */
+	@Override
+	public List<Modulation> getModulationsUsedByCircuit(Circuit circuit){
+		List<Modulation> modList = new ArrayList<>();
+		
+		HashMap<Link, Modulation> modLink = ((TranslucentCircuit)circuit).getModulationByLink();
+		for(Link link : modLink.keySet()){
+			modList.add(((TranslucentCircuit)circuit).getModulationByLink(link));
+		}
+		
+		return modList;
+	}
 }
