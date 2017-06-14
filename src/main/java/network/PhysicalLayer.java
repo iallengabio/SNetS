@@ -39,7 +39,11 @@ public class PhysicalLayer {
     private double A2; // Amplifier noise factor parameter, A2
     private double B0; // Optical bandwidth, it has a value of 1 because we are considering SNR
 
-	
+	/**
+	 * Creates a new instance of PhysicalLayerConfig
+	 * 
+	 * @param plc PhysicalLayerConfig
+	 */
     public PhysicalLayer(PhysicalLayerConfig plc){
         this.activeQoT = plc.isActiveQoT();
         this.activeQoTForOther = plc.isActiveQoTForOther();
@@ -252,7 +256,8 @@ public class PhysicalLayer {
 	}
 	
 	/**
-	 * Based on article: Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
+	 * Based on article:
+	 *  - Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
 	 * 
 	 * @param circuit Circuit
 	 * @param link Link
@@ -323,6 +328,12 @@ public class PhysicalLayer {
 	 * Based on articles:
 	 * - Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats (equation 4)
      * - On the Extended Relationships Among EVM, BER and SNR as Performance Metrics (equation 12)
+     * 
+     * @param SNR double
+     * @param k2 double
+     * @param L double
+     * @param M double
+     * @return double
 	 */
 	public static double getBER(double SNR, double k2, double L, double M){
 		double p1 = ((3.0 * log2(L)) / ((L * L) - 1.0)) * ((Math.sqrt(2.0) * SNR) / (k2 * log2(M)));

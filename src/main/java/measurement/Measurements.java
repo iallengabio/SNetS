@@ -119,6 +119,10 @@ public class Measurements implements Serializable {
 			MetricsOfEnergyConsumption energyConsumption = new MetricsOfEnergyConsumption(loadPoint, replication);
 			this.metricsList.add(energyConsumption);
 		}
+		if(measuringMetrics.ModulationUtilization){
+			ModulationUtilization modulationUtilization = new ModulationUtilization(loadPoint, replication);
+			this.metricsList.add(modulationUtilization);
+		}
     }
     
     /**
@@ -155,7 +159,8 @@ public class Measurements implements Serializable {
      *
      */
     public void transientStepVerify() {
-        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {//ao atingir 10% do número de requisições da simulação o sistema deve estar estabilizado
+    	// // when it reaches 10% of the number of simulation requests, the system must be stabilized
+        if ((transientStep) && (numGeneratedReq >= 0.1 * numMinRequest)) {
             this.transientStep = false;
 
             initializeMetrics(mesh);
@@ -258,6 +263,15 @@ public class Measurements implements Serializable {
 		for(Measurement metric : metricsList){
 			if(metric instanceof MetricsOfEnergyConsumption){
 				return (MetricsOfEnergyConsumption)metric;
+			}
+		}
+		return null;
+	}
+ 	
+ 	public ModulationUtilization getModulationUtilization(){
+		for(Measurement metric : metricsList){
+			if(metric instanceof ModulationUtilization){
+				return (ModulationUtilization)metric;
 			}
 		}
 		return null;

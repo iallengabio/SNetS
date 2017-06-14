@@ -251,6 +251,20 @@ public class SimulationManagement {
         MetricsOfEnergyConsumptionResultManager mecm = new MetricsOfEnergyConsumptionResultManager();
         return mecm.result(llec);
     }
+    
+    public String getModulationUtilizationCsv(){
+        // Modulation utilization
+        List<List<Measurement>> llmu = new ArrayList<>();
+        for (List<Measurements> listMeas : this.mainMeasuremens) {
+            List<Measurement> lmu = new ArrayList<>();
+            llmu.add(lmu);
+            for (Measurements measurements : listMeas) {
+                lmu.add(measurements.getModulationUtilization());
+            }
+        }
+        ModulationUtilizationResultManager murm = new ModulationUtilizationResultManager();
+        return murm.result(llmu);
+    }
 
 
     public static interface SimulationProgressListener {

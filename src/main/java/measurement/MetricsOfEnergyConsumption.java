@@ -79,6 +79,8 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 	
 	/**
 	 * Computes the total power consumption of the network at a given moment
+	 * 
+	 * @param cp ControlPlane
 	 */
 	public void computeGeneralPowerConsumption(ControlPlane cp){
 		double sumPc = 0.0;

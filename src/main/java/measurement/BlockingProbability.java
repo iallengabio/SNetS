@@ -138,7 +138,7 @@ public class BlockingProbability extends Measurement {
             // Increase requests blocked by pair
             i = this.numReqBlockPair.get(pairName);
             if (i == null) i = 0;
-            this.numReqBlockPair.put(pairName,i + 1);
+            this.numReqBlockPair.put(pairName, i + 1);
             
             // Increase requests blocked by bandwidth
             i = this.numReqBlockBW.get(request.getRequiredBandwidth());

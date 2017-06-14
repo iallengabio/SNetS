@@ -59,7 +59,7 @@ public class TranslucentControlPlane extends ControlPlane {
     }
     
     /**
-     * 
+     * Method that allocate the regenerators used by a circuit
      * 
      * @param circuit TranslucentCircuit
      */
@@ -249,10 +249,10 @@ public class TranslucentControlPlane extends ControlPlane {
     }
 	
     /**
-     * Selects the form of modulation format selection and spectrum allocation.
+     * This method selects how modulation format selection and spectrum allocation will be applied.
      * 
      * @param circuit TranslucentCircuit
-     * @return boolean
+     * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
      */
     public boolean strategySelection(TranslucentCircuit circuit){
     	// Releases the regenerators allocated so that they can be later allocated to the other network resources
@@ -267,7 +267,7 @@ public class TranslucentControlPlane extends ControlPlane {
     }
     
     /**
-	 * This method attempts to define the modulation format and the spectrum to be allocated in each link of the route selected for the request
+	 * This method attempts to define the modulation format and the spectrum to be allocated in each link of the route selected for the circuit
 	 * 
 	 * @param circuit - Circuit
 	 * @param route - Route
@@ -306,7 +306,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	
 	/**
 	 * This method tries to define the modulation format and the spectrum to be allocated in each link of the route 
-	 * selected for the request taking into account the transparent segments among the regenerators selected for the request
+	 * selected for the circuit taking into account the transparent segments among the regenerators selected for the circuit
 	 * 
 	 * @param circuit - TranslucentCircuit
 	 * @param route - Route
@@ -341,14 +341,13 @@ public class TranslucentControlPlane extends ControlPlane {
 			}
 			
 			tryAssignModulationAndSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition);
+			int chosen[] = circuit.getSpectrumAssigned();
+			Modulation mod = circuit.getModulation();
 			
-			if(circuit.getSpectrumAssigned() == null){
+			if(chosen == null){
 				// The circuit will be blocked since it was not possible to allocate spectrum
 				// Steps to avoid error in the metrics
 				destinationNodeIndex = route.getNodeList().size() - 1;
-				
-				int chosen[] = null;
-				Modulation mod = circuit.getModulation();
 				
 				for(int l = sourceNodeIndex; l < destinationNodeIndex; l++){
 					sourceNode = route.getNode(l);
@@ -364,9 +363,6 @@ public class TranslucentControlPlane extends ControlPlane {
 				
 				return false;
 			}
-			
-			int chosen[] = circuit.getSpectrumAssigned();
-			Modulation mod = circuit.getModulation();
 			
 			for(int l = sourceNodeIndex; l < destinationNodeIndex; l++){
 				sourceNode = route.getNode(l);

@@ -47,7 +47,7 @@ public class SpectrumUtilization extends Measurement {
     }
 
     /**
-     * Adds a new usage observation of spectrum utilizarion
+     * Adds a new usage observation of spectrum utilization
      * 
      * @param cp ControlPlane
      * @param success boolean

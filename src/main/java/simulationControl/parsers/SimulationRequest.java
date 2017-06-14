@@ -154,5 +154,7 @@ public class SimulationRequest {
         public String spectrumUtilization;
         public String transceiversUtilization;
         public String spectrumStatistics;
+        public String energyConsumption;
+        public String modulationUtilization;
     }
 }
