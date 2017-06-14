@@ -71,7 +71,7 @@ public class ModulationUtilization extends Measurement {
 			}
 			numCirc = numCircBw.get(bandwidth);
 			if(numCirc == null) numCirc = 0;
-			numCircBw.put(bandwidth, numCirc);
+			numCircBw.put(bandwidth, numCirc + 1);
 		}
 	}
 	
