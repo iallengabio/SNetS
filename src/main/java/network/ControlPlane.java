@@ -299,8 +299,11 @@ public class ControlPlane {
             specAssigAt[0] = bottomBand[0];
         }
         circuit.setSpectrumAssigned(specAssigAt);
+        
+        // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
+        boolean QoT = isAdmissibleQualityOfTransmission(circuit);
 
-        return true;
+        return QoT;
     }
 
     /**

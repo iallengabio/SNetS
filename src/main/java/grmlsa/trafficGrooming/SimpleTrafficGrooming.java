@@ -20,19 +20,26 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 	@Override
 	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) {
 
-		//search for active circuits with the same origin and destination of the new request.
+		// Search for active circuits with the same origin and destination of the new request.
 		List<Circuit> activeCircuits = cp.searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
 		
 		for (Circuit circuit : activeCircuits) {
 			
-			//investigate if the active circuit is able to accommodate the new request
+			// Investigate if the active circuit is able to accommodate the new request
 			
-			//how many more slots are needed?
+			// How many more slots are needed?
 			int numFinalSlots = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth() + rfc.getRequiredBandwidth());
 			int numCurrentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
 			int numMoreSlots = numFinalSlots - numCurrentSlots;
 			
-			//Is it possible to expand the channel?
+			// You can add without increasing the number of slots
+			if(numMoreSlots == 0){
+				circuit.addRequest(rfc);
+				rfc.setCircuit(circuit);
+				return true;
+			}
+			
+			// Is it possible to expand the channel?
 			List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 			
 			int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentInferior(circuit.getSpectrumAssigned(), composition);
@@ -73,7 +80,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 					circuit.addRequest(rfc);
 					rfc.setCircuit(circuit);
 					return true;
-				}	
+				}
 			}
 		}
 		
@@ -120,7 +127,6 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 
 	@Override
 	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
-		
 		Circuit circuit = rfc.getCircuit();
 		
 		if(circuit.getRequests().size() == 1){ // The connection being terminated is the last to use this channel.
