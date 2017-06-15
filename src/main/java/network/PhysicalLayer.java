@@ -37,6 +37,8 @@ public class PhysicalLayer {
     private double A1; // Amplifier noise factor parameter, A1
     private double A2; // Amplifier noise factor parameter, A2
     private double B0; // Optical bandwidth
+    
+    private double numReferenceSlots; // Number of reference slots for the signal power density
 
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
@@ -44,6 +46,8 @@ public class PhysicalLayer {
 	 * @param plc PhysicalLayerConfig
 	 */
     public PhysicalLayer(PhysicalLayerConfig plc){
+    	this.numReferenceSlots = 4; // Is set to the value four based on wavelengths of 50 GHz bandwidth
+    	
         this.activeQoT = plc.isActiveQoT();
         this.activeQoTForOther = plc.isActiveQoTForOther();
     	
@@ -221,7 +225,7 @@ public class PhysicalLayer {
 		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); //Hz, Half slots are removed because center Frequency = 193.0E + 12 is the central frequency of the optical spectrum
 		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1)) + (Bsi / 2); // Central frequency of circuit
 		
-		double I = Ptx / (fs * 4); // Signal power density for 4 slots
+		double I = Ptx / (fs * numReferenceSlots); // Signal power density for the number of reference slots
 		
 		Node sourceNode = null;
 		Node destinationNode = null;
