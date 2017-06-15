@@ -305,22 +305,6 @@ public class MMRDS implements RoutingAlgorithmInterface {
 
         return sim / lrm.size();
     }
-
-    /**
-     * This method sort a give array of pairs by required slots
-     * 
-     * @param array ArrayList<Circuit>
-     */
-    public static void sortArrayOfPairsBySlots(ArrayList<Circuit> array) {
-        Collections.sort(array, new Comparator<Circuit>() {
-            @Override
-            public int compare(Circuit r1, Circuit r2) {
-                Integer r1NumSlots = r1.getModulation().requiredSlots(r1.getRequiredBandwidth());
-                Integer r2NumSlots = r2.getModulation().requiredSlots(r2.getRequiredBandwidth());
-                return r1NumSlots.compareTo(r2NumSlots);
-            }
-        });
-    }
     
     /**
      * This method saves in files the routes for all the pairs.

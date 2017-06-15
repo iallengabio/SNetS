@@ -76,7 +76,7 @@ public class Oxc implements Serializable {
      * Remove Link to Oxc n
      *
      * @param n Oxc
-     * @return true case successufully removed Link to Oxc n; false otherwise.
+     * @return true case success removed Link to Oxc n; false otherwise.
      */
     public boolean removeLink(Oxc n) {
         Link auxLink;
@@ -119,7 +119,6 @@ public class Oxc implements Serializable {
             if (auxLink.adjacent(x))
                 return auxLink.getCost();
         }
-        //System.out.println("erro: O nó "+ x.getName()+" nao é adjacente ao "+getName());
         return -1;
     }
 
