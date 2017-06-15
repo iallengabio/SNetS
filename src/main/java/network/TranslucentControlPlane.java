@@ -184,10 +184,9 @@ public class TranslucentControlPlane extends ControlPlane {
 	protected void allocateSpectrum(Circuit circuit, List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-            int[] chosen = circuit.getSpectrumAssignedByLink(link);
+            int[] band = circuit.getSpectrumAssignedByLink(link);
             
-            link.useSpectrum(chosen);
-            link.addCircuit(circuit);
+            link.useSpectrum(band);
         }
     }
     
@@ -221,10 +220,9 @@ public class TranslucentControlPlane extends ControlPlane {
 	protected void releaseSpectrum(Circuit circuit, List<Link> links) {
     	for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-            int chosen[] = circuit.getSpectrumAssignedByLink(link);
+            int band[] = circuit.getSpectrumAssignedByLink(link);
         	
-            link.liberateSpectrum(chosen);
-            link.removeCircuit(circuit);
+            link.liberateSpectrum(band);
         }
     }
     
@@ -342,10 +340,10 @@ public class TranslucentControlPlane extends ControlPlane {
 			}
 			
 			tryAssignModulationAndSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition);
-			int chosen[] = circuit.getSpectrumAssigned();
+			int sa[] = circuit.getSpectrumAssigned();
 			Modulation mod = circuit.getModulation();
 			
-			if(chosen == null){
+			if(sa == null){
 				// The circuit will be blocked since it was not possible to allocate spectrum
 				// Steps to avoid error in the metrics
 				destinationNodeIndex = route.getNodeList().size() - 1;
@@ -355,7 +353,7 @@ public class TranslucentControlPlane extends ControlPlane {
 					destinationNode = route.getNode(l + 1);
 					link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 					
-					spectrumAssignedByLink.put(link, chosen);
+					spectrumAssignedByLink.put(link, sa);
 					modulationByLink.put(link, mod);
 				}
 				
@@ -370,7 +368,7 @@ public class TranslucentControlPlane extends ControlPlane {
 				destinationNode = route.getNode(l + 1);
 				link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 				
-				spectrumAssignedByLink.put(link, chosen);
+				spectrumAssignedByLink.put(link, sa);
 				modulationByLink.put(link, mod);
 			}
 			

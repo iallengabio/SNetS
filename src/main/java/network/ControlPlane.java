@@ -162,9 +162,9 @@ public class ControlPlane {
     protected void allocateCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[] = circuit.getSpectrumAssigned();
+        int band[] = circuit.getSpectrumAssigned();
         
-        allocateSpectrum(circuit, chosen, links);
+        allocateSpectrum(circuit, band, links);
         
         // Allocates transmitter and receiver
         circuit.getSource().getTxs().allocatesTransmitters();
@@ -177,15 +177,14 @@ public class ControlPlane {
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
      * @param circuit Circuit
-     * @param chosen int[]
+     * @param band int[]
      * @param links List<Link>
      */
-    protected void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             
-            link.useSpectrum(chosen);
-            link.addCircuit(circuit);
+            link.useSpectrum(band);
         }
     }
     
@@ -196,9 +195,9 @@ public class ControlPlane {
      */
     public void releaseCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
-        int chosen[] = circuit.getSpectrumAssigned();
+        int band[] = circuit.getSpectrumAssigned();
         
-        releaseSpectrum(circuit, chosen, route.getLinkList());
+        releaseSpectrum(circuit, band, route.getLinkList());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -211,15 +210,14 @@ public class ControlPlane {
      * This method releases the allocated spectrum for the circuit
      * 
      * @param circuit Circuit
-     * @param chosen int[]
+     * @param band int[]
      * @param links List<Link>
      */
-    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+    protected void releaseSpectrum(Circuit circuit, int band[], List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
         	Link link = links.get(i);
         	
-            link.liberateSpectrum(chosen);
-            link.removeCircuit(circuit);
+            link.liberateSpectrum(band);
         }
     }
     
@@ -284,21 +282,20 @@ public class ControlPlane {
      * @return boolean
      */
     public boolean expandCircuit(Circuit circuit, int upperBand[], int bottomBand[]) {
-
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[];
+        int band[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
         
         if (upperBand != null) {
-            chosen = upperBand;
-            allocateSpectrum(circuit, chosen, links);
+            band = upperBand;
+            allocateSpectrum(circuit, band, links);
             specAssigAt[1] = upperBand[1];
         }
         
         if (bottomBand != null) {
-            chosen = bottomBand;
-            allocateSpectrum(circuit, chosen, links);
+            band = bottomBand;
+            allocateSpectrum(circuit, band, links);
             specAssigAt[0] = bottomBand[0];
         }
         circuit.setSpectrumAssigned(specAssigAt);
@@ -316,18 +313,18 @@ public class ControlPlane {
     public void retractCircuit(Circuit circuit, int bottomBand[], int upperBand[]) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[];
+        int band[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
         
         if (bottomBand != null) {
-            chosen = bottomBand;
-            releaseSpectrum(circuit, chosen, links);
+            band = bottomBand;
+            releaseSpectrum(circuit, band, links);
             specAssigAt[0] = bottomBand[1] + 1;
         }
         
         if (upperBand != null) {
-            chosen = upperBand;
-            releaseSpectrum(circuit, chosen, links);
+            band = upperBand;
+            releaseSpectrum(circuit, band, links);
             specAssigAt[1] = upperBand[0] - 1;
         }
         
@@ -469,6 +466,11 @@ public class ControlPlane {
 		if(!connectionList.contains(circuit)){
 			connectionList.add(circuit);
 		}
+		
+		List<Link> links = new ArrayList<Link>(circuit.getRoute().getLinkList());
+	    for (int i = 0; i < links.size(); i++) {
+	    	links.get(i).addCircuit(circuit);
+	    }
 	}
 	
 	/**
@@ -482,6 +484,11 @@ public class ControlPlane {
 		if(connectionList.contains(circuit)){
 			connectionList.remove(circuit);
 		}
+		
+		List<Link> links = new ArrayList<Link>(circuit.getRoute().getLinkList());
+	    for (int i = 0; i < links.size(); i++) {
+	    	links.get(i).removeCircuit(circuit);
+	    }
 	}
 	
 	/**
