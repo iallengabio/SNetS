@@ -30,7 +30,7 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 		Vector<Node> nodes = route.getNodeList();
 		
 		//hight index means a highest spectral efficiency of the modulation format
-		List<Modulation> avaliableModulations = controlPlane.getModulationSelector().getAvaliableModulations();
+		List<Modulation> avaliableModulations = controlPlane.getModulationSelection().getAvaliableModulations();
 		
 		int r = 0;
 		int m = avaliableModulations.size()-1; //modulation format with the higher spectral efficiency
@@ -179,10 +179,10 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 		boolean flagSuccess = false;
 		
 		int numberOfSlots = modulation.requiredSlots(circuit.getRequiredBandwidth());
-		int chosen[] = cp.getSpectrumAssignment().policy(numberOfSlots, composition, circuit);
-		if(chosen != null){
+		int band[] = cp.getSpectrumAssignment().policy(numberOfSlots, composition, circuit);
+		if(band != null){
 			
-			flagQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinatinNodeIndex, modulation, chosen);
+			flagQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinatinNodeIndex, modulation, band);
 			if(flagQoT){
 				flagSuccess = true;
 			}
@@ -190,7 +190,7 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 		
 		// Configures the circuit information
 		circuit.setModulation(modulation);
-		circuit.setSpectrumAssigned(chosen);
+		circuit.setSpectrumAssigned(band);
 		circuit.setQoT(flagQoT);
 		
 		return flagSuccess;

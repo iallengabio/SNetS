@@ -7,6 +7,8 @@ import java.util.List;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
+import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
@@ -23,7 +25,7 @@ import util.IntersectionFreeSpectrum;
 public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterface{
 
 	private NewKShortestPaths kShortestsPaths;
-	private ModulationSelector modulationSelector;
+	private ModulationSelectionAlgorithmInterface modulationSelection;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
 	
@@ -54,9 +56,10 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		if(kShortestsPaths == null){
 			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
 		}
-		if(modulationSelector == null){
-			modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
-		}
+		if (modulationSelection == null){
+        	modulationSelection = new ModulationSelectionByDistance();
+        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        }
 		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
 			spectrumAssignment1 = new FirstFit();
 			spectrumAssignment2 = new LastFit();
@@ -71,7 +74,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		for (Route route : candidateRoutes) {
 			
 			circuit.setRoute(route);
-			Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment1, mesh);
+			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, mesh);
 			
 			// Calculate how many slots are needed for this route
 			int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
@@ -101,7 +104,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			for (Route route : candidateRoutes) {
 				
 				circuit.setRoute(route);
-				Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment2, mesh);
+				Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, mesh);
 				
 				// Calculate how many slots are needed for this route
 				int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
@@ -143,7 +146,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			
 		}else{
 			circuit.setRoute(candidateRoutes.get(0));
-			circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
+			circuit.setModulation(modulationSelection.getAvaliableModulations().get(0));
 			circuit.setSpectrumAssigned(null);
 			
 			return false;

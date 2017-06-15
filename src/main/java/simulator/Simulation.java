@@ -41,10 +41,10 @@ public class Simulation implements Serializable {
         GRMLSA grmlsa = new GRMLSA(sc.getGrooming(),sc.getIntegratedRmlsa(),sc.getRouting(),sc.getModulationSelection(),sc.getSpectrumAssignment(), sc.getRegeneratorAssignment());
         
         if(sc.getNetworkType() == GRMLSA.TRANSPARENT){
-        	controlPlane = new ControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment());	
+        	controlPlane = new ControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateModulationSelection());	
         
         }else if(sc.getNetworkType() == GRMLSA.TRANSLUCENT){
-        	controlPlane = new TranslucentControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateRegeneratorAssignment());
+        	controlPlane = new TranslucentControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateRegeneratorAssignment(), grmlsa.instantiateModulationSelection());
         }
     }
 

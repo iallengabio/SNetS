@@ -45,7 +45,7 @@ public class ModulationUtilization extends Measurement {
    public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
 	   if(modulationList == null){
 		   modulationList = new ArrayList<String>();
-		   List<Modulation> avaliableModulations = cp.getModulationSelector().getAvaliableModulations();
+		   List<Modulation> avaliableModulations = cp.getModulationSelection().getAvaliableModulations();
 		   
 		   for(int i = 0; i < avaliableModulations.size(); i++){
 			   modulationList.add(avaliableModulations.get(i).getName());

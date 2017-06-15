@@ -15,7 +15,7 @@ public class NetworkConfig {
     private List<NodeConfig> nodes = new ArrayList<>();
     private List<LinkConfig> links = new ArrayList<>();
     private List<ModulationConfig> modulations = new ArrayList<>();
-    private int guardBand=1;
+    private int guardBand = 1;
 
     /**
      * Returns the list of modulations

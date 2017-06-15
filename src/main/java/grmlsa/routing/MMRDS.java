@@ -1,13 +1,26 @@
 package grmlsa.routing;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import grmlsa.Route;
 import network.Circuit;
 import network.Link;
 import network.Mesh;
 import network.Node;
-
-import java.io.Serializable;
-import java.util.*;
+import simulationControl.Util;
 
 /**
  * This class represents the MMRDS Routing Algorithm.
@@ -15,7 +28,7 @@ import java.util.*;
  * 
  * @author Iallen
  */
-public class MMRDS implements RoutingAlgorithmInterface, Serializable {
+public class MMRDS implements RoutingAlgorithmInterface {
     private static final String DIV = "-";
 
     private HashMap<String, Route> routesForAllPairs;
@@ -25,7 +38,7 @@ public class MMRDS implements RoutingAlgorithmInterface, Serializable {
     public boolean findRoute(Circuit request, Mesh mesh) {
         if (routesForAllPairs == null) {
             computeAllRoutes(mesh);
-            //salveRoutesByPar();
+            salveRoutesByPar(mesh.getNodeList());
         }
 
         Node source = request.getSource();
@@ -307,5 +320,53 @@ public class MMRDS implements RoutingAlgorithmInterface, Serializable {
                 return r1NumSlots.compareTo(r2NumSlots);
             }
         });
+    }
+    
+    /**
+     * This method saves in files the routes for all the pairs.
+     * 
+     * @param nodeList Vector<Node>
+     */
+    private void salveRoutesByPar(Vector<Node> nodeList) {
+    	List<String> routesList = new ArrayList<String>();
+    	
+    	int numNodes = nodeList.size();
+        for(int i = 1; i <= numNodes; i++){
+    	    for(int j = 1; j <= numNodes; j++){
+    		    
+    		    if(i != j){
+	      		    String pair = i + DIV + j;
+	      		    
+		        	Route rota = routesForAllPairs.get(pair);
+		        	StringBuilder sb = new StringBuilder();
+		        	for(int n = 0; n < rota.getNodeList().size(); n++){
+		        		sb.append(rota.getNodeList().get(n).getName());
+		        		if(n < rota.getNodeList().size() - 1){
+		        			sb.append("-");
+		        		}
+		        	}
+		        	
+		        	routesList.add(sb.toString());
+    		    }
+    	    }
+        }
+        
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(routesList);
+        
+        try {
+        	String separator = System.getProperty("file.separator");
+        	
+        	FileWriter fw = new FileWriter(Util.projectPath + separator + "routesByPar.txt");
+			BufferedWriter out = new BufferedWriter(fw);
+            
+			out.append(json);
+			
+			out.close();
+			fw.close();
+            
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+        }
     }
 }

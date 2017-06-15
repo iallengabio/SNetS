@@ -9,6 +9,7 @@ import grmlsa.GRMLSA;
 import grmlsa.Route;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -29,7 +30,7 @@ public class ControlPlane {
     protected RoutingAlgorithmInterface routing;
     protected SpectrumAssignmentAlgorithmInterface spectrumAssignment;
     protected IntegratedRMLSAAlgorithmInterface integrated;
-    protected ModulationSelector modulationSelector;
+    protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
 	
     protected Mesh mesh;
@@ -52,7 +53,7 @@ public class ControlPlane {
      * @param routingAlgorithm RoutingAlgorithmInterface
      * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm) {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection) {
         this.activeCircuits = new HashMap<>();
         this.connectionList = new TreeSet<>();
         
@@ -61,7 +62,9 @@ public class ControlPlane {
         this.integrated = integratedRMLSAAlgorithm;
         this.routing = routingAlgorithm;
         this.spectrumAssignment = spectrumAssignmentAlgorithm;
-        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
+        this.modulationSelection = modulationSelection;
+        
+        this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
 
         setMesh(mesh);
     }
@@ -113,12 +116,12 @@ public class ControlPlane {
     }
     
     /**
-     * Returns the modulation selector
+     * Returns the modulation selection
      * 
-     * @return ModulationSelector
+     * @return ModulationSelection
      */
-    public ModulationSelector getModulationSelector(){
-    	return modulationSelector;
+    public ModulationSelectionAlgorithmInterface getModulationSelection(){
+    	return modulationSelection;
     }
 
     /**
@@ -159,9 +162,9 @@ public class ControlPlane {
     protected void allocateCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[] = circuit.getSpectrumAssigned();
+        int band[] = circuit.getSpectrumAssigned();
         
-        allocateSpectrum(circuit, chosen, links);
+        allocateSpectrum(circuit, band, links);
         
         // Allocates transmitter and receiver
         circuit.getSource().getTxs().allocatesTransmitters();
@@ -174,15 +177,14 @@ public class ControlPlane {
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
      * @param circuit Circuit
-     * @param chosen int[]
+     * @param band int[]
      * @param links List<Link>
      */
-    protected void allocateSpectrum(Circuit circuit, int[] chosen, List<Link> links) {
+    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             
-            link.useSpectrum(chosen);
-            link.addCircuit(circuit);
+            link.useSpectrum(band);
         }
     }
     
@@ -193,9 +195,9 @@ public class ControlPlane {
      */
     public void releaseCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
-        int chosen[] = circuit.getSpectrumAssigned();
+        int band[] = circuit.getSpectrumAssigned();
         
-        releaseSpectrum(circuit, chosen, route.getLinkList());
+        releaseSpectrum(circuit, band, route.getLinkList());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -208,15 +210,14 @@ public class ControlPlane {
      * This method releases the allocated spectrum for the circuit
      * 
      * @param circuit Circuit
-     * @param chosen int[]
+     * @param band int[]
      * @param links List<Link>
      */
-    protected void releaseSpectrum(Circuit circuit, int chosen[], List<Link> links) {
+    protected void releaseSpectrum(Circuit circuit, int band[], List<Link> links) {
         for (int i = 0; i < links.size(); i++) {
         	Link link = links.get(i);
         	
-            link.liberateSpectrum(chosen);
-            link.removeCircuit(circuit);
+            link.liberateSpectrum(band);
         }
     }
     
@@ -261,7 +262,7 @@ public class ControlPlane {
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
-                    Modulation mod = modulationSelector.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
+                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
                     if(mod != null){
 	                    circuit.setModulation(mod);
 	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
@@ -281,26 +282,28 @@ public class ControlPlane {
      * @return boolean
      */
     public boolean expandCircuit(Circuit circuit, int upperBand[], int bottomBand[]) {
-
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[];
+        int band[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
         
         if (upperBand != null) {
-            chosen = upperBand;
-            allocateSpectrum(circuit, chosen, links);
+            band = upperBand;
+            allocateSpectrum(circuit, band, links);
             specAssigAt[1] = upperBand[1];
         }
         
         if (bottomBand != null) {
-            chosen = bottomBand;
-            allocateSpectrum(circuit, chosen, links);
+            band = bottomBand;
+            allocateSpectrum(circuit, band, links);
             specAssigAt[0] = bottomBand[0];
         }
         circuit.setSpectrumAssigned(specAssigAt);
+        
+        // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
+        boolean QoT = isAdmissibleQualityOfTransmission(circuit);
 
-        return true;
+        return QoT;
     }
 
     /**
@@ -313,18 +316,18 @@ public class ControlPlane {
     public void retractCircuit(Circuit circuit, int bottomBand[], int upperBand[]) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int chosen[];
+        int band[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
         
         if (bottomBand != null) {
-            chosen = bottomBand;
-            releaseSpectrum(circuit, chosen, links);
+            band = bottomBand;
+            releaseSpectrum(circuit, band, links);
             specAssigAt[0] = bottomBand[1] + 1;
         }
         
         if (upperBand != null) {
-            chosen = upperBand;
-            releaseSpectrum(circuit, chosen, links);
+            band = upperBand;
+            releaseSpectrum(circuit, band, links);
             specAssigAt[1] = upperBand[0] - 1;
         }
         
@@ -466,6 +469,11 @@ public class ControlPlane {
 		if(!connectionList.contains(circuit)){
 			connectionList.add(circuit);
 		}
+		
+		List<Link> links = new ArrayList<Link>(circuit.getRoute().getLinkList());
+	    for (int i = 0; i < links.size(); i++) {
+	    	links.get(i).addCircuit(circuit);
+	    }
 	}
 	
 	/**
@@ -479,6 +487,11 @@ public class ControlPlane {
 		if(connectionList.contains(circuit)){
 			connectionList.remove(circuit);
 		}
+		
+		List<Link> links = new ArrayList<Link>(circuit.getRoute().getLinkList());
+	    for (int i = 0; i < links.size(); i++) {
+	    	links.get(i).removeCircuit(circuit);
+	    }
 	}
 	
 	/**
@@ -538,7 +551,7 @@ public class ControlPlane {
         
         Modulation mod = circuit.getModulation();
         if(mod == null){
-        	mod = modulationSelector.getAvaliableModulations().get(0);
+        	mod = modulationSelection.getAvaliableModulations().get(0);
         }
 
         int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());

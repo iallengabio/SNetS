@@ -1,5 +1,7 @@
 package grmlsa.modulation;
 
+import java.util.List;
+
 import grmlsa.Route;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
@@ -22,4 +24,18 @@ public interface ModulationSelectionAlgorithmInterface {
 	 * @return Modulation
 	 */
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh);
+	
+	/**
+	 * This method returns the available modulation formats.
+	 * 
+	 * @return List<Modulation>
+	 */
+	public List<Modulation> getAvaliableModulations();
+	
+	/**
+	 * Configures the available modulation formats.
+	 * 
+	 * @param avaliableModulations List<Modulation>
+	 */
+	public void setAvaliableModulations(List<Modulation> avaliableModulations);
 }

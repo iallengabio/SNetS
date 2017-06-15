@@ -12,8 +12,8 @@ public class PhysicalLayerConfig {
     private boolean activeQoT; // QoTN
 	private boolean activeQoTForOther; // QoTO
 	
-	private boolean activeAse; // ativa o ruido ASE do amplificador
-	private boolean activeNli; // ativa o ruido nao linear nas fibras
+	private boolean activeASE; // ativa o ruido ASE do amplificador
+	private boolean activeNLI; // ativa o ruido nao linear nas fibras
 	private int typeOfTestQoT; // 0, para verificar pelo limiar de SNR, ou outro valor, para verificar pelo limiar de BER
 	private int rateOfFEC; // 0 = 07%, ou 1 = 20%, ou 2 = 28%, outro valor, sem FEC;
 	
@@ -61,25 +61,25 @@ public class PhysicalLayerConfig {
 	 * @return the activeAse
 	 */
 	public boolean isActiveAse() {
-		return activeAse;
+		return activeASE;
 	}
 	/**
 	 * @param activeAse the activeAse to set
 	 */
 	public void setActiveAse(boolean activeAse) {
-		this.activeAse = activeAse;
+		this.activeASE = activeAse;
 	}
 	/**
 	 * @return the activeNli
 	 */
 	public boolean isActiveNli() {
-		return activeNli;
+		return activeNLI;
 	}
 	/**
 	 * @param activeNli the activeNli to set
 	 */
 	public void setActiveNli(boolean activeNli) {
-		this.activeNli = activeNli;
+		this.activeNLI = activeNli;
 	}
 	/**
 	 * @return the typeOfTestQoT

@@ -8,6 +8,9 @@ import grmlsa.integrated.PseudoPartition;
 import grmlsa.integrated.ZonePartition;
 import grmlsa.integrated.ZonePartitionTopInvasion;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
+import grmlsa.modulation.ModulationSelectionByDistance;
+import grmlsa.modulation.ModulationSelectionByDistance2;
+import grmlsa.modulation.ModulationSelectionByQoT;
 import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
 import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
@@ -68,6 +71,11 @@ public class GRMLSA {
     public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
     public static final String FLR_REGENERATOR_ASSIGNMENT = "flrra";
 	public static final String FNS_REGENERATOR_ASSIGNMENT = "fnsra";
+	
+	// Modulation selection
+	public static final String MODULATION_BY_DISTANCE = "modulationbydistance";
+	public static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
+	public static final String MODULATION_BY_QOT = "modulationbyqot";
 
     // End of constants
 
@@ -211,7 +219,12 @@ public class GRMLSA {
      */
     public ModulationSelectionAlgorithmInterface instantiateModulationSelection() throws Exception {
     	switch (this.modulationSelection) {
-	    	
+	    	case MODULATION_BY_DISTANCE:
+	    		return new ModulationSelectionByDistance();
+	    	case MODULATION_BY_DISTANCE2:
+	    		return new ModulationSelectionByDistance2();
+	    	case MODULATION_BY_QOT:
+	    		return new ModulationSelectionByQoT();
 	    	default:
 	    		return null;
     	}
