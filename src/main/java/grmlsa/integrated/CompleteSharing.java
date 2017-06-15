@@ -3,6 +3,8 @@ package grmlsa.integrated;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
+import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -24,7 +26,7 @@ import java.util.List;
 public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 
     private NewKShortestPaths kShortestsPaths;
-    private ModulationSelector modulationSelector;
+    private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
     @Override
@@ -32,8 +34,9 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
         if (kShortestsPaths == null){
         	kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
         }
-        if (modulationSelector == null){
-            modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
+        if (modulationSelection == null){
+        	modulationSelection = new ModulationSelectionByDistance();
+        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
         }
         if(spectrumAssignment == null){
 			spectrumAssignment = new FirstFit();
@@ -47,7 +50,7 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
         for (Route route : candidateRoutes) {
             
             circuit.setRoute(route);
-            Modulation mod = modulationSelector.selectModulation(circuit, route, spectrumAssignment, mesh);
+            Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, mesh);
 
             List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 
@@ -70,7 +73,7 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 
         } else {
             circuit.setRoute(candidateRoutes.get(0));
-            circuit.setModulation(modulationSelector.getAvaliableModulations().get(0));
+            circuit.setModulation(modulationSelection.getAvaliableModulations().get(0));
             circuit.setSpectrumAssigned(null);
             
             return false;

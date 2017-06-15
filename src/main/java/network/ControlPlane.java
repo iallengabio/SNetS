@@ -9,6 +9,7 @@ import grmlsa.GRMLSA;
 import grmlsa.Route;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -29,7 +30,7 @@ public class ControlPlane {
     protected RoutingAlgorithmInterface routing;
     protected SpectrumAssignmentAlgorithmInterface spectrumAssignment;
     protected IntegratedRMLSAAlgorithmInterface integrated;
-    protected ModulationSelector modulationSelector;
+    protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
 	
     protected Mesh mesh;
@@ -52,7 +53,7 @@ public class ControlPlane {
      * @param routingAlgorithm RoutingAlgorithmInterface
      * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
      */
-    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm) {
+    public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection) {
         this.activeCircuits = new HashMap<>();
         this.connectionList = new TreeSet<>();
         
@@ -61,7 +62,9 @@ public class ControlPlane {
         this.integrated = integratedRMLSAAlgorithm;
         this.routing = routingAlgorithm;
         this.spectrumAssignment = spectrumAssignmentAlgorithm;
-        this.modulationSelector = new ModulationSelector(mesh.getLinkList().get(0).getSlotSpectrumBand(), mesh.getGuardBand(), mesh);
+        this.modulationSelection = modulationSelection;
+        
+        this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
 
         setMesh(mesh);
     }
@@ -113,12 +116,12 @@ public class ControlPlane {
     }
     
     /**
-     * Returns the modulation selector
+     * Returns the modulation selection
      * 
-     * @return ModulationSelector
+     * @return ModulationSelection
      */
-    public ModulationSelector getModulationSelector(){
-    	return modulationSelector;
+    public ModulationSelectionAlgorithmInterface getModulationSelection(){
+    	return modulationSelection;
     }
 
     /**
@@ -261,7 +264,7 @@ public class ControlPlane {
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
-                    Modulation mod = modulationSelector.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
+                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this.getMesh());
                     if(mod != null){
 	                    circuit.setModulation(mod);
 	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
@@ -538,7 +541,7 @@ public class ControlPlane {
         
         Modulation mod = circuit.getModulation();
         if(mod == null){
-        	mod = modulationSelector.getAvaliableModulations().get(0);
+        	mod = modulationSelection.getAvaliableModulations().get(0);
         }
 
         int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
