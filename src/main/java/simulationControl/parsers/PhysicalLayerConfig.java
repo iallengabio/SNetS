@@ -12,27 +12,27 @@ public class PhysicalLayerConfig {
     private boolean activeQoT; // QoTN
 	private boolean activeQoTForOther; // QoTO
 	
-	private boolean activeASE; // ativa o ruido ASE do amplificador
-	private boolean activeNLI; // ativa o ruido nao linear nas fibras
-	private int typeOfTestQoT; // 0, para verificar pelo limiar de SNR, ou outro valor, para verificar pelo limiar de BER
-	private int rateOfFEC; // 0 = 07%, ou 1 = 20%, ou 2 = 28%, outro valor, sem FEC;
+	private boolean activeASE; // Active the ASE noise of the amplifier
+	private boolean activeNLI; //  Active nonlinear noise in the fibers
+	private double rateOfFEC; // FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
+	private int typeOfTestQoT; // 0, To check for the SNR threshold (Signal-to-Noise Ratio), or another value, to check for the BER threshold (Bit Error Rate)
 	
-	private double guardBand; // banda de guarda entre canais adjacentes
+	private double guardBand; // Guard band between adjacent channels
 	
-	private double power; // potencia por canal, dBm
-	private double spanLength; // L, tamanho de um span, km
-	private double fiberLoss; // alfa, dB/km, perda da fibra
-	private double fiberNonlinearity; // gama, nao linearidade da fibra
-	private double fiberDispersion; // beta2, ps^2 = E-24, parametro de dispersao
-	private double dispersionCompensationRatio; // C, taxa de compensacao de dispersao
-	private double centerFrequency; // v, frequencia da luz
+	private double power; // Power per channel, dBm
+	private double spanLength; // L, Size of a span, km
+	private double fiberLoss; // alpha, dB/km, Fiber loss
+	private double fiberNonlinearity; // gamma, Fiber nonlinearity
+	private double fiberDispersion; // beta2, ps^2 = E-24, Dispersion parameter
+	private double centerFrequency; // v, Frequency of light
 	
-	private double constantOfPlanck; // h, constante de Planck
-	private double noiseFigureOfOpticalAmplifier; // NF, figura de ruido do amplificador, dB
-	private double powerSaturationOfOpticalAmplifier; //pSat, potencia de saturacao do amplificador, dBm
-	private double noiseFactorModelParameterA1; // A1, parametro do fator de ruido do amplificador
-	private double noiseFactorModelParameterA2; // A2, parametro do fator de ruido do amplificador
-	private double opticalNoiseBandwidth; // B0, largura de banda optica, esta com valor 1 porque estamos considerando SNR
+	private double constantOfPlanck; // h, Constant of Planck
+	private double noiseFigureOfOpticalAmplifier; // NF, Amplifier noise figure, dB
+	private double powerSaturationOfOpticalAmplifier; //pSat, Saturation power of the amplifier, dBm
+	private double noiseFactorModelParameterA1; // A1, Amplifier noise factor parameter
+	private double noiseFactorModelParameterA2; // A2, Amplifier noise factor parameter
+	private double opticalNoiseBandwidth; // B0, Optical bandwidth, it has a value of 1 because we are considering SNR
+	
 	/**
 	 * @return the activeQoT
 	 */
@@ -60,26 +60,26 @@ public class PhysicalLayerConfig {
 	/**
 	 * @return the activeAse
 	 */
-	public boolean isActiveAse() {
+	public boolean isActiveASE() {
 		return activeASE;
 	}
 	/**
-	 * @param activeAse the activeAse to set
+	 * @param activeASE the activeAse to set
 	 */
-	public void setActiveAse(boolean activeAse) {
-		this.activeASE = activeAse;
+	public void setActiveASE(boolean activeASE) {
+		this.activeASE = activeASE;
 	}
 	/**
 	 * @return the activeNli
 	 */
-	public boolean isActiveNli() {
+	public boolean isActiveNLI() {
 		return activeNLI;
 	}
 	/**
-	 * @param activeNli the activeNli to set
+	 * @param activeNLI the activeNli to set
 	 */
-	public void setActiveNli(boolean activeNli) {
-		this.activeNLI = activeNli;
+	public void setActiveNLI(boolean activeNLI) {
+		this.activeNLI = activeNLI;
 	}
 	/**
 	 * @return the typeOfTestQoT
@@ -96,13 +96,13 @@ public class PhysicalLayerConfig {
 	/**
 	 * @return the typeOfFEC
 	 */
-	public int getRateOfFEC() {
+	public double getRateOfFEC() {
 		return rateOfFEC;
 	}
 	/**
 	 * @param rateOfFEC the rateOfFEC to set
 	 */
-	public void setRateOfFEC(int rateOfFEC) {
+	public void setRateOfFEC(double rateOfFEC) {
 		this.rateOfFEC = rateOfFEC;
 	}
 	/**
@@ -177,18 +177,7 @@ public class PhysicalLayerConfig {
 	public void setFiberDispersion(double fiberDispersion) {
 		this.fiberDispersion = fiberDispersion;
 	}
-	/**
-	 * @return the dispersionCompensationRatio
-	 */
-	public double getDispersionCompensationRatio() {
-		return dispersionCompensationRatio;
-	}
-	/**
-	 * @param dispersionCompensationRatio the dispersionCompensationRatio to set
-	 */
-	public void setDispersionCompensationRatio(double dispersionCompensationRatio) {
-		this.dispersionCompensationRatio = dispersionCompensationRatio;
-	}
+	
 	/**
 	 * @return the centerFrequency
 	 */

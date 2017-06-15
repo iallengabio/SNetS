@@ -20,6 +20,7 @@ public class Node implements Serializable {
     private double distanceToCentralNodeControlPlane = -9999999;
     
     private Regenerators regenerators;
+    
     /**
      * Creates a new instance of Node.
      *
