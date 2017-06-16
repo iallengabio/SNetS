@@ -1,14 +1,11 @@
 package simulator.eventListeners;
 
+import grmlsa.Route;
 import measurement.Measurements;
 import request.RequestForConnection;
 import simulator.Event;
 import simulator.EventMachine;
 import simulator.Simulation;
-
-import java.io.Serializable;
-
-import grmlsa.Route;
 
 /**
  * This class is the event listener of a new arrive request for a new connection.
@@ -16,7 +13,7 @@ import grmlsa.Route;
  *
  * @author Iallen
  */
-public class ArriveRequestForConexionListener implements EventListener, Serializable {
+public class ArriveRequestForConexionListener implements EventListener {
 
     private EventMachine em;
     private Simulation simulation;

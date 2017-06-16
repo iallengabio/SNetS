@@ -1,22 +1,21 @@
 package network;
 
-import simulationControl.parsers.NetworkConfig;
-import simulationControl.parsers.PhysicalLayerConfig;
-import simulationControl.parsers.TrafficConfig;
-import util.RandGenerator;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+
+import simulationControl.parsers.NetworkConfig;
+import simulationControl.parsers.PhysicalLayerConfig;
+import simulationControl.parsers.TrafficConfig;
+import util.RandGenerator;
 
 /**
  * This class represents the topology of the network
  * 
  * @author Iallen
  */
-public class Mesh implements Serializable {
+public class Mesh {
 
     private Vector<Node> nodeList;
     private Vector<Link> linkList;

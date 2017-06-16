@@ -1,6 +1,6 @@
 package network;
 
-import java.util.List;
+import java.util.TreeSet;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -21,8 +21,6 @@ public class PhysicalLayer {
     private boolean activeNLI; // Active nonlinear noise in the fibers
     private double rateOfFEC; // FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
     private int typeOfTestQoT; //0, To check for the SNR threshold (Signal-to-Noise Ratio), or another value, to check for the BER threshold (Bit Error Rate)
-	
-    private double guardBand; // Guard band between adjacent channels
 	
     private double power; // Power per channel, dBm
     private double L; // Size of a span, km
@@ -55,8 +53,6 @@ public class PhysicalLayer {
         this.activeNLI = plc.isActiveNLI();
         this.typeOfTestQoT = plc.getTypeOfTestQoT();
         this.rateOfFEC = plc.getRateOfFEC();
-    	
-        this.guardBand = plc.getGuardBand();
     	
         this.power = plc.getPower();
         this.L = plc.getSpanLength();
@@ -107,15 +103,6 @@ public class PhysicalLayer {
 	 */
 	public double getRateOfFEC(){
 		return rateOfFEC;
-	}
-	
-	/**
-	 * Returns the guard band
-	 * 
-	 * @return double
-	 */
-	public double getGuardBand(){
-		return guardBand;
 	}
 	
 	/**
@@ -291,10 +278,8 @@ public class PhysicalLayer {
 		double p1 = arcsinh(ro * Bsi * Bsi);
 		double p2 = 0.0;
 		
-		List<Circuit> listRequests = link.getCircuitList();
-		int size = listRequests.size();
-		for(int i = 0; i < size; i++){
-			Circuit cricuitTemp = listRequests.get(i);
+		TreeSet<Circuit> listRequests = link.getCircuitList();
+		for(Circuit cricuitTemp : listRequests){
 			
 			if(!circuit.equals(cricuitTemp)){
 				double fs = link.getSlotSpectrumBand();
@@ -331,7 +316,7 @@ public class PhysicalLayer {
 	}
 	
 	/**
-	 * This method returns the BER (Bit Error Rate).
+	 * This method returns the BER (Bit Error Rate) for a modulation scheme M-QAM.
 	 * Based on articles:
 	 *  - Capacity Limits of Optical Fiber Networks (2010)
 	 *  - Analise do Impacto do Ruido ASE em Redes Opticas Elasticas Transparentes Utilizando Multiplos Formatos de Modulacao (2015)

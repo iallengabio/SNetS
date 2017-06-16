@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import network.ControlPlane;
-import network.Mesh;
 import network.Node;
 import request.RequestForConnection;
 import simulationControl.resultManagers.TransmittersReceiversRegeneratorsUtilizationResultManager;
