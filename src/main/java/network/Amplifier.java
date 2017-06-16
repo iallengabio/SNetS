@@ -1,13 +1,11 @@
 package network;
 
-import java.io.Serializable;
-
 /**
  * This class represents an optical amplifier in the network.
  * 
  * @author Alexandre
  */
-public class Amplifier implements Serializable {
+public class Amplifier {
 
 	private double gain; // Unsaturated gain of amplifier in dB
 	private double saturationPower; // Saturation power in dBm

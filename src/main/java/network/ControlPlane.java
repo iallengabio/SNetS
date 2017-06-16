@@ -415,11 +415,11 @@ public class ControlPlane {
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
     protected boolean computeQoTForOther(Circuit circuit){
-    	List<Circuit> circuits = new ArrayList<>();
+    	TreeSet<Circuit> circuits = new TreeSet<Circuit>();
 		
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
-			List<Circuit> circuitsTemp = link.getCircuitList();
+			TreeSet<Circuit> circuitsTemp = link.getCircuitList();
 
             for (Circuit circuitTemp : circuitsTemp) {
                 if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {

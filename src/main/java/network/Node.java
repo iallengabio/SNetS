@@ -1,6 +1,5 @@
 package network;
 
-import java.io.Serializable;
 import java.util.Vector;
 
 /**
@@ -8,7 +7,7 @@ import java.util.Vector;
  * 
  * @author Iallen
  */
-public class Node implements Serializable {
+public class Node {
 
     private String name;
     private Oxc oxc;

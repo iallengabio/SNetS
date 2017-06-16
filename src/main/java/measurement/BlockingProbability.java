@@ -1,15 +1,11 @@
 package measurement;
 
-import network.Circuit;
+import java.util.HashMap;
+
 import network.ControlPlane;
-import network.Link;
 import network.Pair;
 import request.RequestForConnection;
 import simulationControl.resultManagers.BlockingProbResultManager;
-import util.IntersectionFreeSpectrum;
-
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class represents the locking probability metric (general, per pair, per bandwidth, 

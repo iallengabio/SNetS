@@ -1,17 +1,16 @@
 package network;
 
-import simulationControl.Util;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import simulationControl.Util;
 
 /**
  * This class represents a pair of source (s) and destination (d) nodes
  * 
  * @author Iallen
  */
-public class Pair implements Serializable {
+public class Pair {
 
     private Node source;
     private Node destination;

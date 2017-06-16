@@ -1,8 +1,7 @@
 package network;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 
 /**
@@ -10,8 +9,7 @@ import java.util.List;
  * 
  * @author Iallen
  */
-@SuppressWarnings("serial")
-public class Link implements Serializable {
+public class Link {
 
     private Oxc source;
     private Oxc destination;
@@ -19,7 +17,7 @@ public class Link implements Serializable {
     private Spectrum spectrum;
     private double distance;
     
-    private List<Circuit> circuitList;
+    private TreeSet<Circuit> circuitList;
 
     /**
      * Creates a new instance of Link.
@@ -36,7 +34,7 @@ public class Link implements Serializable {
         this.spectrum = new Spectrum(numberOfSlots, spectrumBand);
         this.distance = distance;
         
-        this.circuitList = new ArrayList<Circuit>();
+        this.circuitList = new TreeSet<Circuit>();
     }
 
     /**
@@ -195,7 +193,7 @@ public class Link implements Serializable {
 	 * 
 	 * @return the listRequests
 	 */
-	public List<Circuit> getCircuitList() {
+	public TreeSet<Circuit> getCircuitList() {
 		return circuitList;
 	}
 
@@ -204,7 +202,7 @@ public class Link implements Serializable {
 	 * 
 	 * @param listRequests the listRequests to set
 	 */
-	public void setCircuitList(List<Circuit> circuitList) {
+	public void setCircuitList(TreeSet<Circuit> circuitList) {
 		this.circuitList = circuitList;
 	}
 	

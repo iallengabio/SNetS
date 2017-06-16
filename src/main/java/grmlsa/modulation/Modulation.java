@@ -13,14 +13,13 @@ public class Modulation {
     private double bitsPerSymbol;
     private double maxRange; // max range in Km
     
-    private double level; // Level of modulation format
     private double M; // Number of modulation format symbols
     private double SNRthreshold; // dB
     private double SNRthresholdLinear;
 	
     private double rateFEC; // Forward Error Correction
 	private double freqSlot;
-	private double guardBand;
+	private int guardBand;
 	
 	private boolean activeQoT;
 
@@ -36,10 +35,9 @@ public class Modulation {
 	 * @param M double
 	 * @param FEC double
 	 */
-    public Modulation(String name, double maxRange, double level, double M, double SNRthreshold, double rateFEC, double freqSlot, double guardBand, boolean activeQoT) {
+    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, boolean activeQoT) {
         this.name = name;
         this.maxRange = maxRange;
-        this.level = level;
         this.M = M;
         this.SNRthreshold = SNRthreshold;
         this.rateFEC = rateFEC;
@@ -51,72 +49,35 @@ public class Modulation {
         this.SNRthresholdLinear = PhysicalLayer.ratioOfDB(SNRthreshold);
         this.activeQoT = activeQoT;
     }
-    
-    /**
-     * This method selects how the number of slots will be calculated
-     * 
-     * @param bandwidth double
-     * @return int
-     */
-    public int requiredSlots(double bandwidth){
-		int res = 1;
-		
-		if (activeQoT) {
-			res = requiredSlotsByQoT(bandwidth);
-		} else {
-			res = requiredSlotsWithoutFEC(bandwidth);
-		}
-		
-		return res;
-	}
 
     /**
      * Returns the number of slots required according to the bandwidth
      * Adds guard band
+     * 
+     * Based on articles:
+	 *  - Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
+	 *  - Analise do Impacto do Ruido ASE em Redes Opticas Elasticas Transparentes Utilizando Multiplos Formatos de Modulacao (2015)
      *
      * @param bandwidth
-     * @return
+     * @return int - numberOfStos
      */
-    private int requiredSlotsWithoutFEC(double bandwidth) {
-        //System.out.println("C = " + bandwidth + "    bm = " + this.bitsPerSimbol + "     fslot = " + this.freqSlot);
-
-        double res = bandwidth / (this.bitsPerSymbol * this.freqSlot);
-
-        //System.out.println("res = " + res);
-
-        int res2 = (int) res;
-
-        if (res - res2 != 0.0) {
-            res2++;
+    public int requiredSlots(double bandwidth) {
+        double numberOfSlots = bandwidth / (bitsPerSymbol * freqSlot);
+        
+        if(activeQoT){
+        	numberOfSlots = (1.1 * bandwidth * (1 + rateFEC)) / (2 * bitsPerSymbol * freqSlot);
+        }
+        
+        int numberOfSlotsTemp = (int) numberOfSlots;
+        if (numberOfSlots - numberOfSlotsTemp != 0.0) {
+            numberOfSlotsTemp++;
         }
 
-        res2 = res2 + (int)guardBand; //Adds another slot needed to be used as a guard band
+        numberOfSlotsTemp = numberOfSlotsTemp + guardBand; // Adds another slot needed to be used as a guard band
 
-        return res2;
+        return numberOfSlotsTemp;
     }
     
-    /**
-	 * Based on article:
-	 *  - Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
-	 * 
-	 * @param bandwidth double
-	 * @return int
-	 */
-	private int requiredSlotsByQoT(double bandwidth){
-		double Bn = bandwidth; //(bandwidth / 1073741824.0) * 1.0E+9;
-		double Bs = (1.1 * Bn * (1 + rateFEC)) / (2 * PhysicalLayer.log2(this.level)); //single channel bandwidth, Hz
-		double deltaG = 2.0 * guardBand; //guard band between adjacent spectrum (Obs.: A guard band for each edge of the required bandwidth)
-		double deltaB = Bs + deltaG; //channel spacing
-		
-		double res = deltaB / this.freqSlot;
-		int res2 = (int)res;
-		if(res - res2 != 0.0){
-			res2++;
-		}
-		
-		return res2;
-	}
-	
 	/**
 	 * Returns the name of the modulation
 	 * 
@@ -142,15 +103,6 @@ public class Modulation {
      */
     public double getMaxRange() {
         return maxRange;
-    }
-    
-    /**
-     * Returns the level
-     * 
-     * @return double
-     */
-    public double getLevel() {
-    	return level;
     }
     
     /**

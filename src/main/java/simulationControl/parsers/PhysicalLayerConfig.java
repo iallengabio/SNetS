@@ -17,8 +17,6 @@ public class PhysicalLayerConfig {
 	private double rateOfFEC; // FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
 	private int typeOfTestQoT; // 0, To check for the SNR threshold (Signal-to-Noise Ratio), or another value, to check for the BER threshold (Bit Error Rate)
 	
-	private double guardBand; // Guard band between adjacent channels
-	
 	private double power; // Power per channel, dBm
 	private double spanLength; // L, Size of a span, km
 	private double fiberLoss; // alpha, dB/km, Fiber loss
@@ -105,18 +103,7 @@ public class PhysicalLayerConfig {
 	public void setRateOfFEC(double rateOfFEC) {
 		this.rateOfFEC = rateOfFEC;
 	}
-	/**
-	 * @return the guardBand
-	 */
-	public double getGuardBand() {
-		return guardBand;
-	}
-	/**
-	 * @param guardBand the guardBand to set
-	 */
-	public void setGuardBand(double guardBand) {
-		this.guardBand = guardBand;
-	}
+	
 	/**
 	 * @return the power
 	 */

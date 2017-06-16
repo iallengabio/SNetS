@@ -1,11 +1,9 @@
 package network;
 
-import simulator.*;
-import simulator.eventListeners.ArriveRequestForConexionListener;
-
-import java.io.Serializable;
-
 import request.RequestForConnection;
+import simulator.Event;
+import simulator.EventMachine;
+import simulator.eventListeners.ArriveRequestForConexionListener;
 import util.RandGenerator;
 
 /**
@@ -13,7 +11,7 @@ import util.RandGenerator;
  * 
  * @author Iallen
  */
-public class RequestGenerator implements Serializable {
+public class RequestGenerator {
 
   private Pair pair;
   private double bandwidth; // In bits per second (bps)

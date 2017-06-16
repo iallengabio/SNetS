@@ -1,6 +1,5 @@
 package network;
 
-import java.io.Serializable;
 import java.util.Vector;
 
 /**
@@ -8,8 +7,7 @@ import java.util.Vector;
  * 
  * @author Iallen
  */
-@SuppressWarnings("serial")
-public class Oxc implements Serializable {
+public class Oxc {
 
     private String name;
     private Vector<Link> linksList;
