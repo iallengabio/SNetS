@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents the spectrum allocation technique called First Fit.
+ * This class represents the spectrum allocation technique called Last Fit.
  * This technique chooses the last free spectrum band that accommodates the request.
  *
  * @author Iallen

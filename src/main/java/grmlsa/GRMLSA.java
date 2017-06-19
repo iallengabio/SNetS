@@ -55,6 +55,7 @@ public class GRMLSA {
 
     // Spectrum assignment
     public static final String SPECTRUM_ASSIGNMENT_FISTFIT = "firstfit";
+    public static final String SPECTRUM_ASSIGNMENT_LASTTFIT = "lasttfit";
     public static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
     public static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
     public static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";

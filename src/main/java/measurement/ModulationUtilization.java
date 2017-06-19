@@ -23,6 +23,12 @@ public class ModulationUtilization extends Measurement {
 	
 	private List<String> modulationList;
 	
+	/**
+	 * Creates a new instance of ModulationUtilization
+	 * 
+	 * @param loadPoint int
+	 * @param replication int
+	 */
 	public ModulationUtilization(int loadPoint, int replication) {
 		super(loadPoint, replication);
 		

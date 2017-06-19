@@ -22,8 +22,14 @@ public class MetricsOfEnergyConsumption  extends Measurement {
   	private HashMap<String, Double> sumPcPair;
   	private HashMap<String, Integer> numPcPair;
 
-	public MetricsOfEnergyConsumption(int loadPoint, int rep) {
-		super(loadPoint, rep);
+  	/**
+  	 * Creates a new instance of MetricsOfEnergyConsumption
+  	 * 
+  	 * @param loadPoint int
+  	 * @param replication int
+  	 */
+	public MetricsOfEnergyConsumption(int loadPoint, int replication) {
+		super(loadPoint, replication);
 		
 		this.sumGeneralPc = 0.0;
 		this.obsGeneralPc = 0.0;
@@ -67,7 +73,7 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 			Integer num = this.numPcPair.get(pairName);
 			if(num == null)
 				num = 0;
-			this.numPcPair.put(pairName, num+1);
+			this.numPcPair.put(pairName, num + 1);
 			
 			sumPcEstablished += pc;
 			obsPcEstablished++;

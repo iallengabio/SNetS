@@ -26,8 +26,8 @@ public class SimulationRequest {
         public String externalFragmentation;
         public String relativeFragmentation;
         public String spectrumUtilization;
-        public String transceiversUtilization;
         public String spectrumStatistics;
+        public String transceiversUtilization;
         public String energyConsumption;
         public String modulationUtilization;
     }

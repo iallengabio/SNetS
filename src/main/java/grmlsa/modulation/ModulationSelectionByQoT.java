@@ -8,7 +8,7 @@ import network.Circuit;
 import network.Mesh;
 
 /**
- * This class implements the modulation selection algorithm by quality of transmission.
+ * This class implements the modulation selection algorithm by quality of transmission (QoT).
  * The spectrum allocation of each modulation is also checked.
  * Information such as modulation and selected spectrum, and quality of transmission, are stored in the circuit.
  * 

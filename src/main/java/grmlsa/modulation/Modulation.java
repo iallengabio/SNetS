@@ -10,10 +10,10 @@ import network.PhysicalLayer;
 public class Modulation {
 
     private String name;
-    private double bitsPerSymbol;
     private double maxRange; // max range in Km
-    
     private double M; // Number of modulation format symbols
+    private double bitsPerSymbol;
+    
     private double SNRthreshold; // dB
     private double SNRthresholdLinear;
 	
@@ -28,12 +28,13 @@ public class Modulation {
 	 * Creates a new instance of Modulation
 	 * 
 	 * @param name String
-	 * @param freqSlot double
 	 * @param maxRange double
-	 * @param guardBand double
-	 * @param level double
 	 * @param M double
-	 * @param FEC double
+	 * @param SNRthreshold double
+	 * @param rateFEC double
+	 * @param freqSlot double
+	 * @param guardBand double
+	 * @param activeQoT boolean
 	 */
     public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, boolean activeQoT) {
         this.name = name;

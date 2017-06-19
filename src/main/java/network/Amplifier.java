@@ -106,7 +106,7 @@ public class Amplifier {
 	 */
 	public void setNoiseFigure(double noiseFigure) {
 		this.noiseFigure = noiseFigure;
-		this.noiseFigureLinear = PhysicalLayer.ratioOfDB(noiseFigureLinear);
+		this.noiseFigureLinear = PhysicalLayer.ratioOfDB(noiseFigure);
 	}
 	
 	/**

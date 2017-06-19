@@ -8,27 +8,29 @@ package simulationControl.parsers;
  */
 public class SimulationConfig {
 
-    private int requests;
+	private int networkType;
     private int rmlsaType;
+    private int requests;
+    private int loadPoints;
+    private int replications;
+    
+    private String grooming;
     private String routing;
     private String spectrumAssignment;
     private String integratedRmlsa;
     private String modulationSelection;
-    private String grooming;
-    private int loadPoints;
-    private int replications;
-    private Metrics activeMetrics = new Metrics();
     private String regeneratorAssignment;
-    private int networkType;
-
+    
+    private Metrics activeMetrics = new Metrics();
+    
     public static class Metrics {
 
         public boolean BlockingProbability = true;
         public boolean BandwidthBlockingProbability = true;
-        public boolean ExternalFragmentation = true;
         public boolean SpectrumUtilization = true;
-        public boolean RelativeFragmentation = true;
         public boolean SpectrumSizeStatistics = true;
+        public boolean ExternalFragmentation = true;
+        public boolean RelativeFragmentation = true;
         public boolean TransmittersReceiversRegeneratorsUtilization = true;
         public boolean EnergyConsumption = true;
         public boolean ModulationUtilization = true;

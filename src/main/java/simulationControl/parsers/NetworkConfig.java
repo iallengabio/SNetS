@@ -317,8 +317,9 @@ public class NetworkConfig {
     public static class ModulationConfig{
     	
         private String name;
-        private double bitsPerSymbol;
         private double maxRange;
+        private double numberOfSymbols;
+        private double SNRthreshold;
 
         /**
          * Creates a new instance of ModulationConfig
@@ -329,7 +330,6 @@ public class NetworkConfig {
          */
         public ModulationConfig(String name, double bitsPerSymbol, double maxRange) {
             this.name = name;
-            this.bitsPerSymbol = bitsPerSymbol;
             this.maxRange = maxRange;
         }
 
@@ -352,24 +352,6 @@ public class NetworkConfig {
         }
 
         /**
-         * Returns the bits per symbol of the modulation
-         * 
-         * @return double
-         */
-        public double getBitsPerSymbol() {
-            return bitsPerSymbol;
-        }
-
-        /**
-         * Sets the bits per symbol of the modulation
-         * 
-         * @param bitsPerSymbol
-         */
-        public void setBitsPerSymbol(double bitsPerSymbol) {
-            this.bitsPerSymbol = bitsPerSymbol;
-        }
-        
-        /**
          * Returns the maximum range of the modulation
          * 
          * @return double
@@ -386,6 +368,42 @@ public class NetworkConfig {
         public void setMaxRange(double maxRange) {
             this.maxRange = maxRange;
         }
+
+		/**
+		 * Returns the number of symbols
+		 * 
+		 * @return the numberOfSymbols
+		 */
+		public double getNumberOfSymbols() {
+			return numberOfSymbols;
+		}
+
+		/**
+		 * Sets the number of symbols
+		 * 
+		 * @param numberOfSymbols the numberOfSymbols to set
+		 */
+		public void setNumberOfSymbols(double numberOfSymbols) {
+			this.numberOfSymbols = numberOfSymbols;
+		}
+
+		/**
+		 * Returns the SNR threshold
+		 * 
+		 * @return the SNRthreshold
+		 */
+		public double getSNRthreshold() {
+			return SNRthreshold;
+		}
+
+		/**
+		 * Sets the SNR threshold
+		 * 
+		 * @param SNRthreshold the SNRthreshold to set
+		 */
+		public void setSNRthreshold(double SNRthreshold) {
+			this.SNRthreshold = SNRthreshold;
+		}
     }
 
 }
