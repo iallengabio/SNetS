@@ -1,5 +1,8 @@
 package grmlsa.integrated;
 
+import java.util.HashSet;
+import java.util.List;
+
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -10,11 +13,8 @@ import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
-import network.Mesh;
+import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
-
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * This class represents the implementation of the Pseudo Partition algorithm presented in the article:
@@ -44,13 +44,13 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
     }
 
     @Override
-    public boolean rsa(Circuit circuit, Mesh mesh) {
+    public boolean rsa(Circuit circuit, ControlPlane cp) {
     	if(kShortestsPaths == null){
-			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
+			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 3); //This algorithm uses 3 alternative paths
 		}
     	if (modulationSelection == null){
         	modulationSelection = new ModulationSelectionByDistance();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
 		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
 			spectrumAssignment1 = new FirstFit();
@@ -70,7 +70,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
             for (Route route : candidateRoutes) {
                 
                 circuit.setRoute(route);
-                Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, mesh);
+                Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, cp.getMesh());
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 
@@ -92,7 +92,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
             for (Route route : candidateRoutes) {
                 
                 circuit.setRoute(route);
-                Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, mesh);
+                Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, cp.getMesh());
 
                 List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 

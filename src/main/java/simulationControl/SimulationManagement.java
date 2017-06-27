@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 5;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 3;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -74,7 +74,7 @@ public class SimulationManagement {
                 });
             }
         }
-        while(done<numOfSimulations){ //wait untill all simulations have done
+        while(done < numOfSimulations){ //wait untill all simulations have done
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

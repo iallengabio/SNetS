@@ -43,10 +43,10 @@ public class Main {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        if (args.length > 0) {
+        if (args.length > 0) { // To run in local mode
             localSimulation(args[0]);
             
-        } else {// To run in Server mode
+        } else { // To run in Server mode
             simulationServer();
         }
     }
@@ -163,7 +163,7 @@ public class Main {
 
             @Override
             public void onSimulationFinished() {
-
+            	// Nothing at the moment
             }
         });
         System.out.println("saving results");

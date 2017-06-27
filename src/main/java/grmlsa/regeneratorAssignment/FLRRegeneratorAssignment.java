@@ -11,7 +11,6 @@ import network.TranslucentCircuit;
 import network.TranslucentControlPlane;
 import util.IntersectionFreeSpectrum;
 
-
 /**
  * Implementation of the algorithm First Longest Reach Regenerator Assignment (FLR-RA).
  * Based on article:

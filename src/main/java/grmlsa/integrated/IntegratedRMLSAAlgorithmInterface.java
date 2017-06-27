@@ -1,8 +1,7 @@
 package grmlsa.integrated;
 
 import network.Circuit;
-import network.Mesh;
-
+import network.ControlPlane;
 
 /**
  * This interface should be implemented by algorithms that solve the RMLSA problem in an integrated way.
@@ -16,9 +15,9 @@ public interface IntegratedRMLSAAlgorithmInterface {
      * If the RMLSA problem can not be resolved, the method returns false.
 	 * 
 	 * @param circuit Circuit
-	 * @param mesh Mesh
+	 * @param cp ControlPlane
 	 * @return boolean Returns whether or not it is possible to allocate resources to establish the connection
 	 */
-	public boolean rsa(Circuit circuit, Mesh mesh);
+	public boolean rsa(Circuit circuit, ControlPlane cp);
 
 }

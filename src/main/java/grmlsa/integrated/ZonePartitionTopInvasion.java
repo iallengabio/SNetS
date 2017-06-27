@@ -14,7 +14,7 @@ import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
-import network.Mesh;
+import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -52,13 +52,13 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 	}
 	
 	@Override
-	public boolean rsa(Circuit circuit, Mesh mesh) {
+	public boolean rsa(Circuit circuit, ControlPlane cp) {
 		if(kShortestsPaths == null){
-			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
+			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 3); //This algorithm uses 3 alternative paths
 		}
 		if (modulationSelection == null){
         	modulationSelection = new ModulationSelectionByDistance();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
 		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
 			spectrumAssignment1 = new FirstFit();
@@ -74,7 +74,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		for (Route route : candidateRoutes) {
 			
 			circuit.setRoute(route);
-			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, mesh);
+			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, cp.getMesh());
 			
 			// Calculate how many slots are needed for this route
 			int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
@@ -104,7 +104,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			for (Route route : candidateRoutes) {
 				
 				circuit.setRoute(route);
-				Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, mesh);
+				Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, cp.getMesh());
 				
 				// Calculate how many slots are needed for this route
 				int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());

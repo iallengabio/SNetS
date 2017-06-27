@@ -236,7 +236,7 @@ public class TranslucentControlPlane extends ControlPlane {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh());
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
@@ -609,4 +609,47 @@ public class TranslucentControlPlane extends ControlPlane {
 		
 		return modList;
 	}
+	
+	/**
+	 * Este metodo retorna o delta SNR da requisicao
+	 * Pode mudar de acordo com o tipo de requisicao
+	 * @return double - delta SNR
+	 */
+	@Override
+	public double getDeltaSNR(Circuit circuit){
+		int indexNodeSource = 0;
+		double minDeltaSNR = Double.MAX_VALUE;
+		Route route = circuit.getRoute();
+		
+		int quantSegmentos = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
+		for(int i = 0; i < quantSegmentos; i++){
+			
+			int indexNoDestino = route.getNodeList().size() - 1;
+			if(i < quantSegmentos - 1){
+				indexNoDestino = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
+			}
+			
+			Node noSource = route.getNode(indexNodeSource);
+			Node noDestination = route.getNode(indexNodeSource + 1);
+			Link link = noSource.getOxc().linkTo(noDestination.getOxc());
+			
+			Modulation mod = ((TranslucentCircuit)circuit).getModulationByLink(link);
+			int sa[] = ((TranslucentCircuit)circuit).getSpectrumAssignedByLink(link);
+			
+			double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, indexNodeSource, indexNoDestino, mod, sa, false);
+			double SNRdB = PhysicalLayer.ratioForDB(SNR);
+			
+			double modulationSNRthreshold = mod.getSNRthreshold();
+			double deltaSNR = SNRdB - modulationSNRthreshold;
+			
+			if(deltaSNR < minDeltaSNR){
+				minDeltaSNR = deltaSNR;
+			}
+			
+			indexNodeSource = indexNoDestino;
+		}
+		
+		return minDeltaSNR;
+	}
+	
 }

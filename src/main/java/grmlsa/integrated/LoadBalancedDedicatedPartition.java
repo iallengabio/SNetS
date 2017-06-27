@@ -1,5 +1,9 @@
 package grmlsa.integrated;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -9,13 +13,9 @@ import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
+import network.ControlPlane;
 import network.Link;
-import network.Mesh;
 import util.IntersectionFreeSpectrum;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class presents a proposal for modification in the Dedicated Partition algorithm.
@@ -50,13 +50,13 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
     }
 
     @Override
-    public boolean rsa(Circuit circuit, Mesh mesh) {
+    public boolean rsa(Circuit circuit, ControlPlane cp) {
     	if(kShortestsPaths == null){
-			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
+			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 3); //This algorithm uses 3 alternative paths
 		}
     	if (modulationSelection == null){
         	modulationSelection = new ModulationSelectionByDistance();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
 		if(spectrumAssignment == null){
 			spectrumAssignment = new FirstFit();
@@ -71,7 +71,7 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
         for (Route route : candidateRoutes) {
             
             circuit.setRoute(route);
-            Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, mesh);
+            Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp.getMesh());
 
             // Calculate how many slots are needed for this route
             int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());

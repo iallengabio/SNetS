@@ -289,4 +289,5 @@ public class Circuit implements Comparable<Object>{
 		}
 		return false;
 	}
+	
 }

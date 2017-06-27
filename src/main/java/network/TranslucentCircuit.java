@@ -12,12 +12,18 @@ import grmlsa.modulation.Modulation;
  */
 public class TranslucentCircuit extends Circuit {
 	
-	private HashMap<Link, int[]> spectrumAssignedByLink;
+	// Spectrum allocated by link
+	protected HashMap<Link, int[]> spectrumAssignedByLink;
+	
+	// Modulation allocated by link
 	protected HashMap<Link, Modulation> modulationByLink;
 	
-	// list of the indexes of the ones that regenerated the signal and the noise
+	// List of the indexes of the ones that regenerated the signal and the noise
     protected List<Integer> regeneratorsNodesIndexList;
 
+    /**
+     * Creates a new instance of TranslucentCircuit.
+     */
 	public TranslucentCircuit() {
 		super();
 		

@@ -12,7 +12,6 @@ import network.TranslucentCircuit;
 import network.TranslucentControlPlane;
 import util.IntersectionFreeSpectrum;
 
-
 /**
  * Implementation of the algorithm First Narrowest Spectrum Regenerator Assignment (FNS-RA).
  * Based on article:

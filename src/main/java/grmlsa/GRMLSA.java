@@ -3,6 +3,7 @@ package grmlsa;
 import grmlsa.integrated.CompleteSharing;
 import grmlsa.integrated.DedicatedPartition;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
+import grmlsa.integrated.KShortestPathsReductionQoTO;
 import grmlsa.integrated.LoadBalancedDedicatedPartition;
 import grmlsa.integrated.PseudoPartition;
 import grmlsa.integrated.ZonePartition;
@@ -67,6 +68,7 @@ public class GRMLSA {
     public static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
     public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
+    public static final String INTEGRATED_KSPRQOTO = "ksprqoto";
     
     // Regenerator assignment
     public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -188,6 +190,8 @@ public class GRMLSA {
                 return new ZonePartition();
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
+            case INTEGRATED_KSPRQOTO:
+                return new KShortestPathsReductionQoTO();
             default:
                 return null;
         }

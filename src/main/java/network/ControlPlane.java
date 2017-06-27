@@ -258,7 +258,7 @@ public class ControlPlane {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh());
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
@@ -572,5 +572,20 @@ public class ControlPlane {
 		List<Modulation> modList = new ArrayList<>();
 		modList.add(circuit.getModulation());
 		return modList;
+	}
+	
+	/**
+	 * Este metodo retorna o delta SNR da requisicao
+	 * Pode mudar de acordo com o tipo de requisicao
+	 * @return double - delta SNR (dB)
+	 */
+	public double getDeltaSNR(Circuit circuit){
+		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+		double SNRdB = PhysicalLayer.ratioForDB(SNR);
+		
+		double modulationSNRthreshold = circuit.getModulation().getSNRthreshold();
+		double deltaSNR = SNRdB - modulationSNRthreshold;
+		
+		return deltaSNR;
 	}
 }
