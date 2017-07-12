@@ -97,9 +97,11 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit);
 				
 				if(band != null){
-					checkRoute = routeTemp;
-					checkMod = mod;
-					checkBand = band;
+					if(checkRoute == null){
+						checkRoute = routeTemp;
+						checkMod = mod;
+						checkBand = band;
+					}
 					
 					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band);
 					
@@ -181,12 +183,12 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 	public void sigmaFileReader(){
 		sigma = 0.0;
 		
-		String separador = System.getProperty("file.separator");
-		String sigmaPathArqConfiguration = Util.projectPath + separador + "sigma.txt";
-		String sigmaForAllPairspathArqConfiguration = Util.projectPath + separador + "sigmaForAllPairs.txt";
+		String separator = System.getProperty("file.separator");
+		String sigmaPathArqConfiguration = Util.projectPath + separator + "sigma.txt";
+		String sigmaForAllPairspathArqConfiguration = Util.projectPath + separator + "sigmaForAllPairs.txt";
 		
 		if(!Paths.get(sigmaForAllPairspathArqConfiguration).toFile().exists()){
-			System.err.println("\tArquivo com o valor do sigma para os pares nao encontrado. A simulacao vai utilizar um valor de sigma para todos os pares.");
+			System.err.println("\tFile with sigma value for the pairs not found. The simulation will use a sigma value for all pairs.");
 			
 		}else{
 			
@@ -217,7 +219,7 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 		}
 		
 		if(!Paths.get(sigmaPathArqConfiguration).toFile().exists()){
-			System.err.println("\tArquivo com o valor do sigma nao encontrado. A simulacao vai utilizar um valor padrao.");
+			System.err.println("\tFile with sigma value not found. The simulation will use a default value.");
 			
 		}else{
 			
@@ -261,7 +263,6 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 				out.append(sb.toString());
 				sbaux.append(sb.toString());
 			}
-			//System.out.println(sbaux.toString());
 			
 			out.close();
 			fw.close();

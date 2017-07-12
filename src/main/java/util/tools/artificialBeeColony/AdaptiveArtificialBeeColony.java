@@ -4,15 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-/**
- * This class represents the Artificial Bee Colony (ABC) algorithm.
- * 
- * Code inspired by the java code for abc algorithm at artificial bee colony's website 
- * found at http://mf.erciyes.edu.tr/abc/ and https://github.com/jimsquirt/JAVA-ABC.
- *
- * @author Alexandre
- */
-public class ArtificialBeeColony {
+public class AdaptiveArtificialBeeColony {
 
 	// ABC PARAMETERS
 	private int maxLength; 		// The number of parameters of the problem to be optimized
@@ -27,16 +19,40 @@ public class ArtificialBeeColony {
     private Random rand;
     private ArrayList<FoodSource> foodSources;
     private FoodSource gBest; // Global best
+    private FoodSource lBest; // Local best
     private int epoch;
+    
+    // For search rules
+    private int rulesNumber;
+    private int successfulAttempts[];
+    private int totalAttempts[];
+    private double successRate[];
+    private double probabilitySelecting[];
+    
+    // Limits to psi
+    private double minPsi;
+    private double maxPsi;
+    
+    // Limits to F1
+    private double minF1;
+    private double maxF1;
+    
+    // Limits to F2
+    private double minF2;
+    private double maxF2;
+    
+    // Memory length
+    private int ML;
+    
 
     /**
-     * Instantiates the artificial bee colony algorithm along with its parameters.
+     * Instantiates the adaptive artificial bee colony algorithm along with its parameters.
      * 
      * @param n int - numger of parameters (dimension) of the problem
      * @param minX double - Minimum value for a dimension
      * @param maxX double - Maximum value for a dimension
      */
-    public ArtificialBeeColony(int n, double minX, double maxX) {
+    public AdaptiveArtificialBeeColony(int n, double minX, double maxX) {
     	this.maxLength = n;
     	this.NP = 40;
     	this.foodNumber = NP/2;
@@ -47,6 +63,28 @@ public class ArtificialBeeColony {
         
         this.minX = minX;
         this.maxX = maxX;
+        
+        this.rulesNumber = 6;
+        this.successfulAttempts = new int[rulesNumber];
+        this.totalAttempts = new int[rulesNumber];
+        this.successRate = new double[rulesNumber];
+        this.probabilitySelecting = new double[rulesNumber];
+        
+        for(int i = 0; i < rulesNumber; i++){
+        	successfulAttempts[i] = 0;
+        	totalAttempts[i] = 0;
+        	successRate[i] = 0.0;
+        	probabilitySelecting[i] = 0.0;
+        }
+        
+        this.minPsi = 0.0;
+        this.maxPsi = 1.5;
+        this.minF1 = 0.0;
+        this.maxF1 = 1.6;
+        this.minF2 = 0.0;
+        this.maxF2 = 0.4;
+        
+        this.ML = 50;
     }
 
     /**
@@ -104,7 +142,7 @@ public class ArtificialBeeColony {
             currentBee = foodSources.get(i);
             neighborBee = foodSources.get(neighborBeeIndex);
         	
-            sendToWork(currentBee, neighborBee);
+            sendToWork(currentBee, neighborBee, false);
         }
     }
 
@@ -130,7 +168,7 @@ public class ArtificialBeeColony {
                 neighborBeeIndex = getExclusiveRandomNumber(foodNumber - 1, i);
 	            neighborBee = foodSources.get(neighborBeeIndex);
 	            
-	            sendToWork(currentBee, neighborBee);
+	            sendToWork(currentBee, neighborBee, true);
             }
             
             i++;
@@ -148,16 +186,88 @@ public class ArtificialBeeColony {
      * @param currentBee FoodSource
      * @param neighborBee FoodSource
      */
-    public void sendToWork(FoodSource currentBee, FoodSource neighborBee) {
-        //The parameter (dimension) to be changed is determined randomly
+    public void sendToWork(FoodSource currentBee, FoodSource neighborBee, boolean isOnlookerBeePhase) {
+    	double newValue = 0;
+    	
+    	//The parameter (dimension) to be changed is determined randomly
         int parameterToChange = getRandomNumber(0, maxLength - 1);
         
-        //Produce a new candidate solution
         double currentFitness = currentBee.getFitness();
         double currentValue = currentBee.getNectar(parameterToChange);
         double neighborValue = neighborBee.getNectar(parameterToChange);
-        double rid = (rand.nextDouble() - 0.5) * 2.0; //It is a random real number within the ranger [-1, 1]
-        double newValue = currentValue + rid * (currentValue - neighborValue);
+        
+        //Randomly select the search rule
+        int s = getRandomNumber(0, rulesNumber - 1);
+        
+        //For onlooker bee phase
+        if(isOnlookerBeePhase){
+        	//Choose the search strategy according to the adaptive search strategy
+        	//Determine s by roulette wheel
+        	
+        	double sumSuccessRate = 0.0;
+        	for(int i = 0; i < rulesNumber; i++){
+        		successRate[i] = successfulAttempts[i] / totalAttempts[i];
+        		sumSuccessRate += successRate[i];
+        	}
+        	
+        	double sumProbabilitySelecting = 0.0;
+        	for(int i = 0; i < rulesNumber; i++){
+        		probabilitySelecting[i] = successRate[i] / sumSuccessRate;
+        		sumProbabilitySelecting += probabilitySelecting[i];
+        	}
+        	
+        	double selection = rand.nextDouble() * sumProbabilitySelecting;
+        	for(int i = 0; i < rulesNumber; i++){
+        		selection -= probabilitySelecting[i];
+        		if(selection < 0.0){
+        			s = i;
+        			break;
+        		}
+        	}
+        }
+        
+        //Produce a new candidate solution using search rule s
+        if(s == 0){
+        	// Vij = Xij + fi * (Xij - Xr1j)
+	        double fi = (rand.nextDouble() - 0.5) * 2.0; //It is a random real number within the ranger [-1, 1]
+	        newValue = currentValue + fi * (currentValue - neighborValue);
+	        
+        }else if(s == 1){
+        	// Vij = Xij + fi * (Xij - Xr1j) + psi * (Xgbestj - Xij)
+        	double fi = (rand.nextDouble() - 0.5) * 2.0; //It is a random real number within the ranger [-1, 1]
+        	double psi = minPsi + rand.nextDouble() * (maxPsi - minPsi); //It is a random real number within the specific ranger
+        	double gbestValue = gBest.getNectar(parameterToChange);
+	        newValue = currentValue + fi * (currentValue - neighborValue) + psi * (gbestValue - currentValue);
+        	
+        }else if(s == 2){
+        	// Vij = Xlbestj + fi * (Xr1j - Xr2j)
+        	double fi = (rand.nextDouble() - 0.5) * 2.0; //It is a random real number within the ranger [-1, 1]
+        	double lbestValue = lBest.getNectar(parameterToChange);
+        	FoodSource neighborBeeR2 = getExclusiveFoodSource(currentBee, neighborBee);
+        	double neighborValue2 = neighborBeeR2.getNectar(parameterToChange);
+        	newValue = lbestValue + fi * (neighborValue - neighborValue2);
+        	
+        }else if(s == 3){
+        	// Vij = Xlbestj + fi * (Xij - Xr1j)
+        	double fi = (rand.nextDouble() - 0.5) * 2.0; //It is a random real number within the ranger [-1, 1]
+        	double lbestValue = lBest.getNectar(parameterToChange);
+        	newValue = lbestValue + fi * (currentValue - neighborValue);
+        	
+        }else if(s == 4){
+        	// Vij = Xr1j + fi2 * (Xlbestj - Xr1j)
+        	double fi2 = rand.nextDouble(); //It is a random real number within the ranger [0, 1]
+        	double lbestValue = lBest.getNectar(parameterToChange);
+        	newValue = neighborValue + fi2 * (lbestValue - neighborValue);
+        	
+        }else{ // s == 5
+        	// Vij = Xij + F1 * (Xlbestj - Xij) + F2 * (Xr1j - Xr2j)
+        	double F1 = minF1 + rand.nextDouble() * (maxF1- minF1);; //It is a random real number within the specific ranger
+        	double F2 = minF2 + rand.nextDouble() * (maxF2 - minF2);; //It is a random real number within the specific ranger
+        	double lbestValue = lBest.getNectar(parameterToChange);
+        	FoodSource neighborBeeR2 = getExclusiveFoodSource(currentBee, neighborBee);
+        	double neighborValue2 = neighborBeeR2.getNectar(parameterToChange);
+        	newValue = currentValue + F1 * (lbestValue - currentValue) + F2 * (neighborValue - neighborValue2);
+        }
         
         //Trap the value within upper bound and lower bound limits
         if(newValue < minX){
@@ -180,6 +290,27 @@ public class ArtificialBeeColony {
             
         } else { //Improved solution
             currentBee.setTrials(0);
+            
+            //Update the number of success for s
+            successfulAttempts[s] = successfulAttempts[s] + 1;
+        }
+        
+        //Update the number of total attempts for s
+        totalAttempts[s] = totalAttempts[s] + 1;
+        
+        //For onlooker bee phase
+        if(isOnlookerBeePhase){
+        	int sumTA = 0;
+        	for(int i = 0; i < rulesNumber; i++){
+        		sumTA += totalAttempts[i];
+        	}
+        	
+        	if(sumTA > ML){
+        		for(int i = 0; i < rulesNumber; i++){
+                	successfulAttempts[i] = 0;
+                	totalAttempts[i] = 0;
+                }
+        	}
         }
     }
 
@@ -224,8 +355,8 @@ public class ArtificialBeeColony {
         	fit.put(thisFood, fiti);
         }
         
-        for(int i = 0; i < foodNumber; i++) {
-            thisFood = foodSources.get(i);
+        for(int j = 0; j < foodNumber; j++) {
+            thisFood = foodSources.get(j);
             thisFood.setSelectionProbability(fit.get(thisFood) / sum);
         }
     }
@@ -273,17 +404,42 @@ public class ArtificialBeeColony {
     }
     
     /**
+     * Gets a random food source with the exception of the parameters
+     * 
+     * @param foodSource1 - Food that should not be selected
+     * @param foodSource2 - Food that should not be selected
+     * @return FoodSource
+     */
+    public FoodSource getExclusiveFoodSource(FoodSource foodSource1, FoodSource foodSource2){
+    	boolean done = false;
+    	int getRand = 0;
+    	FoodSource food = null;
+    	
+    	while(done){
+	    	getRand = rand.nextInt(foodNumber);
+	    	food = foodSources.get(getRand);
+	    	if((food != foodSource1) && (food != foodSource2)){
+	    		done = true;
+	    	}
+    	}
+    	
+    	return food;
+    }
+    
+    
+    /**
      * Memorizes the best solution
      */
     public void memorizeBestFoodSource() {
-    	if((gBest == null) || ((gBest != null) && (foodSources.get(0).getFitness() < gBest.getFitness()))){
-    		gBest = foodSources.get(0);
+    	lBest = foodSources.get(0);
+    	for(int i = 1; i < foodNumber; i++) {
+    		if(lBest.getFitness() > foodSources.get(i).getFitness()){
+    			lBest = foodSources.get(i);
+    		}
     	}
     	
-    	for(int i = 1; i < foodNumber; i++) {
-    		if(gBest.getFitness() > foodSources.get(i).getFitness()){
-    			gBest = foodSources.get(i);
-    		}
+    	if((gBest == null) || ((gBest != null) && (lBest.getFitness() < gBest.getFitness()))){
+    		gBest = lBest;
     	}
     }
 
@@ -296,5 +452,5 @@ public class ArtificialBeeColony {
 		return gBest;
 	}
 
-    
+
 }

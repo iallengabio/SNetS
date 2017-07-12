@@ -26,8 +26,10 @@ public class MainABC {
 		double maxX = 1.0; //valor maximo para o sigma
 		
 		ArtificialBeeColony abc = new ArtificialBeeColony(n, minX, maxX);
+		AdaptiveArtificialBeeColony aabc = new AdaptiveArtificialBeeColony(n, minX, maxX);
 		
 		abc.execute();
+		aabc.execute();
 		
 	}
 	

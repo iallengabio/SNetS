@@ -32,6 +32,7 @@ public class FoodSource {
         for(int i = 0; i < maxLength; i++) {
             nectar[i] = minX + rand.nextDouble() * (maxX - minX);
         }
+        toEvaluate();
     }
     
     public void toEvaluate(){
@@ -60,7 +61,7 @@ public class FoodSource {
 	public void setMaxLength(int maxLength) {
 		this.maxLength = maxLength;
 	}
-
+	
 	/**
 	 * @return the nectar
 	 */
@@ -117,4 +118,23 @@ public class FoodSource {
 		this.selectionProbability = selectionProbability;
 	}
 	
+	/**
+	 * Gets the data on a specified index.
+	 * 
+	 * @param index of data
+	 * @return double - value of the data
+	 */
+	public double getNectar(int index){
+		return nectar[index];
+	}
+	
+	/**
+	 * Sets the data on a specified index.
+	 * 
+	 * @param index of data
+	 * @param value of the data - double
+	 */
+	public void setNectar(int index, double value){
+		this.nectar[index] = value;
+	}
 }
