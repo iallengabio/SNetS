@@ -1,12 +1,6 @@
 package grmlsa;
 
-import grmlsa.integrated.CompleteSharing;
-import grmlsa.integrated.DedicatedPartition;
-import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
-import grmlsa.integrated.LoadBalancedDedicatedPartition;
-import grmlsa.integrated.PseudoPartition;
-import grmlsa.integrated.ZonePartition;
-import grmlsa.integrated.ZonePartitionTopInvasion;
+import grmlsa.integrated.*;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
@@ -68,6 +62,8 @@ public class GRMLSA {
     public static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
     public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
+    public static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
+
     
     // Regenerator assignment
     public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -191,6 +187,8 @@ public class GRMLSA {
                 return new ZonePartition();
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
+            case INTEGRATED_KSPFIRSTFIT:
+                return new KSPFirstFit();
             default:
                 return null;
         }
