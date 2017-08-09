@@ -102,24 +102,23 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 	 */
 	private int[] decideToExpand(int numMoreSlots, int lowerFreeSlots[], int upperFreeSlots[]){
 		int res[] = new int[2];
-		
+
 		int numLowerFreeSlots = 0;
 		if(lowerFreeSlots != null){
 			numLowerFreeSlots = lowerFreeSlots[1] - lowerFreeSlots[0] + 1;
 		}
-		
+
 		int numUpperFreeSlots = 0;
 		if(upperFreeSlots != null){
 			numUpperFreeSlots = upperFreeSlots[1] - upperFreeSlots[0] + 1;
 		}
-		
+
 		if(numLowerFreeSlots >= numMoreSlots){ // First, try to put everything down
 			res[0] = numMoreSlots;
 			res[1] = 0;
-			
-		} else if(numUpperFreeSlots >= numMoreSlots){ // Second, try to put everything up
-			res[0] = 0;
-			res[1] = numMoreSlots;
+		}else{ // Elsewere, use fully down free spectrum band and the remaining on top
+			res[0] = numLowerFreeSlots;
+			res[1] = numMoreSlots - numLowerFreeSlots;
 		}
 		
 		return res;
@@ -138,11 +137,13 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 			int numCurrentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
 			int release = numCurrentSlots - numFinalSlots;
 			int releaseBand[] = new int[2];
-			
-			releaseBand[1] = circuit.getSpectrumAssigned()[1];
-			releaseBand[0] = releaseBand[1] - release + 1;
 
-			cp.retractCircuit(circuit, null, releaseBand);
+			if(release!=0) {
+				releaseBand[1] = circuit.getSpectrumAssigned()[1];
+				releaseBand[0] = releaseBand[1] - release + 1;
+				cp.retractCircuit(circuit, null, releaseBand);
+			}
+
 			circuit.removeRequest(rfc);
 		}
 	}

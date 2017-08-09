@@ -40,6 +40,7 @@ public class ControlPlane {
      * The second key represents the destination node.
      */
     protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
+
     
     private TreeSet<Circuit> connectionList;
 
@@ -344,6 +345,15 @@ public class ControlPlane {
     public List<Circuit> searchForActiveCircuits(String source, String destination) {
         return this.activeCircuits.get(source).get(destination);
     }
+
+    public List<Circuit> seachForActiveCircuits(String source){
+        List<Circuit> res = new ArrayList<>();
+        for(List<Circuit> lc : activeCircuits.get(source).values()){
+            res.addAll(lc);
+        }
+        return res;
+    }
+
     
     /**
      * This method verifies the transmission quality of the circuit in the establishment 
