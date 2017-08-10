@@ -4,6 +4,8 @@ import network.Circuit;
 import network.Pair;
 import network.RequestGenerator;
 
+import java.util.List;
+
 /**
  * This class represents the requests made by the clients for the establishment of 
  * connections between two nodes of the network
@@ -18,7 +20,7 @@ public class RequestForConnection {
 	protected double requiredBandwidth;
 	protected RequestGenerator rg;
 	
-	protected Circuit circuit; // Circuit that attends this request
+	protected List<Circuit> circuit; // Circuit that attends this request
 	
 	/**
 	 * Returns the pair
@@ -97,17 +99,17 @@ public class RequestForConnection {
 	 * 
 	 * @return Circuit
 	 */
-	public Circuit getCircuit() {
+	public List<Circuit> getCircuits() {
 		return circuit;
 	}
 
 	/**
 	 * Sets the circuit that attends this request
 	 * 
-	 * @param circuit Circuit
+	 * @param circuits Circuit
 	 */
-	public void setCircuit(Circuit circuit) {
-		this.circuit = circuit;		
+	public void setCircuit(List<Circuit> circuits) {
+		this.circuit = circuits;
 	}
 	/**
 	 * Returns the request generator

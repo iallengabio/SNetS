@@ -85,7 +85,7 @@ public class ArriveRequestForConexionListener implements EventListener {
     
     
     public void printTest(RequestForConnection rfc, boolean success){
-		Route route = rfc.getCircuit().getRoute();
+		Route route = rfc.getCircuits().get(0).getRoute();
 		
 		System.out.println("----------------------------------------------------------");
     	System.out.println("Par = "+ rfc.getPair().getPairName());
@@ -96,18 +96,18 @@ public class ArriveRequestForConexionListener implements EventListener {
     	}
     	System.out.println();
     	System.out.println("Taxa de bits (Gbps) = " + (rfc.getRequiredBandwidth() / 1000000000.0));
-    	System.out.println("Modulacao = " + rfc.getCircuit().getModulation().getName());
+    	System.out.println("Modulacao = " + rfc.getCircuits().get(0).getModulation().getName());
     	System.out.println("Distancia = " + route.getDistanceAllLinks());
-    	if(rfc.getCircuit().getSpectrumAssigned() != null){
-    		System.out.println("Quant slots requeridos = " + (rfc.getCircuit().getSpectrumAssigned()[1] - rfc.getCircuit().getSpectrumAssigned()[0] + 1));
-    		System.out.println("Faixa de espectro = (" + rfc.getCircuit().getSpectrumAssigned()[0] + ", " + rfc.getCircuit().getSpectrumAssigned()[1] + ")");
+    	if(rfc.getCircuits().get(0).getSpectrumAssigned() != null){
+    		System.out.println("Quant slots requeridos = " + (rfc.getCircuits().get(0).getSpectrumAssigned()[1] - rfc.getCircuits().get(0).getSpectrumAssigned()[0] + 1));
+    		System.out.println("Faixa de espectro = (" + rfc.getCircuits().get(0).getSpectrumAssigned()[0] + ", " + rfc.getCircuits().get(0).getSpectrumAssigned()[1] + ")");
     	}else{
     		System.out.println("Faixa de espectro = vazio");
     	}
-    	System.out.println("SNR (dB) = " + rfc.getCircuit().getSNR());
+    	System.out.println("SNR (dB) = " + rfc.getCircuits().get(0).getSNR());
     	System.out.println("RMLSA = " + success);
-    	System.out.println("QoT = " + rfc.getCircuit().isQoT());
-    	System.out.println("QoT for other = " + rfc.getCircuit().isQoTForOther());
+    	System.out.println("QoT = " + rfc.getCircuits().get(0).isQoT());
+    	System.out.println("QoT for other = " + rfc.getCircuits().get(0).isQoTForOther());
 	}
 
 }
