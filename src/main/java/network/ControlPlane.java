@@ -348,10 +348,20 @@ public class ControlPlane {
         return this.activeCircuits.get(source).get(destination);
     }
 
-    public List<Circuit> seachForActiveCircuits(String source){
+    public List<Circuit> searchForActiveCircuits(String source){
         List<Circuit> res = new ArrayList<>();
         for(List<Circuit> lc : activeCircuits.get(source).values()){
             res.addAll(lc);
+        }
+        return res;
+    }
+
+    public List<Circuit> searchForActiveCircuits(){
+        List<Circuit> res = new ArrayList<>();
+        for(HashMap<String, List<Circuit>> hA : activeCircuits.values()){
+            for(List<Circuit> lc : hA.values()){
+                res.addAll(lc);
+            }
         }
         return res;
     }

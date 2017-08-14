@@ -77,6 +77,21 @@ public class Modulation {
 
         return numberOfSlotsTemp;
     }
+
+    /**
+     * compute the potential bandwidth when @slotsNumber slots are utilized
+     * @param slotsNumber
+     * @return
+     */
+    public double potentialBandwidth(int slotsNumber){
+        slotsNumber--; //remove the slot needed to be used as a guard band
+
+        if(activeQoT){
+            return slotsNumber * 2 * bitsPerSymbol * freqSlot / ((1+rateFEC)*1.1);
+        }else {
+            return slotsNumber * bitsPerSymbol * freqSlot;
+        }
+    }
     
 	/**
 	 * Returns the name of the modulation

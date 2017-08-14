@@ -17,6 +17,7 @@ public class ArriveRequestForConexionListener implements EventListener {
 
     private EventMachine em;
     private Simulation simulation;
+    private int numOfRequests;
 
     /**
      * Creates a new instance of ArriveRequestForConexionListener.
@@ -24,9 +25,11 @@ public class ArriveRequestForConexionListener implements EventListener {
      * @param em EventMachine
      * @param simulation Simulation
      */
-    public ArriveRequestForConexionListener(EventMachine em, Simulation simulation) {
+    public
+    ArriveRequestForConexionListener(EventMachine em, Simulation simulation) {
         this.em = em;
         this.simulation = simulation;
+        numOfRequests = 0;
     }
 
     /**
@@ -50,9 +53,15 @@ public class ArriveRequestForConexionListener implements EventListener {
         Boolean success = simulation.getControlPlane().handleRequisition(requestForConnection);
         if (success) {// Schedule the end of the requisition and release of resources
             em.insert(new Event(requestForConnection, new HoldRequestListener(simulation), requestForConnection.getTimeOfFinalizeHours()));
+
         }
         
         afterReq(requestForConnection, success);
+
+        numOfRequests++;
+        //System.out.println(numOfRequests);
+
+        //if(numOfRequests%10==0) System.out.println(numOfRequests);
         
         //printTest(requestForConnection, success);
     }

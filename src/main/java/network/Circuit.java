@@ -91,6 +91,16 @@ public class Circuit implements Comparable<Object>{
         return res;
     }
 
+	/**
+	 * Compute the residual capacity of circuit in terms of bandwidth
+	 * @return
+	 */
+	public double getResidualCapacity(){
+    	double rb = getRequiredBandwidth();
+    	double cap = getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
+		return cap-rb;
+	}
+
     /**
      * Returns the source node of the circuit
      * 

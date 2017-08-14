@@ -22,7 +22,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 
 		// Search for active circuits with the same origin and destination of the new request.
 		List<Circuit> activeCircuits = cp.searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
-		
+
 		for (Circuit circuit : activeCircuits) {
 			
 			// Investigate if the active circuit is able to accommodate the new request

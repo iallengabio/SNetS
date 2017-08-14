@@ -4,6 +4,7 @@ import network.Circuit;
 import network.Pair;
 import network.RequestGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class RequestForConnection {
 	protected double requiredBandwidth;
 	protected RequestGenerator rg;
 	
-	protected List<Circuit> circuit; // Circuit that attends this request
+	protected List<Circuit> circuit = new ArrayList<>(); // Circuit that attends this request
 	
 	/**
 	 * Returns the pair

@@ -18,9 +18,7 @@ import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.spectrumAssignment.WorstFit;
-import grmlsa.trafficGrooming.NoTrafficGrooming;
-import grmlsa.trafficGrooming.SimpleTrafficGrooming;
-import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
+import grmlsa.trafficGrooming.*;
 
 /**
  * This class should be responsible for running the RSA algorithms, verifying whether the selected 
@@ -43,6 +41,7 @@ public class GRMLSA {
     // Optical traffic aggregation
     public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
+    public static final String GROOMING_OPT_STGMULTIHOP = "stgmultihop";
 
     // Routing
     public static final String ROUTING_DJK = "djk";
@@ -121,6 +120,8 @@ public class GRMLSA {
                 return new NoTrafficGrooming();
             case GROOMING_OPT_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
+            case GROOMING_OPT_STGMULTIHOP:
+                return new STGMultihop();
             default:
                 return null;
         }
