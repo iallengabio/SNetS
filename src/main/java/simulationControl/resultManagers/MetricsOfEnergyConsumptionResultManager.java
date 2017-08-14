@@ -78,7 +78,7 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	private String ressultAveragePcGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("General Power Consumption" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("General power consumption" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + mec.get(loadPoint).get(replic).getGeneralPc());
 			}
@@ -95,7 +95,7 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	private String resultAveragePcEstablished(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("Average Power Consumption Established" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("Average power consumption established" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + mec.get(loadPoint).get(replic).getAveragePcEstablished());
 			}
@@ -112,7 +112,7 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	private String resultPcPair(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Average Power Consumption per pair" + sep + loadPoint + sep + "all";
+			String aux = "Average power consumption per pair" + sep + loadPoint + sep + "all";
 			
 			for (Pair pair : this.pairs) {
 				String aux2 = aux + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";

@@ -56,7 +56,7 @@ public class ModulationUtilizationResultManager implements ResultManagerInterfac
 		config(llms);
 		
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep + "load point" + sep + "modulation" + sep + "bandwidth" + sep + " ");
+		res.append("Metrics" + sep + "LoadPoint" + sep + "Modulation" + sep + "Bandwidth" + sep + " ");
 		
 		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);
