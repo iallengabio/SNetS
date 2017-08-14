@@ -72,7 +72,7 @@ public class RelativeFragmentationResultManager implements ResultManagerInterfac
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			for (Integer c : this.rfs.get(0).get(0).getCList()) {
-				String aux = "Relative Fragmentation per spectrum size (c)" + sep + loadPoint + sep + "all" + sep + c + sep + " ";
+				String aux = "Relative fragmentation per spectrum size (c)" + sep + loadPoint + sep + "all" + sep + c + sep + " ";
 				for (Integer replication : replications) {
 					aux = aux + sep + rfs.get(loadPoint).get(replication).getAverageRelativeFragmentation(c);
 				}
