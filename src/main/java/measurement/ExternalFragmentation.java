@@ -56,8 +56,9 @@ public class ExternalFragmentation extends Measurement {
      */
     public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
         this.observationExternalFragVertical(cp.getMesh());
-        this.observationExternalFragHorizontal(request.getCircuit());
-
+        for(Circuit circuit : request.getCircuits()) {
+            this.observationExternalFragHorizontal(circuit);
+        }
         numberObservations++;
     }
 

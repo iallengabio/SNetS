@@ -22,7 +22,7 @@ public class NoTrafficGrooming implements TrafficGroomingAlgorithmInterface {
 
 	@Override
 	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
-		cp.releaseCircuit(rfc.getCircuit());
+		cp.releaseCircuit(rfc.getCircuits().get(0));
 	}
 
 }

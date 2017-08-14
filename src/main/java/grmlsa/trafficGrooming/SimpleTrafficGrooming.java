@@ -22,7 +22,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 
 		// Search for active circuits with the same origin and destination of the new request.
 		List<Circuit> activeCircuits = cp.searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
-		
+
 		for (Circuit circuit : activeCircuits) {
 			
 			// Investigate if the active circuit is able to accommodate the new request
@@ -35,7 +35,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 			// You can add without increasing the number of slots
 			if(numMoreSlots == 0){
 				circuit.addRequest(rfc);
-				rfc.setCircuit(circuit);
+				rfc.getCircuits().add(circuit);
 				return true;
 			}
 			
@@ -78,7 +78,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 				
 				if(cp.expandCircuit(circuit, upExpBand, downExpBand)){// Expansion succeeded
 					circuit.addRequest(rfc);
-					rfc.setCircuit(circuit);
+					rfc.getCircuits().add(circuit);
 					return true;
 				}
 			}
@@ -126,7 +126,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 
 	@Override
 	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
-		Circuit circuit = rfc.getCircuit();
+		Circuit circuit = rfc.getCircuits().get(0);
 		
 		if(circuit.getRequests().size() == 1){ // The connection being terminated is the last to use this channel.
 			cp.releaseCircuit(circuit);

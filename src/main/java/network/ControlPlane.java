@@ -81,7 +81,9 @@ public class ControlPlane {
     	Circuit circuit = new Circuit();
 		circuit.setPair(rfc.getPair());
 		circuit.addRequest(rfc);
-		rfc.setCircuit(circuit);
+		ArrayList<Circuit> circs = new ArrayList<>();
+		circs.add(circuit);
+		rfc.setCircuit(circs);
 		
 		return circuit;
     }
@@ -346,10 +348,20 @@ public class ControlPlane {
         return this.activeCircuits.get(source).get(destination);
     }
 
-    public List<Circuit> seachForActiveCircuits(String source){
+    public List<Circuit> searchForActiveCircuits(String source){
         List<Circuit> res = new ArrayList<>();
         for(List<Circuit> lc : activeCircuits.get(source).values()){
             res.addAll(lc);
+        }
+        return res;
+    }
+
+    public List<Circuit> searchForActiveCircuits(){
+        List<Circuit> res = new ArrayList<>();
+        for(HashMap<String, List<Circuit>> hA : activeCircuits.values()){
+            for(List<Circuit> lc : hA.values()){
+                res.addAll(lc);
+            }
         }
         return res;
     }
@@ -511,14 +523,16 @@ public class ControlPlane {
 	 * @param circuit Circuit
 	 * @return boolean
 	 */
-	public boolean isBlockingByQoTN(Circuit circuit){
-		// Check if it is to test the QoT
-		if(mesh.getPhysicalLayer().isActiveQoT()){
-			// Check if it is possible to compute the circuit QoT
-			if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
-				return !computeQualityOfTransmission(circuit);
-			}
-		}
+	public boolean isBlockingByQoTN(List<Circuit> circuits){
+	    for(Circuit circuit : circuits){
+            // Check if it is to test the QoT
+            if(mesh.getPhysicalLayer().isActiveQoT()){
+                // Check if it is possible to compute the circuit QoT
+                if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
+                    return !computeQualityOfTransmission(circuit);
+                }
+            }
+	    }
 		return false;
 	}
 	
@@ -529,11 +543,13 @@ public class ControlPlane {
 	 * @param circuit Circuit
 	 * @return boolean
 	 */
-	public boolean isBlockingByQoTO(Circuit circuit){
-		// Check if it is to test the QoT of other already active circuits
-		if(mesh.getPhysicalLayer().isActiveQoTForOther()){
-			return !circuit.isQoTForOther();
-		}
+	public boolean isBlockingByQoTO(List<Circuit> circuits){
+	    for(Circuit circuit : circuits){
+            // Check if it is to test the QoT of other already active circuits
+            if(mesh.getPhysicalLayer().isActiveQoTForOther()){
+                return !circuit.isQoTForOther();
+            }
+	    }
 		return false;
 	}
 	
@@ -544,31 +560,32 @@ public class ControlPlane {
 	 * @param circuit Circuit
 	 * @return boolean
 	 */
-	public boolean isBlockingByFragmentation(Circuit circuit){
-		if (circuit.getRoute() == null) return false;
-        
-        List<Link> links = circuit.getRoute().getLinkList();
-        List<int[]> merge = links.get(0).getFreeSpectrumBands();
+	public boolean isBlockingByFragmentation(List<Circuit> circuits){
+	    for(Circuit circuit : circuits) {
+            if (circuit.getRoute() == null) return false;
 
-        for (int i = 1; i < links.size(); i++) {
-            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
-        }
+            List<Link> links = circuit.getRoute().getLinkList();
+            List<int[]> merge = links.get(0).getFreeSpectrumBands();
 
-        int totalFree = 0;
-        for (int[] band : merge) {
-            totalFree += (band[1] - band[0] + 1);
-        }
-        
-        Modulation mod = circuit.getModulation();
-        if(mod == null){
-        	mod = modulationSelection.getAvaliableModulations().get(0);
-        }
+            for (int i = 1; i < links.size(); i++) {
+                merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
+            }
 
-        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
-        if (totalFree > numSlotsRequired) {
-            return true;
-        }
+            int totalFree = 0;
+            for (int[] band : merge) {
+                totalFree += (band[1] - band[0] + 1);
+            }
 
+            Modulation mod = circuit.getModulation();
+            if (mod == null) {
+                mod = modulationSelection.getAvaliableModulations().get(0);
+            }
+
+            int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+            if (totalFree > numSlotsRequired) {
+                return true;
+            }
+        }
         return false;
 	}
 	

@@ -54,10 +54,12 @@ public class SpectrumSizeStatistics extends Measurement{
      * @param request RequestForConnection
 	 */
 	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
-		if(request.getCircuit().getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
-			return;
-		this.newObservationRequestSizeBandwidthGeneral(request.getCircuit());	
-		this.newObservationRequestSizeBandwidthPerLink(request.getCircuit());
+		for(Circuit circuit :  request.getCircuits()) {
+			if (circuit.getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
+				return;
+			this.newObservationRequestSizeBandwidthGeneral(circuit);
+			this.newObservationRequestSizeBandwidthPerLink(circuit);
+		}
 	}
 	
 	/**
