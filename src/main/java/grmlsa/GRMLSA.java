@@ -41,7 +41,7 @@ public class GRMLSA {
     // Optical traffic aggregation
     public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
-    public static final String GROOMING_OPT_STGMULTIHOP = "stgmultihop";
+    public static final String GROOMING_OPT_MGMVH = "mgmvh";
 
     // Routing
     public static final String ROUTING_DJK = "djk";
@@ -120,8 +120,8 @@ public class GRMLSA {
                 return new NoTrafficGrooming();
             case GROOMING_OPT_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
-            case GROOMING_OPT_STGMULTIHOP:
-                return new STGMultihop();
+            case GROOMING_OPT_MGMVH:
+                return new MGMVH();
             default:
                 return null;
         }

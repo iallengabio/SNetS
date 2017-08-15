@@ -10,15 +10,14 @@ import util.IntersectionFreeSpectrum;
 import java.util.*;
 
 /**
- * This class represents a Simple Traffic Grooming Multihop Algorithm.
+ * This class represents a Multihop Grooming with Min Virtual Hops policy.
  *
- * This algorithm attempts to do electrical grooming using as few circuits as possible.
  *
  *
  * <p>
  * Created by Iallen on 10/08/2017.
  */
-public class STGMultihop implements TrafficGroomingAlgorithmInterface {
+public class MGMVH implements TrafficGroomingAlgorithmInterface {
 
     private int maxVirtualHops = 3;
 
