@@ -178,7 +178,7 @@ public class STGMultihop implements TrafficGroomingAlgorithmInterface {
             int i;
             ArrayList<Circuit> chosenCircs = avrsc.get(0);
             for (i = 1; i < avrsc.size(); i++) {
-                if (costFunction(chosenCircs) > costFunction(avrsc.get(i))) {
+                if (costFunction1(chosenCircs) > costFunction1(avrsc.get(i))) {
                     chosenCircs = avrsc.get(i);
                 }
             }
@@ -196,21 +196,13 @@ public class STGMultihop implements TrafficGroomingAlgorithmInterface {
     private boolean expandEletricGrooming(RequestForConnection rfc, ControlPlane cp) {
         //second try expand some circuits to enable eletrical grooming
         ArrayList<ArrayList<Circuit>> avr = allVirtualRouting(rfc);
-        Collections.sort(avr, new Comparator<ArrayList<Circuit>>() {//Order the solutions according to the number of circuits that need to be expanded.
+        Collections.sort(avr, new Comparator<ArrayList<Circuit>>() {//Order the solutions according to the cost function 2.
             @Override
             public int compare(ArrayList<Circuit> o1, ArrayList<Circuit> o2) {
-                Integer nce1 = 0, nce2 = 0;
-                for (Circuit circuit : o1) {
-                    if (circuit.getResidualCapacity() < rfc.getRequiredBandwidth()) {
-                        nce1++;
-                    }
-                }
-                for (Circuit circuit : o2) {
-                    if (circuit.getResidualCapacity() < rfc.getRequiredBandwidth()) {
-                        nce2++;
-                    }
-                }
-                return nce1 - nce2;
+                Double d1,d2;
+                d1 = costFunction2(o1,rfc);
+                d2 = costFunction2(o2,rfc);
+                return d1.compareTo(d2);
             }
         });
         for (ArrayList<Circuit> alc : avr) {//for each solution
@@ -224,8 +216,6 @@ public class STGMultihop implements TrafficGroomingAlgorithmInterface {
             if (canBeExpanded) {//all circuits can be expanded
                 //expand each circuit and acomodate the new request
                 for (Circuit c : alc) {
-                    int[] exp = Grooming.circuitExpansiveness(c);
-                    int circExCap = exp[0] + exp[1];
                     int slotsNeeded = c.getModulation().requiredSlots(c.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (c.getSpectrumAssigned()[1] - c.getSpectrumAssigned()[0] + 1);
                     List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute());
                     int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentInferior(c.getSpectrumAssigned(), composition);
@@ -287,12 +277,31 @@ public class STGMultihop implements TrafficGroomingAlgorithmInterface {
     }
 
     /**
-     *
+     * This cost function is used to compare simple eletric grooming solutions.
      * @param sol
      * @return
      */
-    private double costFunction(ArrayList<Circuit> sol) {
+    private double costFunction1(ArrayList<Circuit> sol) {
         return sol.size();
+    }
+
+    /**
+     * This cost function is used to compare solutions of grooming that need to expand some circuits.
+     * @param sol
+     * @param rfc
+     * @return
+     */
+    private double costFunction2(ArrayList<Circuit> sol, RequestForConnection rfc){
+        double res = 0;
+        for (Circuit circuit : sol) {
+            if (circuit.getResidualCapacity() < rfc.getRequiredBandwidth()) {
+                res++;
+            }
+        }
+
+        res = res * 100 + sol.size(); //In case of a tie, preference should be given to solutions with fewer virtual hops.
+
+        return res;
     }
 
     /**
