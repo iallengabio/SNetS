@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 5;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 2;
 
     private List<List<Simulation>> simulations;
     private int done;

@@ -42,6 +42,7 @@ public class GRMLSA {
     public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
     public static final String GROOMING_OPT_MGMVH = "mgmvh";
+    public static final String GROOMING_OPT_MGMPH = "mgmph";
 
     // Routing
     public static final String ROUTING_DJK = "djk";
@@ -122,6 +123,8 @@ public class GRMLSA {
                 return new SimpleTrafficGrooming();
             case GROOMING_OPT_MGMVH:
                 return new MGMVH();
+            case GROOMING_OPT_MGMPH:
+                return new MGMPH();
             default:
                 return null;
         }
