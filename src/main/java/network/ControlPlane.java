@@ -409,17 +409,18 @@ public class ControlPlane {
     				circuit.setQoTForOther(QoTForOther);
     			}
     			
-    			if(QoTForOther){
-    				// QoT the other circuits was kept acceptable
-    				return true;
-    			}
+    			return QoTForOther;
+    			
     			// With this removal, every time it checksQoT of some circuit it must be recalculated
-    			//else {
-    				// QoT the other circuits was not kept acceptable, frees allocated resources
-    			//	releaseCircuit(circuit);
-    				// Recalculates the QoT of the other circuits
-    			//	computeQoTForOther(circuit);
-    			//}
+//    			if(QoTForOther){
+//    				// QoT the other circuits was kept acceptable
+//    				return true;
+//    			} else {
+//    				// QoT the other circuits was not kept acceptable, frees allocated resources
+//    				releaseCircuit(circuit);
+//    				// Recalculates the QoT of the other circuits
+//    				computeQoTForOther(circuit);
+//    			}
     		}
     		
     		return false;
