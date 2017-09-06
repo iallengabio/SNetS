@@ -67,7 +67,7 @@ public class Link {
      *
      * @param spectrumBand int[]
      */
-    public void liberateSpectrum(int spectrumBand[]) {
+    public void liberateSpectrum(int spectrumBand[]) throws Exception {
         spectrum.freeSpectrum(spectrumBand);
     }
 

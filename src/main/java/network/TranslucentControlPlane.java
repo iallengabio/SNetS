@@ -199,7 +199,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit
      */
 	@Override
-    public void releaseCircuit(Circuit circuit) {
+    public void releaseCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
 
         releaseSpectrum(circuit, route.getLinkList());
@@ -220,7 +220,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit Circuit
      * @param links List<Link>
      */
-	protected void releaseSpectrum(Circuit circuit, List<Link> links) {
+	protected void releaseSpectrum(Circuit circuit, List<Link> links) throws Exception {
     	for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             int band[] = circuit.getSpectrumAssignedByLink(link);

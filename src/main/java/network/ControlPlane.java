@@ -144,7 +144,7 @@ public class ControlPlane {
      * @param rfc RequestForConnection
      * @return boolean
      */
-    public boolean handleRequisition(RequestForConnection rfc) {
+    public boolean handleRequisition(RequestForConnection rfc) throws Exception {
         return grooming.searchCircuitsForGrooming(rfc, this);
     }
 
@@ -153,7 +153,7 @@ public class ControlPlane {
      *
      * @param rfc RequestForConnection
      */
-    public void finalizeConnection(RequestForConnection rfc) {
+    public void finalizeConnection(RequestForConnection rfc) throws Exception {
         this.grooming.finishConnection(rfc, this);
     }
 
@@ -196,7 +196,7 @@ public class ControlPlane {
      *
      * @param circuit
      */
-    public void releaseCircuit(Circuit circuit) {
+    public void releaseCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         int band[] = circuit.getSpectrumAssigned();
         
@@ -216,7 +216,7 @@ public class ControlPlane {
      * @param band int[]
      * @param links List<Link>
      */
-    protected void releaseSpectrum(Circuit circuit, int band[], List<Link> links) {
+    protected void releaseSpectrum(Circuit circuit, int band[], List<Link> links) throws Exception {
         for (int i = 0; i < links.size(); i++) {
         	Link link = links.get(i);
         	
@@ -230,7 +230,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return true if the circuit has been successfully allocated, false if the circuit can not be allocated.
      */
-    public boolean establishCircuit(Circuit circuit) {
+    public boolean establishCircuit(Circuit circuit) throws Exception {
 
     	// Check if there are free transmitters and receivers
     	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
@@ -284,27 +284,41 @@ public class ControlPlane {
      * @param bottomBand int[]
      * @return boolean
      */
-    public boolean expandCircuit(Circuit circuit, int upperBand[], int bottomBand[]) {
+    public boolean expandCircuit(Circuit circuit, int upperBand[], int bottomBand[]) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[];
         int specAssigAt[] = circuit.getSpectrumAssigned();
-        
+        int newSpecAssigAt[] = specAssigAt.clone();
         if (upperBand != null) {
             band = upperBand;
             allocateSpectrum(circuit, band, links);
-            specAssigAt[1] = upperBand[1];
+            newSpecAssigAt[1] = upperBand[1];
         }
         
         if (bottomBand != null) {
             band = bottomBand;
             allocateSpectrum(circuit, band, links);
-            specAssigAt[0] = bottomBand[0];
+            newSpecAssigAt[0] = bottomBand[0];
         }
-        circuit.setSpectrumAssigned(specAssigAt);
+        circuit.setSpectrumAssigned(newSpecAssigAt);
         
         // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
         boolean QoT = isAdmissibleQualityOfTransmission(circuit);
+
+        if(!QoT){
+            if (upperBand != null) {
+                band = upperBand;
+                releaseSpectrum(circuit, band, links);
+            }
+
+            if (bottomBand != null) {
+                band = bottomBand;
+                releaseSpectrum(circuit, band, links);
+            }
+
+            circuit.setSpectrumAssigned(specAssigAt);
+        }
 
         return QoT;
     }
@@ -316,7 +330,7 @@ public class ControlPlane {
      * @param bottomBand int[]
      * @param upperBand int[]
      */
-    public void retractCircuit(Circuit circuit, int bottomBand[], int upperBand[]) {
+    public void retractCircuit(Circuit circuit, int bottomBand[], int upperBand[]) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[];
@@ -374,7 +388,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean
      */
-    protected boolean isAdmissibleQualityOfTransmission(Circuit circuit){
+    protected boolean isAdmissibleQualityOfTransmission(Circuit circuit) throws Exception {
     	
     	// Check if it is to test the QoT
     	if(mesh.getPhysicalLayer().isActiveQoT()){
@@ -519,8 +533,7 @@ public class ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by QoTN
 	 * Returns true if the blocking was by QoTN and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	public boolean isBlockingByQoTN(List<Circuit> circuits){
@@ -539,8 +552,7 @@ public class ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by QoTO
 	 * Returns true if the blocking was by QoTO and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	public boolean isBlockingByQoTO(List<Circuit> circuits){
@@ -556,8 +568,7 @@ public class ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by fragmentation
 	 * Returns true if the blocking was by fragmentation and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	public boolean isBlockingByFragmentation(List<Circuit> circuits){

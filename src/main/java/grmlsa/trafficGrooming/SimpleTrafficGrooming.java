@@ -18,7 +18,7 @@ import util.IntersectionFreeSpectrum;
 public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface {
 
 	@Override
-	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) {
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) throws Exception {
 
 		// Search for active circuits with the same origin and destination of the new request.
 		List<Circuit> activeCircuits = cp.searchForActiveCircuits(rfc.getPair().getSource().getName(), rfc.getPair().getDestination().getName());
@@ -125,7 +125,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 	}
 
 	@Override
-	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
+	public void finishConnection(RequestForConnection rfc, ControlPlane cp) throws Exception {
 		Circuit circuit = rfc.getCircuits().get(0);
 		
 		if(circuit.getRequests().size() == 1){ // The connection being terminated is the last to use this channel.
