@@ -244,6 +244,10 @@ public class ControlPlane {
                 // QoT verification
                 if(isAdmissibleQualityOfTransmission(circuit)){
                 	return true; // Admits the circuit
+                
+                } else {
+                	// Circuit QoT is not acceptable, frees allocated resources
+        			releaseCircuit(circuit);
                 }
             }
         }
@@ -408,23 +412,21 @@ public class ControlPlane {
     			if(QoTForOther){
     				// QoT the other circuits was kept acceptable
     				return true;
-    			} else {
-    				// QoT the other circuits was not kept acceptable, frees allocated resources
-    				releaseCircuit(circuit);
-    				// Recalculates the QoT of the other circuits
-    				computeQoTForOther(circuit);
     			}
-    			
-    		} else {
-    			// Circuit QoT is not acceptable, frees allocated resources
-    			releaseCircuit(circuit);
+    			// With this removal, every time it checksQoT of some circuit it must be recalculated
+    			//else {
+    				// QoT the other circuits was not kept acceptable, frees allocated resources
+    			//	releaseCircuit(circuit);
+    				// Recalculates the QoT of the other circuits
+    			//	computeQoTForOther(circuit);
+    			//}
     		}
-    	} else {
-    		// If it does not check the QoT then it returns acceptable
-    		return true;
+    		
+    		return false;
     	}
     	
-    	return false;
+		// If it does not check the QoT then it returns acceptable
+		return true;
     }
     
     /**
