@@ -1,1 +1,11 @@
-{"requestGenerators":[{"source":"1","destination":"2","bandwidth":1.0E10,"arrivalRate":4.0,"holdRate":2.0,"arrivalRateIncrease":1.0},{"source":"2","destination":"1","bandwidth":1.0E10,"arrivalRate":4.0,"holdRate":2.0,"arrivalRateIncrease":1.0}]}
+{
+"requestGenerators":
+	[
+	 {"source":"1","destination":"3","bandwidth":10.0E9,"arrivalRate":100.0,"holdRate":1.0,"arrivalRateIncrease":20.0},
+	 {"source":"3","destination":"1","bandwidth":10.0E9,"arrivalRate":100.0,"holdRate":1.0,"arrivalRateIncrease":20.0},
+	 {"source":"1","destination":"3","bandwidth":100.0E9,"arrivalRate":100.0,"holdRate":1.0,"arrivalRateIncrease":20.0},
+	 {"source":"3","destination":"1","bandwidth":100.0E9,"arrivalRate":100.0,"holdRate":1.0,"arrivalRateIncrease":20.0},
+	 {"source":"1","destination":"3","bandwidth":200.0E9,"arrivalRate":100.0,"holdRate":1.0,"arrivalRateIncrease":20.0},
+	 {"source":"3","destination":"1","bandwidth":200.0E9,"arrivalRate":100.0,"holdRate":1.0,"arrivalRateIncrease":20.0}
+	]
+}

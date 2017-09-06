@@ -14,14 +14,14 @@ public class ModulationSelector {
 	
 	/**
 	 * Distances based on articles:
-	 *  - Efficient Resource Allocation for All-Optical Multicasting Over Spectrum-Sliced Elastic Optical Networks
-	 *  - Evaluating Internal Blocking in Noncontentionless Flex-grid ROADMs
-	 *  - On the Complexity of Routing and Spectrum Assignment in Flexible-Grid Ring Networks
+	 *  - Efficient Resource Allocation for All-Optical Multicasting Over Spectrum-Sliced Elastic Optical Networks (2013)
+	 *  - Evaluating Internal Blocking in Noncontentionless Flex-grid ROADMs (2015)
+	 *  - On the Complexity of Routing and Spectrum Assignment in Flexible-Grid Ring Networks (2015)
 	 * 
 	 * Other values:
-	 *  - Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats
-	 *  - Physical Layer Transmitter and Routing Optimization to Maximize the Traffic Throughput of a Nonlinear Optical Mesh Network
-	 *  - Quantifying the Impact of Non-linear Impairments on Blocking Load in Elastic Optical Networks
+	 *  - Error Vector Magnitude as a Performance Measure for Advanced Modulation Formats (2012)
+	 *  - Physical Layer Transmitter and Routing Optimization to Maximize the Traffic Throughput of a Nonlinear Optical Mesh Network (2014)
+	 *  - Quantifying the Impact of Non-linear Impairments on Blocking Load in Elastic Optical Networks (2014)
 	 * 
 	 * @param mesh Mesh
 	 * @return List<Modulation

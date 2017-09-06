@@ -18,6 +18,7 @@ import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.RegeneratorAssignmentAlgorithmInterface;
 import grmlsa.routing.DJK;
 import grmlsa.routing.FixedRoutes;
+import grmlsa.routing.MMRDS;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.BestFit;
 import grmlsa.spectrumAssignment.ExactFit;
@@ -52,6 +53,7 @@ public class GRMLSA {
 
     // Routing
     public static final String ROUTING_DJK = "djk";
+    public static final String ROUTING_MMRDS = "mmrds";
     public static final String ROUTING_FIXEDROUTES = "fixedroutes";
 
     // Spectrum assignment
@@ -143,6 +145,8 @@ public class GRMLSA {
                 return new DJK();
             case ROUTING_FIXEDROUTES:
                 return new FixedRoutes();
+            case ROUTING_MMRDS:
+                return new MMRDS();
             default:
                 return null;
         }

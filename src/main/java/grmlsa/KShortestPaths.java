@@ -1,13 +1,19 @@
 package grmlsa;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import network.Mesh;
 import network.Node;
 import simulationControl.Util;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * This class serves to compute the k shortest paths for all pairs of source (s) and destination (d) nodes 
@@ -35,6 +41,7 @@ public class KShortestPaths {
     public KShortestPaths(Mesh mesh, int k) {
         this.k = k;
         this.computeAllRoutes(mesh);
+        
         salveRoutesByPar(mesh.getNodeList());
     }
 
@@ -128,45 +135,49 @@ public class KShortestPaths {
      * @param nodeList Vector<Node>
      */
     private void salveRoutesByPar(Vector<Node> nodeList) {
+    	List<String> routesList = new ArrayList<String>();
+    	
+    	int numNodes = nodeList.size();
+        for(int i = 1; i <= numNodes; i++){
+    	    for(int j = 1; j <= numNodes; j++){
+    		    
+    		    if(i != j){
+	      		    String pair = i + DIV + j;
+		        	List<Route> routes = routesForAllPairs.get(pair);
+		        	
+		        	for(int r = 0; r < routes.size(); r++){
+		        		Route route = routes.get(r);
+		        		StringBuilder sb = new StringBuilder();
+		        		
+		        		for(int n = 0; n < route.getNodeList().size(); n++){
+			        		sb.append(route.getNodeList().get(n).getName());
+			        		if(n < route.getNodeList().size() - 1){
+			        			sb.append("-");
+			        		}
+			        	}
+		        		
+		        		routesList.add(sb.toString());
+		        	}
+    		    }
+    	    }
+        }
+        
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(routesList);
+        
         try {
+        	String separator = System.getProperty("file.separator");
         	
-        	FileWriter fw = new FileWriter(Util.projectPath + "/routesByPar.txt");
+        	FileWriter fw = new FileWriter(Util.projectPath + separator + "kRoutesByPar.txt");
 			BufferedWriter out = new BufferedWriter(fw);
-        	
-			for(int i = 0; i < nodeList.size(); i++){
-	    	    Node source = nodeList.get(i);
-	    	    
-	    	    for(int j = 0; j < nodeList.size(); j++){
-	    		    Node destination = nodeList.get(j);
-	    		    
-	    		    if(!source.getName().equals(destination.getName())){
-		      		    String pair = source.getName() + "-" + destination.getName();
-		      		  
-		      		    out.append("Pair " + pair + "\n");
-		      		  
-		      		    List<Route> routes = routesForAllPairs.get(pair);
-		      		    for(int r = 0; r < routes.size(); r++){
-		      			    Route rAux = routes.get(r);
-		      			  
-		      			    StringBuilder sb = new StringBuilder();
-		      			    for (int n = 0; n < rAux.getNodeList().size(); n++) {
-		      			        sb.append(rAux.getNodeList().get(n).getName());
-			      			    if(n < rAux.getNodeList().size() - 1){
-			  						sb.append("-");
-			  					}
-		      			    }
-		      			    
-		      			    out.append(sb.toString());
-		      			    out.append("\n");
-		      		    }
-	    		    }
-	    	    }
-	        }
+            
+			out.append(json);
 			
 			out.close();
 			fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            
+        } catch (Exception ex) {
+        	ex.printStackTrace();
         }
     }
     

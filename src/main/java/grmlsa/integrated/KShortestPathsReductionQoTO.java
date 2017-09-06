@@ -18,6 +18,7 @@ import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByQoT;
 import grmlsa.modulation.ModulationSelector;
+import grmlsa.routing.KFixedRoutes;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
@@ -37,7 +38,9 @@ import util.IntersectionFreeSpectrum;
  */
 public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInterface {
 
-	private NewKShortestPaths kShortestsPaths;
+	//private NewKShortestPaths kShortestsPaths;
+	private KFixedRoutes kShortestsPaths;
+	
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
     
@@ -45,13 +48,21 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
     private double sigma;
     
     // A sigma value for each pair
-	private HashMap<String, Double> sigmaForAllPairs;
+	private HashMap<String, HashMap<Route, Double>> sigmaForAllPairs;
+	
+	// Used as a separator between the names of nodes
+    private static final String DIV = "-";
+    
+    // Number of candidate routes
+    private static int k = 3;
     
 	@Override
 	public boolean rsa(Circuit circuit, ControlPlane cp) {
-		
 		if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 4);
+        	//kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
+        	kShortestsPaths = new KFixedRoutes(cp.getMesh());
+        	
+        	sigmaFileReader();
         }
         if (modulationSelection == null){
         	modulationSelection = new ModulationSelectionByQoT();
@@ -59,7 +70,6 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
         }
         if(spectrumAssignment == null){
 			spectrumAssignment = new FirstFit();
-			sigmaFileReader();
 		}
 
         List<Modulation> avaliableModulations = modulationSelection.getAvaliableModulations();
@@ -69,12 +79,8 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
         int chosenBand[] = {999999, 999999}; // Value never reached
         
         double chosenWorstDeltaSNR = 0.0;
-		
+        String pair = circuit.getPair().getSource().getName() + DIV + circuit.getPair().getDestination().getName();
 		double sigmaPair = sigma;
-		if(sigmaForAllPairs != null){
-			String pair = circuit.getPair().getSource().getName() + "-" + circuit.getPair().getDestination().getName();
-			sigmaPair = sigmaForAllPairs.get(pair);
-		}
 		
 		// To avoid metrics error
 		Route checkRoute = null;
@@ -84,6 +90,10 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 		for (int r = 0; r < candidateRoutes.size(); r++) {
 			Route routeTemp = candidateRoutes.get(r);
 			circuit.setRoute(routeTemp);
+			
+			if(sigmaForAllPairs != null){
+				sigmaPair = sigmaForAllPairs.get(pair).get(routeTemp);
+			}
 			
 	    	double highestLevel = 0.0;
 	    	Modulation firstModulation = null; // First modulation format option
@@ -192,7 +202,7 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 			
 		}else{
 			
-			sigmaForAllPairs = new HashMap<String, Double>();
+			sigmaForAllPairs = new HashMap<>();
 			
 			try {
 				FileReader fr = new FileReader(sigmaForAllPairspathArqConfiguration);
@@ -202,9 +212,16 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 					String linha[] = in.readLine().split(";");
 					
 					String pair = linha[0];
-					double sigmaPair = Double.valueOf(linha[1]);
+					HashMap<Route, Double> sigmaRoute = new HashMap<>();
+					List<Route> candidateRoutes = kShortestsPaths.getRoutes(pair);
 					
-					sigmaForAllPairs.put(pair, sigmaPair);
+					for(int r = 0; r < k; r++){
+						double sigmaPair = Double.valueOf(linha[1 + r]);
+						Route route = candidateRoutes.get(r);
+						sigmaRoute.put(route, sigmaPair);
+					}
+					
+					sigmaForAllPairs.put(pair, sigmaRoute);
 				}
 				
 				in.close();
@@ -256,8 +273,16 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 				for(int j = 1; j <= numberOfNodes; j++){
 					if(i != j){
 						
-						sb.append(i + "-" + j + ";" +  String.valueOf(sigmaAllPairs[cont]) + "\n");
-						cont++;
+						sb.append(i + DIV + j + ";");
+						for(int r = 0; r < k; r++){
+							sb.append(String.valueOf(sigmaAllPairs[cont]));
+							if(r < k - 1){
+								sb.append(";");
+							}
+							
+							cont++;
+						}
+						sb.append("\n");
 					}
 				}
 				out.append(sb.toString());

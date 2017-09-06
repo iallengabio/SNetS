@@ -145,11 +145,11 @@ public class DJK implements RoutingAlgorithmInterface {
     		    if(i != j){
 	      		    String pair = i + DIV + j;
 	      		    
-		        	Route rota = routesForAllPairs.get(pair);
+		        	Route route = routesForAllPairs.get(pair);
 		        	StringBuilder sb = new StringBuilder();
-		        	for(int n = 0; n < rota.getNodeList().size(); n++){
-		        		sb.append(rota.getNodeList().get(n).getName());
-		        		if(n < rota.getNodeList().size() - 1){
+		        	for(int n = 0; n < route.getNodeList().size(); n++){
+		        		sb.append(route.getNodeList().get(n).getName());
+		        		if(n < route.getNodeList().size() - 1){
 		        			sb.append("-");
 		        		}
 		        	}

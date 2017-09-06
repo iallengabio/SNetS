@@ -55,8 +55,8 @@ public class AdaptiveArtificialBeeColony {
     public AdaptiveArtificialBeeColony(int n, double minX, double maxX) {
     	this.maxLength = n;
     	this.NP = 40;
-    	this.foodNumber = NP/2;
-    	this.trialLimit = 50;
+    	this.foodNumber = NP / 2;
+    	this.trialLimit = 200;
     	this.maxEpoch = 1000;
     	this.gBest = null;
     	this.epoch = 0;
@@ -84,7 +84,7 @@ public class AdaptiveArtificialBeeColony {
         this.minF2 = 0.0;
         this.maxF2 = 0.4;
         
-        this.ML = 50;
+        this.ML = 5000;
     }
 
     /**
@@ -138,7 +138,7 @@ public class AdaptiveArtificialBeeColony {
         for(int i = 0; i < foodNumber; i++) {
         	
         	//randomly chosen food source different from the i-th
-        	neighborBeeIndex = getExclusiveRandomNumber(foodNumber - 1, i);
+        	neighborBeeIndex = getExclusiveRandomNumber(foodNumber, i);
             currentBee = foodSources.get(i);
             neighborBee = foodSources.get(neighborBeeIndex);
         	
@@ -165,7 +165,7 @@ public class AdaptiveArtificialBeeColony {
                 t++;
                 
                 //randomly chosen food source different from the i-th
-                neighborBeeIndex = getExclusiveRandomNumber(foodNumber - 1, i);
+                neighborBeeIndex = getExclusiveRandomNumber(foodNumber, i);
 	            neighborBee = foodSources.get(neighborBeeIndex);
 	            
 	            sendToWork(currentBee, neighborBee, true);
@@ -202,11 +202,9 @@ public class AdaptiveArtificialBeeColony {
         //For onlooker bee phase
         if(isOnlookerBeePhase){
         	//Choose the search strategy according to the adaptive search strategy
-        	//Determine s by roulette wheel
-        	
         	double sumSuccessRate = 0.0;
         	for(int i = 0; i < rulesNumber; i++){
-        		successRate[i] = successfulAttempts[i] / totalAttempts[i];
+        		successRate[i] = (double)successfulAttempts[i] / (double)totalAttempts[i];
         		sumSuccessRate += successRate[i];
         	}
         	
@@ -216,6 +214,7 @@ public class AdaptiveArtificialBeeColony {
         		sumProbabilitySelecting += probabilitySelecting[i];
         	}
         	
+        	//Determine s by roulette wheel
         	double selection = rand.nextDouble() * sumProbabilitySelecting;
         	for(int i = 0; i < rulesNumber; i++){
         		selection -= probabilitySelecting[i];
@@ -324,7 +323,7 @@ public class AdaptiveArtificialBeeColony {
         for(int i = 0; i < foodNumber; i++) {
             currentBee = foodSources.get(i);
             
-            if(currentBee.getTrials() >= trialLimit) {
+            if(currentBee.getTrials() > trialLimit) {
             	currentBee.initializeNectar(rand, minX, maxX);
                 currentBee.setTrials(0);
             }
@@ -340,7 +339,7 @@ public class AdaptiveArtificialBeeColony {
 		FoodSource thisFood = null;
         double sum = 0.0;
         
-        for(int i = 1; i < foodNumber; i++) {
+        for(int i = 0; i < foodNumber; i++) {
             thisFood = foodSources.get(i);
             double fiti = 0.0;
             
@@ -366,7 +365,7 @@ public class AdaptiveArtificialBeeColony {
 	 */
     public void initialize() {
         for(int i = 0; i < foodNumber; i++) {
-        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX);
+        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX, 1);
         	foodSources.add(newFoodSource);
         }
     }
@@ -415,10 +414,10 @@ public class AdaptiveArtificialBeeColony {
     	int getRand = 0;
     	FoodSource food = null;
     	
-    	while(done){
+    	while(!done){
 	    	getRand = rand.nextInt(foodNumber);
 	    	food = foodSources.get(getRand);
-	    	if((food != foodSource1) && (food != foodSource2)){
+	    	if((food != null) && (!food.equals(foodSource1)) && (!food.equals(foodSource2))){
 	    		done = true;
 	    	}
     	}
@@ -441,6 +440,9 @@ public class AdaptiveArtificialBeeColony {
     	if((gBest == null) || ((gBest != null) && (lBest.getFitness() < gBest.getFitness()))){
     		gBest = lBest;
     	}
+    	
+    	//Save the best solution
+    	MainABC.saveBestSolution(gBest.getNectar());
     }
 
 	/**

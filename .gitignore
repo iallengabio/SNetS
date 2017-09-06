@@ -27,3 +27,4 @@ target/
 .classpath
 .project
 simulations/
+/src/main/java/simulationControl/parsers/TempMain.java

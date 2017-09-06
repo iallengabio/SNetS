@@ -8,4 +8,13 @@
 "spectrumAssignment":"firstfit",
 "integratedRmlsa":"completesharing",
 "modulationSelection":"modulationbydistance"
+"activeMetrics":
+	{"BlockingProbability":true,
+	 "BandwidthBlockingProbability":false,
+	 "ExternalFragmentation":false,
+	 "RelativeFragmentation":false,
+	 "SpectrumUtilization":false,
+	 "SpectrumSizeStatistics":false,
+	 "TransmittersReceiversRegeneratorsUtilization":false,
+	 "EnergyConsumption":false}
 }

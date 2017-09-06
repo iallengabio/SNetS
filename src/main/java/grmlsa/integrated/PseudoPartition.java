@@ -1,6 +1,5 @@
 package grmlsa.integrated;
 
-import java.util.HashSet;
 import java.util.List;
 
 import grmlsa.NewKShortestPaths;
@@ -28,10 +27,12 @@ import util.IntersectionFreeSpectrum;
  */
 public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 
+
     /**
-     * Larguras de banda que utilizam o espectro de cima para baixo
+     *
+     New circuits will be allocated using @spectrumAssignment1 if their bandwidth requirement is lower than the threshold. Otherwise, they will be allocated using @spectrumAssignment2.
      */
-    private HashSet<Double> largBandSuperiores;
+    private Double threshold;
 
     private NewKShortestPaths kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
@@ -39,8 +40,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
 
     public PseudoPartition() {
-        largBandSuperiores = new HashSet<>();
-        largBandSuperiores.add(343597383680.0); //320Gbps
+        threshold = 300000000000.0; // 300Gbps
     }
 
     @Override
@@ -63,7 +63,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
         int chosenBand[] = new int[2];
         
         // Check whether the FirstFit should be applied from the bottom up or from the top down
-        if (!largBandSuperiores.contains(circuit.getRequiredBandwidth())) { // Allocate from bottom to top
+        if (circuit.getRequiredBandwidth()<threshold) { // Allocate from bottom to top
             chosenBand[0] = 9999999;
             chosenBand[1] = 9999999;
 

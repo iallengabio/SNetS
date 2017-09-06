@@ -40,7 +40,7 @@ public class ArtificialBeeColony {
     	this.maxLength = n;
     	this.NP = 40;
     	this.foodNumber = NP/2;
-    	this.trialLimit = 50;
+    	this.trialLimit = 200;
     	this.maxEpoch = 1000;
     	this.gBest = null;
     	this.epoch = 0;
@@ -100,7 +100,7 @@ public class ArtificialBeeColony {
         for(int i = 0; i < foodNumber; i++) {
         	
         	//randomly chosen food source different from the i-th
-        	neighborBeeIndex = getExclusiveRandomNumber(foodNumber - 1, i);
+        	neighborBeeIndex = getExclusiveRandomNumber(foodNumber, i);
             currentBee = foodSources.get(i);
             neighborBee = foodSources.get(neighborBeeIndex);
         	
@@ -127,7 +127,7 @@ public class ArtificialBeeColony {
                 t++;
                 
                 //randomly chosen food source different from the i-th
-                neighborBeeIndex = getExclusiveRandomNumber(foodNumber - 1, i);
+                neighborBeeIndex = getExclusiveRandomNumber(foodNumber, i);
 	            neighborBee = foodSources.get(neighborBeeIndex);
 	            
 	            sendToWork(currentBee, neighborBee);
@@ -193,7 +193,7 @@ public class ArtificialBeeColony {
         for(int i = 0; i < foodNumber; i++) {
             currentBee = foodSources.get(i);
             
-            if(currentBee.getTrials() >= trialLimit) {
+            if(currentBee.getTrials() > trialLimit) {
             	currentBee.initializeNectar(rand, minX, maxX);
                 currentBee.setTrials(0);
             }
@@ -209,7 +209,7 @@ public class ArtificialBeeColony {
 		FoodSource thisFood = null;
         double sum = 0.0;
         
-        for(int i = 1; i < foodNumber; i++) {
+        for(int i = 0; i < foodNumber; i++) {
             thisFood = foodSources.get(i);
             double fiti = 0.0;
             
@@ -235,7 +235,7 @@ public class ArtificialBeeColony {
 	 */
     public void initialize() {
         for(int i = 0; i < foodNumber; i++) {
-        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX);
+        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX, 1);
         	foodSources.add(newFoodSource);
         }
     }
@@ -285,6 +285,9 @@ public class ArtificialBeeColony {
     			gBest = foodSources.get(i);
     		}
     	}
+    	
+    	//Save the best solution
+    	MainABC.saveBestSolution(gBest.getNectar());
     }
 
 	/**

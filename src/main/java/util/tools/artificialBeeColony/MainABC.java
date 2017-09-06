@@ -11,26 +11,38 @@ public class MainABC {
 	
 	private static String pathFileOfSimulation;
 	private static String pathFileOfSigma;
-	private static String separador;
+	private static String separator;
+	private static String folderName;
 	private static int numberOfNodes;
 
 	public static void main(String[] args) {
 		
-		separador = System.getProperty("file.separator");
-		pathFileOfSimulation = "C:" + separador + "Users" + separador + "Alexandre" + separador + "src" + separador + "workspace" + separador + "SNetS" + separador + "simulations" + separador + "A6NET";
-		pathFileOfSigma = pathFileOfSimulation + separador + "sigmaForAllPairs.txt";
+		separator = System.getProperty("file.separator");
+		folderName = "x_A6NET_teste_AABC_carga_100";
+		pathFileOfSimulation = "C:" + separator + "Users" + separator + "Alexandre" + separator + "src" + separator + "workspace" + separator + "SNetS" + separator + "simulations" + separator + "IA-RMLSA" + separator + "A6NET" + separator + folderName;
+		pathFileOfSigma = pathFileOfSimulation + separator + "sigmaForAllPairs.txt";
 		
 		numberOfNodes = 6;
-		int n = numberOfNodes * (numberOfNodes - 1); //quantidade de pares
-		double minX = 0.0; //valor minimo para o sigma
-		double maxX = 1.0; //valor maximo para o sigma
+		int n = numberOfNodes * (numberOfNodes - 1); //number of pairs
+		double minX = 0.0; //minimum value for sigma
+		double maxX = 1.0; //maximum value for sigma
+		int k = 3; //Number of candidate routes
 		
-		ArtificialBeeColony abc = new ArtificialBeeColony(n, minX, maxX);
-		AdaptiveArtificialBeeColony aabc = new AdaptiveArtificialBeeColony(n, minX, maxX);
+		//ArtificialBeeColony abc = new ArtificialBeeColony(n, minX, maxX);
+		//abc.execute();
+		//double sigmaAllPairs[] = abc.getgBest().getNectar();
 		
-		abc.execute();
+		AdaptiveArtificialBeeColony aabc = new AdaptiveArtificialBeeColony(n * k, minX, maxX);
 		aabc.execute();
+		double sigmaAllPairs[] = aabc.getgBest().getNectar();
 		
+		//Save the best solution
+		saveBestSolution(sigmaAllPairs);
+	}
+	
+	public static void saveBestSolution(double sigmaAllPairs[]){
+		String pathFileBestSoluation = pathFileOfSimulation + separator + "bestSigmaForAllPairs.txt";;
+		KShortestPathsReductionQoTO.createFileSigmaAllPairs(numberOfNodes, pathFileBestSoluation, sigmaAllPairs);
 	}
 	
 	public static double runSimulation(double sigmaAllPairs[]) {
@@ -54,25 +66,24 @@ public class MainABC {
 	}
 	
 	private static double computesBP() {
-		String nomeDaPasta = "A6NET";
-		String nomeDoArquivoLeitura = nomeDaPasta + "_BlockingProbability.csv";
-		String caminhoArqOrigem = pathFileOfSimulation + separador + nomeDoArquivoLeitura;
-		String metrica = "blocking probability";
+		String readFileName = folderName + "_BlockingProbability.csv";
+		String sourcePath = pathFileOfSimulation + separator + readFileName;
+		String metric = "blocking probability";
 		
-		int quantReplicacoes = 3;
-		double bp[] = new double[quantReplicacoes];
+		int numberOfReplications = 1;
+		double bp[] = new double[numberOfReplications];
 		
 		try{
-			FileReader fr = new FileReader(caminhoArqOrigem);
+			FileReader fr = new FileReader(sourcePath);
 			BufferedReader in = new BufferedReader(fr);
 		    
 			while(in.ready()){
-				String[] linha = in.readLine().split(",");
+				String[] line = in.readLine().split(",");
 				
-				if((linha.length >= 5) && linha[0].equals(metrica)){
+				if((line.length >= 5) && line[0].equals(metric)){
 					
-					for(int r = 0; r < quantReplicacoes; r++){
-						bp[r] = Double.parseDouble(linha[6 + r]);
+					for(int r = 0; r < numberOfReplications; r++){
+						bp[r] = Double.parseDouble(line[6 + r]);
 					}
 					
 					break;
@@ -86,10 +97,10 @@ public class MainABC {
 	    }
 		
 		double sumBP = 0.0;
-		for(int r = 0; r < quantReplicacoes; r++){
+		for(int r = 0; r < numberOfReplications; r++){
 			sumBP += bp[r];
 		}
-		double averageBP = sumBP / quantReplicacoes;
+		double averageBP = sumBP / numberOfReplications;
 		
 		return averageBP;
 	}
