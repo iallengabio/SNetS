@@ -162,7 +162,7 @@ public class ControlPlane {
      *
      * @param circuit Circuit
      */
-    protected void allocateCircuit(Circuit circuit) {
+    protected void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
@@ -183,7 +183,7 @@ public class ControlPlane {
      * @param band int[]
      * @param links List<Link>
      */
-    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) {
+    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             
@@ -295,12 +295,14 @@ public class ControlPlane {
         int specAssigAt[] = circuit.getSpectrumAssigned();
         int newSpecAssigAt[] = specAssigAt.clone();
         if (upperBand != null) {
+
             band = upperBand;
             allocateSpectrum(circuit, band, links);
             newSpecAssigAt[1] = upperBand[1];
         }
         
         if (bottomBand != null) {
+
             band = bottomBand;
             allocateSpectrum(circuit, band, links);
             newSpecAssigAt[0] = bottomBand[0];
@@ -338,7 +340,7 @@ public class ControlPlane {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[];
-        int specAssigAt[] = circuit.getSpectrumAssigned();
+        int specAssigAt[] = circuit.getSpectrumAssigned().clone();
         
         if (bottomBand != null) {
             band = bottomBand;
@@ -410,17 +412,6 @@ public class ControlPlane {
     			}
     			
     			return QoTForOther;
-    			
-    			// With this removal, every time it checksQoT of some circuit it must be recalculated
-//    			if(QoTForOther){
-//    				// QoT the other circuits was kept acceptable
-//    				return true;
-//    			} else {
-//    				// QoT the other circuits was not kept acceptable, frees allocated resources
-//    				releaseCircuit(circuit);
-//    				// Recalculates the QoT of the other circuits
-//    				computeQoTForOther(circuit);
-//    			}
     		}
     		
     		return false;
@@ -453,23 +444,46 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    protected boolean computeQoTForOther(Circuit circuit){
-    	TreeSet<Circuit> circuits = new TreeSet<Circuit>();
+    protected boolean computeQoTForOther(Circuit circuit) {
+    	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
+    	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
+    	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits
 		
+    	// Search for all circuits that have links in common with the circuit under evaluation
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
+			
+			// Picks up the active circuits that use the link
 			TreeSet<Circuit> circuitsTemp = link.getCircuitList();
-
             for (Circuit circuitTemp : circuitsTemp) {
+            	
+            	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
                 if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {
                     circuits.add(circuitTemp);
+                    
+                    circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
+                    circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
                 }
             }
 		}
-
+		
+		// Tests the QoT of circuits
         for (Circuit circuitTemp : circuits) {
+        	// Recalculates the QoT and SNR of the circuits
             boolean QoT = computeQualityOfTransmission(circuitTemp);
             if (!QoT) {
+            	
+            	// Returns the SNR and QoT values of circuits before the establishment of the circuit in evaluation
+            	for (Circuit circuitAux : circuits) {
+            		circuitAux.setSNR(circuitsSNR.get(circuitAux));
+            		circuitAux.setQoT(circuitsQoT.get(circuitAux));
+            		
+            		// Runs to the last circuit that has been modified
+            		if (circuitTemp.equals(circuitAux)) {
+            			break;
+            		}
+            	}
+            	
                 return false;
             }
         }
