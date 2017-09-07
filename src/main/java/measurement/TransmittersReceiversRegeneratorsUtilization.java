@@ -68,6 +68,9 @@ public class TransmittersReceiversRegeneratorsUtilization extends Measurement {
     public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
         ArrayList<Node> nodes = new ArrayList<>(cp.getMesh().getNodeList());
 
+        if(nodes.isEmpty())
+            System.out.print("ooo");
+
         for (Node node : nodes) {
             avgTxUtilization += node.getTxs().getTxUtilization();
             avgRxUtilization += node.getRxs().getRxUtilization();

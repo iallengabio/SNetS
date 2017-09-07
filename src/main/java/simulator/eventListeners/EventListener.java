@@ -16,6 +16,6 @@ public interface EventListener {
      *
      * @param e Event
      */
-    public abstract void execute(Event e);
+    public abstract void execute(Event e) throws Exception;
 }
 

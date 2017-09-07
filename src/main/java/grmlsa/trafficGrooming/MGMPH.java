@@ -25,7 +25,7 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
 
 
     @Override
-    public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) {
+    public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) throws Exception {
         if (virtualRouting == null) {
             initVirtualRouting(cp);
         }
@@ -50,7 +50,7 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
     }
 
     @Override
-    public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
+    public void finishConnection(RequestForConnection rfc, ControlPlane cp) throws Exception {
 
         for (Circuit circuit : rfc.getCircuits()) {
 
@@ -68,6 +68,7 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
                     releaseBand[1] = circuit.getSpectrumAssigned()[1];
                     releaseBand[0] = releaseBand[1] - release + 1;
                     cp.retractCircuit(circuit, null, releaseBand);
+
                 }
 
                 circuit.removeRequest(rfc);
@@ -192,7 +193,7 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
         return false;
     }
 
-    private boolean expandEletricGrooming(RequestForConnection rfc, ControlPlane cp) {
+    private boolean expandEletricGrooming(RequestForConnection rfc, ControlPlane cp) throws Exception {
         //second try expand some circuits to enable eletrical grooming
         ArrayList<ArrayList<Circuit>> avr = allVirtualRouting(rfc);
         Collections.sort(avr, new Comparator<ArrayList<Circuit>>() {//Order the solutions according to the cost function 2.
@@ -214,34 +215,39 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
             }
             if (canBeExpanded) {//all circuits can be expanded
                 //expand each circuit and acomodate the new request
-                for (Circuit c : alc) {
+                List<int[]> upExps = new ArrayList<>();
+                List<int[]> downExps = new ArrayList<>();
+                int i;
+                for (i=0;i<alc.size();i++) {
+                    Circuit c = alc.get(i);
                     int slotsNeeded = c.getModulation().requiredSlots(c.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (c.getSpectrumAssigned()[1] - c.getSpectrumAssigned()[0] + 1);
                     List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute());
                     int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentInferior(c.getSpectrumAssigned(), composition);
                     int[] bandFreeAdjSuperior = IntersectionFreeSpectrum.bandAdjacentSuperior(c.getSpectrumAssigned(), composition);
                     int expansion[] = decideToExpand(slotsNeeded, bandFreeAdjInferior, bandFreeAdjSuperior);
-                    int upExpBand[] = null;
-                    int downExpBand[] = null;
-                    if (expansion[0] > 0) { // Expand down
-                        downExpBand = new int[2];
-
-                        downExpBand[1] = bandFreeAdjInferior[1];
-                        downExpBand[0] = downExpBand[1] - expansion[0] + 1;
-                    }
-                    if (expansion[1] > 0) { // Expansion up
-                        upExpBand = new int[2];
-
-                        upExpBand[0] = bandFreeAdjSuperior[0];
-                        upExpBand[1] = upExpBand[0] + expansion[1] - 1;
-                    }
+                    int upExpBand[] = upExpBand(c,rfc,expansion[1]);
+                    int downExpBand[] = downExpBand(c,rfc,expansion[0]);
+                    upExps.add(upExpBand);
+                    downExps.add(downExpBand);
 
                     if (cp.expandCircuit(c, upExpBand, downExpBand)) {// Expansion succeeded
                         c.addRequest(rfc);
                         rfc.getCircuits().add(c);
+                    }else{
+                        canBeExpanded = false; //Undo the expansion of circuits
+                        break;
                     }
-
                 }
-                return true;
+                if(canBeExpanded) {
+                    return true;
+                }else {
+                    i--;
+                    for (; i >= 0; i--) {//Undo the expansion of circuits
+                        cp.retractCircuit(alc.get(i), downExps.get(i),upExps.get(i));
+                        alc.get(i).removeRequest(rfc);
+                        rfc.getCircuits().remove(alc.get(i));
+                    }
+                }
             }
         }
         return false;
@@ -306,7 +312,6 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
 
         return res;
     }
-
     /**
      * This method decides how to expand the channel to accommodate new connections.
      *
@@ -338,6 +343,53 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
         }
 
         return res;
+    }
+
+    /**
+     * This method calculates the range of slots that will be used for the expansion at the bottom.
+     * @param c
+     * @param rfc
+     * @param expansion
+     * @return
+     */
+    private static int[] downExpBand(Circuit c, RequestForConnection rfc, int expansion){
+
+        List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute());
+        int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentInferior(c.getSpectrumAssigned(), composition);
+
+        int downExpBand[] = null;
+        if (expansion > 0) { // Expand down
+            downExpBand = new int[2];
+
+            downExpBand[1] = bandFreeAdjInferior[1];
+            downExpBand[0] = downExpBand[1] - expansion + 1;
+        }
+
+        return downExpBand;
+    }
+
+    /**
+     * This method calculates the range of slots that will be used for the expansion at the top.
+     * @param c
+     * @param rfc
+     * @param expansion
+     * @return
+     */
+    private static int[] upExpBand(Circuit c, RequestForConnection rfc, int expansion){
+
+        List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute());
+
+        int[] bandFreeAdjSuperior = IntersectionFreeSpectrum.bandAdjacentSuperior(c.getSpectrumAssigned(), composition);
+
+        int upExpBand[] = null;
+        if (expansion > 0) { // Expansion up
+            upExpBand = new int[2];
+
+            upExpBand[0] = bandFreeAdjSuperior[0];
+            upExpBand[1] = upExpBand[0] + expansion - 1;
+        }
+
+        return upExpBand;
     }
 
 }

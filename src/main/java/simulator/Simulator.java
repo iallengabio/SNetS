@@ -33,7 +33,7 @@ public class Simulator {
      *
      * @return Measurements
      */
-    public Measurements start() {
+    public Measurements start() throws Exception {
         eMachine = new EventMachine();
      // Creating the ArriveRequest event listener
         arriveRequest = new ArriveRequestForConexionListener(this.getEventMachine(), simulation);

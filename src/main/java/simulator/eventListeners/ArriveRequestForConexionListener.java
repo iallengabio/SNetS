@@ -36,7 +36,7 @@ public class ArriveRequestForConexionListener implements EventListener {
      * Run a certain 'e' event.
      */
     @Override
-    public void execute(Event e) {
+    public void execute(Event e) throws Exception {
 
         RequestForConnection requestForConnection = (RequestForConnection) e.getObject();
 

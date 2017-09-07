@@ -43,7 +43,7 @@ public class EventMachine implements Serializable {
      * Starts running the event machine.
      * The event machine runs until there are no more events in the eventList.
      */
-    public void executeEvents() {
+    public void executeEvents() throws Exception {
         while (eventList.size() > 0) {
             Event e = eventList.firstElement();
             eventList.removeElementAt(0);
