@@ -65,6 +65,10 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
         }
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
+
+            if(chosenBand[0]>chosenBand[1]){
+                int i = 1;
+            }
             circuit.setRoute(chosenRoute);
             circuit.setModulation(chosenMod);
             circuit.setSpectrumAssigned(chosenBand);
