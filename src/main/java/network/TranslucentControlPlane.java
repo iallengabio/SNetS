@@ -1,6 +1,5 @@
 package network;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -181,7 +180,6 @@ public class TranslucentControlPlane extends ControlPlane {
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
      * @param circuit Circuit
-     * @param chosen int[]
      * @param links List<Link>
      */
 	protected void allocateSpectrum(Circuit circuit, List<Link> links) throws Exception {
@@ -239,7 +237,7 @@ public class TranslucentControlPlane extends ControlPlane {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh());
+                return integrated.rsa(circuit, this.getMesh(), this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
@@ -273,8 +271,6 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * 
 	 * @param circuit - Circuit
 	 * @param route - Route
-	 * @param spectrumAssignment - SpectrumAssignmentAlgorithmInterface
-	 * @param modulationSelector - ModulationSelector
 	 * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
 	 */
 	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route){
@@ -494,8 +490,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by QoTN
 	 * Returns true if the blocking was by QoTN and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	@Override
@@ -544,8 +539,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by fragmentation
 	 * Returns true if the blocking was by fragmentation and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	@Override
