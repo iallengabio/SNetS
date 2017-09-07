@@ -14,7 +14,7 @@ import java.util.Random;
  * 
  * @author Alexandre
  */
-public class MultiObjectiveArtificialBeeColony implements Algo {
+public class MultiObjectiveArtificialBeeColony implements ABCInterface {
 
 	// ABC PARAMETERS
 	private int maxLength; 		// The number of parameters of the problem to be optimized

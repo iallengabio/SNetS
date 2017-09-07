@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
+import grmlsa.KFixedRoutes;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByQoT;
 import grmlsa.modulation.ModulationSelector;
-import grmlsa.routing.KFixedRoutes;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
