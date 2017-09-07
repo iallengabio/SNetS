@@ -161,7 +161,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit Circuit
      */
 	@Override
-    protected void allocateCircuit(Circuit circuit) {
+    protected void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         
@@ -184,7 +184,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param chosen int[]
      * @param links List<Link>
      */
-	protected void allocateSpectrum(Circuit circuit, List<Link> links) {
+	protected void allocateSpectrum(Circuit circuit, List<Link> links) throws Exception {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             int[] band = circuit.getSpectrumAssignedByLink(link);

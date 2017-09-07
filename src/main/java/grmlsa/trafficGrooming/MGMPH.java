@@ -68,6 +68,7 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
                     releaseBand[1] = circuit.getSpectrumAssigned()[1];
                     releaseBand[0] = releaseBand[1] - release + 1;
                     cp.retractCircuit(circuit, null, releaseBand);
+
                 }
 
                 circuit.removeRequest(rfc);
@@ -242,7 +243,9 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
                 }else {
                     i--;
                     for (; i >= 0; i--) {//Undo the expansion of circuits
-                        cp.retractCircuit(alc.get(i), upExps.get(i), downExps.get(i));
+                        cp.retractCircuit(alc.get(i), downExps.get(i),upExps.get(i));
+                        alc.get(i).removeRequest(rfc);
+                        rfc.getCircuits().remove(alc.get(i));
                     }
                 }
             }
@@ -309,7 +312,6 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
 
         return res;
     }
-
     /**
      * This method decides how to expand the channel to accommodate new connections.
      *
@@ -389,6 +391,5 @@ public class MGMPH implements TrafficGroomingAlgorithmInterface {
 
         return upExpBand;
     }
-
 
 }

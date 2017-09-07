@@ -162,7 +162,7 @@ public class ControlPlane {
      *
      * @param circuit Circuit
      */
-    protected void allocateCircuit(Circuit circuit) {
+    protected void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
@@ -183,7 +183,7 @@ public class ControlPlane {
      * @param band int[]
      * @param links List<Link>
      */
-    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) {
+    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             
@@ -295,12 +295,14 @@ public class ControlPlane {
         int specAssigAt[] = circuit.getSpectrumAssigned();
         int newSpecAssigAt[] = specAssigAt.clone();
         if (upperBand != null) {
+
             band = upperBand;
             allocateSpectrum(circuit, band, links);
             newSpecAssigAt[1] = upperBand[1];
         }
         
         if (bottomBand != null) {
+
             band = bottomBand;
             allocateSpectrum(circuit, band, links);
             newSpecAssigAt[0] = bottomBand[0];
@@ -338,7 +340,7 @@ public class ControlPlane {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[];
-        int specAssigAt[] = circuit.getSpectrumAssigned();
+        int specAssigAt[] = circuit.getSpectrumAssigned().clone();
         
         if (bottomBand != null) {
             band = bottomBand;

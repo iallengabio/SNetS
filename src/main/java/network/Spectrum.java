@@ -49,8 +49,12 @@ public class Spectrum {
 	 * @param spectrumBand int
 	 * @return boolean
 	 */
-	public boolean useSpectrum(int spectrumBand[]){
-		
+	public boolean useSpectrum(int spectrumBand[]) throws Exception {
+
+		if(spectrumBand[0]>spectrumBand[1]){
+			throw new Exception("invalid spectrum band");
+		}
+
 		for (int freSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freSpecBand)){
 				freeSpectrumBands.remove(freSpecBand); // Remove free bands
@@ -102,6 +106,10 @@ public class Spectrum {
 	 * @param spectrumBand int[]
 	 */
 	public void freeSpectrum(int spectrumBand[]) throws Exception {
+
+		if(spectrumBand[0]>spectrumBand[1]){
+			throw new Exception("invalid spectrum band");
+		}
 
 		for (int freSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freSpecBand)){
