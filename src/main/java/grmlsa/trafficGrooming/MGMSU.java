@@ -21,15 +21,15 @@ public class MGMSU extends MultihopGrooming {
 
 
     @Override
-    protected double costFunction1(ArrayList<Circuit> sol) {
-        throw new UnsupportedOperationException();
-        //return 0;
+    protected double costFunction1(ArrayList<Circuit> sol, RequestForConnection rfc) {
+        double res = 0;
+        for(Circuit circuit : sol){
+            circuit.getModulation().requiredSlots(rfc.getRequiredBandwidth());
+
+            res +=  (circuit.getModulation().requiredSlots(rfc.getRequiredBandwidth()) * circuit.getRoute().getHops());
+        }
+        return res;
     }
 
-    @Override
-    protected double costFunction2(ArrayList<Circuit> sol, RequestForConnection rfc) {
-        throw new UnsupportedOperationException();
-        //return 0;
-    }
 
 }

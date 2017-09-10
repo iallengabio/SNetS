@@ -24,28 +24,11 @@ public class MGMVH extends MultihopGrooming {
      * @param sol
      * @return
      */
-    protected double costFunction1(ArrayList<Circuit> sol) {
+    protected double costFunction1(ArrayList<Circuit> sol, RequestForConnection rfc) {
         return sol.size();
     }
 
-    /**
-     * This cost function is used to compare solutions of grooming that need to expand some circuits.
-     * @param sol
-     * @param rfc
-     * @return
-     */
-    protected double costFunction2(ArrayList<Circuit> sol, RequestForConnection rfc){
-        double res = 0;
-        for (Circuit circuit : sol) {
-            if (circuit.getResidualCapacity() < rfc.getRequiredBandwidth()) {
-                res++;
-            }
-        }
 
-        res = res * 100 + sol.size(); //In case of a tie, preference should be given to solutions with fewer virtual hops.
-
-        return res;
-    }
 
 
 

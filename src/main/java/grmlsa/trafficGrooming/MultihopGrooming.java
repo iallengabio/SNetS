@@ -178,7 +178,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
             int i;
             ArrayList<Circuit> chosenCircs = avrsc.get(0);
             for (i = 1; i < avrsc.size(); i++) {
-                if (costFunction1(chosenCircs) > costFunction1(avrsc.get(i))) {
+                if (costFunction1(chosenCircs, rfc) > costFunction1(avrsc.get(i), rfc)) {
                     chosenCircs = avrsc.get(i);
                 }
             }
@@ -286,7 +286,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
      * @param sol
      * @return
      */
-    protected abstract double costFunction1(ArrayList<Circuit> sol);
+    protected abstract double costFunction1(ArrayList<Circuit> sol, RequestForConnection rfc);
 
     /**
      * This cost function is used to compare solutions of grooming that need to expand some circuits.
@@ -294,7 +294,24 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
      * @param rfc
      * @return
      */
-    protected abstract double costFunction2(ArrayList<Circuit> sol, RequestForConnection rfc);
+    /**
+     * This cost function is used to compare solutions of grooming that need to expand some circuits.
+     * @param sol
+     * @param rfc
+     * @return
+     */
+    protected double costFunction2(ArrayList<Circuit> sol, RequestForConnection rfc){
+        double res = 0;
+        for (Circuit circuit : sol) {
+            if (circuit.getResidualCapacity() < rfc.getRequiredBandwidth()) {
+                res++;
+            }
+        }
+
+        res = res * 100000 + costFunction1(sol, rfc); //In case of a tie, preference should be given to solutions with fewer virtual hops.
+
+        return res;
+    }
     /**
      * This method decides how to expand the channel to accommodate new connections.
      *
