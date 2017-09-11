@@ -18,16 +18,8 @@ public class Grooming {
     public static int[] circuitExpansiveness(Circuit circuit){
         int res[] = new int[2];
         List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
-        int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentInferior(circuit.getSpectrumAssigned(), composition);
-        res[0] = 0;
-        if(bandFreeAdjInferior != null){
-            res[0] = bandFreeAdjInferior[1] - bandFreeAdjInferior[0] + 1;
-        }
-        int[] bandFreeAdjSuperior = IntersectionFreeSpectrum.bandAdjacentSuperior(circuit.getSpectrumAssigned(), composition);
-        res[1] = 0;
-        if(bandFreeAdjSuperior != null){
-            res[1] = bandFreeAdjSuperior[1] - bandFreeAdjSuperior[0] + 1;
-        }
+        res[0] = IntersectionFreeSpectrum.freeSlotsDown(circuit.getSpectrumAssigned(),composition);
+        res[1] = IntersectionFreeSpectrum.freeSlotsUpper(circuit.getSpectrumAssigned(),composition);
         return res;
     }
 }

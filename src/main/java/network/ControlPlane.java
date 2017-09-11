@@ -166,8 +166,11 @@ public class ControlPlane {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
-        
-        allocateSpectrum(circuit, band, links);
+
+        if(!allocateSpectrum(circuit, band, links)){
+            throw new Exception("bad RMLSA choice. Spectrum cant be allocated.");
+        }
+
         
         // Allocates transmitter and receiver
         circuit.getSource().getTxs().allocatesTransmitters();
@@ -183,12 +186,20 @@ public class ControlPlane {
      * @param band int[]
      * @param links List<Link>
      */
-    protected void allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
+    protected boolean allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
+        boolean flag = false;
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-            
-            link.useSpectrum(band);
+
+            if(!link.useSpectrum(band)){//spectrum already in use
+                i--;
+                for(;i>=0;i--){
+                    links.get(i).liberateSpectrum(band);
+                }
+                return false;
+            }
         }
+        return true;
     }
     
     /**
@@ -283,79 +294,87 @@ public class ControlPlane {
     /**
      * Increase the number of slots used by a given circuit
      *
-     * @param circuit Circuit
-     * @param upperBand int[]
-     * @param bottomBand int[]
-     * @return boolean
+     * @param circuit
+     * @param numSlotsUp
+     * @param numSlotsDown
+     * @return
+     * @throws Exception
      */
-    public boolean expandCircuit(Circuit circuit, int upperBand[], int bottomBand[]) throws Exception {
-        Route route = circuit.getRoute();
-        List<Link> links = new ArrayList<>(route.getLinkList());
-        int band[];
+    public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
+        //calculate the spectrum band at top
+        int upperBand[] = new int[2];
+        upperBand[0] = circuit.getSpectrumAssigned()[1] + 1;
+        upperBand[1] = upperBand[0] + numSlotsUp - 1;
+
+        //calculate the spectrum band at bottom
+        int bottomBand[] = new int[2];
+        bottomBand[1] = circuit.getSpectrumAssigned()[0] - 1;
+        bottomBand[0] = bottomBand[1] - numSlotsDown + 1;
+
         int specAssigAt[] = circuit.getSpectrumAssigned();
         int newSpecAssigAt[] = specAssigAt.clone();
-        if (upperBand != null) {
 
-            band = upperBand;
-            allocateSpectrum(circuit, band, links);
-            newSpecAssigAt[1] = upperBand[1];
+        //try to expand circuit
+        if (numSlotsUp > 0){
+            if(allocateSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()))){
+                newSpecAssigAt[1] = upperBand[1];
+            }else{
+                throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
+            }
         }
-        
-        if (bottomBand != null) {
+        if(numSlotsDown > 0) {
+            if(allocateSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()))) {
+                newSpecAssigAt[0] = bottomBand[0];
+            }else{
+                throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
+            }
+        }
 
-            band = bottomBand;
-            allocateSpectrum(circuit, band, links);
-            newSpecAssigAt[0] = bottomBand[0];
-        }
         circuit.setSpectrumAssigned(newSpecAssigAt);
-        
+
         // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
         boolean QoT = isAdmissibleQualityOfTransmission(circuit);
 
         if(!QoT){
-            if (upperBand != null) {
-                band = upperBand;
-                releaseSpectrum(circuit, band, links);
+            if (numSlotsUp>0) {
+                releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             }
 
-            if (bottomBand != null) {
-                band = bottomBand;
-                releaseSpectrum(circuit, band, links);
+            if (numSlotsDown>0) {
+                releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             }
-
             circuit.setSpectrumAssigned(specAssigAt);
+            isAdmissibleQualityOfTransmission(circuit); //recompute QoT
         }
 
         return QoT;
     }
 
-    /**
-     * Reduces the number of slots used by a given circuit
-     *
-     * @param circuit Circuit
-     * @param bottomBand int[]
-     * @param upperBand int[]
-     */
-    public void retractCircuit(Circuit circuit, int bottomBand[], int upperBand[]) throws Exception {
-        Route route = circuit.getRoute();
-        List<Link> links = new ArrayList<>(route.getLinkList());
-        int band[];
-        int specAssigAt[] = circuit.getSpectrumAssigned().clone();
-        
-        if (bottomBand != null) {
-            band = bottomBand;
-            releaseSpectrum(circuit, band, links);
-            specAssigAt[0] = bottomBand[1] + 1;
+    public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
+        //calculate the spectrum band at top
+        int upperBand[] = new int[2];
+        upperBand[1] = circuit.getSpectrumAssigned()[1];
+        upperBand[0] = upperBand[1] - numSlotsUp + 1;
+
+        //calculate the spectrum band at bottom
+        int bottomBand[] = new int[2];
+        bottomBand[0] = circuit.getSpectrumAssigned()[0];
+        bottomBand[1] = bottomBand[0] + numSlotsDown - 1;
+        int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
+        if (numSlotsUp>0) {
+            releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()));
+            newSpecAssign[1] = upperBand[0]-1;
         }
-        
-        if (upperBand != null) {
-            band = upperBand;
-            releaseSpectrum(circuit, band, links);
-            specAssigAt[1] = upperBand[0] - 1;
+
+        if (numSlotsDown>0) {
+            releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
+            newSpecAssign[0] = bottomBand[1]+1;
         }
-        
-        circuit.setSpectrumAssigned(specAssigAt);
+        circuit.setSpectrumAssigned(newSpecAssign);
+        isAdmissibleQualityOfTransmission(circuit); //compute QoT
+
     }
+
 
     /**
      * To find active circuits on the network with specified source and destination
