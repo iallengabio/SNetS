@@ -113,7 +113,7 @@ public class Spectrum {
 
 		for (int freSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freSpecBand)){
-				throw new Exception("spectrum is already free");
+				throw new Exception("spectrum is already free. spectrum band: " + spectrumBand[0] + " - " + spectrumBand[1]);
 			}
 		}
 

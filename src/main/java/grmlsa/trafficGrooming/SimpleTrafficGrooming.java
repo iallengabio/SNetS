@@ -62,21 +62,8 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 				
 				// Expand this channel to accommodate the new request
 				int expansion[] = decideToExpand(numMoreSlots, bandFreeAdjInferior, bandFreeAdjSuperior);
-				int upExpBand[] = null;
-				int downExpBand[] = null;
-				
-				if(expansion[0] > 0){ // Expand down
-					downExpBand = new int[2];
-					downExpBand[1] = bandFreeAdjInferior[1];
-					downExpBand[0] = downExpBand[1] - expansion[0] + 1;					
-				}
-				if(expansion[1] > 0){ // Expansion up
-					upExpBand = new int[2];
-					upExpBand[0] = bandFreeAdjSuperior[0];
-					upExpBand[1] = upExpBand[0] + expansion[1] - 1;
-				}
-				
-				if(cp.expandCircuit(circuit, upExpBand, downExpBand)){// Expansion succeeded
+
+				if(cp.expandCircuit(circuit, expansion[0], expansion[1])){// Expansion succeeded
 					circuit.addRequest(rfc);
 					rfc.getCircuits().add(circuit);
 					return true;
@@ -141,7 +128,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 			if(release!=0) {
 				releaseBand[1] = circuit.getSpectrumAssigned()[1];
 				releaseBand[0] = releaseBand[1] - release + 1;
-				cp.retractCircuit(circuit, null, releaseBand);
+				cp.retractCircuit(circuit, 0, release);
 			}
 
 			circuit.removeRequest(rfc);

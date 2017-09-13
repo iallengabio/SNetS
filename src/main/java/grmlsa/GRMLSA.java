@@ -39,41 +39,45 @@ public class GRMLSA {
 
     // Constants for indication of RMLSA algorithms
     // Optical traffic aggregation
-    public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
-    public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
-    public static final String GROOMING_OPT_MGMVH = "mgmvh";
-    public static final String GROOMING_OPT_MGMPH = "mgmph";
+    private static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
+    private static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
+    private static final String GROOMING_OPT_MGMVH = "mgmvh";
+    private static final String GROOMING_OPT_MGMPH = "mgmph";
+    private static final String GROOMING_OPT_MGHMDS = "mghmds";
+    private static final String GROOMING_OPT_MGHMS = "mghms";
+    private static final String GROOMING_OPT_MGMSU = "mgmsu";
+
 
     // Routing
-    public static final String ROUTING_DJK = "djk";
-    public static final String ROUTING_MMRDS = "mmrds";
-    public static final String ROUTING_FIXEDROUTES = "fixedroutes";
+    private static final String ROUTING_DJK = "djk";
+    private static final String ROUTING_MMRDS = "mmrds";
+    private static final String ROUTING_FIXEDROUTES = "fixedroutes";
 
     // Spectrum assignment
-    public static final String SPECTRUM_ASSIGNMENT_FISTFIT = "firstfit";
-    public static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
-    public static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
-    public static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
+    private static final String SPECTRUM_ASSIGNMENT_FISTFIT = "firstfit";
+    private static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
+    private static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
+    private static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
     
     // Integrados
-    public static final String INTEGRATED_COMPLETESHARING = "completesharing";
-    public static final String INTEGRATED_PSEUDOPARTITION = "pseudopartition";
-    public static final String INTEGRATED_DEDICATEDPARTITION = "dedicatedpartition";
-    public static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
-    public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
-    public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
-    public static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
+    private static final String INTEGRATED_COMPLETESHARING = "completesharing";
+    private static final String INTEGRATED_PSEUDOPARTITION = "pseudopartition";
+    private static final String INTEGRATED_DEDICATEDPARTITION = "dedicatedpartition";
+    private static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
+    private static final String INTEGRATED_ZONEPARTITION = "zonepartition";
+    private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
+    private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
 
     
     // Regenerator assignment
-    public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
-    public static final String FLR_REGENERATOR_ASSIGNMENT = "flrra";
-	public static final String FNS_REGENERATOR_ASSIGNMENT = "fnsra";
+    private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
+    private static final String FLR_REGENERATOR_ASSIGNMENT = "flrra";
+	private static final String FNS_REGENERATOR_ASSIGNMENT = "fnsra";
 	
 	// Modulation selection
-	public static final String MODULATION_BY_DISTANCE = "modulationbydistance";
-	public static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
-	public static final String MODULATION_BY_QOT = "modulationbyqot";
+	private static final String MODULATION_BY_DISTANCE = "modulationbydistance";
+	private static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
+	private static final String MODULATION_BY_QOT = "modulationbyqot";
 
     // End of constants
 
@@ -125,6 +129,12 @@ public class GRMLSA {
                 return new MGMVH();
             case GROOMING_OPT_MGMPH:
                 return new MGMPH();
+            case GROOMING_OPT_MGHMDS:
+                return new MGHMDS();
+            case GROOMING_OPT_MGHMS:
+                return new MGHMS();
+            case GROOMING_OPT_MGMSU:
+                return new MGMSU();
             default:
                 return null;
         }
