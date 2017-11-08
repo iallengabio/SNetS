@@ -65,7 +65,7 @@ public class Modulation {
         double numberOfSlots = bandwidth / (bitsPerSymbol * freqSlot);
         
         if(activeQoT){
-        	numberOfSlots = (1.1 * bandwidth * (1 + rateFEC)) / (2 * bitsPerSymbol * freqSlot);
+        	numberOfSlots = (1.1 * bandwidth * (1.0 + rateFEC)) / (2.0 * bitsPerSymbol * freqSlot);
         }
         
         int numberOfSlotsTemp = (int) numberOfSlots;
