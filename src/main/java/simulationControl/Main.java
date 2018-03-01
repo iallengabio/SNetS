@@ -63,7 +63,9 @@ public class Main {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Gson gson = new GsonBuilder().create();
-                SimulationRequest sr = gson.fromJson(dataSnapshot.getValue(false).toString(), SimulationRequest.class);
+                String srjson = dataSnapshot.getValue(false).toString();
+                System.out.println(srjson);
+                SimulationRequest sr = gson.fromJson(srjson, SimulationRequest.class);
                 //SimulationRequest sr = (SimulationRequest) dataSnapshot.getValue();
                 if(sr.getStatus().equals("new")) {
                     try {

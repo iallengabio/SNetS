@@ -105,6 +105,7 @@ public class GRMLSA {
         this.spectrumAssignmentType = spectrumAssignmentType;
         this.regeneratorAssignment = regeneratorAssignment;
 
+
         if(grooming == null) this.grooming ="";
         if(integrated == null) this.integrated ="";
         if(routing == null) this.routing ="";
