@@ -83,7 +83,7 @@ public class Main {
                     try {
                         newRef.child("status").setValue("started");
                         newRef.child("progress").setValue(0.0);
-                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig(), sr.getPhysicalLayerConfig());
+                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig(), sr.getPhysicalLayerConfig(), sr.getOthersConfig());
                         //remember to implement with thread
                         SimulationManagement sm = new SimulationManagement(allSimulations);
                         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
@@ -202,6 +202,7 @@ public class Main {
         String traficFilePath = filesPath + separator + "traffic";
         //String routesFilePath = filesPath + separator + "fixedRoutes";
         String physicalLayerFilePath = filesPath + separator + "physicalLayer";
+        String othersFilePath = filesPath + separator + "others";
         Util.projectPath = filesPath;
         
         //Read files
@@ -225,16 +226,21 @@ public class Main {
         while (scanner.hasNext()) {
         	physicalLayerConfigJSON += scanner.next();
         }
+        scanner = new Scanner(new File(othersFilePath));
+        String othersConfigJSON = "";
+        while (scanner.hasNext()) {
+            othersConfigJSON += scanner.next();
+        }
         
         Gson gson = new GsonBuilder().create();
         NetworkConfig nc = gson.fromJson(networkConfigJSON, NetworkConfig.class);
         SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
         TrafficConfig tc = gson.fromJson(trafficConfigJSON, TrafficConfig.class);
         PhysicalLayerConfig plc = gson.fromJson(physicalLayerConfigJSON, PhysicalLayerConfig.class);
-        
+        OthersConfig oc = gson.fromJson(othersConfigJSON,OthersConfig.class);
         scanner.close();
         
-        return createAllSimulations(nc, sc, tc, plc);
+        return createAllSimulations(nc, sc, tc, plc, oc);
     }
 
     /**
@@ -246,7 +252,7 @@ public class Main {
      * @return List<List<Simulation>>
      * @throws Exception
      */
-    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc, PhysicalLayerConfig plc) throws Exception {
+    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) throws Exception {
         // Create list of simulations
         List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
         int i, j;
