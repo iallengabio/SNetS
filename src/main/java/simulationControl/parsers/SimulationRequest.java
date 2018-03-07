@@ -11,6 +11,8 @@ public class SimulationRequest {
     private TrafficConfig trafficConfig;
     private SimulationConfig simulationConfig;
     private PhysicalLayerConfig physicalLayerConfig;
+    private OthersConfig othersConfig;
+
     private String status;
     private Double progress = 0.0;
     private Result result = new Result();
@@ -158,4 +160,11 @@ public class SimulationRequest {
         this.progress = progress;
     }
 
+    public OthersConfig getOthersConfig() {
+        return othersConfig;
+    }
+
+    public void setOthersConfig(OthersConfig othersConfig) {
+        this.othersConfig = othersConfig;
+    }
 }

@@ -88,6 +88,17 @@ public class ControlPlane {
 		return circuit;
     }
 
+    public Circuit createNewCircuit(RequestForConnection rfc, Pair p) {
+        Circuit circuit = new Circuit();
+        circuit.setPair(p);
+        circuit.addRequest(rfc);
+        if (rfc.getCircuits() == null) {
+            rfc.setCircuit(new ArrayList());
+        }
+        rfc.getCircuits().add(circuit);
+        return circuit;
+    }
+
     /**
      * Configures the network mesh
      * 
