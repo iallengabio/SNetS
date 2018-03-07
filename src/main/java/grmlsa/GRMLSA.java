@@ -46,6 +46,7 @@ public class GRMLSA {
     private static final String GROOMING_OPT_MGHMDS = "mghmds";
     private static final String GROOMING_OPT_MGHMS = "mghms";
     private static final String GROOMING_OPT_MGMSU = "mgmsu";
+    private static final String GROOMING_OPT_MGFCCF = "mgfccf";
 
 
     // Routing
@@ -136,6 +137,8 @@ public class GRMLSA {
                 return new MGHMS();
             case GROOMING_OPT_MGMSU:
                 return new MGMSU();
+            case GROOMING_OPT_MGFCCF:
+                return new MGFCCF();
             default:
                 return null;
         }
