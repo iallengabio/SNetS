@@ -13,7 +13,7 @@ import request.RequestForConnection;
 public class NoTrafficGrooming implements TrafficGroomingAlgorithmInterface {
 
 	@Override
-	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) {
+	public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) throws Exception {
 		// Create a new circuit
 		Circuit circuit = cp.createNewCircuit(rfc);
 		
@@ -21,8 +21,8 @@ public class NoTrafficGrooming implements TrafficGroomingAlgorithmInterface {
 	}
 
 	@Override
-	public void finishConnection(RequestForConnection rfc, ControlPlane cp) {
-		cp.releaseCircuit(rfc.getCircuit());
+	public void finishConnection(RequestForConnection rfc, ControlPlane cp) throws Exception {
+		cp.releaseCircuit(rfc.getCircuits().get(0));
 	}
 
 }

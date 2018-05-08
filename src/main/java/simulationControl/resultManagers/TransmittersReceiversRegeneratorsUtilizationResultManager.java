@@ -50,7 +50,7 @@ public class TransmittersReceiversRegeneratorsUtilizationResultManager implement
 		config(llms);
 		
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep + "load point" + sep + "node" + sep + " ");
+		res.append("Metrics" + sep + "LoadPoint" + sep + "Node" + sep + " ");
 		
 		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);
@@ -89,7 +89,7 @@ public class TransmittersReceiversRegeneratorsUtilizationResultManager implement
 	private String resultTxUtilizationGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Tx Utilization " + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
+			String aux = "Tx Utilization" + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
 			for (Integer replic : replications) {
 					aux = aux + sep + trus.get(loadPoint).get(replic).getAvgTxUtilizationGen();
 			}
@@ -106,7 +106,7 @@ public class TransmittersReceiversRegeneratorsUtilizationResultManager implement
 	private String resultRxUtilizationGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Rx Utilization " + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
+			String aux = "Rx Utilization" + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
 			for (Integer replic : replications) {
 					aux = aux + sep + trus.get(loadPoint).get(replic).getAvgRxUtilizationGen();
 			}
@@ -123,7 +123,7 @@ public class TransmittersReceiversRegeneratorsUtilizationResultManager implement
 	private String resultRegenUtilizationGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Regenerators Utilization " + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
+			String aux = "Regenerators Utilization" + sep + loadPoint + sep + "all" + sep + " "; // "all"+sep+" ";
 			for (Integer replic : replications) {
 					aux = aux + sep + trus.get(loadPoint).get(replic).getAvgRegenUtilizationGen();
 			}

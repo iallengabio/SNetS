@@ -49,8 +49,12 @@ public class Spectrum {
 	 * @param spectrumBand int
 	 * @return boolean
 	 */
-	public boolean useSpectrum(int spectrumBand[]){
-		
+	public boolean useSpectrum(int spectrumBand[]) throws Exception {
+
+		if(spectrumBand[0]>spectrumBand[1]){
+			throw new Exception("invalid spectrum band");
+		}
+
 		for (int freSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freSpecBand)){
 				freeSpectrumBands.remove(freSpecBand); // Remove free bands
@@ -70,7 +74,7 @@ public class Spectrum {
 					newSpecBand[1] = freSpecBand[1];
 					this.freeSpectrumBands.add(newSpecBand);
 				}
-				
+
 				usedSlots = usedSlots + (spectrumBand[1] - spectrumBand[0] + 1);
 				
 				return true;
@@ -101,12 +105,23 @@ public class Spectrum {
 	 * 
 	 * @param spectrumBand int[]
 	 */
-	public void freeSpectrum(int spectrumBand[]){
+	public void freeSpectrum(int spectrumBand[]) throws Exception {
+
+		if(spectrumBand[0]>spectrumBand[1]){
+			throw new Exception("invalid spectrum band");
+		}
+
+		for (int freSpecBand[] : this.freeSpectrumBands) {
+			if(isInInterval(spectrumBand, freSpecBand)){
+				throw new Exception("spectrum is already free. spectrum band: " + spectrumBand[0] + " - " + spectrumBand[1]);
+			}
+		}
+
 		
 		this.freeSpectrumBands.add(spectrumBand); //liberando spectro
-		
+
 		usedSlots = usedSlots - (spectrumBand[1] - spectrumBand[0] + 1);
-		
+
 		// To merge free spectra when necessary
 		int merge[];
 		
@@ -133,7 +148,7 @@ public class Spectrum {
 			this.freeSpectrumBands.remove(after);
 			this.freeSpectrumBands.remove(spectrumBand);
 			this.freeSpectrumBands.add(merge);
-		}	
+		}
 	}
 	
 	/**

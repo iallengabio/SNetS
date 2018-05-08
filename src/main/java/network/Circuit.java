@@ -91,6 +91,16 @@ public class Circuit implements Comparable<Object>{
         return res;
     }
 
+	/**
+	 * Compute the residual capacity of circuit in terms of bandwidth
+	 * @return
+	 */
+	public double getResidualCapacity(){
+    	double rb = getRequiredBandwidth();
+    	double cap = getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
+		return cap-rb;
+	}
+
     /**
      * Returns the source node of the circuit
      * 
@@ -123,7 +133,8 @@ public class Circuit implements Comparable<Object>{
      * 
      * @param sa int[]
      */
-    public void setSpectrumAssigned(int sa[]) {
+    public void setSpectrumAssigned(int sa[]){
+    	if(sa!=null && sa[0]>sa[1]) throw new UnsupportedOperationException();
         spectrumAssigned = sa;
     }
 
@@ -222,6 +233,7 @@ public class Circuit implements Comparable<Object>{
 	 * @return int[]
 	 */
 	public int[] getSpectrumAssignedByLink(Link link){
+
 		int sa[] = getSpectrumAssigned();
 		return sa;
 	}

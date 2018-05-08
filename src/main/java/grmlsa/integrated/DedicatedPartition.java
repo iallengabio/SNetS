@@ -13,6 +13,7 @@ import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
+import network.ControlPlane;
 import network.Mesh;
 import util.IntersectionFreeSpectrum;
 
@@ -54,12 +55,12 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 	}
 	
 	@Override
-	public boolean rsa(Circuit circuit, Mesh mesh) {
+	public boolean rsa(Circuit circuit, Mesh mesh, ControlPlane cp) {
 		if(kShortestsPaths == null){
 			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
 		}
 		if (modulationSelection == null){
-        	modulationSelection = new ModulationSelectionByDistance();
+        	modulationSelection = cp.getModulationSelection();
         	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
         }
 		if(spectrumAssignment == null){

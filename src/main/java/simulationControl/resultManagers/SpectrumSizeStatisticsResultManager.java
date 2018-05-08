@@ -49,7 +49,7 @@ public class SpectrumSizeStatisticsResultManager implements ResultManagerInterfa
 		config(llms);
 		
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep + "load point" + sep + "link" + sep + "number of slots" + sep + "slot" + sep + " ");
+		res.append("Metrics" + sep + "LoadPoint" + sep + "Link" + sep + "Number of slots" + sep + "Slot" + sep + " ");
 		
 		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);

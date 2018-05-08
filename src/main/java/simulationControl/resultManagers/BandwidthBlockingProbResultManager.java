@@ -81,7 +81,7 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 	private String resultGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("bandwidth blocking probability" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("Bandwidth blocking probability" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + bbps.get(loadPoint).get(replic).getProbBlockGeneral());
 			}
@@ -98,7 +98,7 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 	private String resultPair(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "bandwidth blocking probabilities per pair" + sep + loadPoint + sep + "all";
+			String aux = "Bandwidth blocking probabilities per pair" + sep + loadPoint + sep + "all";
 			
 			for (Pair pair : this.pairs) {
 				String aux2 = aux + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
@@ -119,7 +119,7 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 	private String resultBandwidth(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "bandwidth blocking probabilities per bandwidth" + sep + loadPoint;
+			String aux = "Bandwidth blocking probabilities per bandwidth" + sep + loadPoint;
 			
 			for (Double bandwidth : Util.bandwidths) {
 				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps" + sep + "all" + sep + "all" + sep + " ";
@@ -140,7 +140,7 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 	private String resultPairBandwidth(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "bandwidth blocking probabilities per pair and bandwidth" + sep + loadPoint;
+			String aux = "Bandwidth blocking probabilities per pair and bandwidth" + sep + loadPoint;
 			
 			for (Double bandwidth : Util.bandwidths) {
 				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps";

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 5;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 4;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -66,10 +66,15 @@ public class SimulationManagement {
                 executor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        Simulator simulator = new Simulator(replication);
-                        mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
-                        done++;
-                        simulationProgressListener.onSimulationProgressUpdate((double)done/numOfSimulations);
+                        try {
+                            Simulator simulator = new Simulator(replication);
+                            mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
+                            done++;
+                            simulationProgressListener.onSimulationProgressUpdate((double) done / numOfSimulations);
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                            executor.shutdown();
+                        }
                     }
                 });
             }
@@ -82,22 +87,11 @@ public class SimulationManagement {
             }
         }
 
+        executor.shutdown();
+
         simulationProgressListener.onSimulationFinished();
     }
 
-    public void startSimulations(){
-        startSimulations(new SimulationProgressListener() {
-            @Override
-            public void onSimulationProgressUpdate(double progress) {
-
-            }
-
-            @Override
-            public void onSimulationFinished() {
-
-            }
-        });
-    }
 
     /**
      * This method is responsible for calling the method of the class responsible for saving 

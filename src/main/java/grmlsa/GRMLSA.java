@@ -1,12 +1,6 @@
 package grmlsa;
 
-import grmlsa.integrated.CompleteSharing;
-import grmlsa.integrated.DedicatedPartition;
-import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
-import grmlsa.integrated.LoadBalancedDedicatedPartition;
-import grmlsa.integrated.PseudoPartition;
-import grmlsa.integrated.ZonePartition;
-import grmlsa.integrated.ZonePartitionTopInvasion;
+import grmlsa.integrated.*;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
@@ -24,9 +18,7 @@ import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.spectrumAssignment.WorstFit;
-import grmlsa.trafficGrooming.NoTrafficGrooming;
-import grmlsa.trafficGrooming.SimpleTrafficGrooming;
-import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
+import grmlsa.trafficGrooming.*;
 
 /**
  * This class should be responsible for running the RSA algorithms, verifying whether the selected 
@@ -47,37 +39,46 @@ public class GRMLSA {
 
     // Constants for indication of RMLSA algorithms
     // Optical traffic aggregation
-    public static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
-    public static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
+    private static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
+    private static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
+    private static final String GROOMING_OPT_MGMVH = "mgmvh";
+    private static final String GROOMING_OPT_MGMPH = "mgmph";
+    private static final String GROOMING_OPT_MGHMDS = "mghmds";
+    private static final String GROOMING_OPT_MGHMS = "mghms";
+    private static final String GROOMING_OPT_MGMSU = "mgmsu";
+    private static final String GROOMING_OPT_MGFCCF = "mgfccf";
+
 
     // Routing
-    public static final String ROUTING_DJK = "djk";
-    public static final String ROUTING_MMRDS = "mmrds";
-    public static final String ROUTING_FIXEDROUTES = "fixedroutes";
+    private static final String ROUTING_DJK = "djk";
+    private static final String ROUTING_MMRDS = "mmrds";
+    private static final String ROUTING_FIXEDROUTES = "fixedroutes";
 
     // Spectrum assignment
-    public static final String SPECTRUM_ASSIGNMENT_FISTFIT = "firstfit";
-    public static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
-    public static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
-    public static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
+    private static final String SPECTRUM_ASSIGNMENT_FISTFIT = "firstfit";
+    private static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
+    private static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
+    private static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
     
     // Integrados
-    public static final String INTEGRATED_COMPLETESHARING = "completesharing";
-    public static final String INTEGRATED_PSEUDOPARTITION = "pseudopartition";
-    public static final String INTEGRATED_DEDICATEDPARTITION = "dedicatedpartition";
-    public static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
-    public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
-    public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
+    private static final String INTEGRATED_COMPLETESHARING = "completesharing";
+    private static final String INTEGRATED_PSEUDOPARTITION = "pseudopartition";
+    private static final String INTEGRATED_DEDICATEDPARTITION = "dedicatedpartition";
+    private static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
+    private static final String INTEGRATED_ZONEPARTITION = "zonepartition";
+    private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
+    private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
+
     
     // Regenerator assignment
-    public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
-    public static final String FLR_REGENERATOR_ASSIGNMENT = "flrra";
-	public static final String FNS_REGENERATOR_ASSIGNMENT = "fnsra";
+    private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
+    private static final String FLR_REGENERATOR_ASSIGNMENT = "flrra";
+	private static final String FNS_REGENERATOR_ASSIGNMENT = "fnsra";
 	
 	// Modulation selection
-	public static final String MODULATION_BY_DISTANCE = "modulationbydistance";
-	public static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
-	public static final String MODULATION_BY_QOT = "modulationbyqot";
+	private static final String MODULATION_BY_DISTANCE = "modulationbydistance";
+	private static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
+	private static final String MODULATION_BY_QOT = "modulationbyqot";
 
     // End of constants
 
@@ -105,6 +106,7 @@ public class GRMLSA {
         this.spectrumAssignmentType = spectrumAssignmentType;
         this.regeneratorAssignment = regeneratorAssignment;
 
+
         if(grooming == null) this.grooming ="";
         if(integrated == null) this.integrated ="";
         if(routing == null) this.routing ="";
@@ -125,6 +127,18 @@ public class GRMLSA {
                 return new NoTrafficGrooming();
             case GROOMING_OPT_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
+            case GROOMING_OPT_MGMVH:
+                return new MGMVH();
+            case GROOMING_OPT_MGMPH:
+                return new MGMPH();
+            case GROOMING_OPT_MGHMDS:
+                return new MGHMDS();
+            case GROOMING_OPT_MGHMS:
+                return new MGHMS();
+            case GROOMING_OPT_MGMSU:
+                return new MGMSU();
+            case GROOMING_OPT_MGFCCF:
+                return new MGFCCF();
             default:
                 return null;
         }
@@ -191,6 +205,8 @@ public class GRMLSA {
                 return new ZonePartition();
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
+            case INTEGRATED_KSPFIRSTFIT:
+                return new KSPFirstFit();
             default:
                 return null;
         }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Vector;
 
 import simulationControl.parsers.NetworkConfig;
+import simulationControl.parsers.OthersConfig;
 import simulationControl.parsers.PhysicalLayerConfig;
 import simulationControl.parsers.TrafficConfig;
 import util.RandGenerator;
@@ -22,6 +23,7 @@ public class Mesh {
     private Vector<Pair> pairList;
     private int guarBand;
     private PhysicalLayer physicalLayer;
+    private OthersConfig othersConfig;
 
     /**
      * Creates a new instance of Mesh.
@@ -29,8 +31,9 @@ public class Mesh {
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) {
         this.guarBand = nc.getGuardBand();
+        this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
         HashMap<String, Node> nodesAux = new HashMap<>();
         
@@ -180,5 +183,13 @@ public class Mesh {
      */
     public PhysicalLayer getPhysicalLayer(){
     	return physicalLayer;
+    }
+
+    public OthersConfig getOthersConfig() {
+        return othersConfig;
+    }
+
+    public void setOthersConfig(OthersConfig othersConfig) {
+        this.othersConfig = othersConfig;
     }
 }

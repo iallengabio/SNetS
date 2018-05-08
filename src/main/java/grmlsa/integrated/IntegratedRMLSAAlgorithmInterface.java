@@ -1,6 +1,7 @@
 package grmlsa.integrated;
 
 import network.Circuit;
+import network.ControlPlane;
 import network.Mesh;
 
 
@@ -19,6 +20,6 @@ public interface IntegratedRMLSAAlgorithmInterface {
 	 * @param mesh Mesh
 	 * @return boolean Returns whether or not it is possible to allocate resources to establish the connection
 	 */
-	public boolean rsa(Circuit circuit, Mesh mesh);
+	public boolean rsa(Circuit circuit, Mesh mesh, ControlPlane cp);
 
 }

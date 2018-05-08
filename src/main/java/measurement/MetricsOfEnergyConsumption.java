@@ -46,9 +46,13 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 	 */
 	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
 		if(success){
-			
+
+
 			// It is only possible to calculate the energy consumed from the circuits that were established
-			double pc = cp.getPowerConsumption(request.getCircuit());
+			double pc = 0;
+			for(Circuit circuit : request.getCircuits()){
+				pc += cp.getPowerConsumption(circuit);
+			}
 			
 			// Per pair
 			StringBuilder sbPair = new StringBuilder();

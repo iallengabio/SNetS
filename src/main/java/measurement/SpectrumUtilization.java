@@ -73,7 +73,12 @@ public class SpectrumUtilization extends Measurement {
             this.utilizationPerLink.put(link.getSource().getName() + SEP + link.getDestination().getName(), utLink);
 
             // Calculate slot unusability
+
             for (int[] faixa : link.getFreeSpectrumBands()) {
+//                if(faixa[1]>400){
+//                    Link l = link;
+//                    int a = 2+2;
+//                }
                 incrementarDesUtFaixa(faixa);
             }
         }

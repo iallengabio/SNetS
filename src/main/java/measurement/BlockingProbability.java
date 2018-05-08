@@ -118,13 +118,13 @@ public class BlockingProbability extends Measurement {
             } else if (request.getPair().getDestination().getRxs().isFullUtilized()) { // Check whether the cause of the block was the lack receivers
                 this.numReqBlockByLackReceivers++;
                 
-            } else if (cp.isBlockingByQoTN(request.getCircuit())){ // Check whether the cause of the block was the QoTN
+            } else if (cp.isBlockingByQoTN(request.getCircuits())){ // Check whether the cause of the block was the QoTN
             	this.numRegBlockByQoTN++;
             	
-            } else if (cp.isBlockingByQoTO(request.getCircuit())) { // Check whether the cause of the block was the QoTO
+            } else if (cp.isBlockingByQoTO(request.getCircuits())) { // Check whether the cause of the block was the QoTO
             	this.numRegBlockByQoTO++;
             	
-            } else if (cp.isBlockingByFragmentation(request.getCircuit())) { // Check whether the cause of the block was the fragmentation
+            } else if (cp.isBlockingByFragmentation(request.getCircuits())) { // Check whether the cause of the block was the fragmentation
                 this.numReqBlockByFragmentation++;
                 
             } else { // Blocking occurred due to lack of free slots
