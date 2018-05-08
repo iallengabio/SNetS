@@ -109,7 +109,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
 	@Override
-	protected boolean computeQualityOfTransmission(Circuit circuit){
+	public boolean computeQualityOfTransmission(Circuit circuit){
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
@@ -158,7 +158,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit Circuit
      */
 	@Override
-    protected void allocateCircuit(Circuit circuit) {
+    public void allocateCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         

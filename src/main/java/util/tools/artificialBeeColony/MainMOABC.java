@@ -21,7 +21,7 @@ public class MainMOABC {
 		double maxX[] = new double[n];
 		
 		int replications = 30;
-		List<ABCInterface> moabcList = new ArrayList<>(replications);
+		List<MOABCInterface> moabcList = new ArrayList<>(replications);
 		
 		functionName = "UF6";
 		algorithmName = "MOAABC";
@@ -94,7 +94,7 @@ public class MainMOABC {
 	}
 	
 	
-	private static void saveResults(List<ABCInterface> moabcList){
+	private static void saveResults(List<MOABCInterface> moabcList){
 		try {
 			FileWriter fw = new FileWriter(pathFileIGD);
 			BufferedWriter out = new BufferedWriter(fw);

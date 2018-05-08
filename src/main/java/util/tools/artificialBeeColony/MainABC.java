@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import grmlsa.integrated.KShortestPathsReductionQoTO;
+import grmlsa.integrated.KShortestPathsReductionQoTO_v1;
 import simulationControl.Main;
 
 public class MainABC {
@@ -14,13 +14,16 @@ public class MainABC {
 	private static String separator;
 	private static String folderName;
 	private static int numberOfNodes;
-
+	private static int numberOfReplications;
+	
 	public static void main(String[] args) {
 		
 		separator = System.getProperty("file.separator");
-		folderName = "x_A6NET_teste_AABC_carga_100";
-		pathFileOfSimulation = "C:" + separator + "Users" + separator + "Alexandre" + separator + "src" + separator + "workspace" + separator + "SNetS" + separator + "simulations" + separator + "IA-RMLSA" + separator + "A6NET" + separator + folderName;
+		folderName = "A6NET_teste_AABC_carga_100";
+		pathFileOfSimulation = "C:" + separator + "Users" + separator + "Alexandre" + separator + "src" + separator + "workspace" + separator + "SNetS" + separator + "simulations" + separator + "sbrc2018" + separator + folderName;
 		pathFileOfSigma = pathFileOfSimulation + separator + "sigmaForAllPairs.txt";
+		
+		numberOfReplications = 2;
 		
 		numberOfNodes = 6;
 		int n = numberOfNodes * (numberOfNodes - 1); //number of pairs
@@ -33,22 +36,23 @@ public class MainABC {
 		//double sigmaAllPairs[] = abc.getgBest().getNectar();
 		
 		AdaptiveArtificialBeeColony aabc = new AdaptiveArtificialBeeColony(n * k, minX, maxX);
+		aabc.setPathFileOfSimulation(pathFileOfSimulation);
 		aabc.execute();
 		double sigmaAllPairs[] = aabc.getgBest().getNectar();
 		
 		//Save the best solution
-		saveBestSolution(sigmaAllPairs);
+		saveBestSolution(sigmaAllPairs, aabc.getEpochGBest());
 	}
 	
-	public static void saveBestSolution(double sigmaAllPairs[]){
-		String pathFileBestSoluation = pathFileOfSimulation + separator + "bestSigmaForAllPairs.txt";;
-		KShortestPathsReductionQoTO.createFileSigmaAllPairs(numberOfNodes, pathFileBestSoluation, sigmaAllPairs);
+	public static void saveBestSolution(double sigmaAllPairs[], int epoch){
+		String pathFileBestSoluation = pathFileOfSimulation + separator + "bestSigmaForAllPairs_epoch_" + epoch + ".txt";;
+		KShortestPathsReductionQoTO_v1.createFileSigmaAllPairs(numberOfNodes, pathFileBestSoluation, sigmaAllPairs);
 	}
 	
 	public static double runSimulation(double sigmaAllPairs[]) {
 		Double result = 0.0;
 		
-		KShortestPathsReductionQoTO.createFileSigmaAllPairs(numberOfNodes, pathFileOfSigma, sigmaAllPairs);
+		KShortestPathsReductionQoTO_v1.createFileSigmaAllPairs(numberOfNodes, pathFileOfSigma, sigmaAllPairs);
 		
 		String[] args = new String[1];
 		args[0] = pathFileOfSimulation;
@@ -70,7 +74,6 @@ public class MainABC {
 		String sourcePath = pathFileOfSimulation + separator + readFileName;
 		String metric = "blocking probability";
 		
-		int numberOfReplications = 1;
 		double bp[] = new double[numberOfReplications];
 		
 		try{

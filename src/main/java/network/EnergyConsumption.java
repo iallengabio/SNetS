@@ -54,7 +54,7 @@ public class EnergyConsumption {
 			PCoxcs += n * 85.0 + 150.0; // Power consumption for an OXC
 			
 			double Ns = PhysicalLayer.roundUp(enlace.getDistance() / L); // Number of spans
-			PCedfas += Ns * (30.0 + 140.0); // Power consumption for amplifiers in the link
+			PCedfas += 30.0 + Ns * 140.0; // Power consumption for amplifiers in the link
 		}
 		n = noDestino.getOxc().getLinksList().size();
 		PCoxcs += n * 85.0 + 150.0; // Power consumption for an OXC

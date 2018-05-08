@@ -28,7 +28,8 @@ public class ArtificialBeeColony {
     private ArrayList<FoodSource> foodSources;
     private FoodSource gBest; // Global best
     private int epoch;
-
+    private int epochGBest;
+    
     /**
      * Instantiates the artificial bee colony algorithm along with its parameters.
      * 
@@ -235,7 +236,7 @@ public class ArtificialBeeColony {
 	 */
     public void initialize() {
         for(int i = 0; i < foodNumber; i++) {
-        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX, 1);
+        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX);
         	foodSources.add(newFoodSource);
         }
     }
@@ -276,18 +277,24 @@ public class ArtificialBeeColony {
      * Memorizes the best solution
      */
     public void memorizeBestFoodSource() {
+    	boolean changed = false;
+    	
     	if((gBest == null) || ((gBest != null) && (foodSources.get(0).getFitness() < gBest.getFitness()))){
     		gBest = foodSources.get(0);
+    		changed = true;
     	}
     	
     	for(int i = 1; i < foodNumber; i++) {
     		if(gBest.getFitness() > foodSources.get(i).getFitness()){
     			gBest = foodSources.get(i);
+    			changed = true;
     		}
     	}
     	
-    	//Save the best solution
-    	MainABC.saveBestSolution(gBest.getNectar());
+    	if(changed){
+    		epochGBest = epoch;
+    		MainABC.saveBestSolution(gBest.getNectar(), epochGBest); //Save the best solution
+    	}
     }
 
 	/**
@@ -299,5 +306,13 @@ public class ArtificialBeeColony {
 		return gBest;
 	}
 
-    
+	/**
+	 * Returns the epoch of gBest
+	 * 
+	 * @return the epochGBest
+	 */
+	public int getEpochGBest(){
+		return epochGBest;
+	}
+	
 }

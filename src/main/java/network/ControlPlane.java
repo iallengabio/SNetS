@@ -159,7 +159,7 @@ public class ControlPlane {
      *
      * @param circuit Circuit
      */
-    protected void allocateCircuit(Circuit circuit) {
+    public void allocateCircuit(Circuit circuit) {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
@@ -397,7 +397,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    protected boolean computeQualityOfTransmission(Circuit circuit){
+    public boolean computeQualityOfTransmission(Circuit circuit){
     	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);

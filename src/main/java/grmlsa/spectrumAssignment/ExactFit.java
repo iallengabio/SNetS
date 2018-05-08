@@ -54,11 +54,10 @@ public class ExactFit implements SpectrumAssignmentAlgorithmInterface {
         
         for (int[] band : freeSpectrumBands) {
             int sizeBand = band[1] - band[0] + 1;
-            if (chosen == null) {
-                if (sizeBand == numberOfSlots) {
-                    chosen = band.clone();
-                    chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
-                }
+            if (sizeBand == numberOfSlots) {
+                chosen = band.clone();
+                chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required
+                break;
             }
         }
 

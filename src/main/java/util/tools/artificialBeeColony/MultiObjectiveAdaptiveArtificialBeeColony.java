@@ -8,7 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
+/**
+ * This class implements the MOAABC (Multi-Objective Adaptive Artificial Bee Colony) algorithm.
+ * 
+ * @author Alexandre
+ */
+public class MultiObjectiveAdaptiveArtificialBeeColony implements MOABCInterface {
 
 	// ABC PARAMETERS
 	private int maxLength; 		// The number of parameters of the problem to be optimized
@@ -21,10 +26,11 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
     private double maxX[];        // Maximum value for a parameter
     
     private Random rand;
-    private ArrayList<FoodSource> foodSources;
-    private FoodSource gBest; // Global best
-    private FoodSource lBest; // Local best
+    private ArrayList<MultiObjectiveFoodSource> foodSources;
+    private MultiObjectiveFoodSource gBest; // Global best
+    private MultiObjectiveFoodSource lBest; // Local best
     private int epoch;
+    private int epochGBest;
     
     // For search rules
     private int rulesNumber;
@@ -50,7 +56,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
     
     private int objectivesNumber;
     
-    private ArrayList<FoodSource> archive;
+    private ArrayList<MultiObjectiveFoodSource> archive;
     private int arcSize;
     
     private double paretoFront[][];
@@ -157,8 +163,8 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
      */
     public void sendEmployedBees() {
         int neighborBeeIndex = 0;
-        FoodSource currentBee = null;
-        FoodSource neighborBee = null;
+        MultiObjectiveFoodSource currentBee = null;
+        MultiObjectiveFoodSource neighborBee = null;
         
         for(int i = 0; i < foodNumber; i++) {
         	
@@ -180,8 +186,8 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
     	int i = 0;
         int t = 0;
         int neighborBeeIndex = 0;
-        FoodSource currentBee = null;
-        FoodSource neighborBee = null;
+        MultiObjectiveFoodSource currentBee = null;
+        MultiObjectiveFoodSource neighborBee = null;
 
         while(t < foodNumber) {
             currentBee = foodSources.get(i);
@@ -211,7 +217,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
      * @param currentBee FoodSource
      * @param neighborBee FoodSource
      */
-    public void sendToWork(FoodSource currentBee, FoodSource neighborBee, boolean isOnlookerBeePhase) {
+    public void sendToWork(MultiObjectiveFoodSource currentBee, MultiObjectiveFoodSource neighborBee, boolean isOnlookerBeePhase) {
     	double newValue = 0;
     	
     	//The parameter (dimension) to be changed is determined randomly
@@ -268,7 +274,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
         	// Vij = Xlbestj + fi * (Xr1j - Xr2j)
         	double fi = (rand.nextDouble() - 0.5) * 2.0; //It is a random real number within the ranger [-1, 1]
         	double lbestValue = lBest.getNectar(parameterToChange);
-        	FoodSource neighborBeeR2 = getExclusiveFoodSource(currentBee, neighborBee, null);
+        	MultiObjectiveFoodSource neighborBeeR2 = getExclusiveFoodSource(currentBee, neighborBee, null);
         	double neighborValue2 = neighborBeeR2.getNectar(parameterToChange);
         	newValue = lbestValue + fi * (neighborValue - neighborValue2);
         	
@@ -289,7 +295,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
         	double F1 = minF1 + rand.nextDouble() * (maxF1- minF1);; //It is a random real number within the specific ranger
         	double F2 = minF2 + rand.nextDouble() * (maxF2 - minF2);; //It is a random real number within the specific ranger
         	double lbestValue = lBest.getNectar(parameterToChange);
-        	FoodSource neighborBeeR2 = getExclusiveFoodSource(currentBee, neighborBee, null);
+        	MultiObjectiveFoodSource neighborBeeR2 = getExclusiveFoodSource(currentBee, neighborBee, null);
         	double neighborValue2 = neighborBeeR2.getNectar(parameterToChange);
         	newValue = currentValue + F1 * (lbestValue - currentValue) + F2 * (neighborValue - neighborValue2);
         }
@@ -347,7 +353,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
      * Scout bees will generate a totally random solution from the existing and it will also reset its trials back to zero.
      */
     public void sendScoutBees() {
-    	FoodSource currentBee = null;
+    	MultiObjectiveFoodSource currentBee = null;
         
         for(int i = 0; i < foodNumber; i++) {
             currentBee = foodSources.get(i);
@@ -361,9 +367,9 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
         }
     }
     
-    public double computesFiness(FoodSource currentSource, ArrayList<FoodSource> foodSources){
+    public double computesFiness(MultiObjectiveFoodSource currentSource, ArrayList<MultiObjectiveFoodSource> foodSources){
     	List<Double> fie = new ArrayList<>();
-    	FoodSource thisFood = null;
+    	MultiObjectiveFoodSource thisFood = null;
     	double s = 0.01;
     	double c = Double.NEGATIVE_INFINITY;
     	double sum = 0.0;
@@ -406,8 +412,8 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
      * The higher the fitness the greater the probability.
      */
 	public void calculateProbabilities() {
-		FoodSource thisFood;
-		List<FoodSource> rank = new ArrayList<>(foodNumber);
+		MultiObjectiveFoodSource thisFood;
+		List<MultiObjectiveFoodSource> rank = new ArrayList<>(foodNumber);
 		double a = 0.5;
 		double sum = 0.0;
         
@@ -443,7 +449,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
         }
     }
 	
-	public void addToArchive(FoodSource foodSource){
+	public void addToArchive(MultiObjectiveFoodSource foodSource){
 		for(int i = 0; i < archive.size(); i++){
 			if(archive.get(i).equals(foodSource)){ // Is already on archive
 				return;
@@ -459,7 +465,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	 * @param food2 FoodSource
 	 * @return boolean
 	 */
-	public boolean checksForDominance(FoodSource food1, FoodSource food2){
+	public boolean checksForDominance(MultiObjectiveFoodSource food1, MultiObjectiveFoodSource food2){
 		int cont = 0;
 		boolean flag = false;
 		boolean dominated = false;
@@ -485,8 +491,8 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	}
 	
 	public void maintainingArchive(){
-		List<FoodSource> nonDominated = new ArrayList<>();
-		FoodSource food1, food2;
+		List<MultiObjectiveFoodSource> nonDominated = new ArrayList<>();
+		MultiObjectiveFoodSource food1, food2;
 		
 		// Select all the non-dominated solutions in the population as P1
 		for(int i = 0; i < foodNumber; i++) {
@@ -526,7 +532,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	        
 	        // Sort descending archive
 	        for(int i = 1; i < archive.size(); i++) {
-	        	FoodSource food = archive.get(i);
+	        	MultiObjectiveFoodSource food = archive.get(i);
 	            double key = food.getFitness();
 	            int j = i;
 	            
@@ -548,7 +554,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	 */
     public void initialize() {
         for(int i = 0; i < foodNumber; i++) {
-        	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX, objectivesNumber);
+        	MultiObjectiveFoodSource newFoodSource = new MultiObjectiveFoodSource(maxLength, rand, minX, maxX, objectivesNumber);
         	foodSources.add(newFoodSource);
         }
     }
@@ -592,10 +598,10 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
      * @param foodSource2 - Food that should not be selected
      * @return FoodSource
      */
-    public FoodSource getExclusiveFoodSource(FoodSource foodSource1, FoodSource foodSource2, FoodSource foodSource3){
+    public MultiObjectiveFoodSource getExclusiveFoodSource(MultiObjectiveFoodSource foodSource1, MultiObjectiveFoodSource foodSource2, MultiObjectiveFoodSource foodSource3){
     	boolean done = false;
     	int getRand = 0;
-    	FoodSource food = null;
+    	MultiObjectiveFoodSource food = null;
     	
     	while(!done){
 	    	getRand = rand.nextInt(foodNumber);
@@ -627,16 +633,19 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
     		}
     	}
     	
+    	boolean changed = false;
     	if((gBest == null) || ((gBest != null) && (lBest.getFitness() > gBest.getFitness()))){
     		gBest = lBest.clone();
+    		changed = true;
     	}
     	
-    	//Save the best solution
-    	MainABC.saveBestSolution(gBest.getNectar());
-    	
+    	if(changed){
+    		epochGBest = epoch;
+    		//MainABC.saveBestSolution(gBest.getNectar(), epochGBest); //Save the best solution
+    	}
     	
     	for(int i = 0; i < foodNumber; i++) {
-    		FoodSource food = foodSources.get(i);
+    		MultiObjectiveFoodSource food = foodSources.get(i);
     		System.out.println(food.getFitness() + "," + food.getFitnessByObjective(0) + "," + food.getFitnessByObjective(1));
     	}
     	System.out.println("para aqui");
@@ -647,11 +656,11 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	 * 
 	 * @return the gBest
 	 */
-	public FoodSource getgBest() {
+	public MultiObjectiveFoodSource getgBest() {
 		return gBest;
 	}
 	
-	public void invertedGenerationalDistance(ArrayList<FoodSource> foodSources){
+	public void invertedGenerationalDistance(ArrayList<MultiObjectiveFoodSource> foodSources){
 		double sumDist = 0.0;
 		for(int i = 0; i < paretoFront.length; i++){
 			
@@ -709,7 +718,7 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	/**
 	 * @return the archive
 	 */
-	public ArrayList<FoodSource> getArchive() {
+	public ArrayList<MultiObjectiveFoodSource> getArchive() {
 		return archive;
 	}
 
@@ -718,6 +727,15 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements ABCInterface {
 	 */
 	public List<Double> getIGDepoch() {
 		return IGDepoch;
+	}
+	
+	/**
+	 * Returns the epoch of gBest
+	 * 
+	 * @return the epochGBest
+	 */
+	public int getEpochGBest(){
+		return epochGBest;
 	}
 
 }

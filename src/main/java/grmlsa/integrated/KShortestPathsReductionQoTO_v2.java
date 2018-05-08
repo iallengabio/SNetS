@@ -36,10 +36,10 @@ import util.IntersectionFreeSpectrum;
  * 
  * @author Alexandre
  */
-public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInterface {
+public class KShortestPathsReductionQoTO_v2 implements IntegratedRMLSAAlgorithmInterface {
 
-	//private NewKShortestPaths kShortestsPaths;
-	private KFixedRoutes kShortestsPaths;
+	private NewKShortestPaths kShortestsPaths;
+	//private KFixedRoutes kShortestsPaths;
 	
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -54,13 +54,13 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
     private static final String DIV = "-";
     
     // Number of candidate routes
-    private static int k = 3;
+    private static int k = 4;
     
 	@Override
 	public boolean rsa(Circuit circuit, ControlPlane cp) {
 		if (kShortestsPaths == null){
-        	//kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
-        	kShortestsPaths = new KFixedRoutes(cp.getMesh());
+        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
+        	//kShortestsPaths = new KFixedRoutes(cp.getMesh());
         	
         	sigmaFileReader();
         }
@@ -200,6 +200,29 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 		if(!Paths.get(sigmaForAllPairspathArqConfiguration).toFile().exists()){
 			System.err.println("\tFile with sigma value for the pairs not found. The simulation will use a sigma value for all pairs.");
 			
+			if(!Paths.get(sigmaPathArqConfiguration).toFile().exists()){
+				System.err.println("\tFile with sigma value not found. The simulation will use a default value.");
+				
+			}else{
+				
+				try {
+					FileReader fr = new FileReader(sigmaPathArqConfiguration);
+					BufferedReader in = new BufferedReader(fr);
+					
+					String linha = in.readLine();
+					sigma = Double.valueOf(linha);
+					
+					in.close();
+				    fr.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
+			}
+			
 		}else{
 			
 			sigmaForAllPairs = new HashMap<>();
@@ -234,29 +257,6 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 				e.printStackTrace();
 			}
 		}
-		
-		if(!Paths.get(sigmaPathArqConfiguration).toFile().exists()){
-			System.err.println("\tFile with sigma value not found. The simulation will use a default value.");
-			
-		}else{
-			
-			try {
-				FileReader fr = new FileReader(sigmaPathArqConfiguration);
-				BufferedReader in = new BufferedReader(fr);
-				
-				String linha = in.readLine();
-				sigma = Double.valueOf(linha);
-				
-				in.close();
-			    fr.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	public static void createFileSigmaAllPairs(int numberOfNodes, String pathFile, double sigmaAllPairs[]) {
@@ -266,7 +266,6 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 			FileWriter fw = new FileWriter(pathFile);
 			BufferedWriter out = new BufferedWriter(fw);
 			
-			StringBuilder sbaux = new StringBuilder();
 			for(int i = 1; i <= numberOfNodes; i++){
 				StringBuilder sb = new StringBuilder();
 				
@@ -286,7 +285,6 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 					}
 				}
 				out.append(sb.toString());
-				sbaux.append(sb.toString());
 			}
 			
 			out.close();

@@ -3,7 +3,9 @@ package grmlsa;
 import grmlsa.integrated.CompleteSharing;
 import grmlsa.integrated.DedicatedPartition;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
-import grmlsa.integrated.KShortestPathsReductionQoTO;
+import grmlsa.integrated.KShortestPathsReductionQoTO_Adapted_v1;
+import grmlsa.integrated.KShortestPathsReductionQoTO_v1;
+import grmlsa.integrated.KShortestPathsReductionQoTO_v2;
 import grmlsa.integrated.LoadBalancedDedicatedPartition;
 import grmlsa.integrated.PseudoPartition;
 import grmlsa.integrated.ZonePartition;
@@ -70,7 +72,10 @@ public class GRMLSA {
     public static final String INTEGRATED_LOADBALANCEDDEDICATEDPARTITION = "loadbalanceddedicatedpartition";
     public static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     public static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
-    public static final String INTEGRATED_KSPRQOTO = "ksprqoto";
+    
+    public static final String INTEGRATED_KSPRQOTO_v1 = "ksprqotov1";
+    public static final String INTEGRATED_KSPRQOTO_v2 = "ksprqotov2";
+    public static final String INTEGRATED_KSPRQOTO_AD_v1 = "ksprqotoadv1";
     
     // Regenerator assignment
     public static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -194,8 +199,14 @@ public class GRMLSA {
                 return new ZonePartition();
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
-            case INTEGRATED_KSPRQOTO:
-                return new KShortestPathsReductionQoTO();
+                
+            case INTEGRATED_KSPRQOTO_v1:
+                return new KShortestPathsReductionQoTO_v1();
+            case INTEGRATED_KSPRQOTO_v2:
+                return new KShortestPathsReductionQoTO_v2();
+            case INTEGRATED_KSPRQOTO_AD_v1:
+                return new KShortestPathsReductionQoTO_Adapted_v1();
+                
             default:
                 return null;
         }

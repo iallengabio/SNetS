@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 3;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 2;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -66,10 +66,15 @@ public class SimulationManagement {
                 executor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        Simulator simulator = new Simulator(replication);
-                        mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
-                        done++;
-                        simulationProgressListener.onSimulationProgressUpdate((double)done/numOfSimulations);
+                    	try{
+	                        Simulator simulator = new Simulator(replication);
+	                        mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
+	                        done++;
+	                        simulationProgressListener.onSimulationProgressUpdate((double)done/numOfSimulations);
+                    	}catch (Exception ex){
+                    		ex.printStackTrace();
+                    		executor.shutdown();
+                    	}
                     }
                 });
             }
@@ -81,7 +86,8 @@ public class SimulationManagement {
                 e.printStackTrace();
             }
         }
-
+        
+        executor.shutdown();
         simulationProgressListener.onSimulationFinished();
     }
 

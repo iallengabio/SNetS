@@ -43,7 +43,7 @@ public class NewKShortestPaths {
         this.k = k;
         this.computeAllRoutes(mesh);
         
-        salveRoutesByPar(mesh.getNodeList());
+        //salveRoutesByPar(mesh.getNodeList());
     }
 
     /**

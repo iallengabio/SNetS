@@ -328,10 +328,24 @@ public class PhysicalLayer {
 	public static double getBER(double SNR, double M){
 		double SNRb = SNR / log2(M); // SNR per bit
 		
-		double p1 = (3.0 * SNRb * log2(M)) / (2 * (M - 1.0));
+		double p1 = (3.0 * SNRb * log2(M)) / (2.0 * (M - 1.0));
 		double p2 = erfc(Math.sqrt(p1));
 		double BER = (2.0 / log2(M)) * ((Math.sqrt(M) - 1.0) / Math.sqrt(M)) * p2;
 		
+		return BER;
+	}
+	
+	/**
+	 * This method returns the BER (Bit Error Rate) for a SNR value
+	 * Based on book:
+	 *  - Optical Transmission Systems Engineering (2004) - Milorad Cvijetic
+	 * 
+	 * @param SNR double
+	 * @return double
+	 */
+	public static double getBERbySNR(double SNR){
+		double Q = 0.5 * Math.sqrt(SNR);
+		double BER = 0.5 * erfc(Q / Math.sqrt(2.0));
 		return BER;
 	}
 	

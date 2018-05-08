@@ -151,6 +151,7 @@ public class Main {
      */
     private static void localSimulation(String path) throws Exception {
         System.out.println("Reading files");
+        System.out.println("Path: " + path);
         List<List<Simulation>> allSimulations = createAllSimulations(path);
         //Now start the simulations
         System.out.println("Starting simulations");

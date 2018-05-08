@@ -18,42 +18,29 @@ import java.util.Random;
 @SuppressWarnings("serial")
 public class FoodSource implements Comparable<FoodSource>, Serializable {
 
-	private int maxLength;
-	private double nectar[];
-    private int trials;
-    private double fitness;
-    private double fitnessByObjective[];
-    private double selectionProbability;
+	protected int maxLength;
+	protected double nectar[];
+	protected int trials;
+	protected double fitness;
+	protected double selectionProbability;
     
     
-    public FoodSource(int size, Random rand, double minX[], double maxX[], int objectivesNumber) {
+    public FoodSource(int size, Random rand, double minX, double maxX) {
         this.maxLength = size;
         this.nectar = new double[maxLength];
         this.trials = 0;
         this.selectionProbability = 0.0;
         this.fitness = 0.0;
-        
-        this.fitnessByObjective = new double[objectivesNumber];
-        for(int m = 0; m < objectivesNumber; m++){
-        	this.fitnessByObjective[m] = 0.0;
-        }
         
         initializeNectar(rand, minX, maxX);
     }
     
-    public FoodSource(int size, Random rand, double minX, double maxX, int objectivesNumber) {
-        this.maxLength = size;
-        this.nectar = new double[maxLength];
-        this.trials = 0;
-        this.selectionProbability = 0.0;
-        this.fitness = 0.0;
-        
-        this.fitnessByObjective = new double[objectivesNumber];
-        for(int m = 0; m < objectivesNumber; m++){
-        	this.fitnessByObjective[m] = 0.0;
-        }
-        
-        initializeNectar(rand, minX, maxX);
+    public FoodSource(int size, int trials, double fitness, double selectionProbability, double nectar[]){
+    	this.maxLength = size;
+        this.trials = trials;
+        this.selectionProbability = selectionProbability;
+        this.fitness = fitness;
+        this.nectar = nectar;
     }
     
     public void initializeNectar(Random rand, double minX, double maxX) {
@@ -63,18 +50,11 @@ public class FoodSource implements Comparable<FoodSource>, Serializable {
         toEvaluate();
     }
     
-    public void initializeNectar(Random rand, double minX[], double maxX[]) {
-        for(int i = 0; i < maxLength; i++) {
-            nectar[i] = minX[i] + rand.nextDouble() * (maxX[i] - minX[i]);
-        }
-        toEvaluate();
-    }
-    
     public void toEvaluate(){
     	//System.out.println("*** Evaluating the food ***");
     	//System.out.println("    Simulation start...");
     	
-    	this.fitnessByObjective = MainMOABC.runSimulation(nectar, maxLength, fitnessByObjective.length);
+    	this.fitness = MainABC.runSimulation(nectar);
     	
     	//System.out.println("    End of simulation.\n");
     }
@@ -132,18 +112,6 @@ public class FoodSource implements Comparable<FoodSource>, Serializable {
 		return fitness;
 	}
 	
-	public double[] getFitnessByObjective(){
-		return fitnessByObjective;
-	}
-	
-	public double getFitnessByObjective(int m){
-		return fitnessByObjective[m];
-	}
-	
-	public void setFitnessByObjective(double fitnessByObjective[]){
-		this.fitnessByObjective = fitnessByObjective;
-	}
-
 	/**
 	 * @param fitness the fitness to set
 	 */
