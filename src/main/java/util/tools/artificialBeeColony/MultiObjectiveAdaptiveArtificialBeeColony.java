@@ -358,12 +358,12 @@ public class MultiObjectiveAdaptiveArtificialBeeColony implements MOABCInterface
         for(int i = 0; i < foodNumber; i++) {
             currentBee = foodSources.get(i);
             
-//            if(currentBee.getTrials() > trialLimit) {
-//            	currentBee.initializeNectar(rand, minX, maxX);
-//            	double newFitness = computesFiness(currentBee, foodSources);
-//                currentBee.setFitness(newFitness);
-//                currentBee.setTrials(0);
-//            }
+            if(currentBee.getTrials() > trialLimit) {
+            	currentBee.initializeNectar(rand, minX, maxX);
+            	double newFitness = computesFiness(currentBee, foodSources);
+                currentBee.setFitness(newFitness);
+                currentBee.setTrials(0);
+            }
         }
     }
     

@@ -1,5 +1,12 @@
 package util.tools.artificialBeeColony;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -29,6 +36,8 @@ public class ArtificialBeeColony {
     private FoodSource gBest; // Global best
     private int epoch;
     private int epochGBest;
+    
+    private String pathFileOfSimulation; //way to save the state of an epoch
     
     /**
      * Instantiates the artificial bee colony algorithm along with its parameters.
@@ -79,6 +88,8 @@ public class ArtificialBeeColony {
                 
                 // This is here simply to show the runtime status.
                 System.out.println("Epoch: " + epoch);
+                stateEpochSave();
+                
             } else {
                 done = true;
             }
@@ -315,4 +326,138 @@ public class ArtificialBeeColony {
 		return epochGBest;
 	}
 	
+	public void setPathFileOfSimulation(String pathFileOfSimulation){
+		this.pathFileOfSimulation = pathFileOfSimulation;
+	}
+	
+	public void stateEpochSave(){
+		String separator = System.getProperty("file.separator");
+		String path = pathFileOfSimulation + separator + "stateEpoch.txt";
+		
+		try {
+			FileWriter fw = new FileWriter(path);
+			BufferedWriter out = new BufferedWriter(fw);
+			
+			StringBuilder sb1 = new StringBuilder();
+			sb1.append("epoch:" + epoch);
+			sb1.append("\n");
+			
+			sb1.append("gBestFoodSource:" + epochGBest + ";");
+            sb1.append("trials:" + gBest.getTrials() + ";");
+            sb1.append("fitness:" + gBest.getFitness() + ";");
+            sb1.append("selectionProbability:" + gBest.getSelectionProbability() + ";");
+            
+            sb1.append("nectar:");
+            double nectarGBest[] = gBest.getNectar();
+            for(int n = 0; n < nectarGBest.length; n++) {
+            	sb1.append(String.valueOf(nectarGBest[n]));
+            	if(n < nectarGBest.length - 1){
+					sb1.append("&");
+				}
+            }
+            sb1.append("\n");
+            
+            out.append(sb1.toString());
+			
+			for(int i = 0; i < foodNumber; i++) {
+				StringBuilder sb = new StringBuilder();
+	            FoodSource currentBee = foodSources.get(i);
+	            
+	            sb.append("foodSource:" + (i + 1) + ";");
+	            sb.append("trials:" + currentBee.getTrials() + ";");
+	            sb.append("fitness:" + currentBee.getFitness() + ";");
+	            sb.append("selectionProbability:" + currentBee.getSelectionProbability() + ";");
+	            
+	            sb.append("nectar:");
+	            double nectar[] = currentBee.getNectar();
+	            for(int n = 0; n < nectar.length; n++) {
+	            	sb.append(String.valueOf(nectar[n]));
+	            	if(n < nectar.length - 1){
+						sb.append("&");
+					}
+	            }
+	            sb.append("\n");
+	            
+				out.append(sb.toString());
+			}
+			
+			out.close();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean stateEpochReader(){
+		String separator = System.getProperty("file.separator");
+		String path = pathFileOfSimulation + separator + "stateEpoch.txt";
+		
+    	if(Paths.get(path).toFile().exists()){ //there is file with configuration of an epoch
+	    	try {
+				FileReader fr = new FileReader(path);
+				BufferedReader in = new BufferedReader(fr);
+				
+				while(in.ready()){
+					String linha[] = in.readLine().split(";");
+					String info[] = linha[0].split(":");
+					
+					if(info[0].equals("epoch")){
+						this.epoch = Integer.valueOf(info[1]);
+						
+					}else if(info[0].equals("gBestFoodSource")){
+						this.epochGBest = Integer.valueOf(info[1]);
+						this.gBest = createFoodSource(linha);;
+						
+					}else if(info[0].equals("foodSource")){
+						FoodSource newFoodSource = createFoodSource(linha);
+						foodSources.add(newFoodSource);
+					}
+				}
+				
+				in.close();
+			    fr.close();
+			    
+			    return true;
+			    
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+    	}
+    	
+    	return false;
+	}
+	
+	public FoodSource createFoodSource(String linha[]){
+		double nectar[] = new double[maxLength];
+		int trials = 0;
+		double fitness = 0.0;
+		double selectionProbability = 0.0;
+		
+		for(int i = 1; i < linha.length; i++){
+			String attribute[] = linha[i].split(":");
+			
+			if(attribute[0].equals("trials")){
+				trials = Integer.valueOf(attribute[1]);
+				
+			}else if(attribute[0].equals("fitness")){
+				fitness = Double.valueOf(attribute[1]);
+				
+			}else if(attribute[0].equals("selectionProbability")){
+				selectionProbability = Double.valueOf(attribute[1]);
+				
+			}else if(attribute[0].equals("nectar")){
+				String values[] = attribute[1].split("&");
+				for(int v = 0; v < values.length; v++){
+					nectar[v] = Double.valueOf(values[v]);
+				}
+			}
+		}
+		
+		FoodSource foodSource = new FoodSource(maxLength, trials, fitness, selectionProbability, nectar);
+		return foodSource;
+	}
 }

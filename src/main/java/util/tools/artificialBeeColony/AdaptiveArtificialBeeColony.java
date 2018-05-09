@@ -58,9 +58,8 @@ public class AdaptiveArtificialBeeColony {
     // Memory length
     private int ML;
     
-    private String pathFileOfSimulation; // To save the state of an epoch
+    private String pathFileOfSimulation; //way to save the state of an epoch
     
-
     /**
      * Instantiates the adaptive artificial bee colony algorithm along with its parameters.
      * 
@@ -122,6 +121,9 @@ public class AdaptiveArtificialBeeColony {
                 if(gBest.isSatisfiedCondition()) {
                     done = true;
                 }
+                
+                long beg = System.nanoTime();
+                
                 sendEmployedBees();
                 calculateProbabilities();
                 sendOnlookerBees();
@@ -132,8 +134,12 @@ public class AdaptiveArtificialBeeColony {
                 
                 // This is here simply to show the runtime status.
                 System.out.println("Epoch: " + epoch);
+                long end = System.nanoTime();
+        		long time = end - beg;
+        		System.out.println("Total time of epoch: " + time/1000000000.0 + "s");
+        		System.out.println("-------------------\n");
+        		
                 stateEpochSave();
-                
             } else {
                 done = true;
             }
@@ -149,6 +155,8 @@ public class AdaptiveArtificialBeeColony {
      * Sends the employed bees to optimize the solution
      */
     public void sendEmployedBees() {
+    	System.out.println("\n---- sendEmployedBees ----");
+    	
         int neighborBeeIndex = 0;
         FoodSource currentBee = null;
         FoodSource neighborBee = null;
@@ -163,13 +171,15 @@ public class AdaptiveArtificialBeeColony {
             sendToWork(currentBee, neighborBee, false);
         }
     }
-
+    
     /**
      * Sends the onlooker bees to optimize the solution.
      * Onlooker bees work on the best solutions from the employed bees.
      * Best solutions have high selection probability.
      */
     public void sendOnlookerBees() {
+    	System.out.println("\n---- sendOnlookerBees ----");
+    	
     	int i = 0;
         int t = 0;
         int neighborBeeIndex = 0;
@@ -336,6 +346,8 @@ public class AdaptiveArtificialBeeColony {
      * Scout bees will generate a totally random solution from the existing and it will also reset its trials back to zero.
      */
     public void sendScoutBees() {
+    	System.out.println("\n---- sendScoutBees ----");
+    	
     	FoodSource currentBee = null;
         
         for(int i = 0; i < foodNumber; i++) {
@@ -382,6 +394,8 @@ public class AdaptiveArtificialBeeColony {
 	 * Initializes food locations
 	 */
     public void initialize() {
+    	System.out.println("---- Initialize ----");
+    	
     	if(!stateEpochReader()){ //there is no file with configuration of an epoch
     		for(int i = 0; i < foodNumber; i++) {
             	FoodSource newFoodSource = new FoodSource(maxLength, rand, minX, maxX);

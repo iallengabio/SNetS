@@ -3,8 +3,6 @@ package grmlsa;
 import grmlsa.integrated.CompleteSharing;
 import grmlsa.integrated.DedicatedPartition;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
-import grmlsa.integrated.KShortestPathsReductionQoTO_Adapted_v1;
-import grmlsa.integrated.KShortestPathsReductionQoTO_v1;
 import grmlsa.integrated.KShortestPathsReductionQoTO_v2;
 import grmlsa.integrated.LoadBalancedDedicatedPartition;
 import grmlsa.integrated.PseudoPartition;
@@ -200,12 +198,8 @@ public class GRMLSA {
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
                 
-            case INTEGRATED_KSPRQOTO_v1:
-                return new KShortestPathsReductionQoTO_v1();
             case INTEGRATED_KSPRQOTO_v2:
                 return new KShortestPathsReductionQoTO_v2();
-            case INTEGRATED_KSPRQOTO_AD_v1:
-                return new KShortestPathsReductionQoTO_Adapted_v1();
                 
             default:
                 return null;
