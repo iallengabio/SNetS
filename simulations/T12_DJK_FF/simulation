@@ -1,11 +1,23 @@
 {
-"requests":100000,
+"networkType":0,
 "rmlsaType":0,
+"requests":100000,
+"loadPoints":4,
+"replications":10,
+"grooming":"notrafficgrooming",
 "routing":"djk",
 "spectrumAssignment":"firstfit",
-"grooming":"notrafficgrooming",
-"loadPoints":3,
-"replications":10,
-"measuringMetrics":
-    ["BlockingProbability", "BandwidthBlockingProbability",]
+"integratedRmlsa":"completesharing",
+"modulationSelection":"modulationbydistance",
+"activeMetrics":
+	{"BlockingProbability":true,
+	 "BandwidthBlockingProbability":true,
+	 "SpectrumUtilization":true,
+	 "SpectrumSizeStatistics":true,
+	 "ExternalFragmentation":false,
+	 "RelativeFragmentation":false,
+	 "TransmittersReceiversRegeneratorsUtilization":false,
+	 "EnergyConsumption":true,
+	 "ModulationUtilization":false,
+	 "ConsumedEnergy":true}
 }

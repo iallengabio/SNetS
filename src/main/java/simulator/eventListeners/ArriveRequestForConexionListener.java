@@ -48,7 +48,7 @@ public class ArriveRequestForConexionListener implements EventListener {
         }
 
         beforeReq();
-        
+        m.getConsumedEnergyMetric().addNewObservation(simulation.getControlPlane(),e.getTimeHours());
         // Try to satisfy the request
         Boolean success = simulation.getControlPlane().handleRequisition(requestForConnection);
         if (success) {// Schedule the end of the requisition and release of resources
@@ -71,6 +71,7 @@ public class ArriveRequestForConexionListener implements EventListener {
      */
     private void beforeReq() {
         Measurements m = simulation.getMeasurements();
+
         
         // Transient state check
         m.transientStepVerify();
@@ -87,9 +88,11 @@ public class ArriveRequestForConexionListener implements EventListener {
      */
     private void afterReq(RequestForConnection request, boolean success) {
         Measurements m = simulation.getMeasurements();
+
         
         // Adds a new note for all enabled performance metrics
         m.addNewObservation(simulation.getControlPlane(), success, request);
+
     }
     
     

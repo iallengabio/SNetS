@@ -25,6 +25,16 @@ public class Mesh {
     private PhysicalLayer physicalLayer;
     private OthersConfig othersConfig;
 
+    private double totalPowerConsumption;
+
+    public double getTotalPowerConsumption() {
+        return totalPowerConsumption;
+    }
+
+    public void setTotalPowerConsumption(double totalPowerConsumption) {
+        this.totalPowerConsumption = totalPowerConsumption;
+    }
+
     /**
      * Creates a new instance of Mesh.
      * 
