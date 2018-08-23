@@ -547,7 +547,7 @@ public class ControlPlane {
 	 * @return double - power consumption (W)
 	 */
 	public double getPowerConsumption(Circuit circuit){
-		double powerConsumption = EnergyConsumption.computePowerConsumptionBySegment(this, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
+		double powerConsumption = EnergyConsumption.computePowerConsumptionBySegment(this, circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
 		circuit.setPowerConsumption(powerConsumption);
 		return powerConsumption;
 	}

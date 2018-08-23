@@ -68,12 +68,18 @@ public class PhysicalLayer {
         this.A2 = plc.getNoiseFactorModelParameterA2();
         this.B0 = plc.getOpticalNoiseBandwidth();
     }
-
-	public static int getNumberOfAmplifiers(double distance) {
-    	double S = 80;
-    	return (int)((distance/(S-1))+2);
+  
+    /**
+	 * This method returns the number of amplifiers on a link
+	 * 
+	 * @param distance - km
+	 * @return double
+	 */
+	public double getNumberOfAmplifiers(double distance){
+		double Ns = 2.0 + roundUp((distance / L) - 1.0);
+		return Ns;
 	}
-
+  
 	/**
 	 * Returns if QoTN check is active or not
 	 * 
