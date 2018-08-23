@@ -32,6 +32,7 @@ public class SimulationConfig {
         public boolean TransmittersReceiversRegeneratorsUtilization = true;
         public boolean EnergyConsumption = true;
         public boolean ModulationUtilization = true;
+        public boolean ConsumedEnergy = true;
     }
 
     /**

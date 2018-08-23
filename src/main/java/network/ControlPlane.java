@@ -68,6 +68,7 @@ public class ControlPlane {
         this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
 
         setMesh(mesh);
+        mesh.setTotalPowerConsumption(EnergyConsumption.computeNetworkPowerConsumption(this));
     }
     
     /**
@@ -188,6 +189,8 @@ public class ControlPlane {
         circuit.getDestination().getRxs().allocatesReceivers();
         
         addConnection(circuit);
+
+
     }
 
     /**
@@ -229,6 +232,9 @@ public class ControlPlane {
         circuit.getDestination().getRxs().releasesReceivers();
 
         removeConnection(circuit);
+
+        updateNetworkPowerConsumption();
+
     }
     
     /**
@@ -265,8 +271,8 @@ public class ControlPlane {
                 
                 // QoT verification
                 if(isAdmissibleQualityOfTransmission(circuit)){
+                    this.updateNetworkPowerConsumption();
                 	return true; // Admits the circuit
-                
                 } else {
                 	// Circuit QoT is not acceptable, frees allocated resources
         			releaseCircuit(circuit);
@@ -356,6 +362,8 @@ public class ControlPlane {
             }
             circuit.setSpectrumAssigned(specAssigAt);
             isAdmissibleQualityOfTransmission(circuit); //recompute QoT
+        }else{
+            this.updateNetworkPowerConsumption();
         }
 
         return QoT;
@@ -383,6 +391,7 @@ public class ControlPlane {
         }
         circuit.setSpectrumAssigned(newSpecAssign);
         isAdmissibleQualityOfTransmission(circuit); //compute QoT
+        this.updateNetworkPowerConsumption();
 
     }
 
@@ -669,4 +678,8 @@ public class ControlPlane {
 		modList.add(circuit.getModulation());
 		return modList;
 	}
+
+    private void updateNetworkPowerConsumption(){
+        this.mesh.setTotalPowerConsumption(EnergyConsumption.computeNetworkPowerConsumption(this));
+    }
 }

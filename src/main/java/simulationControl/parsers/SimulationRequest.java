@@ -32,6 +32,7 @@ public class SimulationRequest {
         public String spectrumStatistics;
         public String energyConsumption;
         public String modulationUtilization;
+        public String consumedEnergy;
     }
 
     /**

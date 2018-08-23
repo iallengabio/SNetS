@@ -50,6 +50,11 @@ public class Measurements implements Serializable {
      * List of performance metrics
      */
     private List<Measurement> metricsList;
+
+	/**
+	 * Ajust this!
+	 */
+	private ConsumedEnergy consumedEnergyMetric;
     
     /**
      * List of metrics to be considered during the simulation
@@ -122,6 +127,10 @@ public class Measurements implements Serializable {
 		if(measuringMetrics.ModulationUtilization){
 			ModulationUtilization modulationUtilization = new ModulationUtilization(loadPoint, replication);
 			this.metricsList.add(modulationUtilization);
+		}
+		if(measuringMetrics.ConsumedEnergy){
+			ConsumedEnergy consumedEnergy = new ConsumedEnergy(loadPoint,replication);
+			this.consumedEnergyMetric = consumedEnergy; //fix this
 		}
     }
     
@@ -276,5 +285,12 @@ public class Measurements implements Serializable {
 		}
 		return null;
 	}
- 	
+
+	public ConsumedEnergy getConsumedEnergyMetric() {
+		return consumedEnergyMetric;
+	}
+
+	public void setConsumedEnergyMetric(ConsumedEnergy consumedEnergyMetric) {
+		this.consumedEnergyMetric = consumedEnergyMetric;
+	}
 }

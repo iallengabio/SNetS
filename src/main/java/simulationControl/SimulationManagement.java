@@ -107,10 +107,25 @@ public class SimulationManagement {
     	
     	try {
     		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
+
+    		Measurement metric = this.mainMeasuremens.get(0).get(0).getConsumedEnergyMetric();
+            List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
+            for (List<Measurements> listMeasurements : this.mainMeasuremens) {
+                List<Measurement> lms = new ArrayList<Measurement>();
+                llms.add(lms);
+                for (Measurements measurements : listMeasurements) {
+                    lms.add(measurements.getConsumedEnergyMetric());
+                }
+            }
+            String path = pathResultFiles + separador + nomePasta + metric.getFileName();
+            FileWriter fw = new FileWriter(new File(path));
+            fw.write(metric.result(llms));
+            fw.close();
+
     		for(int m = 0; m < numMetrics; m++){
-    			Measurement metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
+    			metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
     			
-				List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
+				llms = new ArrayList<List<Measurement>>();
 				for (List<Measurements> listMeasurements : this.mainMeasuremens) {
 					List<Measurement> lms = new ArrayList<Measurement>();
 					llms.add(lms);
@@ -119,16 +134,18 @@ public class SimulationManagement {
 					}
 				}
 				
-				String path = pathResultFiles + separador + nomePasta + metric.getFileName();
+				path = pathResultFiles + separador + nomePasta + metric.getFileName();
 				
-				FileWriter fw = new FileWriter(new File(path));
+				fw = new FileWriter(new File(path));
 				fw.write(metric.result(llms));
 	            fw.close();
     		}
+
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
     }
 
     /**
@@ -294,6 +311,19 @@ public class SimulationManagement {
             }
         }
         ModulationUtilizationResultManager murm = new ModulationUtilizationResultManager();
+        return murm.result(llmu);
+    }
+
+    public String getConsumedEnergyCsv(){
+        List<List<Measurement>> llmu = new ArrayList<>();
+        for (List<Measurements> listMeas : this.mainMeasuremens) {
+            List<Measurement> lmu = new ArrayList<>();
+            llmu.add(lmu);
+            for (Measurements measurements : listMeas) {
+                lmu.add(measurements.getConsumedEnergyMetric());
+            }
+        }
+        ConsumedEnergyResultManager murm = new ConsumedEnergyResultManager();
         return murm.result(llmu);
     }
 

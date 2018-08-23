@@ -14,6 +14,7 @@ import grmlsa.modulation.Modulation;
  *  - Energy efficiency analysis for flexible-grid OFDM-based optical networks (2012)
  *  - Power-Efficient Protection With Directed p-Cycles for Asymmetric Traffic in Elastic Optical Networks (2016)
  *  - Energy-efficient routing, modulation and spectrum allocation in elastic optical networks (2017)
+ *  - Power-Efficient Protection With Directed p-Cycles for Asymmetric Traffic in Elastic Optical Networks (2016)
  *  
  * Obs.: The following works present formulas similar to the works that were used for the implementation of power consumption
  *  - Traffic and Power-Aware Protection Scheme in Elastic Optical Networks (2012)
@@ -59,7 +60,7 @@ public class EnergyConsumption {
 		double PCt = 2.0 * PCtran; //power consumption of the transmitter and receiver
 		double PClinks = (quantSlotsRequeridos / totalSlots) * (PCedfas + PCoxcs); //energy consumption along the links and OXCs
 		double PCtotal = PCt + PClinks; //total energy consumption of the circuit
-		
+    
 		return PCtotal;
 	}
 	
@@ -179,5 +180,4 @@ public class EnergyConsumption {
 		
 		return PClink;
 	}
-
 }

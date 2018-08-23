@@ -3,10 +3,7 @@ package simulationControl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -105,6 +102,7 @@ public class Main {
                         if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics)sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption)sr.getResult().energyConsumption = sm.getEnergyConsumptionCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization)sr.getResult().modulationUtilization = sm.getModulationUtilizationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().ConsumedEnergy)sr.getResult().consumedEnergy = sm.getConsumedEnergyCsv();
                         sr.setProgress(1.0);
                         sr.setStatus("finished");
                         newRef.setValue(sr);
@@ -239,6 +237,7 @@ public class Main {
         PhysicalLayerConfig plc = gson.fromJson(physicalLayerConfigJSON, PhysicalLayerConfig.class);
         OthersConfig oc = gson.fromJson(othersConfigJSON,OthersConfig.class);
         scanner.close();
+
         
         return createAllSimulations(nc, sc, tc, plc, oc);
     }

@@ -128,7 +128,15 @@ public class BandwidthBlockingProbability extends Measurement{
 	public double getProbBlockGeneral(){
 		return ((double) this.generalBandwidthBlockingProbability/ (double) this.generalRequestedBandwidth);
 	}
-	
+
+	/**
+	 * Returns total requested bandwidth.
+	 * @return
+	 */
+	public double getGeneralRequestedBandwidth() {
+		return generalRequestedBandwidth;
+	}
+
 	/**
 	 * Returns the bandwidth blocking probability of a given pair
 	 * 

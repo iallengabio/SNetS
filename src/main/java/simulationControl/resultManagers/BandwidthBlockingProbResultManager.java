@@ -63,6 +63,8 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		
 		res.append(resultGeneral());
 		res.append("\n\n");
+		res.append(resultGeneralRequestedBandwidth());
+		res.append("\n\n");
 		res.append(resultPair());
 		res.append("\n\n");
 		res.append(resultBandwidth());
@@ -84,6 +86,18 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 			res.append("Bandwidth blocking probability" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + bbps.get(loadPoint).get(replic).getProbBlockGeneral());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+
+	private String resultGeneralRequestedBandwidth(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("General requested bandwidth" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getGeneralRequestedBandwidth());
 			}
 			res.append("\n");
 		}
