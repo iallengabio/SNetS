@@ -299,4 +299,4 @@ computGain <- function(df,mySol){
   return(gains)
 }
 
-%novo comentário
+%novo comentário2
