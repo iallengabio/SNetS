@@ -92,4 +92,4 @@ costBenefit(directory, replicacoes, alpha, legLoads, legSol)
 maxBVTUtilization(directory, replicacoes, alpha, legLoads, legSol)
 profit(directory, replicacoes, alpha, legLoads, legSol)
 
-
+#teste do git
