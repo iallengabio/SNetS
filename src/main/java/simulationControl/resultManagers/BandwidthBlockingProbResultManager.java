@@ -64,6 +64,7 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		res.append(resultGeneral());
 		res.append("\n\n");
 		res.append(resultGeneralRequestedBandwidth());
+		res.append("\n\n");
 		
 		res.append(resultGeneralLackTx());
 		res.append("\n\n");
@@ -78,7 +79,6 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		res.append(resultGeneralOther());
 		res.append("\n\n");
 		
-		res.append("\n\n");
 		res.append(resultPair());
 		res.append("\n\n");
 		res.append(resultBandwidth());

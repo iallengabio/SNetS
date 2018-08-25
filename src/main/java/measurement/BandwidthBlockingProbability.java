@@ -111,22 +111,22 @@ public class BandwidthBlockingProbability extends Measurement{
 			this.generalBandwidthBlockingProbability += bandwidth;
 			
 			if (request.getPair().getSource().getTxs().isFullUtilized()) { // Check whether the cause of the block was the lack of transmitters
-                this.bandwidthBlockingByLackTransmitters++;
+                this.bandwidthBlockingByLackTransmitters += bandwidth;
                 
             } else if (request.getPair().getDestination().getRxs().isFullUtilized()) { // Check whether the cause of the block was the lack receivers
-                this.bandwidthBlockingByLackReceivers++;
+                this.bandwidthBlockingByLackReceivers += bandwidth;
                 
             } else if (cp.isBlockingByQoTN(request.getCircuits())){ // Check whether the cause of the block was the QoTN
-            	this.bandwidthBlockingByQoTN++;
+            	this.bandwidthBlockingByQoTN += bandwidth;
             	
             } else if (cp.isBlockingByQoTO(request.getCircuits())) { // Check whether the cause of the block was the QoTO
-            	this.bandwidthBlockingByQoTO++;
+            	this.bandwidthBlockingByQoTO += bandwidth;
             	
             } else if (cp.isBlockingByFragmentation(request.getCircuits())) { // Check whether the cause of the block was the fragmentation
-                this.bandwidthBlockingByFragmentation++;
+                this.bandwidthBlockingByFragmentation += bandwidth;
                 
             } else { // Blocking occurred due to lack of free slots
-            	this.bandwidthBlockingByOther++;
+            	this.bandwidthBlockingByOther += bandwidth;
             }
 			
 			// Increment blocked requests per pair
@@ -294,5 +294,4 @@ public class BandwidthBlockingProbability extends Measurement{
 		
 		return res;
 	}
-	
 }
