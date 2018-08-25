@@ -64,6 +64,20 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		res.append(resultGeneral());
 		res.append("\n\n");
 		res.append(resultGeneralRequestedBandwidth());
+		
+		res.append(resultGeneralLackTx());
+		res.append("\n\n");
+		res.append(resultGeneralLackRx());
+		res.append("\n\n");
+		res.append(resultGeneralFrag());
+		res.append("\n\n");
+		res.append(resultGeneralQoTN());
+		res.append("\n\n");
+		res.append(resultGeneralQoTO());
+		res.append("\n\n");
+		res.append(resultGeneralOther());
+		res.append("\n\n");
+		
 		res.append("\n\n");
 		res.append(resultPair());
 		res.append("\n\n");
@@ -91,13 +105,120 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		}
 		return res.toString();
 	}
-
+	
+	/**
+	 * Returns the general requested bandwidth
+	 * 
+	 * @return String
+	 */
 	private String resultGeneralRequestedBandwidth(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			res.append("General requested bandwidth" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + bbps.get(loadPoint).get(replic).getGeneralRequestedBandwidth());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by lack of transmitters
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralLackTx(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Blocking probability by lack of transmitters" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getBandwidthBlockingByLackTx());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by lack of receivers
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralLackRx(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Blocking probability by lack of receivers" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getBandwidthBlockingByLackRx());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by fragmentation
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralFrag(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Blocking probability by fragmentation" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getBandwidthBlockingByFragmentation());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by QoTN
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralQoTN(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Blocking probability by QoTN" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getBandwidthBlockingByQoTN());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by QoTO
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralQoTO(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Blocking probability by QoTO" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getBandwidthBlockingByQoTO());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the blocking probability by other
+	 * 
+	 * @return String
+	 */
+	private String resultGeneralOther(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Blocking probability by other" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + bbps.get(loadPoint).get(replic).getBandwidthBlockingByOther());
 			}
 			res.append("\n");
 		}
