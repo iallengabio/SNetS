@@ -116,7 +116,6 @@ public class Spectrum {
 				throw new Exception("spectrum is already free. spectrum band: " + spectrumBand[0] + " - " + spectrumBand[1]);
 			}
 		}
-
 		
 		this.freeSpectrumBands.add(spectrumBand); //liberando spectro
 

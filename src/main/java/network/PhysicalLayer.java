@@ -37,7 +37,9 @@ public class PhysicalLayer {
     private double B0; // Optical bandwidth
     
     private double numReferenceSlots; // Number of reference slots for the signal power density
-
+    
+    private double Lsss; // Switch insertion loss, dB
+    
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
 	 * 
@@ -67,18 +69,9 @@ public class PhysicalLayer {
         this.A1 = plc.getNoiseFactorModelParameterA1();
         this.A2 = plc.getNoiseFactorModelParameterA2();
         this.B0 = plc.getOpticalNoiseBandwidth();
+        
+        this.Lsss = plc.getSwitchInsertionLoss();
     }
-  
-    /**
-	 * This method returns the number of amplifiers on a link
-	 * 
-	 * @param distance - km
-	 * @return double
-	 */
-	public double getNumberOfAmplifiers(double distance){
-		double Ns = 2.0 + roundUp((distance / L) - 1.0);
-		return Ns;
-	}
   
 	/**
 	 * Returns if QoTN check is active or not
@@ -114,6 +107,26 @@ public class PhysicalLayer {
 	 */
 	public double getRateOfFEC(){
 		return rateOfFEC;
+	}
+	
+	/**
+	 * This method returns the number of amplifiers on a link including the booster and pre
+	 * 
+	 * @param distance - double
+	 * @return double double
+	 */
+	public double getNumberOfAmplifiers(double distance){
+		return 2.0 + roundUp((distance / L) - 1.0);
+	}
+	
+	/**
+	 * This method returns the number of line amplifiers on a link
+	 * 
+	 * @param distance - double
+	 * @return double
+	 */
+	public double getNumberOfLineAmplifiers(double distance){
+		return roundUp((distance / L) - 1.0);
 	}
 	
 	/**
@@ -210,18 +223,19 @@ public class PhysicalLayer {
 	 * @return double - SNR (linear)
 	 */
 	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
-		
+
 		double Ptx = ratioOfDB(power) * 1.0E-3; //W, Transmitter power
 		double Pase = 0.0;
 		double Pnli = 0.0;
 		
 		int numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
 		double fs = route.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
-		double Bsi = numSlotsRequired * fs; // Circuit bandwidth
+		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * fs; // Circuit bandwidth, less the guard band
+		//double Bsi = numSlotsRequired * fs; // Circuit bandwidth, less the guard band
 		
 		double slotsTotal = route.getLinkList().firstElement().getNumOfSlots();
-		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); //Hz, Half slots are removed because center Frequency = 193.0E + 12 is the central frequency of the optical spectrum
-		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1)) + (Bsi / 2); // Central frequency of circuit
+		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); // Hz, Half slots are removed because center Frequency = 193.0E+12 is the central frequency of the optical spectrum
+		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
 		
 		double I = Ptx / (fs * numReferenceSlots); // Signal power density for the number of reference slots
 		
@@ -229,31 +243,45 @@ public class PhysicalLayer {
 		Node destinationNode = null;
 		Link link = null;
 		
-		double G0 = alpha * L; // Gain in dB of the amplifier
-		Amplifier amp = new Amplifier(G0, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-		amp.setActiveAse(1); // Active the ASE noise
-		amp.setTypeGainAmplifier(1); // Sets the gain type to fixed
+		Amplifier boosterAmp = new Amplifier(Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
+		Amplifier lineAmp = new Amplifier(alpha * L, pSat, NF, h, centerFrequency, 0.0, A1, A2);
+		Amplifier preAmp = new Amplifier((alpha * L) + Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
+		
+		double Ns = 0.0; // Number of line amplifiers
+		double numSlotsUsed = 0.0;
+		double noiseNli = 0.0;
+		double totalPower = 0.0;
+		double boosterAmpNoiseAse = 0.0;
+		double preAmpNoiseAse = 0.0;
+		double lineAmpNoiseAse = 0.0;
+		double lastFiberSegment = 0.0;
 		
 		for(int i = sourceNodeIndex; i < destinationNodeIndex; i++){
 			sourceNode = route.getNode(i);
 			destinationNode = route.getNode(i + 1);
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-			double Ns = PhysicalLayer.roundUp(link.getDistance() / L); // Number of spans
+			Ns = getNumberOfLineAmplifiers(link.getDistance());
 			
-			double numSlotsUsed = link.getUsedSlots();
+			numSlotsUsed = link.getUsedSlots();
 			if(checksOnTotalPower){
 				numSlotsUsed += numSlotsRequired;
 			}
 			
 			if(activeNLI){
-				double noiseNli = B0 * Ns * getGnli(circuit, link, I, Bsi, fi, gamma, beta2, alpha, lowerFrequency);
+				noiseNli = Ns * getGnli(circuit, link, I, Bsi, fi, gamma, beta2, alpha, lowerFrequency);
 				Pnli = Pnli + noiseNli;
 			}
 			
 			if(activeASE){
-				double totalPower = numSlotsUsed * fs * I;
-				double noiseAse = B0 * Ns * 2.0 * amp.getAseByTypeGain(totalPower, centerFrequency);
-				Pase = Pase + noiseAse;
+				totalPower = numSlotsUsed * fs * I;
+				lastFiberSegment = link.getDistance() - (Ns * L);
+				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
+				
+				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, centerFrequency, boosterAmp.getGainLinear());
+				preAmpNoiseAse = preAmp.getAseByGain(totalPower, centerFrequency, preAmp.getGainLinear());
+				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, centerFrequency, lineAmp.getGainLinear());
+				
+				Pase = Pase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
 			}
 		}
 		
@@ -289,24 +317,36 @@ public class PhysicalLayer {
 		double p1 = arcsinh(ro * Bsi * Bsi);
 		double p2 = 0.0;
 		
+		double fs = 0.0;
+		int sa[] = null;
+		double numOfSlots = 0.0;
+		double Bsj = 0.0;
+		double fj = 0.0;
+		double deltaFij = 0.0;
+		double d1 = 0.0;
+		double d2 = 0.0;
+		double ln = 0.0;
+		
 		TreeSet<Circuit> listRequests = link.getCircuitList();
 		for(Circuit cricuitTemp : listRequests){
 			
 			if(!circuit.equals(cricuitTemp)){
-				double fs = link.getSlotSpectrumBand();
-				int sa[] = cricuitTemp.getSpectrumAssignedByLink(link);
-				double numOfSlots = sa[1] - sa[0] + 1;
-				double Bsj = numOfSlots * fs; //Circuit bandwidth
-				double fj = lowerFrequency + (fs * (sa[0] - 1)) + (Bsj / 2); //Central frequency of circuit
+				fs = link.getSlotSpectrumBand();
+				sa = cricuitTemp.getSpectrumAssignedByLink(link);
+				numOfSlots = sa[1] - sa[0] + 1.0;
 				
-				double deltaFij = fi - fj;
+				Bsj = (numOfSlots - cricuitTemp.getModulation().getGuardBand()) * fs; // Circuit bandwidth, less the guard band
+				//Bsj = numOfSlots * fs; // Circuit bandwidth, less the guard band
+				fj = lowerFrequency + (fs * (sa[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				
+				deltaFij = fi - fj;
 				if(deltaFij < 0.0)
 					deltaFij = -1.0 * deltaFij;
 				
-				double d1 = deltaFij + (Bsj / 2);
-				double d2 = deltaFij - (Bsj / 2);
+				d1 = deltaFij + (Bsj / 2.0);
+				d2 = deltaFij - (Bsj / 2.0);
 				
-				double ln = Math.log(d1 / d2);
+				ln = Math.log(d1 / d2);
 				p2 += ln;
 			}
 		}
@@ -339,7 +379,7 @@ public class PhysicalLayer {
 	public static double getBER(double SNR, double M){
 		double SNRb = SNR / log2(M); // SNR per bit
 		
-		double p1 = (3.0 * SNRb * log2(M)) / (2 * (M - 1.0));
+		double p1 = (3.0 * SNRb * log2(M)) / (2.0 * (M - 1.0));
 		double p2 = erfc(Math.sqrt(p1));
 		double BER = (2.0 / log2(M)) * ((Math.sqrt(M) - 1.0) / Math.sqrt(M)) * p2;
 		

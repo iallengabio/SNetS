@@ -72,29 +72,34 @@ public class ControlPlane {
     }
     
     /**
-     * This method create a new transparent circuit.
+     * This method creates a new transparent circuit.
      * 
      * @param rfc RequestForConnection
      * @return Circuit
      */
     public Circuit createNewCircuit(RequestForConnection rfc){
-    	
     	Circuit circuit = new Circuit();
 		circuit.setPair(rfc.getPair());
 		circuit.addRequest(rfc);
 		ArrayList<Circuit> circs = new ArrayList<>();
 		circs.add(circuit);
 		rfc.setCircuit(circs);
-		
 		return circuit;
     }
-
+    
+    /**
+     * This method creates a new transparent circuit.
+     * 
+     * @param rfc RequestForConnection
+     * @param p Pair
+     * @return Circuit
+     */
     public Circuit createNewCircuit(RequestForConnection rfc, Pair p) {
         Circuit circuit = new Circuit();
         circuit.setPair(p);
         circuit.addRequest(rfc);
         if (rfc.getCircuits() == null) {
-            rfc.setCircuit(new ArrayList());
+            rfc.setCircuit(new ArrayList<>());
         }
         rfc.getCircuits().add(circuit);
         return circuit;
@@ -183,14 +188,11 @@ public class ControlPlane {
             throw new Exception("bad RMLSA choice. Spectrum cant be allocated.");
         }
 
-        
         // Allocates transmitter and receiver
         circuit.getSource().getTxs().allocatesTransmitters();
         circuit.getDestination().getRxs().allocatesReceivers();
         
         addConnection(circuit);
-
-
     }
 
     /**
@@ -201,7 +203,6 @@ public class ControlPlane {
      * @param links List<Link>
      */
     protected boolean allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
-        boolean flag = false;
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
 
@@ -234,7 +235,6 @@ public class ControlPlane {
         removeConnection(circuit);
 
         updateNetworkPowerConsumption();
-
     }
     
     /**
@@ -391,10 +391,9 @@ public class ControlPlane {
         }
         circuit.setSpectrumAssigned(newSpecAssign);
         isAdmissibleQualityOfTransmission(circuit); //compute QoT
+        
         this.updateNetworkPowerConsumption();
-
     }
-
 
     /**
      * To find active circuits on the network with specified source and destination
@@ -406,7 +405,13 @@ public class ControlPlane {
     public List<Circuit> searchForActiveCircuits(String source, String destination) {
         return this.activeCircuits.get(source).get(destination);
     }
-
+    
+    /**
+     * 
+     * 
+     * @param source
+     * @return List<Circuit>
+     */
     public List<Circuit> searchForActiveCircuits(String source){
         List<Circuit> res = new ArrayList<>();
         for(List<Circuit> lc : activeCircuits.get(source).values()){
@@ -414,7 +419,12 @@ public class ControlPlane {
         }
         return res;
     }
-
+    
+    /**
+     * 
+     * 
+     * @return List<Circuit>
+     */
     public List<Circuit> searchForActiveCircuits(){
         List<Circuit> res = new ArrayList<>();
         for(HashMap<String, List<Circuit>> hA : activeCircuits.values()){
@@ -424,7 +434,6 @@ public class ControlPlane {
         }
         return res;
     }
-
     
     /**
      * This method verifies the transmission quality of the circuit in the establishment 
@@ -451,17 +460,6 @@ public class ControlPlane {
     			}
     			
     			return QoTForOther;
-    			
-    			// With this removal, every time it checksQoT of some circuit it must be recalculated
-//    			if(QoTForOther){
-//    				// QoT the other circuits was kept acceptable
-//    				return true;
-//    			} else {
-//    				// QoT the other circuits was not kept acceptable, frees allocated resources
-//    				releaseCircuit(circuit);
-//    				// Recalculates the QoT of the other circuits
-//    				computeQoTForOther(circuit);
-//    			}
     		}
     		
     		return false;
@@ -510,28 +508,25 @@ public class ControlPlane {
             	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
                 if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {
                     circuits.add(circuitTemp);
-                    
-                    circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
-                    circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
                 }
             }
 		}
 		
 		// Tests the QoT of circuits
         for (Circuit circuitTemp : circuits) {
+
+        	// Stores the SNR and QoT values
+        	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
+            circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
+            
         	// Recalculates the QoT and SNR of the circuits
             boolean QoT = computeQualityOfTransmission(circuitTemp);
             if (!QoT) {
             	
             	// Returns the SNR and QoT values of circuits before the establishment of the circuit in evaluation
-            	for (Circuit circuitAux : circuits) {
+            	for (Circuit circuitAux : circuitsSNR.keySet()) {
             		circuitAux.setSNR(circuitsSNR.get(circuitAux));
             		circuitAux.setQoT(circuitsQoT.get(circuitAux));
-            		
-            		// Runs to the last circuit that has been modified
-            		if (circuitTemp.equals(circuitAux)) {
-            			break;
-            		}
             	}
             	
                 return false;
@@ -604,12 +599,15 @@ public class ControlPlane {
 	 * @return boolean
 	 */
 	public boolean isBlockingByQoTN(List<Circuit> circuits){
-	    for(Circuit circuit : circuits){
-            // Check if it is to test the QoT
-            if(mesh.getPhysicalLayer().isActiveQoT()){
+		// Check if it is to test the QoT
+        if(mesh.getPhysicalLayer().isActiveQoT()){
+        	for(Circuit circuit : circuits){
                 // Check if it is possible to compute the circuit QoT
                 if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
-                    return !computeQualityOfTransmission(circuit);
+                    // Check if the QoT is acceptable
+                	if(!computeQualityOfTransmission(circuit)){
+                    	return true;
+                    }
                 }
             }
 	    }
@@ -623,10 +621,13 @@ public class ControlPlane {
 	 * @return boolean
 	 */
 	public boolean isBlockingByQoTO(List<Circuit> circuits){
-	    for(Circuit circuit : circuits){
-            // Check if it is to test the QoT of other already active circuits
-            if(mesh.getPhysicalLayer().isActiveQoTForOther()){
-                return !circuit.isQoTForOther();
+		// Check if it is to test the QoT of other already active circuits
+        if(mesh.getPhysicalLayer().isActiveQoTForOther()){
+        	for(Circuit circuit : circuits){
+        		// Check if the QoTO is acceptable
+                if(!circuit.isQoTForOther()){
+                	return true;
+                }
             }
 	    }
 		return false;
@@ -677,6 +678,22 @@ public class ControlPlane {
 		List<Modulation> modList = new ArrayList<>();
 		modList.add(circuit.getModulation());
 		return modList;
+	}
+	
+	/**
+	 * This method returns the circuit SNR delta
+	 * Can change according to the type of circuit
+	 * 
+	 * @return double - delta SNR (dB)
+	 */
+	public double getDeltaSNR(Circuit circuit){
+		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+		double SNRdB = PhysicalLayer.ratioForDB(SNR);
+		
+		double modulationSNRthreshold = circuit.getModulation().getSNRthreshold();
+		double deltaSNR = SNRdB - modulationSNRthreshold;
+		
+		return deltaSNR;
 	}
 
     private void updateNetworkPowerConsumption(){

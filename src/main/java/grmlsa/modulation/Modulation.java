@@ -17,12 +17,9 @@ public class Modulation {
     private double SNRthreshold; // dB
     private double SNRthresholdLinear;
 	
-    private double rateFEC; // Forward Error Correction
+    private double rateFEC; // rate of Forward Error Correction
 	private double freqSlot;
 	private int guardBand;
-	
-	private boolean activeQoT;
-
 
 	/**
 	 * Creates a new instance of Modulation
@@ -35,7 +32,7 @@ public class Modulation {
 	 * @param M double
 	 * @param FEC double
 	 */
-    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, boolean activeQoT) {
+    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand) {
         this.name = name;
         this.maxRange = maxRange;
         this.M = M;
@@ -47,7 +44,6 @@ public class Modulation {
         // Calculation based on article: Capacity Limits of Optical Fiber Networks (2010)
         this.bitsPerSymbol = PhysicalLayer.log2(M);
         this.SNRthresholdLinear = PhysicalLayer.ratioOfDB(SNRthreshold);
-        this.activeQoT = activeQoT;
     }
 
     /**
@@ -62,20 +58,16 @@ public class Modulation {
      * @return int - numberOfStos
      */
     public int requiredSlots(double bandwidth) {
-        double numberOfSlots = bandwidth / (bitsPerSymbol * freqSlot);
+    	double slotsNumber = (bandwidth * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
         
-        if(activeQoT){
-        	numberOfSlots = (1.1 * bandwidth * (1.0 + rateFEC)) / (2.0 * bitsPerSymbol * freqSlot);
-        }
-        
-        int numberOfSlotsTemp = (int) numberOfSlots;
-        if (numberOfSlots - numberOfSlotsTemp != 0.0) {
-            numberOfSlotsTemp++;
+        int slotsNumberTemp = (int) slotsNumber;
+        if (slotsNumber - slotsNumberTemp != 0.0) {
+        	slotsNumberTemp++;
         }
 
-        numberOfSlotsTemp = numberOfSlotsTemp + guardBand; // Adds another slot needed to be used as a guard band
+        slotsNumberTemp = slotsNumberTemp + guardBand; // Adds another slot needed to be used as a guard band
 
-        return numberOfSlotsTemp;
+        return slotsNumberTemp;
     }
 
     /**
@@ -84,13 +76,9 @@ public class Modulation {
      * @return
      */
     public double potentialBandwidth(int slotsNumber){
-        slotsNumber--; //remove the slot needed to be used as a guard band
-
-        if(activeQoT){
-            return slotsNumber * 2 * bitsPerSymbol * freqSlot / ((1+rateFEC)*1.1);
-        }else {
-            return slotsNumber * bitsPerSymbol * freqSlot;
-        }
+    	slotsNumber = slotsNumber - guardBand; // Remove the slot needed to be used as a guard band
+        
+        return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
     }
     
 	/**
@@ -145,5 +133,14 @@ public class Modulation {
      */
     public double getSNRthresholdLinear(){
     	return SNRthresholdLinear;
+    }
+    
+    /**
+     * Returns the guard band
+     * 
+     * @return int
+     */
+    public int getGuardBand(){
+    	return guardBand;
     }
 }

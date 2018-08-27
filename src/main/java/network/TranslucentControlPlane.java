@@ -111,7 +111,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
 	@Override
-	protected boolean computeQualityOfTransmission(Circuit circuit){
+	public boolean computeQualityOfTransmission(Circuit circuit){
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
@@ -529,7 +529,9 @@ public class TranslucentControlPlane extends ControlPlane {
 				}
 
 				// Now you can check the QoT by transparent segment
-				return !computeQualityOfTransmission(circuit);
+				if(!computeQualityOfTransmission(circuit)){
+					return true;
+				}
 			}
 		}
 		

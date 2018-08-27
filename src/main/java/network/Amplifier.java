@@ -18,9 +18,6 @@ public class Amplifier {
 	private double noiseFigureLinear; // Linear noise figure
 	private double saturationPowerLinear; // Linear saturation power (Watt)
 	
-	private int activeAse; // To enable or disable ASE
-	private int typeGainAmplifier; // Set the amplifier gain type (0 = saturated gain, any other = fixed gain)
-	
 	private double Famp; // Amplifier noise factor
 	private double A1; // Parameter for noise factor
 	private double A2; // Parameter for noise factor
@@ -223,6 +220,23 @@ public class Amplifier {
 	}
 	
 	/**
+	 * A method that calculates the gain in relation to an input power and verifying the saturation power
+	 * @param pinTotal
+	 * @return
+	 */
+	public double getSaturatedGainByPsat(double totalPin){
+		double g = gainLinear;
+		//double Pout = totalPin * g;
+		double Pout = gain + PhysicalLayer.ratioForDB(totalPin / 1.0E-3); //dBm
+		
+		if(Pout > saturationPower){
+			g = getGainSaturated(totalPin);
+		}
+		
+		return g;
+	}
+	
+	/**
 	 * Method toString to override the toString of the Object class
 	 * 
 	 * @return String
@@ -232,55 +246,20 @@ public class Amplifier {
 	}
 	
 	/**
-	 * Returns if the ASE is active or not
-	 * 
-	 * @return int
-	 */
-	public int getActiveAse() {
-		return activeAse;
-	}
-	
-	/**
-	 * Sets is the ASE is active or not
-	 * 
-	 * @param activeAse
-	 */
-	public void setActiveAse(int activeAse) {
-		this.activeAse = activeAse;
-	}
-	
-	/**
-	 * Returns the type of gain of the amplifier
-	 * 
-	 * @return typeGainAmplifier
-	 */
-	public int getTypeGainAmplifier() {
-		return typeGainAmplifier;
-	}
-	
-	/**
-	 * Sets the amplifier gain type
-	 * 
-	 * @param typeGainAmplifier
-	 */
-	public void setTypeGainAmplifier(int typeGainAmplifier) {
-		this.typeGainAmplifier = typeGainAmplifier;
-	}
-	
-	/**
 	 * Returns the value of gain of the amplifier according to gain type of the amplifier
 	 * 
 	 * @param pinTotal - Total power at the amplifier input
+	 * @param typeOfAmplifierGain - Type of amplifier gain
 	 * @return double - amplifier gain
 	 */
-	public double getGainByType(double pinTotal){
+	public double getGainByType(double pinTotal, int typeOfAmplifierGain){
 		double gain = 0.0;
 		
-		if(typeGainAmplifier == 0){ // Saturated gain of the amplifier
-			gain = this.getGainSaturated(pinTotal); 
-			
-		} else { // Fixed gain of the amplifier
+		if(typeOfAmplifierGain == 0){ // Fixed gain of the amplifier
 			gain = this.getGainLinear();
+			
+		} else { // Saturated gain of the amplifier
+			gain = this.getSaturatedGainByPsat(pinTotal);
 		}
 		
 		return gain;
@@ -291,18 +270,16 @@ public class Amplifier {
 	 * 
 	 * @param pinTotal - Total power at the amplifier input
 	 * @param frequency - Signal frequency
+	 * @param gain - Amplifier gain
 	 * @return double - ASE
 	 */
-	public double getAseByTypeGain(double pinTotal, double frequency){
+	public double getAseByGain(double pinTotal, double frequency, double gain){
 		double aseNoise = 0.0;
 		
-		if(activeAse == 1){
-			if(typeGainAmplifier == 0){ // Saturated gain of the amplifier
-				aseNoise = this.getAseBySaturation(frequency, pinTotal);
-				
-			}else{ // Fixed gain of the amplifier
-				aseNoise = this.getAse(frequency);
-			}
+		if(gain == gainLinear){
+			aseNoise = this.getAse(frequency);
+		}else{
+			aseNoise = this.getAseBySaturation(frequency, pinTotal);
 		}
 		
 		return aseNoise;
