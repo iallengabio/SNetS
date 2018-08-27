@@ -31,6 +31,8 @@ public class PhysicalLayerConfig {
 	private double noiseFactorModelParameterA2; // A2, Amplifier noise factor parameter
 	private double opticalNoiseBandwidth; // B0, Optical bandwidth, it has a value of 1 because we are considering SNR
 	
+	private double switchInsertionLoss; // dB
+	
 	/**
 	 * @return the activeQoT
 	 */
@@ -249,5 +251,16 @@ public class PhysicalLayerConfig {
 	public void setOpticalNoiseBandwidth(double opticalNoiseBandwidth) {
 		this.opticalNoiseBandwidth = opticalNoiseBandwidth;
 	}
-	
+	/**
+	 * @return the switchInsertionLoss
+	 */
+	public double getSwitchInsertionLoss() {
+		return switchInsertionLoss;
+	}
+	/**
+	 * @param switchInsertionLoss the switchInsertionLoss to set
+	 */
+	public void setSwitchInsertionLoss(double switchInsertionLoss) {
+		this.switchInsertionLoss = switchInsertionLoss;
+	}
 }
