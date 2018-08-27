@@ -34,20 +34,25 @@ public class PhysicalLayer {
     private double pSat; // Saturation power of the amplifier, dBm
     private double A1; // Amplifier noise factor parameter, A1
     private double A2; // Amplifier noise factor parameter, A2
-    private double B0; // Optical bandwidth
-    
-    private double numReferenceSlots; // Number of reference slots for the signal power density
+    private int typeOfAmplifierGain; // Type of amplifier gain, 0 to fixed gain and 1 to saturated gain
     
     private double Lsss; // Switch insertion loss, dB
     
+    private boolean fixedPowerSpectralDensity; // To enable or disable fixed power spectral density
+	private double referenceBandwidth; // Reference bandwidth for power spectral density
+    
+	private Amplifier boosterAmp; // Booster amplifier
+	private Amplifier lineAmp; // Line amplifier
+	private Amplifier preAmp; // Pre amplifier
+	
+	private double linearPower; // Transmitter power, Watt
+	
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
 	 * 
 	 * @param plc PhysicalLayerConfig
 	 */
     public PhysicalLayer(PhysicalLayerConfig plc){
-    	this.numReferenceSlots = 4; // Is set to the value four based on wavelengths of 50 GHz bandwidth
-    	
         this.activeQoT = plc.isActiveQoT();
         this.activeQoTForOther = plc.isActiveQoTForOther();
     	
@@ -68,9 +73,17 @@ public class PhysicalLayer {
         this.pSat = plc.getPowerSaturationOfOpticalAmplifier();
         this.A1 = plc.getNoiseFactorModelParameterA1();
         this.A2 = plc.getNoiseFactorModelParameterA2();
-        this.B0 = plc.getOpticalNoiseBandwidth();
         
         this.Lsss = plc.getSwitchInsertionLoss();
+        
+        this.fixedPowerSpectralDensity = plc.isFixedPowerSpectralDensity();
+        this.referenceBandwidth = plc.getReferenceBandwidthForPowerSpectralDensity();
+        
+        this.boosterAmp = new Amplifier(Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
+        this.lineAmp = new Amplifier(alpha * L, pSat, NF, h, centerFrequency, 0.0, A1, A2);
+        this.preAmp = new Amplifier((alpha * L) + Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
+        
+        this.linearPower = ratioOfDB(power) * 1.0E-3; // converting to Watt
     }
   
 	/**
@@ -223,32 +236,24 @@ public class PhysicalLayer {
 	 * @return double - SNR (linear)
 	 */
 	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
-
-		double Ptx = ratioOfDB(power) * 1.0E-3; //W, Transmitter power
+		
+		double I = linearPower / referenceBandwidth; // Signal power density for the reference bandwidth
 		double Pase = 0.0;
 		double Pnli = 0.0;
 		
-		int numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
+		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
 		double fs = route.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
 		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * fs; // Circuit bandwidth, less the guard band
-		//double Bsi = numSlotsRequired * fs; // Circuit bandwidth, less the guard band
 		
 		double slotsTotal = route.getLinkList().firstElement().getNumOfSlots();
 		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); // Hz, Half slots are removed because center Frequency = 193.0E+12 is the central frequency of the optical spectrum
 		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
 		
-		double I = Ptx / (fs * numReferenceSlots); // Signal power density for the number of reference slots
-		
 		Node sourceNode = null;
 		Node destinationNode = null;
 		Link link = null;
 		
-		Amplifier boosterAmp = new Amplifier(Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-		Amplifier lineAmp = new Amplifier(alpha * L, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-		Amplifier preAmp = new Amplifier((alpha * L) + Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-		
 		double Ns = 0.0; // Number of line amplifiers
-		double numSlotsUsed = 0.0;
 		double noiseNli = 0.0;
 		double totalPower = 0.0;
 		double boosterAmpNoiseAse = 0.0;
@@ -262,27 +267,28 @@ public class PhysicalLayer {
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			Ns = getNumberOfLineAmplifiers(link.getDistance());
 			
-			numSlotsUsed = link.getUsedSlots();
-			if(checksOnTotalPower){
-				numSlotsUsed += numSlotsRequired;
-			}
-			
 			if(activeNLI){
-				noiseNli = Ns * getGnli(circuit, link, I, Bsi, fi, gamma, beta2, alpha, lowerFrequency);
+				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi, gamma, beta2, alpha, lowerFrequency);
 				Pnli = Pnli + noiseNli;
 			}
 			
 			if(activeASE){
-				totalPower = numSlotsUsed * fs * I;
+				if(typeOfAmplifierGain == 1){
+					totalPower = getTotalPowerInTheLink(link, linearPower, Bsi, I, numSlotsRequired, checksOnTotalPower);
+				}
 				lastFiberSegment = link.getDistance() - (Ns * L);
 				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
 				
-				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, centerFrequency, boosterAmp.getGainLinear());
-				preAmpNoiseAse = preAmp.getAseByGain(totalPower, centerFrequency, preAmp.getGainLinear());
-				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, centerFrequency, lineAmp.getGainLinear());
+				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, centerFrequency, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, centerFrequency, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				preAmpNoiseAse = preAmp.getAseByGain(totalPower, centerFrequency, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				
 				Pase = Pase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
 			}
+		}
+		
+		if(!fixedPowerSpectralDensity){
+			I = linearPower / Bsi; // Signal power spectral density calculated according to the requested bandwidth
 		}
 		
 		double SNR = I / (Pase + Pnli);
@@ -291,63 +297,121 @@ public class PhysicalLayer {
 	}
 	
 	/**
+	 * Total input power on the link
+	 * 
+	 * @param link Link
+	 * @param I double
+	 * @param numSlotsRequired int
+	 * @param checksOnTotalPower boolean
+	 * @return double
+	 */
+	public double getTotalPowerInTheLink(Link link, double powerI, double Bsi, double I, double numSlotsRequired, boolean checksOnTotalPower){
+		double totalPower = 0.0;
+		double circuitPower = 0.0;
+		int saj[] = null;
+		double numOfSlots = 0.0;
+		double Bsj = 0.0;
+		double powerJ = powerI;
+		double fs = link.getSlotSpectrumBand(); //Hz
+		
+		if(checksOnTotalPower){ // Check if it is to add the power of the circuit under test
+			totalPower = powerI;
+			if(fixedPowerSpectralDensity){
+				totalPower = I * Bsi;
+			}
+		}
+		
+		TreeSet<Circuit> listCircuits = link.getCircuitList();
+		for(Circuit cricuitJ : listCircuits){
+			
+			saj = cricuitJ.getSpectrumAssignedByLink(link);;
+			numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
+			Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * fs; // Circuit bandwidth, less the guard band
+			
+			circuitPower = powerJ;
+			if(fixedPowerSpectralDensity){
+				circuitPower = I * Bsj;
+			}
+			
+			totalPower += circuitPower;
+		}
+		
+		return totalPower;
+	}
+	
+	/**
 	 * Based on article:
 	 *  - Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
 	 * 
-	 * @param circuit Circuit
+	 * @param circuitI Circuit
 	 * @param link Link
 	 * @param I double
-	 * @param Bsi double
-	 * @param fi double
+	 * @param BsI double
+	 * @param fI double
 	 * @param gamma double
 	 * @param beta2 double
 	 * @param alpha double
 	 * @param lowerFrequency double
 	 * @return double
 	 */
-	public double getGnli(Circuit circuit, Link link, double I, double Bsi, double fi, double gamma, double beta2, double alpha, double lowerFrequency){
+	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double I, double fI, double gamma, double beta2, double alpha, double lowerFrequency){
 		double alphaLinear = ratioOfDB(alpha);
 		if(beta2 < 0.0){
 			beta2 = -1.0 * beta2;
 		}
 		
-		double mi = (3.0 * gamma * gamma * I * I * I) / (2.0 * Math.PI * alphaLinear * beta2);
+		double Gi = I; // Power spectral density of the circuit i
+		if(!fixedPowerSpectralDensity){
+			Gi = powerI / BsI; // Power spectral density of the circuit i calculated according to the required bandwidth
+		}
 		
+		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta2);
 		double ro = (Math.PI * Math.PI * beta2) / (2.0 * alphaLinear);
-		double p1 = arcsinh(ro * Bsi * Bsi);
-		double p2 = 0.0;
+		double p1 = Gi * Gi * arcsinh(ro * BsI * BsI);
 		
+		double p2 = 0.0;
 		double fs = 0.0;
-		int sa[] = null;
+		int saJ[] = null;
 		double numOfSlots = 0.0;
 		double Bsj = 0.0;
-		double fj = 0.0;
+		double fJ = 0.0;
 		double deltaFij = 0.0;
 		double d1 = 0.0;
 		double d2 = 0.0;
+		double d3 = 0.0;
 		double ln = 0.0;
+		double powerJ = powerI;
+		double Gj = I; // Power spectral density of the circuit j
 		
-		TreeSet<Circuit> listRequests = link.getCircuitList();
-		for(Circuit cricuitTemp : listRequests){
+		TreeSet<Circuit> listCircuits = link.getCircuitList();
+		for(Circuit cricuitJ : listCircuits){
 			
-			if(!circuit.equals(cricuitTemp)){
+			if(!circuitI.equals(cricuitJ)){
 				fs = link.getSlotSpectrumBand();
-				sa = cricuitTemp.getSpectrumAssignedByLink(link);
-				numOfSlots = sa[1] - sa[0] + 1.0;
+				saJ = cricuitJ.getSpectrumAssignedByLink(link);
+				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = (numOfSlots - cricuitTemp.getModulation().getGuardBand()) * fs; // Circuit bandwidth, less the guard band
-				//Bsj = numOfSlots * fs; // Circuit bandwidth, less the guard band
-				fj = lowerFrequency + (fs * (sa[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * fs; // Circuit bandwidth, less the guard band
+				fJ = lowerFrequency + (fs * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
 				
-				deltaFij = fi - fj;
+				if(!fixedPowerSpectralDensity){
+					Gj = powerJ / Bsj; // Power spectral density of the circuit j calculated according to the required bandwidth
+				}
+				
+				deltaFij = fI - fJ;
 				if(deltaFij < 0.0)
 					deltaFij = -1.0 * deltaFij;
 				
 				d1 = deltaFij + (Bsj / 2.0);
 				d2 = deltaFij - (Bsj / 2.0);
 				
+				d3 = d1 / d2;
+				if(d3 < 0.0){
+					d3 = -1.0 * d3;
+				}
+				
 				ln = Math.log(d1 / d2);
-				p2 += ln;
+				p2 += Gj * Gj * ln;
 			}
 		}
 		

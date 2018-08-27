@@ -51,6 +51,7 @@ public class Modulation {
      * Adds guard band
      * 
      * Based on articles:
+     *  - Efficient Resource Allocation for All-Optical Multicasting Over Spectrum-Sliced Elastic Optical Networks (2013)
 	 *  - Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
 	 *  - Analise do Impacto do Ruido ASE em Redes Opticas Elasticas Transparentes Utilizando Multiplos Formatos de Modulacao (2015)
      *
