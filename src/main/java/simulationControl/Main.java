@@ -197,7 +197,7 @@ public class Main {
         String filesPath = path;
         String networkFilePath = filesPath + separator + "network";
         String simulationFilePath = filesPath + separator + "simulation";
-        String traficFilePath = filesPath + separator + "traffic";
+        String trafficFilePath = filesPath + separator + "traffic";
         //String routesFilePath = filesPath + separator + "fixedRoutes";
         String physicalLayerFilePath = filesPath + separator + "physicalLayer";
         String othersFilePath = filesPath + separator + "others";
@@ -214,7 +214,7 @@ public class Main {
         while (scanner.hasNext()) {
             simulationConfigJSON += scanner.next();
         }
-        scanner = new Scanner(new File(traficFilePath));
+        scanner = new Scanner(new File(trafficFilePath));
         String trafficConfigJSON = "";
         while (scanner.hasNext()) {
             trafficConfigJSON += scanner.next();

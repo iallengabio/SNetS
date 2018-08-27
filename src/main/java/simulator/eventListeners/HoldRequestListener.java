@@ -27,7 +27,8 @@ public class HoldRequestListener implements EventListener {
     public void execute(Event e) throws Exception {
         RequestForConnection request = (RequestForConnection) e.getObject();
         simulation.getControlPlane().finalizeConnection(request);
-        simulation.getMeasurements().getConsumedEnergyMetric().addNewObservation(simulation.getControlPlane(),e.getTimeHours());
+        if(simulation.getMeasurements().getConsumedEnergyMetric() != null)
+        	simulation.getMeasurements().getConsumedEnergyMetric().addNewObservation(simulation.getControlPlane(),e.getTimeHours());
     }
 
 }
