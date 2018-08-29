@@ -7,6 +7,13 @@ import network.Mesh;
 import request.RequestForConnection;
 import simulationControl.resultManagers.MetricsOfEnergyConsumptionResultManager;
 
+
+/**
+ * This class is responsible for metrics of energy consumption
+ * The metric represented by this class is associated with a load point and a replication
+ * 
+ * @author Alexandre
+ */
 public class MetricsOfEnergyConsumption  extends Measurement {
 
 	public final static String SEP = "-";
@@ -19,6 +26,12 @@ public class MetricsOfEnergyConsumption  extends Measurement {
     private double energyOXCsAndAmps;
     private double totalEnergyTransponders;
 
+    /**
+     * Creates a new instance of MetricsOfEnergyConsumption
+     * 
+     * @param loadPoint int
+     * @param rep int
+     */
 	public MetricsOfEnergyConsumption(int loadPoint, int rep) {
 		super(loadPoint, rep);
 		
@@ -78,7 +91,7 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 	 * 
 	 * @return double Watt
 	 */
-	public double getAverageGeneralPowerConsumption(){
+	public double getAveragePowerConsumption(){
 		return (sumGeneralPc / obsGeneralPc); // Watt
 	}
 	
