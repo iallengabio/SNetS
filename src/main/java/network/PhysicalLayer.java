@@ -410,7 +410,7 @@ public class PhysicalLayer {
 					d3 = -1.0 * d3;
 				}
 				
-				ln = Math.log(d1 / d2);
+				ln = Math.log(d3);
 				p2 += Gj * Gj * ln;
 			}
 		}

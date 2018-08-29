@@ -1,11 +1,9 @@
 package measurement;
 
-import java.util.HashMap;
-import java.util.TreeSet;
-
 import network.Circuit;
 import network.ControlPlane;
-import network.Pair;
+import network.EnergyConsumption;
+import network.Mesh;
 import request.RequestForConnection;
 import simulationControl.resultManagers.MetricsOfEnergyConsumptionResultManager;
 
@@ -15,24 +13,23 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 
 	private double sumGeneralPc;
 	private double obsGeneralPc;
-	private double sumPcEstablished;
-    private double obsPcEstablished;
-
-    // Per pair
-  	private HashMap<String, Double> sumPcPair;
-  	private HashMap<String, Integer> numPcPair;
+	
+	private double sumDataTransmitted;    
+    private double tempoDeSimulacao;
+    private double energyOXCsAndAmps;
+    private double totalEnergyTransponders;
 
 	public MetricsOfEnergyConsumption(int loadPoint, int rep) {
 		super(loadPoint, rep);
-
-		this.sumGeneralPc = 0.0;
-		this.obsGeneralPc = 0.0;
-		this.sumPcEstablished = 0.0;
-		this.obsPcEstablished = 0.0;
-
-		this.sumPcPair = new HashMap<String, Double>();
-		this.numPcPair = new HashMap<String, Integer>();
-
+		
+		sumGeneralPc = 0.0;
+		obsGeneralPc = 0.0;
+		
+		sumDataTransmitted = 0.0;
+		tempoDeSimulacao = 0.0;
+		energyOXCsAndAmps = 0.0;
+		totalEnergyTransponders = 0.0;
+		
 		fileName = "_EnergyConsumption.csv";
 		resultManager = new MetricsOfEnergyConsumptionResultManager();
 	}
@@ -42,106 +39,116 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 	 *
 	 * @param cp - ControlPlane
 	 * @param success - boolean
-	 * @param request - Request
+	 * @param request - RequestForConnection
 	 */
 	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
-		if(success){
-
-
-			// It is only possible to calculate the energy consumed from the circuits that were established
-			double pc = 0;
-			for(Circuit circuit : request.getCircuits()){
-				pc += cp.getPowerConsumption(circuit);
-			}
-
-			// Per pair
-			StringBuilder sbPair = new StringBuilder();
-			sbPair.append(request.getPair().getSource().getName());
-			sbPair.append(SEP);
-			sbPair.append(request.getPair().getDestination().getName());
-			String pairName = sbPair.toString();
-
-			Double pcPair = this.sumPcPair.get(pairName);
-			if(pcPair == null)
-				pcPair = pc;
-			else
-				pcPair += pc;
-			this.sumPcPair.put(pairName, pcPair);
-
-			Integer num = this.numPcPair.get(pairName);
-			if(num == null)
-				num = 0;
-			this.numPcPair.put(pairName, num+1);
-
-			sumPcEstablished += pc;
-			obsPcEstablished++;
+		double tempoDeFinalizacao = request.getTimeOfFinalizeHours() * 3600.0; // Converting to seconds
+		if(tempoDeFinalizacao > tempoDeSimulacao){
+			tempoDeSimulacao = tempoDeFinalizacao; // Seconds
 		}
-
-		// Calculates the total power consumption of the network
-		computeGeneralPowerConsumption(cp);
+		
+		if(energyOXCsAndAmps == 0.0){
+			double PcOxcsAndAmps = computeTotalPowerConsumptionOXCsAndAmps(cp.getMesh(), cp);
+			energyOXCsAndAmps = PcOxcsAndAmps; // Watt
+		}
+		
+		if(success){
+			Double duracao = request.getTimeOfFinalizeHours() - request.getTimeOfRequestHours();
+			duracao *= 3600.0; // Converting to seconds
+			
+			sumDataTransmitted += duracao * request.getRequiredBandwidth(); // Total data transmitted by the flow (bits)
+			totalEnergyTransponders += computeEnergyConsumptionTransponders(request, duracao, cp); // Total energy consumed by the flow (Joule = Watt * second)
+		}
+		
+		computeGeneralPowerConsumption(cp); // Calculates the total power consumption of the network
 	}
-
+	
 	/**
-	 * Computes the total power consumption of the network at a given moment
-	 *
+	 * Computes the power consumption of the network
+	 * 
 	 * @param cp ControlPlane
 	 */
 	public void computeGeneralPowerConsumption(ControlPlane cp){
-		double sumPc = 0.0;
-
-		TreeSet<Circuit> circuitList = cp.getConnections();
-        for(Circuit circuit : circuitList){
-        	sumPc += cp.getPowerConsumption(circuit);
-        }
-
-        sumGeneralPc += sumPc;
-        obsGeneralPc++;
-    }
-
-	/**
-	 * Returns the average power consumption of the network
-	 *
-	 * @return double
-	 */
-	public double getGeneralPc(){
-        return (this.sumGeneralPc / this.obsGeneralPc);
-    }
-
-	/**
-	 * Returns the average power consumption of all circuits that were established
-	 *
-	 * @return double
-	 */
-	public double getAveragePcEstablished(){
-		return (this.sumPcEstablished / this.obsPcEstablished);
+		sumGeneralPc += EnergyConsumption.computeNetworkPowerConsumption(cp); // Watt
+		obsGeneralPc++;
 	}
-
+	
 	/**
-	 * Returns the average power consumption for a given pair
-	 *
-	 * @param p Pair
-	 * @return double
+	 * Returns the average power consumption
+	 * 
+	 * @return double Watt
 	 */
-	public double getAveragePcPair(Pair p){
-		double res = 0.0;
-
-		StringBuilder sbPair = new StringBuilder();
-		sbPair.append(p.getSource().getName());
-		sbPair.append(SEP);
-		sbPair.append(p.getDestination().getName());
-		String pairName =  sbPair.toString();
-
-		Integer num = this.numPcPair.get(pairName);
-		if(num == null)
-			num = 0;
-
-		Double pc = this.sumPcPair.get(pairName);
-		if(pc == null)
-			pc = 0.0;
-
-		if(num > 0)
-			res = ((double)pc / (double)num);
-
-		return res;
+	public double getAverageGeneralPowerConsumption(){
+		return (sumGeneralPc / obsGeneralPc); // Watt
 	}
+	
+	/**
+	 * Returns the energy consumption of the transponders
+	 * 
+	 * @param request RequestForConnection
+	 * @param duration double
+	 * @param cp ControlPlane
+	 * @return double Joule
+	 */
+	public double computeEnergyConsumptionTransponders(RequestForConnection request, double duration, ControlPlane cp){
+		double PCtrans = 0.0;
+		for(Circuit circuit : request.getCircuits()){
+			PCtrans += 2.0 * EnergyConsumption.computeTransponderPowerConsumption(circuit); // Power consumption of the transmitter and receiver
+		}
+		double flowPCtrans = duration * PCtrans; // Flow energy consumption
+		return flowPCtrans;
+	}
+	
+	/**
+	 * Return the total power consumption of the OXCs and amplifiers
+	 * 
+	 * @param mesh Mesh
+	 * @param cp ControlPlane
+	 * @return double Watt
+	 */
+	public double computeTotalPowerConsumptionOXCsAndAmps(Mesh mesh, ControlPlane cp){
+		double PCoxcs = EnergyConsumption.computeOxcsPowerConsumption(mesh.getNodeList());
+		double PClinks = EnergyConsumption.computeLinksPowerConsumption(mesh.getLinkList(), cp);
+		double PcOxcsAndAmps = PCoxcs + PClinks;
+		return PcOxcsAndAmps;
+	}
+	
+	/**
+	 * Return the energy efficiency
+	 * 
+	 * @return double bits/Joule
+	 */
+	public double getEnergyEfficiencyGeneral(){
+		double totalEcOXCsAndAmps = energyOXCsAndAmps * tempoDeSimulacao; // Joule
+		double ef = sumDataTransmitted / (totalEnergyTransponders + totalEcOXCsAndAmps); // bits/Joule
+		return ef;
+	}
+	
+	/**
+	 * Returns the total data transmitted
+	 * 
+	 * @return double bits
+	 */
+	public double getTotalDataTransmitted(){
+		return sumDataTransmitted;
+	}
+	
+	/**
+	 * Returns the energy consumption of the transponders
+	 * 
+	 * @return double Joule
+	 */
+	public double getTotalEnergyConsumptionTransponders(){
+		return totalEnergyTransponders;
+	}
+	
+	/**
+	 * Returns the energy consumption of the Oxcs and the amplifiers
+	 * 
+	 * @return double Joule
+	 */
+	public double getTotalEnergyConsumptionOxcsAndAmps(){
+		return (energyOXCsAndAmps * tempoDeSimulacao);
+	}
+	
 }
