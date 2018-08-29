@@ -68,7 +68,6 @@ public class EnergyConsumption {
 	 * This method calculates the power consumption of network
 	 * 
 	 * @param cp - ControlPlane
-	 * @param mesh - Mesh
 	 * @return double - (W) - power consumption of network
 	 */
 	public static double computeNetworkPowerConsumption(ControlPlane cp){
@@ -103,7 +102,6 @@ public class EnergyConsumption {
 	 * This method calculates the energy consumption of a transponder
 	 * 
 	 * @param circuit - Circuit
-	 * @param cp - ControlePlane
 	 * @return double - (W)
 	 */
 	public static double computeTransponderPowerConsumption(Circuit circuit){
