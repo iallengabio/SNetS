@@ -56,7 +56,7 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 		}
 		res.append("\n");
 		
-		res.append(ressultAverageGeneralPowerConsumption());
+		res.append(ressultAveragePowerConsumption());
 		res.append("\n\n");
 		
 		res.append(ressultEnergyEfficiency());
@@ -75,16 +75,16 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	}
 	
 	/**
-	 * Returns the average general power consumption
+	 * Returns the average power consumption
 	 * 
 	 * @return String
 	 */
-	private String ressultAverageGeneralPowerConsumption(){
+	private String ressultAveragePowerConsumption(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("Average general power consumption (Watt)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("Average power consumption (Watt)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + mec.get(loadPoint).get(replic).getAverageGeneralPowerConsumption());
+				res.append(sep + mec.get(loadPoint).get(replic).getAveragePowerConsumption());
 			}
 			res.append("\n");
 		}
@@ -133,7 +133,7 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	private String resultTotalEnergyTransporders(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("Total energy consumption by transpoenders (Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("Total energy consumption by transponders (Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + mec.get(loadPoint).get(replic).getTotalEnergyConsumptionTransponders());
 			}
