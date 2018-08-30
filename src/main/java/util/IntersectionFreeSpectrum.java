@@ -93,11 +93,9 @@ public class IntersectionFreeSpectrum {
      */
     public static List<int[]> merge(Route route) {
         List<Link> links = new ArrayList<>(route.getLinkList());
-        List<int[]> composition;
-        composition = links.get(0).getFreeSpectrumBands();
-        int i;
-
-        for (i = 1; i < links.size(); i++) {
+        List<int[]> composition = links.get(0).getFreeSpectrumBands();
+        
+        for (int i = 1; i < links.size(); i++) {
             composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 

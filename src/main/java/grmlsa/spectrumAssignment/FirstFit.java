@@ -15,7 +15,6 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
-    	
         List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
         int chosen[] = policy(numberOfSlots, composition, circuit);

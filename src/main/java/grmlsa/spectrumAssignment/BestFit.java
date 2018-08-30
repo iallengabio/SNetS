@@ -1,12 +1,9 @@
 package grmlsa.spectrumAssignment;
 
-import grmlsa.Route;
-import network.Circuit;
-import network.Link;
-import util.IntersectionFreeSpectrum;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import network.Circuit;
+import util.IntersectionFreeSpectrum;
 
 /**
  * This class represents the spectrum allocation technique called Best Fit.
@@ -18,15 +15,7 @@ public class BestFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
-        Route route = circuit.getRoute();
-        List<Link> links = new ArrayList<>(route.getLinkList());
-        List<int[]> composition;
-        composition = links.get(0).getFreeSpectrumBands();
-        int i;
-
-        for (i = 1; i < links.size(); i++) {
-            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
-        }
+    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
         int chosen[] = policy(numberOfSlots, composition, circuit);
 

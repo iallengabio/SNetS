@@ -1,12 +1,9 @@
 package grmlsa.spectrumAssignment;
 
-import grmlsa.Route;
-import network.Circuit;
-import network.Link;
-import util.IntersectionFreeSpectrum;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import network.Circuit;
+import util.IntersectionFreeSpectrum;
 
 /**
  * This is a class that assigns spectrum following the policy of worst fit
@@ -17,15 +14,8 @@ public class WorstFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
-    	Route route = circuit.getRoute();		
-		List<Link> links = new ArrayList<>(route.getLinkList());		
-		List<int[]> composition;
-		composition = links.get(0).getFreeSpectrumBands();
-		int i;
-		for(i = 1; i < links.size(); i++){
-			composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
-		}
-		
+    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
+
 		// now just look for the free range with size farthest from the amount of slots required
 		int chosen[] = policy(numberOfSlots, composition, circuit);
 		
