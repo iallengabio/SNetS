@@ -16,6 +16,7 @@ import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.BestFit;
 import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
+import grmlsa.spectrumAssignment.FirstLastExactFit;
 import grmlsa.spectrumAssignment.FirstLastFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.RandomFit;
@@ -66,6 +67,7 @@ public class GRMLSA {
     private static final String SPECTRUM_ASSIGNMENT_LASTFIT = "lastfit";
     private static final String SPECTRUM_ASSIGNMENT_RANDOMFIT = "randomfit";
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTFIT = "firstlastfit";
+    private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
     private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
     
     // Integrados
@@ -193,6 +195,8 @@ public class GRMLSA {
                 return new RandomFit();
             case SPECTRUM_ASSIGNMENT_FIRSTLASTFIT:
                 return new FirstLastFit();
+            case SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT:
+            	return new FirstLastExactFit();
             case SPECTRUM_ASSIGNMENT_TBSA:
                 return new TrafficBalancingSpectrumAssignment();
             default:
