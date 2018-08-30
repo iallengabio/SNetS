@@ -131,10 +131,7 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
         @Override
         public void run() {
             try {
-                Gson gson = new GsonBuilder().create();
-                String sSim = gson.toJson(p);
-                String sRes = server.simulate(sSim);
-                Measurements res =  gson.fromJson(sRes,Measurements.class);
+                Measurements res =  server.simulate(p);
                 mainMeasuremens.get(p.getLoadPoint()).set(p.getReplication(),res);
                 nSimE[0]++;
                 lazyServers.add(server);

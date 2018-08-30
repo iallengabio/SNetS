@@ -2,12 +2,14 @@ package grmlsa.modulation;
 
 import network.PhysicalLayer;
 
+import java.io.Serializable;
+
 /**
  * This class represents the modulation formats.
  * 
  * @author Iallen
  */
-public class Modulation {
+public class Modulation implements Serializable {
 
     private String name;
     private double bitsPerSymbol;

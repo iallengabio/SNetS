@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ import util.IntersectionFreeSpectrum;
  * 
  * @author Alexandre
  */
-public class TranslucentControlPlane extends ControlPlane {
+public class TranslucentControlPlane extends ControlPlane implements Serializable {
 	
 	protected RegeneratorAssignmentAlgorithmInterface regeneratorAssignment;
 	

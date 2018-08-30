@@ -10,6 +10,6 @@ public interface ServerSInterface extends Remote {
 
     public boolean isAlive() throws RemoteException;
     public String getName() throws RemoteException;
-    public String simulate(String simulation) throws Exception;
+    public Measurements simulate(Simulation simulation) throws Exception;
 
 }

@@ -1,9 +1,10 @@
 package simulationControl.parsers;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OthersConfig {
+public class OthersConfig implements Serializable {
 
     private Map<String, String> variables = new HashMap();
 

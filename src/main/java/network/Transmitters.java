@@ -1,11 +1,13 @@
 package network;
 
+import java.io.Serializable;
+
 /**
  * This class represents the transmitters on the network
  * 
  * @author Iallen
  */
-public class Transmitters {
+public class Transmitters implements Serializable {
 
 	private int txUtilization;
 	private int numberOfTx;

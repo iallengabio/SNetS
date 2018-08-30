@@ -7,6 +7,7 @@ import simulationControl.Util;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -15,7 +16,7 @@ import java.util.*;
  * 
  * @author Iallen
  */
-public class NewKShortestPaths {
+public class NewKShortestPaths implements Serializable {
 	
 	// Used as a separator between the names of nodes
     private static final String DIV = "-";

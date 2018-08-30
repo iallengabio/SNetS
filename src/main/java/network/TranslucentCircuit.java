@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import grmlsa.modulation.Modulation;
  * 
  * @author Alexandre
  */
-public class TranslucentCircuit extends Circuit {
+public class TranslucentCircuit extends Circuit implements Serializable {
 	
 	private HashMap<Link, int[]> spectrumAssignedByLink;
 	protected HashMap<Link, Modulation> modulationByLink;

@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.TreeSet;
 
 import grmlsa.Route;
@@ -11,7 +12,7 @@ import simulationControl.parsers.PhysicalLayerConfig;
  * 
  * @author Alexandre
  */
-public class PhysicalLayer {
+public class PhysicalLayer implements Serializable {
 
 	// Allows you to enable or disable transmission quality computing
     private boolean activeQoT; // QoTN

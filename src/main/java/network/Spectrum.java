@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.TreeSet;
  * 
  * @author Iallen
  */
-public class Spectrum {
+public class Spectrum implements Serializable {
 	
 	private TreeSet<int[]> freeSpectrumBands;
 	private int numOfSlots;
@@ -25,15 +26,7 @@ public class Spectrum {
 	 */
 	public Spectrum(int numOfSlots, double slotSpectrumBand){
 		
-		freeSpectrumBands = new TreeSet<int[]>(new Comparator<int[]>() {
-			@Override
-			public int compare(int[] o1, int[] o2) {
-				Integer i1, i2;
-				i1 = o1[0];
-				i2 = o2[0];
-				return i1.compareTo(i2);
-			}
-		});
+		freeSpectrumBands = new TreeSet<int[]>(new MyComparator());
 		this.numOfSlots = numOfSlots;
 		this.slotSpectrumBand = slotSpectrumBand;
 		int fsin[] = new int[2];
@@ -41,6 +34,16 @@ public class Spectrum {
 		fsin[1] = numOfSlots;		
 		freeSpectrumBands.add(fsin);
 		usedSlots = 0; 
+	}
+
+	private class MyComparator implements Comparator<int[]>, Serializable{
+		@Override
+		public int compare(int[] o1, int[] o2) {
+			Integer i1, i2;
+			i1 = o1[0];
+			i2 = o2[0];
+			return i1.compareTo(i2);
+		}
 	}
 	
 	/**

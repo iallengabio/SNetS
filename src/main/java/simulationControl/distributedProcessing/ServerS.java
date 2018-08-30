@@ -1,7 +1,5 @@
 package simulationControl.distributedProcessing;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import measurement.Measurements;
 import simulator.Simulation;
 import simulator.Simulator;
@@ -16,19 +14,18 @@ public class ServerS extends UnicastRemoteObject implements ServerSInterface {
     String name = "anonimous";
 
 
-
-    public static void main(String args[]){
+    public static void main(String args[]) {
         try {
             ServerMInterface server = (ServerMInterface) Naming.lookup("//127.0.0.1/ServerM");
             ServerS severS = new ServerS();
             server.register(severS);
             System.out.println("registered");
-        }catch (RemoteException ex){
+        } catch (RemoteException ex) {
             ex.printStackTrace();
-        }catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }catch (NotBoundException e) {
+        } catch (NotBoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -49,13 +46,12 @@ public class ServerS extends UnicastRemoteObject implements ServerSInterface {
     }
 
     @Override
-    public String simulate(String simulation) throws Exception {
-        Gson gson = new GsonBuilder().create();
-        Simulator simulator = new Simulator(gson.fromJson(simulation,Simulation.class));
+    public Measurements simulate(Simulation simulation) throws Exception {
+        Simulator simulator = new Simulator(simulation);
         System.out.println("init simulation");
         Measurements res = simulator.start();
         System.out.println("end simulation");
-        return gson.toJson(res);
+        return res;
     }
 
 

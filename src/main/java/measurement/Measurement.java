@@ -1,6 +1,7 @@
 package measurement;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 
 import network.ControlPlane;
@@ -12,7 +13,7 @@ import simulationControl.resultManagers.ResultManagerInterface;
  * 
  * @author Iallen
  */
-public abstract class Measurement {
+public abstract class Measurement implements Serializable {
 	
 	protected int loadPoint;
 	protected int replication;

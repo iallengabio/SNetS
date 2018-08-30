@@ -20,6 +20,8 @@ import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.spectrumAssignment.WorstFit;
 import grmlsa.trafficGrooming.*;
 
+import java.io.Serializable;
+
 /**
  * This class should be responsible for running the RSA algorithms, verifying whether the selected 
  * algorithm is of the integrated or sequential type, after activating the algorithm (s) necessary 
@@ -27,7 +29,7 @@ import grmlsa.trafficGrooming.*;
  *
  * @author Iallen
  */
-public class GRMLSA {
+public class GRMLSA implements Serializable {
 	
 	// Network type
 	public static final int TRANSPARENT = 0;

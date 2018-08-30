@@ -1,5 +1,6 @@
 package grmlsa.spectrumAssignment;
 
+import java.io.Serializable;
 import java.util.List;
 
 import network.Circuit;
@@ -10,7 +11,7 @@ import network.Circuit;
  * 
  * @author Iallen
  */
-public interface SpectrumAssignmentAlgorithmInterface {
+public interface SpectrumAssignmentAlgorithmInterface extends Serializable {
 	
 	/**
 	 * This method assigns a range of spectrum and returns true.

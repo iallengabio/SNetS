@@ -3,12 +3,14 @@ package grmlsa.trafficGrooming;
 import network.ControlPlane;
 import request.RequestForConnection;
 
+import java.io.Serializable;
+
 /**
  * This interface should be implemented by classes of traffic grooming algorithms.
  * 
  * @author Iallen
  */
-public interface TrafficGroomingAlgorithmInterface {
+public interface TrafficGroomingAlgorithmInterface extends Serializable {
 	
 	/**
 	 * This method defines which circuits will be used to aggregate traffic.
