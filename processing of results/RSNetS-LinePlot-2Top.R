@@ -5,8 +5,8 @@ source("C:/Users/ialle/Documents/workspace/IdeaProjects/SNetS/processing of resu
 metricPlots = c(blockingProbability,bandwidthBlockingProbability,consumedEnergy,costBenefit,energyConsumption,maxBVTUtilization,spectrumUtilization,profit)
 #metricPlots = c(costBenefit)
 
-directory1 = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_NSFNet"
-directory2 = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_USA"
+directory1 = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_NSFNet_New"
+directory2 = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_NSFNet"
 replicacoes = 10
 alpha = 0.1
 legLoads1 = c("491","655","819")

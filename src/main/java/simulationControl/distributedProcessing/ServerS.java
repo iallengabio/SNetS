@@ -13,6 +13,7 @@ import java.rmi.server.UnicastRemoteObject;
 public class ServerS extends UnicastRemoteObject implements ServerSInterface {
     String name = "anonimous";
 
+    private int numJobs = 0;
 
     public static void main(String args[]) {
         try {
@@ -48,9 +49,11 @@ public class ServerS extends UnicastRemoteObject implements ServerSInterface {
     @Override
     public Measurements simulate(Simulation simulation) throws Exception {
         Simulator simulator = new Simulator(simulation);
-        System.out.println("init simulation");
+        //System.out.println("init simulation");
         Measurements res = simulator.start();
-        System.out.println("end simulation");
+        //System.out.println("end simulation");
+        numJobs++;
+        System.out.println(numJobs);
         return res;
     }
 

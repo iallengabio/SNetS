@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 public class ServerM extends UnicastRemoteObject implements ServerMInterface {
 
     private List<ServerSInterface> lazyServers = new ArrayList<>();
-    private List<ServerSInterface> busyServers = new ArrayList<>();
 
     protected ServerM() throws RemoteException {
     }
@@ -43,28 +42,6 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
     public void register(ServerSInterface server) throws RemoteException {
         System.out.println(server.getName() + " registered");
         lazyServers.add(server);
-
-        /*ExecutorService executor = Executors.newScheduledThreadPool(2);
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                while(true){
-                    try {
-                        server.isAlive();
-                        System.out.println("está vivo");
-                        Thread.sleep(1000);
-                    } catch (RemoteException e) {
-                        System.out.println("está morto");
-                        break;
-                        //e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-        server.pseudoSimulation(200);*/
-
     }
 
     @Override
@@ -94,6 +71,8 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
                 executor.execute(new SimulationTask(server,mainMeasuremens,nSimE,p,simulationQueue));
             }
             Thread.sleep(200);
+            double progress = (double)nSimE[0]/(double)nSim * 100;
+            System.out.println("progress: "+ progress +"%");
         }
 
         SimulationManagement sm = new SimulationManagement(simulations, mainMeasuremens);
@@ -137,7 +116,8 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
                 lazyServers.add(server);
             }catch (Exception ex){
                 simulationQueue.add(p);
-                ex.printStackTrace();
+                //ex.printStackTrace();
+                System.out.println("Server desconectado!");
             }
         }
     }
