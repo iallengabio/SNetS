@@ -6,8 +6,6 @@ import java.util.List;
 
 import measurement.Measurement;
 import measurement.MetricsOfEnergyConsumption;
-import network.Pair;
-import simulationControl.Util;
 
 /**
  * This class is responsible for formatting the file with results of energy consumption
@@ -19,7 +17,6 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	private HashMap<Integer, HashMap<Integer, MetricsOfEnergyConsumption>> mec; // Contains the energy consumption metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
-	private List<Pair> pairs;
 	private final static String sep = ",";
 	
 	/**
@@ -41,11 +38,10 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 		}
 		loadPoints = new ArrayList<>(mec.keySet());
 		replications = new ArrayList<>(mec.values().iterator().next().keySet());
-		pairs = new ArrayList<>(Util.pairs);
 	}
 	
 	/**
-	 * Returns a string corresponding to the result file for blocking probabilities
+	 * Returns a string corresponding to the result file for energy consumption
 	 * 
 	 * @return String
 	 */
@@ -60,27 +56,41 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 		}
 		res.append("\n");
 		
-		res.append(ressultAveragePcGeneral());
+		res.append(resultTotalEnergyConsumption());
 		res.append("\n\n");
-		res.append(resultAveragePcEstablished());
+		
+		res.append(ressultAveragePowerConsumption());
 		res.append("\n\n");
-		res.append(resultPcPair());
+		
+		res.append(ressultEnergyEfficiency());
+		res.append("\n\n");
+		
+		res.append(resultTotalDataTransmitted());
+		res.append("\n\n");
+		
+		res.append(resultTotalEnergyTransponders());
+		res.append("\n\n");
+		
+		res.append(resultTotalEnergyOXCs());
+		res.append("\n\n");
+		
+		res.append(resultTotalEnergyAmplifiers());
 		res.append("\n\n");
 		
 		return res.toString();
 	}
 	
 	/**
-	 * Returns the general power consumption
+	 * Returns the total energy consumption of the network
 	 * 
 	 * @return String
 	 */
-	private String ressultAveragePcGeneral(){
+	private String resultTotalEnergyConsumption(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("General power consumption" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("Total energy consumption (Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + mec.get(loadPoint).get(replic).getGeneralPc());
+				res.append(sep + mec.get(loadPoint).get(replic).getTotalEnergyConsumption());
 			}
 			res.append("\n");
 		}
@@ -88,16 +98,16 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	}
 	
 	/**
-	 * Returns the average power consumption for established circuits
+	 * Returns the average power consumption
 	 * 
 	 * @return String
 	 */
-	private String resultAveragePcEstablished(){
+	private String ressultAveragePowerConsumption(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			res.append("Average power consumption established" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			res.append("Average power consumption (Watt)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
 			for (Integer replic : replications) {
-				res.append(sep + mec.get(loadPoint).get(replic).getAveragePcEstablished());
+				res.append(sep + mec.get(loadPoint).get(replic).getAveragePowerConsumption());
 			}
 			res.append("\n");
 		}
@@ -105,24 +115,87 @@ public class MetricsOfEnergyConsumptionResultManager implements ResultManagerInt
 	}
 	
 	/**
-	 * Returns the power consumption per pair
+	 * Returns the energy efficiency
 	 * 
 	 * @return String
 	 */
-	private String resultPcPair(){
+	private String ressultEnergyEfficiency(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Average power consumption per pair" + sep + loadPoint + sep + "all";
-			
-			for (Pair pair : this.pairs) {
-				String aux2 = aux + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
-				for (Integer replic : replications) {
-					aux2 = aux2 + sep + mec.get(loadPoint).get(replic).getAveragePcPair(pair);
-				}
-				res.append(aux2 + "\n");		
+			res.append("Energy efficiency (bits/Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + mec.get(loadPoint).get(replic).getEnergyEfficiencyGeneral());
 			}
+			res.append("\n");
 		}
 		return res.toString();
 	}
-
+	
+	/**
+	 * Returns the total data transmitted
+	 * 
+	 * @return String
+	 */
+	private String resultTotalDataTransmitted(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Total data transmitted (bits)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + mec.get(loadPoint).get(replic).getTotalDataTransmitted());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the energy consumption of the transponders 
+	 * 
+	 * @return String
+	 */
+	private String resultTotalEnergyTransponders(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Total energy consumption by transponders (Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + mec.get(loadPoint).get(replic).getTotalEnergyConsumptionTransponders());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the energy consumption of the OXCs
+	 * 
+	 * @return String
+	 */
+	private String resultTotalEnergyOXCs(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Total energy consumption by OXCs (Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + mec.get(loadPoint).get(replic).getTotalEnergyConsumptionOXCs());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the energy consumption of the amplifiers
+	 * 
+	 * @return String
+	 */
+	private String resultTotalEnergyAmplifiers(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Total energy consumption by Amplifiers (Joule)" + sep + loadPoint + sep + "all" + sep + "all" + sep + "all" + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + mec.get(loadPoint).get(replic).getTotalEnergyConsumptionAmplifiers());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
 }

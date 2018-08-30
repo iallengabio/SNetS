@@ -3,9 +3,6 @@ package measurement;
 import network.ControlPlane;
 import request.RequestForConnection;
 import simulationControl.resultManagers.ConsumedEnergyResultManager;
-import simulationControl.resultManagers.MetricsOfEnergyConsumptionResultManager;
-
-import java.util.HashMap;
 
 public class ConsumedEnergy extends Measurement {
 
