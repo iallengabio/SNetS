@@ -8,13 +8,11 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
-import network.Mesh;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -55,13 +53,13 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 	}
 	
 	@Override
-	public boolean rsa(Circuit circuit, Mesh mesh, ControlPlane cp) {
+	public boolean rsa(Circuit circuit, ControlPlane cp) {
 		if(kShortestsPaths == null){
-			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
+			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 3); //This algorithm uses 3 alternative paths
 		}
 		if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
 		if(spectrumAssignment == null){
 			spectrumAssignment = new FirstFit();
@@ -75,7 +73,7 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 		for (Route route : candidateRoutes) {
 			
 			circuit.setRoute(route);
-			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, mesh);
+			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
 			
 			// Calculate how many slots are needed for this route
 			int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
@@ -86,7 +84,7 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 			List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 			merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 			
-			int ff[] = spectrumAssignment.policy(numSlots, merge, circuit);
+			int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);
 			
 			if(ff != null && ff[0] < chosenBand[0]){
 				chosenBand = ff;

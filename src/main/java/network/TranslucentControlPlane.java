@@ -237,7 +237,7 @@ public class TranslucentControlPlane extends ControlPlane {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh(), this);
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
@@ -274,7 +274,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
 	 */
 	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route){
-		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, mesh);
+		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, this);
 		
 		if(mod != null){
 			circuit.setModulation(mod);
@@ -286,7 +286,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			}
 			circuit.setModulationByLink(modulationByLink);
 			
-			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit)){
+			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit, this)){
 				int sa[] = circuit.getSpectrumAssigned();
 				
 				HashMap<Link, int[]> spectrumAssignedByLink = new HashMap<Link, int[]>();
@@ -412,7 +412,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = avaliableModulations.get(i);
 			int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			
-			int band[] = spectrumAssignment.policy(numberOfSlots, composition, circuit);
+			int band[] = spectrumAssignment.policy(numberOfSlots, composition, circuit, this);
 			if(band != null){
 				if(alternativeMod == null){
 					alternativeMod = mod; // The first modulation that was able to allocate spectrum

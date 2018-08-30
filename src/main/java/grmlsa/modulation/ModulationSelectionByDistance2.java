@@ -5,7 +5,7 @@ import java.util.List;
 import grmlsa.Route;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
-import network.Mesh;
+import network.ControlPlane;
 
 /**
  * This class implements the modulation selection algorithm by maximum range.
@@ -19,7 +19,7 @@ public class ModulationSelectionByDistance2 implements ModulationSelectionAlgori
 	private List<Modulation> avaliableModulations;
 
 	@Override
-	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh) {
+	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
 		
 		// Modulation and spectrum selected
@@ -34,7 +34,7 @@ public class ModulationSelectionByDistance2 implements ModulationSelectionAlgori
 			Modulation mod = avaliableModulations.get(m);
 			int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			
-			if(spectrumAssignment.assignSpectrum(numberOfSlots, circuit)){
+			if(spectrumAssignment.assignSpectrum(numberOfSlots, circuit, cp)){
 				int band[] = circuit.getSpectrumAssigned();
 				
 				if(alternativeMod == null){

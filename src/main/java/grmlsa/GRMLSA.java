@@ -16,7 +16,11 @@ import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.BestFit;
 import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
+import grmlsa.spectrumAssignment.FirstLastFit;
+import grmlsa.spectrumAssignment.LastFit;
+import grmlsa.spectrumAssignment.RandomFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
 import grmlsa.spectrumAssignment.WorstFit;
 import grmlsa.trafficGrooming.*;
 
@@ -59,6 +63,10 @@ public class GRMLSA {
     private static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
     private static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
     private static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
+    private static final String SPECTRUM_ASSIGNMENT_LASTFIT = "lastfit";
+    private static final String SPECTRUM_ASSIGNMENT_RANDOMFIT = "randomfit";
+    private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTFIT = "firstlastfit";
+    private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -105,7 +113,6 @@ public class GRMLSA {
         this.modulationSelection = modulationSelection;
         this.spectrumAssignmentType = spectrumAssignmentType;
         this.regeneratorAssignment = regeneratorAssignment;
-
 
         if(grooming == null) this.grooming ="";
         if(integrated == null) this.integrated ="";
@@ -180,6 +187,14 @@ public class GRMLSA {
                 return new WorstFit();
             case SPECTRUM_ASSIGNMENT_EXACTFIT:
                 return new ExactFit();
+            case SPECTRUM_ASSIGNMENT_LASTFIT:
+                return new LastFit();
+            case SPECTRUM_ASSIGNMENT_RANDOMFIT:
+                return new RandomFit();
+            case SPECTRUM_ASSIGNMENT_FIRSTLASTFIT:
+                return new FirstLastFit();
+            case SPECTRUM_ASSIGNMENT_TBSA:
+                return new TrafficBalancingSpectrumAssignment();
             default:
                 return null;
         }

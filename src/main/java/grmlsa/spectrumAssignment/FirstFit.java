@@ -1,6 +1,7 @@
 package grmlsa.spectrumAssignment;
 
 import network.Circuit;
+import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
 
 import java.util.List;
@@ -14,14 +15,14 @@ import java.util.List;
 public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
         List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
-        int chosen[] = policy(numberOfSlots, composition, circuit);
-
-        if (chosen == null) return false;
-
+        int chosen[] = policy(numberOfSlots, composition, circuit, cp);
         circuit.setSpectrumAssigned(chosen);
+        
+        if (chosen == null)
+        	return false;
 
         return true;
     }
@@ -35,7 +36,7 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
      * @return int[]
      */
     @Override
-    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
     	int chosen[] = null;
         for (int[] band : freeSpectrumBands) {
             if (band[1] - band[0] + 1 >= numberOfSlots) {

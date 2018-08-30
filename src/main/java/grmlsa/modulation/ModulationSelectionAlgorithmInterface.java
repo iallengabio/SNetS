@@ -5,7 +5,7 @@ import java.util.List;
 import grmlsa.Route;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
-import network.Mesh;
+import network.ControlPlane;
 
 /**
  * This interface should be implemented by classes of modulation selection algorithms.
@@ -20,10 +20,10 @@ public interface ModulationSelectionAlgorithmInterface {
 	 * @param circuit Circuit
 	 * @param route Route
 	 * @param spectrumAssignment SpectrumAssignmentAlgorithmInterface
-	 * @param mesh Mesh
+	 * @param cp ControlPlane
 	 * @return Modulation
 	 */
-	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh);
+	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp);
 	
 	/**
 	 * This method returns the available modulation formats.

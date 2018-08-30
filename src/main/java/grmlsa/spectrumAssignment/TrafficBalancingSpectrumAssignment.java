@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import network.Circuit;
+import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
 
 /**
- * Algorithm based on :A Quality-of-Transmission Aware Dynamic Routing and Spectrum Assignment 
+ * Algorithm based on: A Quality-of-Transmission Aware Dynamic Routing and Spectrum Assignment 
  *                     Scheme for Future Elastic Optical Networks (2013)
  * TBSA algorithm attempts to perform load balancing on the spectrum allocation
  * 
@@ -15,14 +16,14 @@ import util.IntersectionFreeSpectrum;
  */
 public class TrafficBalancingSpectrumAssignment implements SpectrumAssignmentAlgorithmInterface {
 	@Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
         List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
-        int chosen[] = policy(numberOfSlots, composition, circuit);
-
-        if (chosen == null) return false;
-
+        int chosen[] = policy(numberOfSlots, composition, circuit, cp);
         circuit.setSpectrumAssigned(chosen);
+        
+        if (chosen == null)
+        	return false;
 
         return true;
     }
@@ -36,7 +37,7 @@ public class TrafficBalancingSpectrumAssignment implements SpectrumAssignmentAlg
      * @return int[]
      */
     @Override
-    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
     	int chosen[] = null;
 		List<int[]> lowFreeBands = null;
 		List<int[]> upperFreeBands = null;
