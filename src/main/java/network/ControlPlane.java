@@ -153,6 +153,23 @@ public class ControlPlane {
     	return spectrumAssignment;
     }
     
+    /**
+     * Returns the routing algorithm
+     * 
+     * @return RoutingAlgorithmInterface
+     */
+    public RoutingAlgorithmInterface getRouting(){
+    	return routing;
+    }
+    
+    /**
+     * Returns the integrated RMLSA algorithm
+     * 
+     * @return IntegratedRMLSAAlgorithmInterface
+     */
+    public IntegratedRMLSAAlgorithmInterface getIntegrated(){
+    	return integrated;
+    }
     
     /**
      * This method tries to satisfy a certain request by checking if there are available resources for the establishment of the circuit.
