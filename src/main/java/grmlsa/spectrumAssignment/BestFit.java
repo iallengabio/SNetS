@@ -55,3 +55,4 @@ public class BestFit implements SpectrumAssignmentAlgorithmInterface {
 	}
 
 }
+

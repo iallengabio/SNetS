@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class OthersConfig {
 
-    private Map<String, String> variables = new HashMap();
+    private Map<String, String> variables = new HashMap<>();
 
     public OthersConfig() {
     }

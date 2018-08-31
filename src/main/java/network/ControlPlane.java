@@ -32,7 +32,7 @@ public class ControlPlane {
     protected IntegratedRMLSAAlgorithmInterface integrated;
     protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
-	
+    
     protected Mesh mesh;
     
     /**
@@ -53,6 +53,7 @@ public class ControlPlane {
      * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
      * @param routingAlgorithm RoutingAlgorithmInterface
      * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
+     * @param modulationSelection ModulationSelectionAlgorithmInterface
      */
     public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection) {
         this.activeCircuits = new HashMap<>();
@@ -327,12 +328,12 @@ public class ControlPlane {
     }
 
     /**
-     * Increase the number of slots used by a given circuit
-     *
-     * @param circuit
-     * @param numSlotsUp
-     * @param numSlotsDown
-     * @return
+     * Increases the number of slots used by a given circuit
+     * 
+     * @param circuit Circuit
+     * @param numSlotsUp int
+     * @param numSlotsDown int
+     * @return boolean
      * @throws Exception
      */
     public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
@@ -389,6 +390,14 @@ public class ControlPlane {
         return QoT;
     }
 
+    /**
+     * Decreases the number of slots used by a given circuit
+     * 
+     * @param circuit Circuit
+     * @param numSlotsDown int
+     * @param numSlotsUp int
+     * @throws Exception
+     */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
         //calculate the spectrum band at top
         int upperBand[] = new int[2];
@@ -429,9 +438,9 @@ public class ControlPlane {
     }
     
     /**
+     * To find active circuits on the network with specified source
      * 
-     * 
-     * @param source
+     * @param source String
      * @return List<Circuit>
      */
     public List<Circuit> searchForActiveCircuits(String source){
@@ -443,7 +452,7 @@ public class ControlPlane {
     }
     
     /**
-     * 
+     * To find active circuits on the network
      * 
      * @return List<Circuit>
      */
