@@ -1,7 +1,6 @@
 package grmlsa.routing;
 
 import java.util.HashMap;
-import java.util.Vector;
 
 import grmlsa.Route;
 import network.Circuit;

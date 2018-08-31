@@ -79,7 +79,6 @@ public class GRMLSA {
     private static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
-
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -227,7 +226,7 @@ public class GRMLSA {
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
             case INTEGRATED_KSPFIRSTFIT:
-                return new KShortestPathsAndSpectrumAssignment();
+                return new KSPFirstFit();
             default:
                 return null;
         }

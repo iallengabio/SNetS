@@ -7,6 +7,7 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
+import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
@@ -16,7 +17,7 @@ import util.IntersectionFreeSpectrum;
  * This class implements the integrated RMLSA algorithm that uses First Fit to spectrum allocation and try establish the circuit with 'k' shortests paths.
  * @author Iallen
  */
-public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgorithmInterface{
+public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface{
 
     private int K = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
@@ -32,7 +33,7 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
             modulationSelection = cp.getModulationSelection();
         }
         if(spectrumAssignment == null){
-            spectrumAssignment = cp.getSpectrumAssignment();
+            spectrumAssignment = new FirstFit();
         }
 
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
