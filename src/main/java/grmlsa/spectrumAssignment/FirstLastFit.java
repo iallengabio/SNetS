@@ -8,10 +8,12 @@ import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
 
 /**
+ * This class represents the spectrum allocation technique called FirstLastFit.
  * Algorithm based on: Spectrum management techniques for elastic optical networks: A survey (2014)
  *                     Routing and spectrum allocation in elastic optical networks: A tutorial (2015)
  * 
  * FirstLastFit algorithm uses the largerBand parameter to choose between FisrtFit or LastFit.
+ * The largerBand parameter represents a transmission rate in bit per seconds.
  * The value of largerBand must be entered in the configuration file "others" as shown below.
  * {"variables":{
  *               "largerBand":"80.0E+9"

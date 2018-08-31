@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -23,7 +23,7 @@ import util.IntersectionFreeSpectrum;
  */
 public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterface{
 
-	private NewKShortestPaths kShortestsPaths;
+	private KRoutingAlgorithmInterface kShortestsPaths;
 	private ModulationSelectionAlgorithmInterface modulationSelection;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
@@ -57,7 +57,6 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		}
 		if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
 		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
 			spectrumAssignment1 = new FirstFit();
@@ -200,4 +199,13 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		
 		return res;
 	}
+	
+	/**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+    public KRoutingAlgorithmInterface getRoutingAlgorithm(){
+    	return kShortestsPaths;
+    }
 }

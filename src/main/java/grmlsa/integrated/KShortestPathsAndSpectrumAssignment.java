@@ -2,12 +2,11 @@ package grmlsa.integrated;
 
 import java.util.List;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelector;
-import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
@@ -17,10 +16,10 @@ import util.IntersectionFreeSpectrum;
  * This class implements the integrated RMLSA algorithm that uses First Fit to spectrum allocation and try establish the circuit with 'k' shortests paths.
  * @author Iallen
  */
-public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface{
+public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgorithmInterface{
 
     private int K = 3; //This algorithm uses 3 alternative paths
-    private NewKShortestPaths kShortestsPaths;
+    private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 
@@ -31,10 +30,9 @@ public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface{
         }
         if (modulationSelection == null){
             modulationSelection = cp.getModulationSelection();
-            modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
         if(spectrumAssignment == null){
-            spectrumAssignment = new FirstFit();
+            spectrumAssignment = cp.getSpectrumAssignment();
         }
 
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
@@ -74,5 +72,14 @@ public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface{
 
             return false;
         }
+    }
+    
+    /**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+    public KRoutingAlgorithmInterface getRoutingAlgorithm(){
+    	return kShortestsPaths;
     }
 }

@@ -14,6 +14,7 @@ import grmlsa.routing.FixedRoutes;
 import grmlsa.routing.MMRDS;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.BestFit;
+import grmlsa.spectrumAssignment.DispersionAdaptiveFirstLastFit;
 import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.FirstLastExactFit;
@@ -53,7 +54,6 @@ public class GRMLSA {
     private static final String GROOMING_OPT_MGMSU = "mgmsu";
     private static final String GROOMING_OPT_MGFCCF = "mgfccf";
 
-
     // Routing
     private static final String ROUTING_DJK = "djk";
     private static final String ROUTING_MMRDS = "mmrds";
@@ -69,6 +69,7 @@ public class GRMLSA {
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTFIT = "firstlastfit";
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
     private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
+    private static final String SPECTRUM_ASSIGNMENT_DAFLF = "daflf";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -179,7 +180,6 @@ public class GRMLSA {
      * @return SpectrumAssignmentInterface
      */
     public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment() throws Exception {
-
         switch (this.spectrumAssignmentType) {
             case SPECTRUM_ASSIGNMENT_FISTFIT:
                 return new FirstFit();
@@ -199,6 +199,8 @@ public class GRMLSA {
             	return new FirstLastExactFit();
             case SPECTRUM_ASSIGNMENT_TBSA:
                 return new TrafficBalancingSpectrumAssignment();
+            case SPECTRUM_ASSIGNMENT_DAFLF:
+                return new DispersionAdaptiveFirstLastFit();
             default:
                 return null;
         }
@@ -225,7 +227,7 @@ public class GRMLSA {
             case INTEGRATED_ZONEPARTITIONTOPINVASION:
                 return new ZonePartitionTopInvasion();
             case INTEGRATED_KSPFIRSTFIT:
-                return new KSPFirstFit();
+                return new KShortestPathsAndSpectrumAssignment();
             default:
                 return null;
         }

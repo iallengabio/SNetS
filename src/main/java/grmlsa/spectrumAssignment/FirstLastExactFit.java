@@ -12,7 +12,9 @@ import network.Link;
 import util.IntersectionFreeSpectrum;
 
 /**
- * Algorithm based on: 
+ * This class represents the spectrum allocation technique called FirstLastExactFit.
+ * Algorithm based on: A spectrum allocation scheme based on first-last-exact fit policy
+ *                     for elastic optical networks (2016)
  * 
  * @author Alexandre
  */
@@ -34,7 +36,7 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
     }
     
     /**
-     * 
+     * Creates the disjoint connection group
      * 
      * @param cp ControlPlane
      */
@@ -43,9 +45,22 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 			return;
 		}
 		
-		//corrigir
 		HashMap<Route, List<Route>> pathGraph = new HashMap<>();
-		Vector<Route> routesForAllPairs = null;//cp.getRoutesForAllPairs();
+		Vector<Route> routesForAllPairs = new Vector<Route>();
+		
+		if(cp.getIntegrated() != null && cp.getIntegrated().getRoutingAlgorithm().getRoutesForAllPairs() != null){
+			HashMap<String, List<Route>> routes = cp.getIntegrated().getRoutingAlgorithm().getRoutesForAllPairs();
+			
+			for(String pair : routes.keySet()){
+				for(Route route : routes.get(pair)){
+					routesForAllPairs.add(route);
+				}
+			}
+			
+		}else if(cp.getRouting().getRoutesForAllPairs() != null){
+			HashMap<String, Route> routes = cp.getRouting().getRoutesForAllPairs();
+			routesForAllPairs = new Vector<Route>(routes.values());
+		}
 		
 		for(int i = 0; i < routesForAllPairs.size(); i++){
 			Route routeI = routesForAllPairs.get(i);
@@ -92,7 +107,8 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 	}
 
     /**
-	 * aplica a politica first exact fit
+	 * Apply first exact fit policy
+	 * 
 	 * @param numberOfSlots int
 	 * @param freeSpectrumBands List<int[]>
 	 * @return int[]
@@ -128,7 +144,8 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 	}
 	
 	/**
-	 * aplica a politica last exact fit
+	 * Apply first exact fit policy
+	 * 
 	 * @param numberOfSlots
 	 * @param livres
 	 * @return

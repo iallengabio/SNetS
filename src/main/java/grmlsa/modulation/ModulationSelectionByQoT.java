@@ -32,6 +32,7 @@ public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInt
 		
 		for (int m = 0; m < avaliableModulations.size(); m++) {
 			Modulation mod = avaliableModulations.get(m);
+			circuit.setModulation(mod);
 			int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			
 			if(spectrumAssignment.assignSpectrum(numberOfSlots, circuit, cp)){

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
@@ -26,7 +26,7 @@ import util.IntersectionFreeSpectrum;
  */
 public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 
-	private NewKShortestPaths kShortestsPaths;
+	private KRoutingAlgorithmInterface kShortestsPaths;
 	private ModulationSelectionAlgorithmInterface modulationSelection;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
 	
@@ -59,7 +59,6 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 		}
 		if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
         }
 		if(spectrumAssignment == null){
 			spectrumAssignment = new FirstFit();
@@ -109,5 +108,14 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 		}
 		
 	}
+	
+	/**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+    public KRoutingAlgorithmInterface getRoutingAlgorithm(){
+    	return kShortestsPaths;
+    }
 
 }
