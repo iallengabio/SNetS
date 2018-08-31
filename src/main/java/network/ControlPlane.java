@@ -68,7 +68,7 @@ public class ControlPlane {
         this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
 
         setMesh(mesh);
-        mesh.setTotalPowerConsumption(EnergyConsumption.computeNetworkPowerConsumption(this));
+        mesh.computesPowerConsmption(this);
     }
     
     /**
@@ -273,6 +273,7 @@ public class ControlPlane {
                 if(isAdmissibleQualityOfTransmission(circuit)){
                     this.updateNetworkPowerConsumption();
                 	return true; // Admits the circuit
+                	
                 } else {
                 	// Circuit QoT is not acceptable, frees allocated resources
         			releaseCircuit(circuit);
@@ -360,8 +361,10 @@ public class ControlPlane {
             if (numSlotsDown>0) {
                 releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             }
+            
             circuit.setSpectrumAssigned(specAssigAt);
             isAdmissibleQualityOfTransmission(circuit); //recompute QoT
+            
         }else{
             this.updateNetworkPowerConsumption();
         }
@@ -380,6 +383,7 @@ public class ControlPlane {
         bottomBand[0] = circuit.getSpectrumAssigned()[0];
         bottomBand[1] = bottomBand[0] + numSlotsDown - 1;
         int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
+        
         if (numSlotsUp>0) {
             releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             newSpecAssign[1] = upperBand[0]-1;
@@ -389,6 +393,7 @@ public class ControlPlane {
             releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             newSpecAssign[0] = bottomBand[1]+1;
         }
+        
         circuit.setSpectrumAssigned(newSpecAssign);
         isAdmissibleQualityOfTransmission(circuit); //compute QoT
         
@@ -697,6 +702,6 @@ public class ControlPlane {
 	}
 
     private void updateNetworkPowerConsumption(){
-        this.mesh.setTotalPowerConsumption(EnergyConsumption.computeNetworkPowerConsumption(this));
+        this.mesh.computesPowerConsmption(this);
     }
 }
