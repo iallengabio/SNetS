@@ -1,13 +1,6 @@
 package grmlsa;
 
-import grmlsa.integrated.CompleteSharing;
-import grmlsa.integrated.DedicatedPartition;
-import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
-import grmlsa.integrated.KSPFirstFit;
-import grmlsa.integrated.LoadBalancedDedicatedPartition;
-import grmlsa.integrated.PseudoPartition;
-import grmlsa.integrated.ZonePartition;
-import grmlsa.integrated.ZonePartitionTopInvasion;
+import grmlsa.integrated.*;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
@@ -21,22 +14,17 @@ import grmlsa.routing.FixedRoutes;
 import grmlsa.routing.MMRDS;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.BestFit;
+import grmlsa.spectrumAssignment.DispersionAdaptiveFirstLastFit;
 import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
+import grmlsa.spectrumAssignment.FirstLastExactFit;
+import grmlsa.spectrumAssignment.FirstLastFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.RandomFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
 import grmlsa.spectrumAssignment.WorstFit;
-import grmlsa.trafficGrooming.MGFCCF;
-import grmlsa.trafficGrooming.MGHMDS;
-import grmlsa.trafficGrooming.MGHMS;
-import grmlsa.trafficGrooming.MGMPH;
-import grmlsa.trafficGrooming.MGMSU;
-import grmlsa.trafficGrooming.MGMVH;
-import grmlsa.trafficGrooming.NoTrafficGrooming;
-import grmlsa.trafficGrooming.SimpleTrafficGrooming;
-import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
+import grmlsa.trafficGrooming.*;
 
 /**
  * This class should be responsible for running the RSA algorithms, verifying whether the selected 
@@ -191,22 +179,30 @@ public class GRMLSA {
      * @return SpectrumAssignmentInterface
      */
     public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment() throws Exception {
-        switch (this.spectrumAssignmentType) {
-            case SPECTRUM_ASSIGNMENT_FISTFIT:
-                return new FirstFit();
-            case SPECTRUM_ASSIGNMENT_BESTFIT:
-                return new BestFit();
-            case SPECTRUM_ASSIGNMENT_WORSTFIT:
-                return new WorstFit();
-            case SPECTRUM_ASSIGNMENT_EXACTFIT:
-                return new ExactFit();
-            case SPECTRUM_ASSIGNMENT_LASTFIT:
-                return new LastFit();
-            case SPECTRUM_ASSIGNMENT_RANDOMFIT:
-                return new RandomFit();
-            default:
-                return null;
-        }
+    	switch (this.spectrumAssignmentType) {
+        case SPECTRUM_ASSIGNMENT_FISTFIT:
+            return new FirstFit();
+        case SPECTRUM_ASSIGNMENT_BESTFIT:
+            return new BestFit();
+        case SPECTRUM_ASSIGNMENT_WORSTFIT:
+            return new WorstFit();
+        case SPECTRUM_ASSIGNMENT_EXACTFIT:
+            return new ExactFit();
+        case SPECTRUM_ASSIGNMENT_LASTFIT:
+            return new LastFit();
+        case SPECTRUM_ASSIGNMENT_RANDOMFIT:
+            return new RandomFit();
+        case SPECTRUM_ASSIGNMENT_FIRSTLASTFIT:
+            return new FirstLastFit();
+        case SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT:
+        	return new FirstLastExactFit();
+        case SPECTRUM_ASSIGNMENT_TBSA:
+            return new TrafficBalancingSpectrumAssignment();
+        case SPECTRUM_ASSIGNMENT_DAFLF:
+            return new DispersionAdaptiveFirstLastFit();
+        default:
+            return null;
+    	}
     }
 
     /**
