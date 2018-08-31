@@ -40,7 +40,7 @@ public class ConsumedEnergy extends Measurement {
         totalConsumedEnergyOXCs = 0.0;
         totalConsumedEnergyAmplifiers = 0.0;
         
-        totalDataTransmitted = 0.0;;   
+        totalDataTransmitted = 0.0;
         
         fileName = "_ConsumedEnergy.csv";
         resultManager = new ConsumedEnergyResultManager();
@@ -54,7 +54,7 @@ public class ConsumedEnergy extends Measurement {
 			totalDataTransmitted += duration * request.getRequiredBandwidth(); // Total data transmitted by the flow (bits)
 			
 		}else{
-	    	instantTime = instantTime * 3600.0; // Converting to seconds
+	    	instantTime *= 3600.0; // Converting to seconds
 	    	if(instantTime > totalNetworkOperationTime){
 				totalNetworkOperationTime = instantTime;
 			}
