@@ -53,4 +53,3 @@ public class WorstFit implements SpectrumAssignmentAlgorithmInterface {
     }
 
 }
-

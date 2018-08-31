@@ -48,4 +48,3 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
         return chosen;
 	}
 }
-

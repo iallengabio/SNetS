@@ -50,4 +50,3 @@ public class DummyFit implements SpectrumAssignmentAlgorithmInterface {
         return null;
     }
 }
-

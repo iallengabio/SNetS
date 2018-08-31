@@ -26,14 +26,9 @@ public class Mesh {
     private OthersConfig othersConfig;
 
     private double totalPowerConsumption;
-
-    public double getTotalPowerConsumption() {
-        return totalPowerConsumption;
-    }
-
-    public void setTotalPowerConsumption(double totalPowerConsumption) {
-        this.totalPowerConsumption = totalPowerConsumption;
-    }
+    private double totalPowerConsumptionTransponders;
+    private double totalPowerConsumptionOXCs;
+    private double totalPowerConsumptionAmplifiers;
 
     /**
      * Creates a new instance of Mesh.
@@ -194,12 +189,62 @@ public class Mesh {
     public PhysicalLayer getPhysicalLayer(){
     	return physicalLayer;
     }
-
+    
+    /**
+     * Returns the others configuration
+     * 
+     * @return
+     */
     public OthersConfig getOthersConfig() {
         return othersConfig;
     }
-
-    public void setOthersConfig(OthersConfig othersConfig) {
-        this.othersConfig = othersConfig;
+    
+    /**
+     * Returns the total power consumption
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumption() {
+        return totalPowerConsumption;
+    }
+    
+    /**
+     * Returns the total power consumption by transponders
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumptionTransponders() {
+        return totalPowerConsumptionTransponders;
+    }
+    
+    /**
+     * Returns the total power consumption by OXCs
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumptionOXCs() {
+        return totalPowerConsumptionOXCs;
+    }
+    
+    /**
+     * Returns the total power consumption by amplifiers
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumptionAmplifiers() {
+        return totalPowerConsumptionAmplifiers;
+    }
+    
+    /**
+     * Computes the total power consumption
+     * 
+     * @param cp ControlPlane
+     */
+    public void computesPowerConsmption(ControlPlane cp){
+    	totalPowerConsumptionTransponders = EnergyConsumption.computeTranspondersPowerConsumption(cp);
+    	totalPowerConsumptionOXCs = EnergyConsumption.computeOxcsPowerConsumption(nodeList);
+    	totalPowerConsumptionAmplifiers = EnergyConsumption.computeLinksPowerConsumption(linkList, cp);
+    	
+    	totalPowerConsumption = totalPowerConsumptionTransponders + totalPowerConsumptionOXCs + totalPowerConsumptionAmplifiers;
     }
 }

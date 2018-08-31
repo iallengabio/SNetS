@@ -49,14 +49,13 @@ public class ArriveRequestForConexionListener implements EventListener {
 
         beforeReq();
         if(m.getConsumedEnergyMetric() != null){
-        	m.getConsumedEnergyMetric().addNewObservation(simulation.getControlPlane(),e.getTimeHours());
+        	m.getConsumedEnergyMetric().addNewObservation(simulation.getControlPlane(), e.getTimeHours(), false, requestForConnection, false);
         }
         
         // Try to satisfy the request
         Boolean success = simulation.getControlPlane().handleRequisition(requestForConnection);
         if (success) {// Schedule the end of the requisition and release of resources
             em.insert(new Event(requestForConnection, new HoldRequestListener(simulation), requestForConnection.getTimeOfFinalizeHours()));
-
         }
         
         afterReq(requestForConnection, success);
@@ -94,7 +93,10 @@ public class ArriveRequestForConexionListener implements EventListener {
         
         // Adds a new note for all enabled performance metrics
         m.addNewObservation(simulation.getControlPlane(), success, request);
-
+        
+        if(m.getConsumedEnergyMetric() != null){
+        	m.getConsumedEnergyMetric().addNewObservation(simulation.getControlPlane(), request.getTimeOfFinalizeHours(), success, request, true);
+        }
     }
     
     
