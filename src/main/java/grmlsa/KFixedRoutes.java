@@ -1,4 +1,4 @@
-package grmlsa.routing;
+package grmlsa;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -12,12 +12,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import grmlsa.Route;
 import network.Mesh;
 import network.Node;
 import simulationControl.Util;
 
-public class KFixedRoutes {
+public class KFixedRoutes implements KRoutingAlgorithmInterface {
 
     private static final String DIV = "-";
 
@@ -112,4 +111,13 @@ public class KFixedRoutes {
     public List<Route> getRoutes(String pair) {
         return this.routesForAllPairs.get(pair);
     }
+    
+    /**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return Vector<Route>
+	 */
+    public HashMap<String, List<Route>> getRoutesForAllPairs() {
+		return routesForAllPairs;
+	}
 }

@@ -1,15 +1,13 @@
 package grmlsa.spectrumAssignment;
 
-import grmlsa.Route;
-import network.Circuit;
-import network.Link;
-import util.IntersectionFreeSpectrum;
-
-import java.util.ArrayList;
 import java.util.List;
 
+import network.Circuit;
+import network.ControlPlane;
+import util.IntersectionFreeSpectrum;
+
 /**
- * This class represents the spectrum allocation technique called First Fit.
+ * This class represents the spectrum allocation technique called Last Fit.
  * This technique chooses the last free spectrum band that accommodates the request.
  *
  * @author Iallen
@@ -17,22 +15,14 @@ import java.util.List;
 public class LastFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
-    public boolean assignSpectrum(int numberOfSlots, Circuit circuit) {
-        Route route = circuit.getRoute();
-        List<Link> links = new ArrayList<>(route.getLinkList());
-        List<int[]> composition;
-        composition = links.get(0).getFreeSpectrumBands();
-        int i;
+    public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
+    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
-        for (i = 1; i < links.size(); i++) {
-            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
-        }
-
-        int chosen[] = policy(numberOfSlots, composition, circuit);
-
-        if (chosen == null) return false;
-
+        int chosen[] = policy(numberOfSlots, composition, circuit, cp);
         circuit.setSpectrumAssigned(chosen);
+        
+        if (chosen == null)
+        	return false;
 
         return true;
     }
@@ -46,7 +36,7 @@ public class LastFit implements SpectrumAssignmentAlgorithmInterface {
      * @return int[]
      */
     @Override
-    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit){
+    public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
     	int chosen[] = null;
         int band[] = null;
         int i;

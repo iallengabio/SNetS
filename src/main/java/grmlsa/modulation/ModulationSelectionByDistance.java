@@ -5,7 +5,7 @@ import java.util.List;
 import grmlsa.Route;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
-import network.Mesh;
+import network.ControlPlane;
 
 /**
  * this class implement the modulation selection algorithm that returns modulation robust enough to satisfy 
@@ -18,7 +18,7 @@ public class ModulationSelectionByDistance implements ModulationSelectionAlgorit
 	private List<Modulation> avaliableModulations;
 	
 	@Override
-	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh) {
+	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
 		double maxBPS = 0.0;
 		Modulation resMod = null;
 		

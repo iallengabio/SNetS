@@ -32,7 +32,7 @@ public class ControlPlane {
     protected IntegratedRMLSAAlgorithmInterface integrated;
     protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
-	
+    
     protected Mesh mesh;
     
     /**
@@ -53,6 +53,7 @@ public class ControlPlane {
      * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
      * @param routingAlgorithm RoutingAlgorithmInterface
      * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
+     * @param modulationSelection ModulationSelectionAlgorithmInterface
      */
     public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection) {
         this.activeCircuits = new HashMap<>();
@@ -153,6 +154,23 @@ public class ControlPlane {
     	return spectrumAssignment;
     }
     
+    /**
+     * Returns the routing algorithm
+     * 
+     * @return RoutingAlgorithmInterface
+     */
+    public RoutingAlgorithmInterface getRouting(){
+    	return routing;
+    }
+    
+    /**
+     * Returns the integrated RMLSA algorithm
+     * 
+     * @return IntegratedRMLSAAlgorithmInterface
+     */
+    public IntegratedRMLSAAlgorithmInterface getIntegrated(){
+    	return integrated;
+    }
     
     /**
      * This method tries to satisfy a certain request by checking if there are available resources for the establishment of the circuit.
@@ -293,14 +311,14 @@ public class ControlPlane {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh(), this);
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
-                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, mesh);
+                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
+                    circuit.setModulation(mod);
                     if(mod != null){
-	                    circuit.setModulation(mod);
-	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
+	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit, this);
                     }
                 }
         }
@@ -309,12 +327,12 @@ public class ControlPlane {
     }
 
     /**
-     * Increase the number of slots used by a given circuit
-     *
-     * @param circuit
-     * @param numSlotsUp
-     * @param numSlotsDown
-     * @return
+     * Increases the number of slots used by a given circuit
+     * 
+     * @param circuit Circuit
+     * @param numSlotsUp int
+     * @param numSlotsDown int
+     * @return boolean
      * @throws Exception
      */
     public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
@@ -369,6 +387,14 @@ public class ControlPlane {
         return QoT;
     }
 
+    /**
+     * Decreases the number of slots used by a given circuit
+     * 
+     * @param circuit Circuit
+     * @param numSlotsDown int
+     * @param numSlotsUp int
+     * @throws Exception
+     */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
         //calculate the spectrum band at top
         int upperBand[] = new int[2];
@@ -407,9 +433,9 @@ public class ControlPlane {
     }
     
     /**
+     * To find active circuits on the network with specified source
      * 
-     * 
-     * @param source
+     * @param source String
      * @return List<Circuit>
      */
     public List<Circuit> searchForActiveCircuits(String source){
@@ -421,7 +447,7 @@ public class ControlPlane {
     }
     
     /**
-     * 
+     * To find active circuits on the network
      * 
      * @return List<Circuit>
      */

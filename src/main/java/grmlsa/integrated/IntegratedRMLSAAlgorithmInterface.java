@@ -1,8 +1,8 @@
 package grmlsa.integrated;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
-import network.Mesh;
 
 
 /**
@@ -17,9 +17,15 @@ public interface IntegratedRMLSAAlgorithmInterface {
      * If the RMLSA problem can not be resolved, the method returns false.
 	 * 
 	 * @param circuit Circuit
-	 * @param mesh Mesh
+	 * @param cp ControlPlane
 	 * @return boolean Returns whether or not it is possible to allocate resources to establish the connection
 	 */
-	public boolean rsa(Circuit circuit, Mesh mesh, ControlPlane cp);
+	public boolean rsa(Circuit circuit, ControlPlane cp);
 
+	/**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+	public KRoutingAlgorithmInterface getRoutingAlgorithm();
 }
