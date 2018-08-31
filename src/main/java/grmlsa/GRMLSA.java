@@ -1,6 +1,13 @@
 package grmlsa;
 
-import grmlsa.integrated.*;
+import grmlsa.integrated.CompleteSharing;
+import grmlsa.integrated.DedicatedPartition;
+import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
+import grmlsa.integrated.KSPFirstFit;
+import grmlsa.integrated.LoadBalancedDedicatedPartition;
+import grmlsa.integrated.PseudoPartition;
+import grmlsa.integrated.ZonePartition;
+import grmlsa.integrated.ZonePartitionTopInvasion;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
@@ -16,9 +23,20 @@ import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.BestFit;
 import grmlsa.spectrumAssignment.ExactFit;
 import grmlsa.spectrumAssignment.FirstFit;
+import grmlsa.spectrumAssignment.LastFit;
+import grmlsa.spectrumAssignment.RandomFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
 import grmlsa.spectrumAssignment.WorstFit;
-import grmlsa.trafficGrooming.*;
+import grmlsa.trafficGrooming.MGFCCF;
+import grmlsa.trafficGrooming.MGHMDS;
+import grmlsa.trafficGrooming.MGHMS;
+import grmlsa.trafficGrooming.MGMPH;
+import grmlsa.trafficGrooming.MGMSU;
+import grmlsa.trafficGrooming.MGMVH;
+import grmlsa.trafficGrooming.NoTrafficGrooming;
+import grmlsa.trafficGrooming.SimpleTrafficGrooming;
+import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
 
 /**
  * This class should be responsible for running the RSA algorithms, verifying whether the selected 
@@ -48,7 +66,6 @@ public class GRMLSA {
     private static final String GROOMING_OPT_MGMSU = "mgmsu";
     private static final String GROOMING_OPT_MGFCCF = "mgfccf";
 
-
     // Routing
     private static final String ROUTING_DJK = "djk";
     private static final String ROUTING_MMRDS = "mmrds";
@@ -59,6 +76,12 @@ public class GRMLSA {
     private static final String SPECTRUM_ASSIGNMENT_BESTFIT = "bestfit";
     private static final String SPECTRUM_ASSIGNMENT_WORSTFIT = "worstfit";
     private static final String SPECTRUM_ASSIGNMENT_EXACTFIT = "exactfit";
+    private static final String SPECTRUM_ASSIGNMENT_LASTFIT = "lastfit";
+    private static final String SPECTRUM_ASSIGNMENT_RANDOMFIT = "randomfit";
+    private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTFIT = "firstlastfit";
+    private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
+    private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
+    private static final String SPECTRUM_ASSIGNMENT_DAFLF = "daflf";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -68,7 +91,6 @@ public class GRMLSA {
     private static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
-
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -105,7 +127,6 @@ public class GRMLSA {
         this.modulationSelection = modulationSelection;
         this.spectrumAssignmentType = spectrumAssignmentType;
         this.regeneratorAssignment = regeneratorAssignment;
-
 
         if(grooming == null) this.grooming ="";
         if(integrated == null) this.integrated ="";
@@ -170,7 +191,6 @@ public class GRMLSA {
      * @return SpectrumAssignmentInterface
      */
     public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment() throws Exception {
-
         switch (this.spectrumAssignmentType) {
             case SPECTRUM_ASSIGNMENT_FISTFIT:
                 return new FirstFit();
@@ -180,6 +200,10 @@ public class GRMLSA {
                 return new WorstFit();
             case SPECTRUM_ASSIGNMENT_EXACTFIT:
                 return new ExactFit();
+            case SPECTRUM_ASSIGNMENT_LASTFIT:
+                return new LastFit();
+            case SPECTRUM_ASSIGNMENT_RANDOMFIT:
+                return new RandomFit();
             default:
                 return null;
         }

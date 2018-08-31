@@ -1,13 +1,18 @@
 package grmlsa;
 
-import network.Mesh;
-import network.Node;
-import simulationControl.Util;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import network.Mesh;
+import network.Node;
+import simulationControl.Util;
 
 /**
  * This class serves to compute the k shortest paths for all pairs of source (s) and destination (d) nodes 
@@ -15,7 +20,7 @@ import java.util.*;
  * 
  * @author Iallen
  */
-public class NewKShortestPaths {
+public class NewKShortestPaths implements KRoutingAlgorithmInterface {
 	
 	// Used as a separator between the names of nodes
     private static final String DIV = "-";
@@ -184,4 +189,12 @@ public class NewKShortestPaths {
         }
     }
 
+    /**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return Vector<Route>
+	 */
+    public HashMap<String, List<Route>> getRoutesForAllPairs() {
+		return routesForAllPairs;
+	}
 }

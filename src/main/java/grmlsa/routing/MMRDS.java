@@ -351,4 +351,13 @@ public class MMRDS implements RoutingAlgorithmInterface {
         	ex.printStackTrace();
         }
     }
+    
+    /**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return Vector<Route>
+	 */
+    public HashMap<String, Route> getRoutesForAllPairs() {
+		return routesForAllPairs;
+	}
 }

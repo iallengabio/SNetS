@@ -294,14 +294,14 @@ public class ControlPlane {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh(), this);
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
-                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, mesh);
+                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
+                    circuit.setModulation(mod);
                     if(mod != null){
-	                    circuit.setModulation(mod);
-	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
+	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit, this);
                     }
                 }
         }
