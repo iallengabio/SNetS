@@ -14,7 +14,7 @@ import util.IntersectionFreeSpectrum;
 
 public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgorithmInterface {
 	
-	private int K = 3; //This algorithm uses 3 alternative paths
+	private int k = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -22,7 +22,7 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
         if (kShortestsPaths == null){
-            kShortestsPaths = new NewKShortestPaths(cp.getMesh(), K);
+            kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
         }
         if (modulationSelection == null){
             modulationSelection = cp.getModulationSelection();

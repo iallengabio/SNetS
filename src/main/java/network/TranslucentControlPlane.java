@@ -160,7 +160,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit Circuit
      */
 	@Override
-    protected void allocateCircuit(Circuit circuit) throws Exception {
+    public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         
@@ -275,10 +275,9 @@ public class TranslucentControlPlane extends ControlPlane {
 	 */
 	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route){
 		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, this);
+		circuit.setModulation(mod);
 		
 		if(mod != null){
-			circuit.setModulation(mod);
-			
 			HashMap<Link, Modulation> modulationByLink = new HashMap<Link, Modulation>();
 			Vector<Link> linkList = route.getLinkList();
 			for(int l = 0; l < linkList.size(); l++){

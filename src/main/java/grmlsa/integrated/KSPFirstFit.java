@@ -19,7 +19,7 @@ import util.IntersectionFreeSpectrum;
  */
 public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface {
 
-    private int K = 3; //This algorithm uses 3 alternative paths
+    private int k = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -27,7 +27,7 @@ public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface {
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
         if (kShortestsPaths == null){
-            kShortestsPaths = new NewKShortestPaths(cp.getMesh(), K);
+            kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
         }
         if (modulationSelection == null){
             modulationSelection = cp.getModulationSelection();
@@ -42,20 +42,21 @@ public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface {
         int chosenBand[] = {999999, 999999}; // Value never reached
 
         for (Route route : candidateRoutes) {
-
             circuit.setRoute(route);
+            
             Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
+            if(mod != null){
+            	List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 
-            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
-
-            // Calculate how many slots are needed for this route
-            int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);
-
-            if (ff != null) {
-                chosenBand = ff;
-                chosenRoute = route;
-                chosenMod = mod;
-                break;
+	            // Calculate how many slots are needed for this route
+	            int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);
+	
+	            if (ff != null) {
+	                chosenBand = ff;
+	                chosenRoute = route;
+	                chosenMod = mod;
+	                break;
+	            }
             }
         }
 
