@@ -381,7 +381,8 @@ public class ControlPlane {
             }
             
             circuit.setSpectrumAssigned(specAssigAt);
-            isAdmissibleQualityOfTransmission(circuit); //recompute QoT
+            //isAdmissibleQualityOfTransmission(circuit); //recompute QoT
+            computeQualityOfTransmission(circuit); // Recalculates the QoT and SNR of the circuit
             
         }else{
             this.updateNetworkPowerConsumption();
@@ -421,7 +422,8 @@ public class ControlPlane {
         }
         
         circuit.setSpectrumAssigned(newSpecAssign);
-        isAdmissibleQualityOfTransmission(circuit); //compute QoT
+        //isAdmissibleQualityOfTransmission(circuit); //compute QoT
+        computeQualityOfTransmission(circuit); // Recalculates the QoT and SNR of the circuit
         
         this.updateNetworkPowerConsumption();
     }
@@ -550,7 +552,7 @@ public class ControlPlane {
         	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
             circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
             
-        	// Recalculates the QoT and SNR of the circuits
+        	// Recalculates the QoT and SNR of the circuit
             boolean QoT = computeQualityOfTransmission(circuitTemp);
             if (!QoT) {
             	
