@@ -48,7 +48,8 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 		HashMap<Route, List<Route>> pathGraph = new HashMap<>();
 		Vector<Route> routesForAllPairs = new Vector<Route>();
 		
-		if(cp.getIntegrated() != null && cp.getIntegrated().getRoutingAlgorithm().getRoutesForAllPairs() != null){
+		if(cp.getIntegrated() != null && cp.getIntegrated().getRoutingAlgorithm() != null &&
+		   cp.getIntegrated().getRoutingAlgorithm().getRoutesForAllPairs() != null){
 			HashMap<String, List<Route>> routes = cp.getIntegrated().getRoutingAlgorithm().getRoutesForAllPairs();
 			
 			for(String pair : routes.keySet()){

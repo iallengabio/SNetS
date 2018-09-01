@@ -163,6 +163,7 @@ public class Main {
      * @throws Exception
      */
     private static void localSimulation(String path) throws Exception {
+    	System.out.println("Path: " + path);
         System.out.println("Reading files");
         List<List<Simulation>> allSimulations = createAllSimulations(path);
         //Now start the simulations
@@ -258,7 +259,7 @@ public class Main {
         for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
             List<Simulation> reps = new ArrayList<>();
             for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
-                Mesh m = new Mesh(nc, tc, plc,oc);
+                Mesh m = new Mesh(nc, tc, plc, oc);
                 incArrivedRate(m.getPairList(), i);
                 Simulation s = new Simulation(sc, m, i, j);
                 reps.add(s);

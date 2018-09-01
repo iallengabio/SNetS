@@ -24,6 +24,7 @@ import util.IntersectionFreeSpectrum;
  */
 public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 
+	private int k = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -31,7 +32,7 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
         if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 3); //This algorithm uses 3 alternative paths
+        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
         }
         if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection();
@@ -46,27 +47,24 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
         int chosenBand[] = {999999, 999999}; // Value never reached
 
         for (Route route : candidateRoutes) {
-            
             circuit.setRoute(route);
+            
             Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
-
-            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
-
-            // Calculate how many slots are needed for this route
-            int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);
-
-            if (ff != null && ff[0] < chosenBand[0]) {
-                chosenBand = ff;
-                chosenRoute = route;
-                chosenMod = mod;
+            if(mod != null){
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	
+	            // Calculate how many slots are needed for this route
+	            int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);
+	
+	            if (ff != null && ff[0] < chosenBand[0]) {
+	                chosenBand = ff;
+	                chosenRoute = route;
+	                chosenMod = mod;
+	            }
             }
         }
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
-
-            if(chosenBand[0]>chosenBand[1]){
-                int i = 1;
-            }
             circuit.setRoute(chosenRoute);
             circuit.setModulation(chosenMod);
             circuit.setSpectrumAssigned(chosenBand);

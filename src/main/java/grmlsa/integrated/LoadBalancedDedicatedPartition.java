@@ -23,6 +23,7 @@ import util.IntersectionFreeSpectrum;
  */
 public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmInterface {
 
+	private int k = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -51,7 +52,7 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
     	if(kShortestsPaths == null){
-			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 3); //This algorithm uses 3 alternative paths
+			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
 		}
     	if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection();
@@ -67,28 +68,30 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
         int leastUsed = 999999999;
 
         for (Route route : candidateRoutes) {
-            
             circuit.setRoute(route);
+            
             Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
-
-            // Calculate how many slots are needed for this route
-            int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-            int zone[] = this.zones.get(numSlots);
-            List<int[]> primaryZone = new ArrayList<>();
-            primaryZone.add(zone);
-
-            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
-            merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
-
-            int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);
-
-            int ut = this.numSlotsUsedZone(route, zone);
-
-            if (ff != null && ut < leastUsed) {
-                chosenBand = ff;
-                chosenRoute = route;
-                leastUsed = ut;
-                chosenMod = mod;
+            if(mod != null){
+            	
+	            // Calculate how many slots are needed for this route
+	            int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
+	            int zone[] = this.zones.get(numSlots);
+	            List<int[]> primaryZone = new ArrayList<>();
+	            primaryZone.add(zone);
+	
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	            merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
+	
+	            int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);
+	
+	            int ut = this.numSlotsUsedZone(route, zone);
+	
+	            if (ff != null && ut < leastUsed) {
+	                chosenBand = ff;
+	                chosenRoute = route;
+	                leastUsed = ut;
+	                chosenMod = mod;
+	            }
             }
         }
 
