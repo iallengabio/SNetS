@@ -97,7 +97,7 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
 		if(beta == null){
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
-			beta = Double.parseDouble((String)uv.get("largerBand"));
+			beta = Double.parseDouble((String)uv.get("beta"));
 		}
 		
 		if (circuit.getRoute().getDistanceAllLinks() > beta) {

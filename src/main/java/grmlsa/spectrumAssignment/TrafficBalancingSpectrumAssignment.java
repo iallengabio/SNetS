@@ -38,6 +38,10 @@ public class TrafficBalancingSpectrumAssignment implements SpectrumAssignmentAlg
      */
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
+    	if(freeSpectrumBands.size() == 0){
+    		return null;
+    	}
+    	
     	int chosen[] = null;
 		List<int[]> lowFreeBands = null;
 		List<int[]> upperFreeBands = null;

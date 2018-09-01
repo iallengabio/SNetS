@@ -17,7 +17,7 @@ import util.IntersectionFreeSpectrum;
  * This class implements the integrated RMLSA algorithm that uses First Fit to spectrum allocation and try establish the circuit with 'k' shortests paths.
  * @author Iallen
  */
-public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface{
+public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface {
 
     private int K = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
