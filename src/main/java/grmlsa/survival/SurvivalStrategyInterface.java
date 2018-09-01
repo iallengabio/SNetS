@@ -1,0 +1,34 @@
+package grmlsa.survival;
+
+import network.Circuit;
+import network.SurvivalControlPlane;
+import request.RequestForConnection;
+
+
+/**
+ * This interface must be implemented by the classes that represent the survival strategy.
+ * 
+ * @author Alexandre
+ */
+public interface SurvivalStrategyInterface {
+	
+	/**
+	 * Applies the survival strategy
+	 * 
+	 * @param rfc RequestForConnection
+	 * @param cp SurvivalControlPlane
+	 * @return boolean
+	 * @throws Exception
+	 */
+	public boolean applyStrategy(RequestForConnection rfc, SurvivalControlPlane cp) throws Exception;
+	
+	/**
+	 * Returns true if it can survive the fault and false otherwise.
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 * @throws Exception
+	 */
+	public boolean survive(Circuit circuit) throws Exception;
+
+}

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import grmlsa.modulation.Modulation;
+import network.Circuit;
 import network.ControlPlane;
 import request.RequestForConnection;
 import simulationControl.resultManagers.ModulationUtilizationResultManager;
@@ -23,12 +24,6 @@ public class ModulationUtilization extends Measurement {
 	
 	private List<String> modulationList;
 	
-	/**
-	 * Creates a new instance of ModulationUtilization
-	 * 
-	 * @param loadPoint int
-	 * @param replication int
-	 */
 	public ModulationUtilization(int loadPoint, int replication) {
 		super(loadPoint, replication);
 		
@@ -59,36 +54,37 @@ public class ModulationUtilization extends Measurement {
 	   }
 	   
 	   if(success){
+	   	for(Circuit circuit : request.getCircuits()) {
 			numObservations++;
-			
-			double bandwidth = request.getCircuit().getRequiredBandwidth();
-			List<Modulation> modList = cp.getModulationsUsedByCircuit(request.getCircuit());
-			
-			for(int i = 0; i < modList.size(); i++){
+
+			double bandwidth = circuit.getRequiredBandwidth();
+			List<Modulation> modList = cp.getModulationsUsedByCircuit(circuit);
+
+			for (int i = 0; i < modList.size(); i++) {
 				String modName = modList.get(i).getName();
-				
+
 				// Number of circuits per modulation
 				Integer numCirc = numCircuitsPerMod.get(modName);
-				if(numCirc == null) numCirc = 0;
+				if (numCirc == null) numCirc = 0;
 				numCircuitsPerMod.put(modName, numCirc + 1);
-				
+
 				// Number of circuits per modulation and bandwidth
 				HashMap<Double, Integer> numCircBw = numCircuitsPerModPerBw.get(modName);
-				if(numCircBw == null){
+				if (numCircBw == null) {
 					numCircBw = new HashMap<>();
 					numCircuitsPerModPerBw.put(modName, numCircBw);
 				}
 				numCirc = numCircBw.get(bandwidth);
-				if(numCirc == null) numCirc = 0;
+				if (numCirc == null) numCirc = 0;
 				numCircBw.put(bandwidth, numCirc + 1);
 			}
+		}
 		}
 	}
 	
    /**
     * Returns the percentage of circuits per modulation
-    * 
-    * @param mod String
+    *
     * @return double
     */
 	public double getPercentageCircuitsPerModulation(String modName){

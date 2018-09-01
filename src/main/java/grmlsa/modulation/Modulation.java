@@ -10,33 +10,29 @@ import network.PhysicalLayer;
 public class Modulation {
 
     private String name;
-    private double maxRange; // max range in Km
-    private double M; // Number of modulation format symbols
     private double bitsPerSymbol;
+    private double maxRange; // max range in Km
     
+    private double M; // Number of modulation format symbols
     private double SNRthreshold; // dB
     private double SNRthresholdLinear;
 	
-    private double rateFEC; // Forward Error Correction
+    private double rateFEC; // rate of Forward Error Correction
 	private double freqSlot;
 	private int guardBand;
-	
-	private boolean activeQoT;
-
 
 	/**
 	 * Creates a new instance of Modulation
 	 * 
 	 * @param name String
-	 * @param maxRange double
-	 * @param M double
-	 * @param SNRthreshold double
-	 * @param rateFEC double
 	 * @param freqSlot double
+	 * @param maxRange double
 	 * @param guardBand double
-	 * @param activeQoT boolean
+	 * @param level double
+	 * @param M double
+	 * @param FEC double
 	 */
-    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, boolean activeQoT) {
+    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand) {
         this.name = name;
         this.maxRange = maxRange;
         this.M = M;
@@ -48,7 +44,6 @@ public class Modulation {
         // Calculation based on article: Capacity Limits of Optical Fiber Networks (2010)
         this.bitsPerSymbol = PhysicalLayer.log2(M);
         this.SNRthresholdLinear = PhysicalLayer.ratioOfDB(SNRthreshold);
-        this.activeQoT = activeQoT;
     }
 
     /**
@@ -56,6 +51,7 @@ public class Modulation {
      * Adds guard band
      * 
      * Based on articles:
+     *  - Efficient Resource Allocation for All-Optical Multicasting Over Spectrum-Sliced Elastic Optical Networks (2013)
 	 *  - Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
 	 *  - Analise do Impacto do Ruido ASE em Redes Opticas Elasticas Transparentes Utilizando Multiplos Formatos de Modulacao (2015)
      *
@@ -63,20 +59,27 @@ public class Modulation {
      * @return int - numberOfStos
      */
     public int requiredSlots(double bandwidth) {
-        double numberOfSlots = bandwidth / (bitsPerSymbol * freqSlot);
+    	double slotsNumber = (bandwidth * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
         
-        if(activeQoT){
-        	numberOfSlots = (1.1 * bandwidth * (1 + rateFEC)) / (2 * bitsPerSymbol * freqSlot);
-        }
-        
-        int numberOfSlotsTemp = (int) numberOfSlots;
-        if (numberOfSlots - numberOfSlotsTemp != 0.0) {
-            numberOfSlotsTemp++;
+        int slotsNumberTemp = (int) slotsNumber;
+        if (slotsNumber - slotsNumberTemp != 0.0) {
+        	slotsNumberTemp++;
         }
 
-        numberOfSlotsTemp = numberOfSlotsTemp + guardBand; // Adds another slot needed to be used as a guard band
+        slotsNumberTemp = slotsNumberTemp + guardBand; // Adds another slot needed to be used as a guard band
 
-        return numberOfSlotsTemp;
+        return slotsNumberTemp;
+    }
+
+    /**
+     * compute the potential bandwidth when @slotsNumber slots are utilized
+     * @param slotsNumber
+     * @return
+     */
+    public double potentialBandwidth(int slotsNumber){
+    	slotsNumber = slotsNumber - guardBand; // Remove the slot needed to be used as a guard band
+        
+        return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
     }
     
 	/**
@@ -131,5 +134,14 @@ public class Modulation {
      */
     public double getSNRthresholdLinear(){
     	return SNRthresholdLinear;
+    }
+    
+    /**
+     * Returns the guard band
+     * 
+     * @return int
+     */
+    public int getGuardBand(){
+    	return guardBand;
     }
 }

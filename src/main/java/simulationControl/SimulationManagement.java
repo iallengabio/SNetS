@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 3;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 4;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -66,15 +66,20 @@ public class SimulationManagement {
                 executor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        Simulator simulator = new Simulator(replication);
-                        mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
-                        done++;
-                        simulationProgressListener.onSimulationProgressUpdate((double)done/numOfSimulations);
+                        try {
+                            Simulator simulator = new Simulator(replication);
+                            mainMeasuremens.get(replication.getLoadPoint()).set(replication.getReplication(), simulator.start());
+                            done++;
+                            simulationProgressListener.onSimulationProgressUpdate((double) done / numOfSimulations);
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                            executor.shutdown();
+                        }
                     }
                 });
             }
         }
-        while(done < numOfSimulations){ //wait untill all simulations have done
+        while(done<numOfSimulations){ //wait untill all simulations have done
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -82,22 +87,11 @@ public class SimulationManagement {
             }
         }
 
+        executor.shutdown();
+
         simulationProgressListener.onSimulationFinished();
     }
 
-    public void startSimulations(){
-        startSimulations(new SimulationProgressListener() {
-            @Override
-            public void onSimulationProgressUpdate(double progress) {
-
-            }
-
-            @Override
-            public void onSimulationFinished() {
-
-            }
-        });
-    }
 
     /**
      * This method is responsible for calling the method of the class responsible for saving 
@@ -113,10 +107,25 @@ public class SimulationManagement {
     	
     	try {
     		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
+
+    		Measurement metric = this.mainMeasuremens.get(0).get(0).getConsumedEnergyMetric();
+            List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
+            for (List<Measurements> listMeasurements : this.mainMeasuremens) {
+                List<Measurement> lms = new ArrayList<Measurement>();
+                llms.add(lms);
+                for (Measurements measurements : listMeasurements) {
+                    lms.add(measurements.getConsumedEnergyMetric());
+                }
+            }
+            String path = pathResultFiles + separador + nomePasta + metric.getFileName();
+            FileWriter fw = new FileWriter(new File(path));
+            fw.write(metric.result(llms));
+            fw.close();
+
     		for(int m = 0; m < numMetrics; m++){
-    			Measurement metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
+    			metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
     			
-				List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
+				llms = new ArrayList<List<Measurement>>();
 				for (List<Measurements> listMeasurements : this.mainMeasuremens) {
 					List<Measurement> lms = new ArrayList<Measurement>();
 					llms.add(lms);
@@ -125,16 +134,18 @@ public class SimulationManagement {
 					}
 				}
 				
-				String path = pathResultFiles + separador + nomePasta + metric.getFileName();
+				path = pathResultFiles + separador + nomePasta + metric.getFileName();
 				
-				FileWriter fw = new FileWriter(new File(path));
+				fw = new FileWriter(new File(path));
 				fw.write(metric.result(llms));
 	            fw.close();
     		}
+
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
     }
 
     /**
@@ -300,6 +311,19 @@ public class SimulationManagement {
             }
         }
         ModulationUtilizationResultManager murm = new ModulationUtilizationResultManager();
+        return murm.result(llmu);
+    }
+
+    public String getConsumedEnergyCsv(){
+        List<List<Measurement>> llmu = new ArrayList<>();
+        for (List<Measurements> listMeas : this.mainMeasuremens) {
+            List<Measurement> lmu = new ArrayList<>();
+            llmu.add(lmu);
+            for (Measurements measurements : listMeas) {
+                lmu.add(measurements.getConsumedEnergyMetric());
+            }
+        }
+        ConsumedEnergyResultManager murm = new ConsumedEnergyResultManager();
         return murm.result(llmu);
     }
 

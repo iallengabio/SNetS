@@ -62,6 +62,15 @@ public class Receivers {
 	public int getRxUtilization() {
 		return rxUtilization;
 	}
+	
+	/**
+	 * Returns the maximum number of receivers
+	 * 
+	 * @return int
+	 */
+	public int getNumberOfRx() {
+		return numberOfRx;
+	}
 
 	/**
 	 * Sets the maximum number of receivers

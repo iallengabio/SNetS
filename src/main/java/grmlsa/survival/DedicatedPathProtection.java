@@ -1,17 +1,29 @@
 package grmlsa.survival;
 
 import network.Circuit;
+import network.SurvivalControlPlane;
+import request.RequestForConnection;
 
-public class DedicatedPathProtection implements ProtectionAlgorithmInterface {
+/**
+ * this class represents the dedicate path protection
+ * 
+ * @author Alexandre
+ */
+public class DedicatedPathProtection implements SurvivalStrategyInterface {
 
 	
-	/**
-	 * Returns true if it can survive the fault and false otherwise.
-	 * 
-	 * @return boolean
-	 */
 	@Override
-	public boolean survive(Circuit circuit) {
+	public boolean applyStrategy(RequestForConnection rfc, SurvivalControlPlane cp) throws Exception {
+		
+		// Applies the traffic aggregation algorithm
+		cp.getGrooming().searchCircuitsForGrooming(rfc, cp);
+		
+		return true;
+	}
+	
+	
+	@Override
+	public boolean survive(Circuit circuit) throws Exception {
 		
 		
 		

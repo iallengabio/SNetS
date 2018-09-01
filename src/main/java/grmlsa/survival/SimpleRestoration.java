@@ -1,20 +1,22 @@
 package grmlsa.survival;
 
 import network.Circuit;
+import network.SurvivalControlPlane;
+import request.RequestForConnection;
 
 /**
- * 
+ * This class represents the simple restoration
  * 
  * @author Alexandre
  */
-public class SimpleRestoration implements ProtectionAlgorithmInterface {
+public class SimpleRestoration implements SurvivalStrategyInterface {
 
-	
-	/**
-	 * Returns true if it can survive the fault and false otherwise.
-	 * 
-	 * @return boolean
-	 */
+	@Override
+	public boolean applyStrategy(RequestForConnection rfc, SurvivalControlPlane cp) throws Exception {
+		// Applies the traffic aggregation algorithm
+		return cp.getGrooming().searchCircuitsForGrooming(rfc, cp);
+	}
+
 	@Override
 	public boolean survive(Circuit circuit){
 		

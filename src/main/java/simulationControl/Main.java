@@ -3,29 +3,19 @@ package simulationControl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseCredentials;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import network.Mesh;
 import network.Pair;
 import network.RequestGenerator;
-import simulationControl.parsers.NetworkConfig;
-import simulationControl.parsers.PhysicalLayerConfig;
-import simulationControl.parsers.SimulationConfig;
-import simulationControl.parsers.SimulationRequest;
-import simulationControl.parsers.TrafficConfig;
+import simulationControl.parsers.*;
 import simulator.Simulation;
 
 /**
@@ -43,10 +33,10 @@ public class Main {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        if (args.length > 0) { // To run in local mode
+        if (args.length > 0) {
             localSimulation(args[0]);
             
-        } else { // To run in Server mode
+        } else {// To run in Server mode
             simulationServer();
         }
     }
@@ -58,24 +48,45 @@ public class Main {
      */
     private static void simulationServer() throws IOException {
         initFirebase();
+
+        DatabaseReference simSerRef = FirebaseDatabase.getInstance().getReference("simulationServers").push();
+        simSerRef.setValue(new SimulationServer());
         System.out.println("SNetS Simulation Server Running");
-        FirebaseDatabase.getInstance().getReference("simulations").addChildEventListener(new ChildEventListener() {
+        System.out.println("simulation server key: " + simSerRef.getKey());
+        FirebaseDatabase.getInstance().getReference("simulationServers/" +simSerRef.getKey()+"/online").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!(boolean)dataSnapshot.getValue()){
+                    dataSnapshot.getRef().setValue(true);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        }); //sinalizates that server is alive
+
+        FirebaseDatabase.getInstance().getReference("simulationServers/" +simSerRef.getKey()+"/simulationQueue").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Gson gson = new GsonBuilder().create();
-                SimulationRequest sr = gson.fromJson(dataSnapshot.getValue(false).toString(), SimulationRequest.class);
-                //SimulationRequest sr = (SimulationRequest) dataSnapshot.getValue();
+                String srjson = dataSnapshot.getValue(false).toString();
+                SimulationRequest sr = gson.fromJson(srjson, SimulationRequest.class);
+                DatabaseReference newRef = FirebaseDatabase.getInstance().getReference("simulations").push();
+                newRef.setValue(sr);
+                dataSnapshot.getRef().removeValue();
+
                 if(sr.getStatus().equals("new")) {
                     try {
-                        dataSnapshot.getRef().child("status").setValue("started");
-                        dataSnapshot.getRef().child("progress").setValue(0.0);
-                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig(), sr.getPhysicalLayerConfig());
+                        newRef.child("status").setValue("started");
+                        newRef.child("progress").setValue(0.0);
+                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig(), sr.getPhysicalLayerConfig(), sr.getOthersConfig());
                         //remember to implement with thread
                         SimulationManagement sm = new SimulationManagement(allSimulations);
                         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
                             @Override
                             public void onSimulationProgressUpdate(double progress) {
-                                dataSnapshot.getRef().child("progress").setValue(progress);
+                                newRef.child("progress").setValue(progress);
                             }
 
                             @Override
@@ -91,13 +102,14 @@ public class Main {
                         if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics)sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption)sr.getResult().energyConsumption = sm.getEnergyConsumptionCsv();
                         if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization)sr.getResult().modulationUtilization = sm.getModulationUtilizationCsv();
+                        if(sr.getSimulationConfig().getActiveMetrics().ConsumedEnergy)sr.getResult().consumedEnergy = sm.getConsumedEnergyCsv();
                         sr.setProgress(1.0);
                         sr.setStatus("finished");
-                        dataSnapshot.getRef().setValue(sr);
+                        newRef.setValue(sr);
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        dataSnapshot.getRef().child("status").setValue("failed");
+                        newRef.child("status").setValue("failed");
                     }
                 }else{//do nothing
                 }
@@ -127,6 +139,7 @@ public class Main {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }
     }
 
@@ -150,6 +163,7 @@ public class Main {
      * @throws Exception
      */
     private static void localSimulation(String path) throws Exception {
+    	System.out.println("Path: " + path);
         System.out.println("Reading files");
         List<List<Simulation>> allSimulations = createAllSimulations(path);
         //Now start the simulations
@@ -163,7 +177,7 @@ public class Main {
 
             @Override
             public void onSimulationFinished() {
-            	// Nothing at the moment
+
             }
         });
         System.out.println("saving results");
@@ -173,8 +187,7 @@ public class Main {
 
     /**
      * This method creates the simulations from the local mode
-     * 
-     * @param args String Paths of the simulations configuration files
+     *
      * @return List<List<Simulation>>
      * @throws Exception
      */
@@ -185,9 +198,10 @@ public class Main {
         String filesPath = path;
         String networkFilePath = filesPath + separator + "network";
         String simulationFilePath = filesPath + separator + "simulation";
-        String traficFilePath = filesPath + separator + "traffic";
+        String trafficFilePath = filesPath + separator + "traffic";
         //String routesFilePath = filesPath + separator + "fixedRoutes";
         String physicalLayerFilePath = filesPath + separator + "physicalLayer";
+        String othersFilePath = filesPath + separator + "others";
         Util.projectPath = filesPath;
         
         //Read files
@@ -201,7 +215,7 @@ public class Main {
         while (scanner.hasNext()) {
             simulationConfigJSON += scanner.next();
         }
-        scanner = new Scanner(new File(traficFilePath));
+        scanner = new Scanner(new File(trafficFilePath));
         String trafficConfigJSON = "";
         while (scanner.hasNext()) {
             trafficConfigJSON += scanner.next();
@@ -211,16 +225,22 @@ public class Main {
         while (scanner.hasNext()) {
         	physicalLayerConfigJSON += scanner.next();
         }
+        scanner = new Scanner(new File(othersFilePath));
+        String othersConfigJSON = "";
+        while (scanner.hasNext()) {
+            othersConfigJSON += scanner.next();
+        }
         
         Gson gson = new GsonBuilder().create();
         NetworkConfig nc = gson.fromJson(networkConfigJSON, NetworkConfig.class);
         SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
         TrafficConfig tc = gson.fromJson(trafficConfigJSON, TrafficConfig.class);
         PhysicalLayerConfig plc = gson.fromJson(physicalLayerConfigJSON, PhysicalLayerConfig.class);
-        
+        OthersConfig oc = gson.fromJson(othersConfigJSON,OthersConfig.class);
         scanner.close();
+
         
-        return createAllSimulations(nc, sc, tc, plc);
+        return createAllSimulations(nc, sc, tc, plc, oc);
     }
 
     /**
@@ -232,14 +252,14 @@ public class Main {
      * @return List<List<Simulation>>
      * @throws Exception
      */
-    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc, PhysicalLayerConfig plc) throws Exception {
+    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) throws Exception {
         // Create list of simulations
         List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
         int i, j;
         for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
             List<Simulation> reps = new ArrayList<>();
             for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
-                Mesh m = new Mesh(nc, tc, plc);
+                Mesh m = new Mesh(nc, tc, plc, oc);
                 incArrivedRate(m.getPairList(), i);
                 Simulation s = new Simulation(sc, m, i, j);
                 reps.add(s);

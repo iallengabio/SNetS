@@ -93,11 +93,9 @@ public class IntersectionFreeSpectrum {
      */
     public static List<int[]> merge(Route route) {
         List<Link> links = new ArrayList<>(route.getLinkList());
-        List<int[]> composition;
-        composition = links.get(0).getFreeSpectrumBands();
-        int i;
-
-        for (i = 1; i < links.size(); i++) {
+        List<int[]> composition = links.get(0).getFreeSpectrumBands();
+        
+        for (int i = 1; i < links.size(); i++) {
             composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
@@ -140,6 +138,18 @@ public class IntersectionFreeSpectrum {
         }
 
         return null;
+    }
+
+    public static int freeSlotsUpper(int band[], List<int[]> freeBands){
+        int[] aux = bandAdjacentSuperior(band, freeBands);
+        if(aux==null) return 0;
+        else return aux[1] - aux[0] + 1;
+    }
+
+    public static int freeSlotsDown(int band[], List<int[]> freeBands){
+        int[] aux = bandAdjacentInferior(band, freeBands);
+        if(aux==null) return 0;
+        else return aux[1] - aux[0] + 1;
     }
 
 }

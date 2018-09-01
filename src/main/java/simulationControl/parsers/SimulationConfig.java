@@ -8,32 +8,32 @@ package simulationControl.parsers;
  */
 public class SimulationConfig {
 
-	private int networkType;
-    private int rmlsaType;
     private int requests;
-    private int loadPoints;
-    private int replications;
-    
-    private String grooming;
+    private int rmlsaType;
     private String routing;
     private String spectrumAssignment;
     private String integratedRmlsa;
     private String modulationSelection;
-    private String regeneratorAssignment;
-    
+    private String grooming;
+    private int loadPoints;
+    private int replications;
     private Metrics activeMetrics = new Metrics();
-    
+    private String regeneratorAssignment;
+    private int networkType;
+    private String survivalStrategy;
+
     public static class Metrics {
 
         public boolean BlockingProbability = true;
         public boolean BandwidthBlockingProbability = true;
-        public boolean SpectrumUtilization = true;
-        public boolean SpectrumSizeStatistics = true;
         public boolean ExternalFragmentation = true;
+        public boolean SpectrumUtilization = true;
         public boolean RelativeFragmentation = true;
+        public boolean SpectrumSizeStatistics = true;
         public boolean TransmittersReceiversRegeneratorsUtilization = true;
         public boolean EnergyConsumption = true;
         public boolean ModulationUtilization = true;
+        public boolean ConsumedEnergy = true;
     }
 
     /**
@@ -251,5 +251,24 @@ public class SimulationConfig {
 	public void setNetworkType(int networkType) {
 		this.networkType = networkType;
 	}
+
+	/**
+	 * Returns the survival strategy
+	 * 
+	 * @return the survivalStrategy
+	 */
+	public String getSurvivalStrategy() {
+		return survivalStrategy;
+	}
+
+	/**
+	 * Sets the survival strategy
+	 * 
+	 * @param survivalStrategy the survivalStrategy to set
+	 */
+	public void setSurvivalStrategy(String survivalStrategy) {
+		this.survivalStrategy = survivalStrategy;
+	}
+	
 	
 }

@@ -5,10 +5,10 @@ import java.util.List;
 import grmlsa.Route;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
-import network.Mesh;
+import network.ControlPlane;
 
 /**
- * This class implements the modulation selection algorithm by quality of transmission (QoT).
+ * This class implements the modulation selection algorithm by quality of transmission.
  * The spectrum allocation of each modulation is also checked.
  * Information such as modulation and selected spectrum, and quality of transmission, are stored in the circuit.
  * 
@@ -19,7 +19,7 @@ public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInt
 	private List<Modulation> avaliableModulations;
 
 	@Override
-	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, Mesh mesh) {
+	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
 		
 		// Modulation and spectrum selected
@@ -32,9 +32,10 @@ public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInt
 		
 		for (int m = 0; m < avaliableModulations.size(); m++) {
 			Modulation mod = avaliableModulations.get(m);
+			circuit.setModulation(mod);
 			int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			
-			if(spectrumAssignment.assignSpectrum(numberOfSlots, circuit)){
+			if(spectrumAssignment.assignSpectrum(numberOfSlots, circuit, cp)){
 				int band[] = circuit.getSpectrumAssigned();
 				
 				if(alternativeMod == null){
@@ -42,7 +43,7 @@ public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInt
 					alternativeBand = band;
 				}
 				
-				if(mesh.getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){
+				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){
 					chosenMod = mod; // Save the modulation that has admissible QoT
 					chosenBand = band;
 					

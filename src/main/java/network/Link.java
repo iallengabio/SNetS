@@ -58,7 +58,7 @@ public class Link {
      *                           and the second to the last slot to be used
      * @return boolean
      */
-    public boolean useSpectrum(int interval[]) {
+    public boolean useSpectrum(int interval[]) throws Exception {
         return spectrum.useSpectrum(interval);
     }
 
@@ -67,7 +67,7 @@ public class Link {
      *
      * @param spectrumBand int[]
      */
-    public void liberateSpectrum(int spectrumBand[]) {
+    public void liberateSpectrum(int spectrumBand[]) throws Exception {
         spectrum.freeSpectrum(spectrumBand);
     }
 

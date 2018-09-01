@@ -1,42 +1,41 @@
 package grmlsa.integrated;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelectionByQoT;
-import grmlsa.modulation.ModulationSelector;
-import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
 import network.Link;
-import simulationControl.Util;
 import util.IntersectionFreeSpectrum;
 
 /**
- * Based on the article:
+ * Implementation based on the K Shortest Paths Reduction QoTO (KSP-RQoTO) algorithm presented in:
  *  - An Efficient IA-RMLSA Algorithm for Transparent Elastic Optical Networks (2017)
  *  
- * This version does not pre-establish the circuit under analysis to verify the impact on other 
+ * This version pre-establish the circuit under analysis to verify the impact on other 
  * circuits already active in the network
+ * 
+ * KSP-RQoTO algorithm uses the sigma parameter to choose modulation format.
+ * The value of sigma must be entered in the configuration file "others" as shown below.
+ * {"variables":{
+ *               "sigma":"0.5"
+ *               }
+ * }
  * 
  * @author Alexandre
  */
-public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInterface {
-
+public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInterface {
+	
+    private static int k = 4; // Number of candidate routes
 	private NewKShortestPaths kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -45,21 +44,25 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
     private double sigma;
     
     // A sigma value for each pair
-	private HashMap<String, Double> sigmaForAllPairs;
+	private HashMap<String, HashMap<Route, Double>> sigmaForAllPairs;
+	
+	// Used as a separator between the names of nodes
+    private static final String DIV = "-";
     
 	@Override
 	public boolean rsa(Circuit circuit, ControlPlane cp) {
-		
 		if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), 4);
+        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
         }
-        if (modulationSelection == null){
-        	modulationSelection = new ModulationSelectionByQoT();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(cp.getMesh()));
+		if (modulationSelection == null){
+        	modulationSelection = cp.getModulationSelection(); // Uses the modulation selection algorithm defined in the simulation file
+        	
+        	//read the sigma value
+			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
+			sigma = Double.parseDouble((String)uv.get("sigma"));
         }
         if(spectrumAssignment == null){
-			spectrumAssignment = new FirstFit();
-			sigmaFileReader();
+			spectrumAssignment = cp.getSpectrumAssignment(); // Uses the spectrum assignment algorithm defined in the simulation file
 		}
 
         List<Modulation> avaliableModulations = modulationSelection.getAvaliableModulations();
@@ -69,12 +72,10 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
         int chosenBand[] = {999999, 999999}; // Value never reached
         
         double chosenWorstDeltaSNR = 0.0;
-		
+        String pair = circuit.getPair().getSource().getName() + DIV + circuit.getPair().getDestination().getName();
 		double sigmaPair = sigma;
-		if(sigmaForAllPairs != null){
-			String pair = circuit.getPair().getSource().getName() + "-" + circuit.getPair().getDestination().getName();
-			sigmaPair = sigmaForAllPairs.get(pair);
-		}
+		
+		HashMap<Modulation, Double> routeModWorstDeltaSNR = new HashMap<Modulation, Double>();
 		
 		// To avoid metrics error
 		Route checkRoute = null;
@@ -85,34 +86,90 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 			Route routeTemp = candidateRoutes.get(r);
 			circuit.setRoute(routeTemp);
 			
+			if(sigmaForAllPairs != null){
+				sigmaPair = sigmaForAllPairs.get(pair).get(routeTemp);
+			}
+			
 	    	double highestLevel = 0.0;
 	    	Modulation firstModulation = null; // First modulation format option
 	    	Modulation secondModulation = null; // Second modulation format option
 	    	
 			for(int m = 0; m < avaliableModulations.size(); m++){
 				Modulation mod = avaliableModulations.get(m);
+				circuit.setModulation(mod);
 				
 				int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp);
-				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit);
+				
+				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
+				circuit.setSpectrumAssigned(band);
 				
 				if(band != null){
-					checkRoute = routeTemp;
-					checkMod = mod;
-					checkBand = band;
+					if(checkRoute == null){
+						checkRoute = routeTemp;
+						checkMod = mod;
+						checkBand = band;
+					}
 					
 					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band);
 					
 					if(circuitQoT){
-						double modulationSNRthreshold = mod.getSNRthreshold();
-						double circuitDeltaSNR = circuit.getSNR() - modulationSNRthreshold;
-						
-						if(circuitDeltaSNR >= sigmaPair){ // Tries to choose the modulation format that respects the sigma value
-							firstModulation = mod;
+						//pre establishes the circuit, to check the impact on other already active circuits
+						try {
+							cp.allocateCircuit(circuit);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						if(mod.getBitsPerSymbol() > highestLevel){ // Save the modulation format with the highest level as the second choice option
-							secondModulation = mod;
-							highestLevel = mod.getBitsPerSymbol();
+						
+						double circuitDeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
+						
+						List<Circuit> circuits = new ArrayList<Circuit>();
+						for (Link link : routeTemp.getLinkList()) {
+							TreeSet<Circuit> circuitsAux = link.getCircuitList();
+							
+							for(Circuit circuitTemp : circuitsAux){
+								if(!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)){
+									circuits.add(circuitTemp);
+								}
+							}
+						}
+						
+						boolean othersQoT = true;
+						double worstDeltaSNR = Double.MAX_VALUE;
+						
+						for(int i = 0; i < circuits.size(); i++){
+							Circuit circuitTemp = circuits.get(i);
+							
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp);
+							double deltaSNR = circuitTemp.getSNR() - circuitTemp.getModulation().getSNRthreshold();
+							
+							if(deltaSNR < worstDeltaSNR){
+								worstDeltaSNR = deltaSNR;
+							}
+							
+							if(!QoT){ //request with unacceptable QoT, has the worst deltaSNR
+								othersQoT = false;
+								break;
+							}
+						}
+						
+						routeModWorstDeltaSNR.put(mod, worstDeltaSNR);
+						
+						if(othersQoT){ // if you have not made QoT inadmissible from any of the other already active circuits
+							if(circuitDeltaSNR >= sigmaPair){ // Tries to choose the modulation format that respects the sigma value
+								firstModulation = mod;
+							}
+							if(mod.getBitsPerSymbol() > highestLevel){ // Save the modulation format with the highest level as the second choice option
+								secondModulation = mod;
+								highestLevel = mod.getBitsPerSymbol();
+							}
+						}
+						
+						//releases the resources used by the circuit
+						try {
+							cp.releaseCircuit(circuit);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 				}
@@ -125,29 +182,10 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 			if(firstModulation != null){
 				int numberOfSlots = firstModulation.requiredSlots(circuit.getRequiredBandwidth());
 				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp);
-				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit);
+				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
 				
 				if(band != null){
-					List<Circuit> circuits = new ArrayList<Circuit>();
-					for (Link link : routeTemp.getLinkList()) {
-						TreeSet<Circuit> circuitsAux = link.getCircuitList();
-						
-						for(Circuit circuitTemp : circuitsAux){
-							if(!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)){
-								circuits.add(circuitTemp);
-							}
-						}
-					}
-					
-					double worstDeltaSNR = Double.MAX_VALUE;
-					for(int i = 0; i < circuits.size(); i++){
-						Circuit circuitTemp = circuits.get(i);
-						
-						double deltaSNR = cp.getDeltaSNR(circuitTemp);
-						if(deltaSNR < worstDeltaSNR){
-							worstDeltaSNR = deltaSNR;
-						}
-					}
+					double worstDeltaSNR = routeModWorstDeltaSNR.get(firstModulation);
 					
 					if((band[0] < chosenBand[0]) && (worstDeltaSNR >= chosenWorstDeltaSNR)){
 						chosenBand = band;
@@ -163,6 +201,7 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 			circuit.setRoute(chosenRoute);
 			circuit.setModulation(chosenMod);
 			circuit.setSpectrumAssigned(chosenBand);
+			
 			return true;
 			
 		}else{
@@ -173,101 +212,17 @@ public class KShortestPathsReductionQoTO implements IntegratedRMLSAAlgorithmInte
 			circuit.setRoute(checkRoute);
 			circuit.setModulation(checkMod);
 			circuit.setSpectrumAssigned(checkBand);
+			
 			return false;
-		}
-		
-	}
-
-	public void sigmaFileReader(){
-		sigma = 0.0;
-		
-		String separador = System.getProperty("file.separator");
-		String sigmaPathArqConfiguration = Util.projectPath + separador + "sigma.txt";
-		String sigmaForAllPairspathArqConfiguration = Util.projectPath + separador + "sigmaForAllPairs.txt";
-		
-		if(!Paths.get(sigmaForAllPairspathArqConfiguration).toFile().exists()){
-			System.err.println("\tArquivo com o valor do sigma para os pares nao encontrado. A simulacao vai utilizar um valor de sigma para todos os pares.");
-			
-		}else{
-			
-			sigmaForAllPairs = new HashMap<String, Double>();
-			
-			try {
-				FileReader fr = new FileReader(sigmaForAllPairspathArqConfiguration);
-				BufferedReader in = new BufferedReader(fr);
-				
-				while(in.ready()){
-					String linha[] = in.readLine().split(";");
-					
-					String pair = linha[0];
-					double sigmaPair = Double.valueOf(linha[1]);
-					
-					sigmaForAllPairs.put(pair, sigmaPair);
-				}
-				
-				in.close();
-			    fr.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		if(!Paths.get(sigmaPathArqConfiguration).toFile().exists()){
-			System.err.println("\tArquivo com o valor do sigma nao encontrado. A simulacao vai utilizar um valor padrao.");
-			
-		}else{
-			
-			try {
-				FileReader fr = new FileReader(sigmaPathArqConfiguration);
-				BufferedReader in = new BufferedReader(fr);
-				
-				String linha = in.readLine();
-				sigma = Double.valueOf(linha);
-				
-				in.close();
-			    fr.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	
-	public static void createFileSigmaAllPairs(int numberOfNodes, String pathFile, double sigmaAllPairs[]) {
-		int cont = 0;
-		
-		try {
-			FileWriter fw = new FileWriter(pathFile);
-			BufferedWriter out = new BufferedWriter(fw);
-			
-			StringBuilder sbaux = new StringBuilder();
-			for(int i = 1; i <= numberOfNodes; i++){
-				StringBuilder sb = new StringBuilder();
-				
-				for(int j = 1; j <= numberOfNodes; j++){
-					if(i != j){
-						
-						sb.append(i + "-" + j + ";" +  String.valueOf(sigmaAllPairs[cont]) + "\n");
-						cont++;
-					}
-				}
-				out.append(sb.toString());
-				sbaux.append(sb.toString());
-			}
-			//System.out.println(sbaux.toString());
-			
-			out.close();
-			fw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+	/**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+    public KRoutingAlgorithmInterface getRoutingAlgorithm(){
+    	return kShortestsPaths;
+    }
 }

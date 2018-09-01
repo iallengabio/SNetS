@@ -100,4 +100,12 @@ public class FixedRoutes implements RoutingAlgorithmInterface {
         }
     }
 
+    /**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return Vector<Route>
+	 */
+    public HashMap<String, Route> getRoutesForAllPairs() {
+		return routesForAllPairs;
+	}
 }

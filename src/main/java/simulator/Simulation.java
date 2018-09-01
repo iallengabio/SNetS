@@ -4,6 +4,7 @@ import grmlsa.GRMLSA;
 import measurement.Measurements;
 import network.ControlPlane;
 import network.Mesh;
+import network.SurvivalControlPlane;
 import network.TranslucentControlPlane;
 import simulationControl.parsers.SimulationConfig;
 
@@ -44,7 +45,10 @@ public class Simulation implements Serializable {
         	controlPlane = new ControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateModulationSelection());	
         
         }else if(sc.getNetworkType() == GRMLSA.TRANSLUCENT){
-        	controlPlane = new TranslucentControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateRegeneratorAssignment(), grmlsa.instantiateModulationSelection());
+        	controlPlane = new TranslucentControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateModulationSelection(), grmlsa.instantiateRegeneratorAssignment());
+        	
+        }else if(sc.getNetworkType() == GRMLSA.SURVIVAL){
+        	controlPlane = new SurvivalControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateModulationSelection(), grmlsa.instantiateSurvivalStrategy());
         }
     }
 

@@ -33,7 +33,7 @@ public class DJK implements RoutingAlgorithmInterface {
     public boolean findRoute(Circuit circuit, Mesh mesh) {
         if (routesForAllPairs == null) {
         	computeAllRoutes(mesh);
-        	salveRoutesByPar(mesh.getNodeList());
+        	//salveRoutesByPar(mesh.getNodeList());
         }
 
         Node source = circuit.getSource();
@@ -129,6 +129,15 @@ public class DJK implements RoutingAlgorithmInterface {
 
         return res;
     }
+    
+    /**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return Vector<Route>
+	 */
+	public HashMap<String, Route> getRoutesForAllPairs() {
+		return routesForAllPairs;
+	}
     
     /**
      * This method saves in files the routes for all the pairs.

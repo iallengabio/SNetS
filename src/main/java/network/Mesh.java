@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Vector;
 
 import simulationControl.parsers.NetworkConfig;
+import simulationControl.parsers.OthersConfig;
 import simulationControl.parsers.PhysicalLayerConfig;
 import simulationControl.parsers.TrafficConfig;
 import util.RandGenerator;
@@ -22,6 +23,12 @@ public class Mesh {
     private Vector<Pair> pairList;
     private int guarBand;
     private PhysicalLayer physicalLayer;
+    private OthersConfig othersConfig;
+
+    private double totalPowerConsumption;
+    private double totalPowerConsumptionTransponders;
+    private double totalPowerConsumptionOXCs;
+    private double totalPowerConsumptionAmplifiers;
 
     /**
      * Creates a new instance of Mesh.
@@ -29,8 +36,9 @@ public class Mesh {
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) {
         this.guarBand = nc.getGuardBand();
+        this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
         HashMap<String, Node> nodesAux = new HashMap<>();
         
@@ -180,5 +188,63 @@ public class Mesh {
      */
     public PhysicalLayer getPhysicalLayer(){
     	return physicalLayer;
+    }
+    
+    /**
+     * Returns the others configuration
+     * 
+     * @return
+     */
+    public OthersConfig getOthersConfig() {
+        return othersConfig;
+    }
+    
+    /**
+     * Returns the total power consumption
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumption() {
+        return totalPowerConsumption;
+    }
+    
+    /**
+     * Returns the total power consumption by transponders
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumptionTransponders() {
+        return totalPowerConsumptionTransponders;
+    }
+    
+    /**
+     * Returns the total power consumption by OXCs
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumptionOXCs() {
+        return totalPowerConsumptionOXCs;
+    }
+    
+    /**
+     * Returns the total power consumption by amplifiers
+     * 
+     * @return
+     */
+    public double getTotalPowerConsumptionAmplifiers() {
+        return totalPowerConsumptionAmplifiers;
+    }
+    
+    /**
+     * Computes the total power consumption
+     * 
+     * @param cp ControlPlane
+     */
+    public void computesPowerConsmption(ControlPlane cp){
+    	totalPowerConsumptionTransponders = EnergyConsumption.computeTranspondersPowerConsumption(cp);
+    	totalPowerConsumptionOXCs = EnergyConsumption.computeOxcsPowerConsumption(nodeList);
+    	totalPowerConsumptionAmplifiers = EnergyConsumption.computeLinksPowerConsumption(linkList, cp);
+    	
+    	totalPowerConsumption = totalPowerConsumptionTransponders + totalPowerConsumptionOXCs + totalPowerConsumptionAmplifiers;
     }
 }

@@ -14,7 +14,7 @@ public class PhysicalLayerConfig {
 	
 	private boolean activeASE; // Active the ASE noise of the amplifier
 	private boolean activeNLI; //  Active nonlinear noise in the fibers
-	private double rateOfFEC; // FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
+	private double rateOfFEC; // Rate of FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
 	private int typeOfTestQoT; // 0, To check for the SNR threshold (Signal-to-Noise Ratio), or another value, to check for the BER threshold (Bit Error Rate)
 	
 	private double power; // Power per channel, dBm
@@ -29,7 +29,12 @@ public class PhysicalLayerConfig {
 	private double powerSaturationOfOpticalAmplifier; //pSat, Saturation power of the amplifier, dBm
 	private double noiseFactorModelParameterA1; // A1, Amplifier noise factor parameter
 	private double noiseFactorModelParameterA2; // A2, Amplifier noise factor parameter
-	private double opticalNoiseBandwidth; // B0, Optical bandwidth, it has a value of 1 because we are considering SNR
+	private int typeOfAmplifierGain; // Type of amplifier gain, 0 to fixed gain and 1 to saturated gain
+	
+	private double switchInsertionLoss; // dB
+	
+	private boolean fixedPowerSpectralDensity; // To enable or disable fixed power spectral density
+	private double referenceBandwidthForPowerSpectralDensity; // Reference bandwidth for power spectral density
 	
 	/**
 	 * @return the activeQoT
@@ -238,16 +243,52 @@ public class PhysicalLayerConfig {
 		this.noiseFactorModelParameterA2 = noiseFactorModelParameterA2;
 	}
 	/**
-	 * @return the opticalNoiseBandwidth
+	 * @return the typeOfAmplifierGain
 	 */
-	public double getOpticalNoiseBandwidth() {
-		return opticalNoiseBandwidth;
+	public int getTypeOfAmplifierGain() {
+		return typeOfAmplifierGain;
 	}
 	/**
-	 * @param opticalNoiseBandwidth the opticalNoiseBandwidth to set
+	 * @param typeOfAmplifierGain the typeOfAmplifierGain to set
 	 */
-	public void setOpticalNoiseBandwidth(double opticalNoiseBandwidth) {
-		this.opticalNoiseBandwidth = opticalNoiseBandwidth;
+	public void setTypeOfAmplifierGain(int typeOfAmplifierGain) {
+		this.typeOfAmplifierGain = typeOfAmplifierGain;
+	}
+	/**
+	 * @return the switchInsertionLoss
+	 */
+	public double getSwitchInsertionLoss() {
+		return switchInsertionLoss;
+	}
+	/**
+	 * @param switchInsertionLoss the switchInsertionLoss to set
+	 */
+	public void setSwitchInsertionLoss(double switchInsertionLoss) {
+		this.switchInsertionLoss = switchInsertionLoss;
+	}
+	/**
+	 * @return the fixedPowerSpectralDensity
+	 */
+	public boolean isFixedPowerSpectralDensity() {
+		return fixedPowerSpectralDensity;
+	}
+	/**
+	 * @param fixedPowerSpectralDensity the fixedPowerSpectralDensity to set
+	 */
+	public void setFixedPowerSpectralDensity(boolean fixedPowerSpectralDensity) {
+		this.fixedPowerSpectralDensity = fixedPowerSpectralDensity;
+	}
+	/**
+	 * @return the referenceBandwidthForPowerSpectralDensity
+	 */
+	public double getReferenceBandwidthForPowerSpectralDensity() {
+		return referenceBandwidthForPowerSpectralDensity;
+	}
+	/**
+	 * @param referenceBandwidthForPowerSpectralDensity the referenceBandwidthForPowerSpectralDensity to set
+	 */
+	public void setReferenceBandwidthForPowerSpectralDensity(double referenceBandwidthForPowerSpectralDensity) {
+		this.referenceBandwidthForPowerSpectralDensity = referenceBandwidthForPowerSpectralDensity;
 	}
 	
 }

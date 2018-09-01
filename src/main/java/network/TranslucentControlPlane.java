@@ -35,9 +35,10 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
 	 * @param routingAlgorithm RoutingAlgorithmInterface
 	 * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
+	 * @param ModulationSelectionAlgorithmInterface modulationSelection
 	 * @param regeneratorAssignment regeneratorAssignment
 	 */
-	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, RegeneratorAssignmentAlgorithmInterface regeneratorAssignment, ModulationSelectionAlgorithmInterface modulationSelection) {
+	public TranslucentControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection, RegeneratorAssignmentAlgorithmInterface regeneratorAssignment) {
 		super(mesh, rmlsaType, trafficGroomingAlgorithm, integratedRMLSAAlgorithm, routingAlgorithm, spectrumAssignmentAlgorithm, modulationSelection);
 
 		this.regeneratorAssignment = regeneratorAssignment;
@@ -54,12 +55,52 @@ public class TranslucentControlPlane extends ControlPlane {
     	Circuit circuit = new TranslucentCircuit();
 		circuit.setPair(rfc.getPair());
 		circuit.addRequest(rfc);
-		rfc.setCircuit(circuit);
+		ArrayList<Circuit> circs = new ArrayList<>();
+		circs.add(circuit);
+		rfc.setCircuit(circs);
 		
 		return circuit;
     }
     
     /**
+     * This method creates a new translucent circuit.
+     * 
+     * @param rfc RequestForConnection
+     * @param p Pair
+     * @return Circuit
+     */
+    public Circuit createNewCircuit(RequestForConnection rfc, Pair p) {
+    	
+        Circuit circuit = new TranslucentCircuit();
+        circuit.setPair(p);
+        circuit.addRequest(rfc);
+        if (rfc.getCircuits() == null) {
+            rfc.setCircuit(new ArrayList<>());
+        }
+        rfc.getCircuits().add(circuit);
+        
+        return circuit;
+    }
+    
+    /**
+     * Returns the regenerator assignment algorithm
+     * 
+	 * @return the regeneratorAssignment
+	 */
+	public RegeneratorAssignmentAlgorithmInterface getRegeneratorAssignment() {
+		return regeneratorAssignment;
+	}
+
+	/**
+	 * Sets the regenerator assignment algorithm
+	 * 
+	 * @param regeneratorAssignment the regeneratorAssignment to set
+	 */
+	public void setRegeneratorAssignment(RegeneratorAssignmentAlgorithmInterface regeneratorAssignment) {
+		this.regeneratorAssignment = regeneratorAssignment;
+	}
+
+	/**
      * Method that allocate the regenerators used by a circuit
      * 
      * @param circuit TranslucentCircuit
@@ -109,7 +150,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
 	@Override
-	protected boolean computeQualityOfTransmission(Circuit circuit){
+	public boolean computeQualityOfTransmission(Circuit circuit){
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
@@ -158,7 +199,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit Circuit
      */
 	@Override
-    protected void allocateCircuit(Circuit circuit) {
+    public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         
@@ -178,10 +219,9 @@ public class TranslucentControlPlane extends ControlPlane {
      * This method allocates the spectrum band selected for the circuit in the route links
      * 
      * @param circuit Circuit
-     * @param chosen int[]
      * @param links List<Link>
      */
-	protected void allocateSpectrum(Circuit circuit, List<Link> links) {
+	protected void allocateSpectrum(Circuit circuit, List<Link> links) throws Exception {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             int[] band = circuit.getSpectrumAssignedByLink(link);
@@ -196,7 +236,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit
      */
 	@Override
-    public void releaseCircuit(Circuit circuit) {
+    public void releaseCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
 
         releaseSpectrum(circuit, route.getLinkList());
@@ -217,7 +257,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @param circuit Circuit
      * @param links List<Link>
      */
-	protected void releaseSpectrum(Circuit circuit, List<Link> links) {
+	protected void releaseSpectrum(Circuit circuit, List<Link> links) throws Exception {
     	for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             int band[] = circuit.getSpectrumAssignedByLink(link);
@@ -270,16 +310,13 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * 
 	 * @param circuit - Circuit
 	 * @param route - Route
-	 * @param spectrumAssignment - SpectrumAssignmentAlgorithmInterface
-	 * @param modulationSelector - ModulationSelector
 	 * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
 	 */
 	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route){
-		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, mesh);
+		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, this);
+		circuit.setModulation(mod);
 		
 		if(mod != null){
-			circuit.setModulation(mod);
-			
 			HashMap<Link, Modulation> modulationByLink = new HashMap<Link, Modulation>();
 			Vector<Link> linkList = route.getLinkList();
 			for(int l = 0; l < linkList.size(); l++){
@@ -287,7 +324,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			}
 			circuit.setModulationByLink(modulationByLink);
 			
-			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit)){
+			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit, this)){
 				int sa[] = circuit.getSpectrumAssigned();
 				
 				HashMap<Link, int[]> spectrumAssignedByLink = new HashMap<Link, int[]>();
@@ -413,7 +450,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = avaliableModulations.get(i);
 			int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			
-			int band[] = spectrumAssignment.policy(numberOfSlots, composition, circuit);
+			int band[] = spectrumAssignment.policy(numberOfSlots, composition, circuit, this);
 			if(band != null){
 				if(alternativeMod == null){
 					alternativeMod = mod; // The first modulation that was able to allocate spectrum
@@ -477,7 +514,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = circuit.getModulationByLink(link);
 			int sa[] = circuit.getSpectrumAssignedByLink(link);
 			
-			double PCsegment = EnergyConsumption.computePowerConsumptionBySegment(this, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, mod, sa);
+			double PCsegment = EnergyConsumption.computePowerConsumptionBySegment(this, circuit, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, mod, sa);
 			PCtotal += PCsegment;
 			
 			sourceNodeIndex = destinationNodeIndex;
@@ -491,46 +528,49 @@ public class TranslucentControlPlane extends ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by QoTN
 	 * Returns true if the blocking was by QoTN and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	@Override
-	public boolean isBlockingByQoTN(Circuit circuit){
+	public boolean isBlockingByQoTN(List<Circuit> circuits){
 		// Check if it is to test the QoT
-		if(mesh.getPhysicalLayer().isActiveQoT()){
-			
-			if(circuit.getRoute() == null) return false;
-			
-			Route route = circuit.getRoute();
-			int sourceNodeIndex = 0;
-			int mumberTransparentSegments = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
-			
-			// Verifies by transparent segment if they have modulation and spectrum selected
-			for(int i = 0; i < mumberTransparentSegments; i++){
-				
-				int destinationNodeIndex = route.getNodeList().size() - 1;
-				if(i < mumberTransparentSegments - 1){
-					destinationNodeIndex = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
+		for(Circuit circuit : circuits) {
+			if (mesh.getPhysicalLayer().isActiveQoT()) {
+
+				if (circuit.getRoute() == null) return false;
+
+				Route route = circuit.getRoute();
+				int sourceNodeIndex = 0;
+				int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
+
+				// Verifies by transparent segment if they have modulation and spectrum selected
+				for (int i = 0; i < mumberTransparentSegments; i++) {
+
+					int destinationNodeIndex = route.getNodeList().size() - 1;
+					if (i < mumberTransparentSegments - 1) {
+						destinationNodeIndex = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().get(i);
+					}
+
+					Node noSource = route.getNode(sourceNodeIndex);
+					Node noDestination = route.getNode(sourceNodeIndex + 1);
+					Link link = noSource.getOxc().linkTo(noDestination.getOxc());
+
+					Modulation mod = circuit.getModulationByLink(link);
+					int sa[] = circuit.getSpectrumAssignedByLink(link);
+
+					// If it does not have modulation or spectrum by segment the blockade is not by QoT
+					if (mod == null || sa == null) {
+						return false;
+					}
+
+					sourceNodeIndex = destinationNodeIndex;
 				}
-				
-				Node noSource = route.getNode(sourceNodeIndex);
-				Node noDestination = route.getNode(sourceNodeIndex + 1);
-				Link link = noSource.getOxc().linkTo(noDestination.getOxc());
-				
-				Modulation mod = circuit.getModulationByLink(link);
-				int sa[] = circuit.getSpectrumAssignedByLink(link);
-				
-				// If it does not have modulation or spectrum by segment the blockade is not by QoT
-				if(mod == null || sa == null){
-					return false;
+
+				// Now you can check the QoT by transparent segment
+				if(!computeQualityOfTransmission(circuit)){
+					return true;
 				}
-				
-				sourceNodeIndex = destinationNodeIndex;
 			}
-			
-			// Now you can check the QoT by transparent segment
-			return !computeQualityOfTransmission(circuit);
 		}
 		
 		return false;
@@ -539,54 +579,55 @@ public class TranslucentControlPlane extends ControlPlane {
 	/**
 	 * This method checks whether the circuit blocking was by fragmentation
 	 * Returns true if the blocking was by fragmentation and false otherwise
-	 * 
-	 * @param circuit Circuit
+	 *
 	 * @return boolean
 	 */
 	@Override
-	public boolean isBlockingByFragmentation(Circuit circuit){
-		if (circuit.getRoute() == null) return false;
-        
-		Route route = circuit.getRoute();
-		int sourceNodeIndex = 0;
-		int mumberTransparentSegments = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
-		
-		for(int i = 0; i < mumberTransparentSegments; i++){
-			
-			int destinationNodeIndex = route.getNodeList().size() - 1;
-			if(i < mumberTransparentSegments - 1){
-				destinationNodeIndex = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
+	public boolean isBlockingByFragmentation(List<Circuit> circuits){
+		for(Circuit circuit : circuits) {
+			if (circuit.getRoute() == null) return false;
+
+			Route route = circuit.getRoute();
+			int sourceNodeIndex = 0;
+			int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
+
+			for (int i = 0; i < mumberTransparentSegments; i++) {
+
+				int destinationNodeIndex = route.getNodeList().size() - 1;
+				if (i < mumberTransparentSegments - 1) {
+					destinationNodeIndex = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().get(i);
+				}
+
+				Node sourceNode = route.getNode(sourceNodeIndex);
+				Node destinationNode = route.getNode(sourceNodeIndex + 1);
+				Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+
+				List<int[]> merge = link.getFreeSpectrumBands();
+				for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
+					sourceNode = route.getNode(n);
+					destinationNode = route.getNode(n + 1);
+					link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+
+					merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
+				}
+
+				int totalFree = 0;
+				for (int[] band : merge) {
+					totalFree += (band[1] - band[0] + 1);
+				}
+
+				Modulation mod = circuit.getModulationByLink(link);
+				if (mod == null) {
+					mod = modulationSelection.getAvaliableModulations().get(0);
+				}
+
+				int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+				if (totalFree > numSlotsRequired) {
+					return true;
+				}
+
+				sourceNodeIndex = destinationNodeIndex;
 			}
-			
-			Node sourceNode = route.getNode(sourceNodeIndex);
-			Node destinationNode = route.getNode(sourceNodeIndex + 1);
-			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-			
-			List<int[]> merge = link.getFreeSpectrumBands();
-	        for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
-	            sourceNode = route.getNode(n);
-	            destinationNode = route.getNode(n + 1);
-	            link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-	        	
-	        	merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
-	        }
-			
-			int totalFree = 0;
-	        for (int[] band : merge) {
-	            totalFree += (band[1] - band[0] + 1);
-	        }
-	        
-	        Modulation mod = circuit.getModulationByLink(link);
-			if(mod == null){
-				mod = modulationSelection.getAvaliableModulations().get(0);
-			}
-	        
-	        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
-	        if(totalFree > numSlotsRequired){
-	        	return true;
-	        }
-			
-			sourceNodeIndex = destinationNodeIndex;
 		}
 
         return false;
@@ -601,7 +642,7 @@ public class TranslucentControlPlane extends ControlPlane {
 	@Override
 	public List<Modulation> getModulationsUsedByCircuit(Circuit circuit){
 		List<Modulation> modList = new ArrayList<>();
-		
+
 		HashMap<Link, Modulation> modLink = ((TranslucentCircuit)circuit).getModulationByLink();
 		for(Link link : modLink.keySet()){
 			modList.add(((TranslucentCircuit)circuit).getModulationByLink(link));
@@ -609,47 +650,4 @@ public class TranslucentControlPlane extends ControlPlane {
 		
 		return modList;
 	}
-	
-	/**
-	 * Este metodo retorna o delta SNR da requisicao
-	 * Pode mudar de acordo com o tipo de requisicao
-	 * @return double - delta SNR
-	 */
-	@Override
-	public double getDeltaSNR(Circuit circuit){
-		int indexNodeSource = 0;
-		double minDeltaSNR = Double.MAX_VALUE;
-		Route route = circuit.getRoute();
-		
-		int quantSegmentos = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().size() + 1;
-		for(int i = 0; i < quantSegmentos; i++){
-			
-			int indexNoDestino = route.getNodeList().size() - 1;
-			if(i < quantSegmentos - 1){
-				indexNoDestino = ((TranslucentCircuit)circuit).getRegeneratorsNodesIndexList().get(i);
-			}
-			
-			Node noSource = route.getNode(indexNodeSource);
-			Node noDestination = route.getNode(indexNodeSource + 1);
-			Link link = noSource.getOxc().linkTo(noDestination.getOxc());
-			
-			Modulation mod = ((TranslucentCircuit)circuit).getModulationByLink(link);
-			int sa[] = ((TranslucentCircuit)circuit).getSpectrumAssignedByLink(link);
-			
-			double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, indexNodeSource, indexNoDestino, mod, sa, false);
-			double SNRdB = PhysicalLayer.ratioForDB(SNR);
-			
-			double modulationSNRthreshold = mod.getSNRthreshold();
-			double deltaSNR = SNRdB - modulationSNRthreshold;
-			
-			if(deltaSNR < minDeltaSNR){
-				minDeltaSNR = deltaSNR;
-			}
-			
-			indexNodeSource = indexNoDestino;
-		}
-		
-		return minDeltaSNR;
-	}
-	
 }

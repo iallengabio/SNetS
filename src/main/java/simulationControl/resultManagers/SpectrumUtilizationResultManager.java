@@ -49,7 +49,7 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 		config(llms);
 		
 		StringBuilder res = new StringBuilder();
-		res.append("Metrics" + sep + "load point" + sep + "link" + sep + "number of slots" + sep + "slot" + sep + " ");
+		res.append("Metrics" + sep + "LoadPoint" + sep + "Link" + sep + "Number of slots" + sep + "Slot" + sep + " ");
 		
 		for (Integer rep : replications) { // Checks how many replications have been made and creates the header of each column
 			res.append(sep + "rep" + rep);
@@ -74,7 +74,7 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 	private String resultUtilizationGeneral(){
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
-			String aux = "Utilization " + sep + loadPoint + sep + "all" + sep + " - " + sep + " - " + sep + " "; // "all"+sep+" ";
+			String aux = "Utilization" + sep + loadPoint + sep + "all" + sep + " - " + sep + " - " + sep + " "; // "all"+sep+" ";
 			for (Integer replic : replications) {
 					aux = aux + sep + sus.get(loadPoint).get(replic).getUtilizationGen();
 			}

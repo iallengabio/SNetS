@@ -1,7 +1,9 @@
 package grmlsa.integrated;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
+
 
 /**
  * This interface should be implemented by algorithms that solve the RMLSA problem in an integrated way.
@@ -20,4 +22,10 @@ public interface IntegratedRMLSAAlgorithmInterface {
 	 */
 	public boolean rsa(Circuit circuit, ControlPlane cp);
 
+	/**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+	public KRoutingAlgorithmInterface getRoutingAlgorithm();
 }

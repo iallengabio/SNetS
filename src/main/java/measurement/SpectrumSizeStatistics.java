@@ -54,20 +54,22 @@ public class SpectrumSizeStatistics extends Measurement{
      * @param request RequestForConnection
 	 */
 	public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
-		if(request.getCircuit().getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
-			return;
-		this.newObservationRequestSizeBandwidthGeneral(request.getCircuit());	
-		this.newObservationRequestSizeBandwidthPerLink(request.getCircuit());
+		for(Circuit circuit :  request.getCircuits()) {
+			if (circuit.getModulation() == null) // This metric may not be reliable if there are locks due to lack of transmitter
+				return;
+			this.newObservationRequestSizeBandwidthGeneral(circuit);
+			this.newObservationRequestSizeBandwidthPerLink(circuit);
+		}
 	}
 	
 	/**
 	 * Observation of the Requisition metric according to the size of the band requested in general
 	 * 
-	 * @param request
+	 * @param circuit
 	 */
-	private void newObservationRequestSizeBandwidthGeneral(Circuit request){
+	private void newObservationRequestSizeBandwidthGeneral(Circuit circuit){
 		numberRequests++;			
-		int qSlots = request.getModulation().requiredSlots(request.getRequiredBandwidth());			
+		int qSlots = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth());			
 		Integer aux = this.numberReqPerSlotReq.get(qSlots);			
 		if(aux==null){
 			aux = 0;
@@ -79,11 +81,11 @@ public class SpectrumSizeStatistics extends Measurement{
 	/** 
 	 * Observation of the Requisition metric according to the size of the band requested per link
 	 * 
-	 * @param request
+	 * @param circuit
 	 */
-	private void newObservationRequestSizeBandwidthPerLink(Circuit request){
-		for (Link link : request.getRoute().getLinkList()) {
-			newObsReqSizeBandPerLink(link, request);
+	private void newObservationRequestSizeBandwidthPerLink(Circuit circuit){
+		for (Link link : circuit.getRoute().getLinkList()) {
+			newObsReqSizeBandPerLink(link, circuit);
 		}	
 	}
 	
@@ -91,9 +93,9 @@ public class SpectrumSizeStatistics extends Measurement{
 	 * Observation of the Requisition metric according to the size of the band requested per link
 	 * 
 	 * @param link
-	 * @param request
+	 * @param circuit
 	 */
-	private void newObsReqSizeBandPerLink(Link link, Circuit request){
+	private void newObsReqSizeBandPerLink(Link link, Circuit circuit){
 		String l = link.getSource().getName() + SEP + link.getDestination().getName();
 		
 		// Increase the number of requests generated
@@ -103,7 +105,7 @@ public class SpectrumSizeStatistics extends Measurement{
 		this.numberRequestsPerLink.put(l, aux);
 		
 		// Increase the number of requisitions generated with this requested range size
-		int qSlots = request.getModulation().requiredSlots(request.getRequiredBandwidth());
+		int qSlots = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth());
 		HashMap<Integer, Integer> hashAux = numberReqPerSlotReqPerLink.get(l);
 		if(hashAux==null){
 			hashAux = new HashMap<Integer, Integer>();

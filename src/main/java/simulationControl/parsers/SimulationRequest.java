@@ -11,6 +11,8 @@ public class SimulationRequest {
     private TrafficConfig trafficConfig;
     private SimulationConfig simulationConfig;
     private PhysicalLayerConfig physicalLayerConfig;
+    private OthersConfig othersConfig;
+
     private String status;
     private Double progress = 0.0;
     private Result result = new Result();
@@ -26,10 +28,11 @@ public class SimulationRequest {
         public String externalFragmentation;
         public String relativeFragmentation;
         public String spectrumUtilization;
-        public String spectrumStatistics;
         public String transceiversUtilization;
+        public String spectrumStatistics;
         public String energyConsumption;
         public String modulationUtilization;
+        public String consumedEnergy;
     }
 
     /**
@@ -158,4 +161,11 @@ public class SimulationRequest {
         this.progress = progress;
     }
 
+    public OthersConfig getOthersConfig() {
+        return othersConfig;
+    }
+
+    public void setOthersConfig(OthersConfig othersConfig) {
+        this.othersConfig = othersConfig;
+    }
 }

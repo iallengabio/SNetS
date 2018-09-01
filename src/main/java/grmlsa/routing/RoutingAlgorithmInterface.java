@@ -1,5 +1,8 @@
 package grmlsa.routing;
 
+import java.util.HashMap;
+
+import grmlsa.Route;
 import network.Circuit;
 import network.Mesh;
 
@@ -20,5 +23,12 @@ public interface RoutingAlgorithmInterface {
 	 * @return boolean
 	 */
 	public boolean findRoute(Circuit circuit, Mesh mesh);
+	
+	/**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return HashMap<String, Route>
+	 */
+	public HashMap<String, Route> getRoutesForAllPairs();
 
 }
