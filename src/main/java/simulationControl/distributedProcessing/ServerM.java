@@ -23,7 +23,7 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
     protected ServerM() throws RemoteException {
     }
 
-    public static void main(String[] args){
+    public static void runServerM(){
         try {
             java.rmi.registry.LocateRegistry.createRegistry(1099);
             // Creates an object of the HelloServer class.

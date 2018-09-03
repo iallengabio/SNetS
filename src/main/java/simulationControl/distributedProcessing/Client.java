@@ -22,11 +22,10 @@ import java.util.regex.Pattern;
 
 public class Client {
 
-    public static void main(String args[]){
+    public static void runClient(String serverMLocation, String path){
         try {
-            ServerMInterface server = (ServerMInterface) Naming.lookup("//127.0.0.1/ServerM");
+            ServerMInterface server = (ServerMInterface) Naming.lookup("//"+serverMLocation+"/ServerM");
 
-            String path = args[0];
             System.out.println("Reading files");
             SimulationRequest sr = Main.makeSR(path);
             Gson gson = new GsonBuilder().create();

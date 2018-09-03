@@ -1,9 +1,6 @@
 package simulationControl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.SocketImpl;
 import java.util.*;
 
@@ -17,6 +14,9 @@ import com.google.gson.GsonBuilder;
 import network.Mesh;
 import network.Pair;
 import network.RequestGenerator;
+import simulationControl.distributedProcessing.Client;
+import simulationControl.distributedProcessing.ServerM;
+import simulationControl.distributedProcessing.ServerS;
 import simulationControl.parsers.*;
 import simulator.Simulation;
 
@@ -35,11 +35,26 @@ public class Main {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        if (args.length > 0) {
-            localSimulation(args[0]);
-            
-        } else {// To run in Server mode
-            simulationServer();
+
+        if(args.length==0){
+            System.out.println("No option selected");
+        }else{
+            switch (args[0]){
+                case "-fs":
+                    simulationServer();
+                break;
+                case "-lm":
+                    ServerM.runServerM();
+                break;
+                case "-ls":
+                    ServerS.runServerS(args[1]);
+                break;
+                case "-lc":
+                    Client.runClient(args[1],args[2]);
+                break;
+                default:
+                    localSimulation(args[0]);
+            }
         }
     }
 

@@ -20,12 +20,33 @@ O SNetS é um simulador de redes ópticas elásticas voltado para a avaliação 
 
     $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar DIR
       
-Where `DIR` is the **absolute** path to directory holding simulation config
+Where `DIR` is the path to directory holding simulation config
 files.
 
-- Simulation Server
+- Firebase Simulation Server
 
 
-    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar
+    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar -fs
 
-In this way the program works as a simulation server.,
+In this way the program works as a simulation server.
+
+- LAN Simulation Server Master
+
+
+    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar -lm
+    
+In this way the program works as a LAN master simulation server. This server receives simulation requests from clients and distribute the simulation beteweem registered slave servers.
+
+- LAN Simulation Server Slave
+
+
+    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar -ls IPSM
+    
+Where `IPSM` is the location (IP) of the Simulation Server Master. In this way the program works as a LAN slave simulation server.
+   
+- LAN Client
+
+
+    $ java -jar target/snets-1.0-SNAPSHOT-jar-with-dependencies.jar -lc IPSM DIR
+ 
+ Where `IPSM` is the location (IP) of the Simulation Server Master and `DIR` is the path to directory holding simulation config files.
