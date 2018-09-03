@@ -60,6 +60,16 @@ consumedEnergy <- function(directory, replicacoes, alpha, legLoads, legSol){
   return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
 }
 
+consumedEnergyOld <- function(directory, replicacoes, alpha, legLoads, legSol){
+  arq="ConsumedEnergy.csv"
+  metric="Total consumed energy"
+  legX = "Load (Erlangs)"
+  legY = "Total energy consumption (Joule) Iallen"
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  df = auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol)
+  return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
+}
+
 consumedEnergyBVT <- function(directory, replicacoes, alpha, legLoads, legSol){
   arq="EnergyConsumption.csv"
   metric="Total energy consumption by transponders (Joule)"
