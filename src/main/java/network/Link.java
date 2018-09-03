@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -9,7 +10,7 @@ import java.util.TreeSet;
  * 
  * @author Iallen
  */
-public class Link {
+public class Link implements Serializable {
 
     private Oxc source;
     private Oxc destination;

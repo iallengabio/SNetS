@@ -6,13 +6,15 @@ import grmlsa.Route;
 import network.Circuit;
 import network.Mesh;
 
+import java.io.Serializable;
+
 
 /**
  * This interface represents a routing algorithm.
  * 
  * @author Iallen
  */
-public interface RoutingAlgorithmInterface {
+public interface RoutingAlgorithmInterface extends Serializable {
 	
 	/**
 	 * This method computes a route for a new circuit.

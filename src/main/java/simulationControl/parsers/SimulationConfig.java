@@ -1,5 +1,7 @@
 package simulationControl.parsers;
 
+import java.io.Serializable;
+
 /**
  * This class represents the Simulation configuration file, its representation in entity form is 
  * important for the storage and transmission of this type of configuration in the JSON format.
@@ -21,7 +23,7 @@ public class SimulationConfig {
     private String regeneratorAssignment;
     private int networkType;
 
-    public static class Metrics {
+    public static class Metrics implements Serializable {
 
         public boolean BlockingProbability = true;
         public boolean BandwidthBlockingProbability = true;

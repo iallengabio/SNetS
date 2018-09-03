@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 4;
+    private static final int NUMBER_OF_ACTIVE_THREADS = 1;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -50,6 +50,14 @@ public class SimulationManagement {
                 numOfSimulations++;
             }
         }
+    }
+
+    /**
+     * This constructor is used to reuse the methods that converts results into csv files.
+     * @param mainMeasuremens
+     */
+    public SimulationManagement(List<List<Simulation>> simulations, List<List<Measurements>> mainMeasuremens) {
+        this.mainMeasuremens = mainMeasuremens;
     }
 
     /**

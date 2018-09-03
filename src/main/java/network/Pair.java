@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import simulationControl.Util;
  * 
  * @author Iallen
  */
-public class Pair {
+public class Pair implements Serializable {
 
     private Node source;
     private Node destination;

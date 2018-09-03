@@ -4,13 +4,15 @@ import grmlsa.KRoutingAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
 
+import java.io.Serializable;
+
 
 /**
  * This interface should be implemented by algorithms that solve the RMLSA problem in an integrated way.
  * 
  * @author Iallen
  */
-public interface IntegratedRMLSAAlgorithmInterface {
+public interface IntegratedRMLSAAlgorithmInterface extends Serializable {
 	
 	/**
 	 * This method must establish for a given request a route and a band of spectrum and return true.

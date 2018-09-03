@@ -1,11 +1,13 @@
 package network;
 
+import java.io.Serializable;
+
 /**
  * This class represents a bank of regenerators on a network node.
  * 
  * @author Alexandre
  */
-public class Regenerators {
+public class Regenerators implements Serializable {
 
 	private int regenUtilization;
     private int numRegenerators;

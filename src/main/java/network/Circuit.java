@@ -4,6 +4,7 @@ import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import request.RequestForConnection;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * 
  * @author Iallen
  */
-public class Circuit implements Comparable<Object>{
+public class Circuit implements Comparable<Object>, Serializable {
 	
 	protected static int quantidade = 0;
     protected Integer id;

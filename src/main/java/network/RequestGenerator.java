@@ -6,12 +6,14 @@ import simulator.EventMachine;
 import simulator.eventListeners.ArriveRequestForConexionListener;
 import util.RandGenerator;
 
+import java.io.Serializable;
+
 /**
  * This class represents the network request generator
  * 
  * @author Iallen
  */
-public class RequestGenerator {
+public class RequestGenerator implements Serializable {
 
   private Pair pair;
   private double bandwidth; // In bits per second (bps)

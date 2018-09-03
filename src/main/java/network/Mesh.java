@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import util.RandGenerator;
  * 
  * @author Iallen
  */
-public class Mesh {
+public class Mesh implements Serializable {
 
     private Vector<Node> nodeList;
     private Vector<Link> linkList;

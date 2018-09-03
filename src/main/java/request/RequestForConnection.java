@@ -4,6 +4,7 @@ import network.Circuit;
 import network.Pair;
 import network.RequestGenerator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * 
  * @author Iallen
  */
-public class RequestForConnection {
+public class RequestForConnection implements Serializable {
 	
 	protected Pair pair;
 	protected double timeOfRequestHours;

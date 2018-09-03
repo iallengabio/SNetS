@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ import util.IntersectionFreeSpectrum;
  *
  * @author Iallen
  */
-public class ControlPlane {
+public class ControlPlane implements Serializable {
 
     protected int rsaType;
     protected RoutingAlgorithmInterface routing;

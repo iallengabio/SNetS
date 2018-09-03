@@ -1,8 +1,7 @@
 package simulationControl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.SocketImpl;
 import java.util.*;
 
 import com.google.firebase.FirebaseApp;
@@ -15,6 +14,9 @@ import com.google.gson.GsonBuilder;
 import network.Mesh;
 import network.Pair;
 import network.RequestGenerator;
+import simulationControl.distributedProcessing.Client;
+import simulationControl.distributedProcessing.ServerM;
+import simulationControl.distributedProcessing.ServerS;
 import simulationControl.parsers.*;
 import simulator.Simulation;
 
@@ -33,11 +35,26 @@ public class Main {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        if (args.length > 0) {
-            localSimulation(args[0]);
-            
-        } else {// To run in Server mode
-            simulationServer();
+
+        if(args.length==0){
+            System.out.println("No option selected");
+        }else{
+            switch (args[0]){
+                case "-fs":
+                    simulationServer();
+                break;
+                case "-lm":
+                    ServerM.runServerM();
+                break;
+                case "-ls":
+                    ServerS.runServerS(args[1]);
+                break;
+                case "-lc":
+                    Client.runClient(args[1],args[2]);
+                break;
+                default:
+                    localSimulation(args[0]);
+            }
         }
     }
 
@@ -80,7 +97,7 @@ public class Main {
                     try {
                         newRef.child("status").setValue("started");
                         newRef.child("progress").setValue(0.0);
-                        List<List<Simulation>> allSimulations = createAllSimulations(sr.getNetworkConfig(), sr.getSimulationConfig(), sr.getTrafficConfig(), sr.getPhysicalLayerConfig(), sr.getOthersConfig());
+                        List<List<Simulation>> allSimulations = createAllSimulations(sr);
                         //remember to implement with thread
                         SimulationManagement sm = new SimulationManagement(allSimulations);
                         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
@@ -165,7 +182,7 @@ public class Main {
     private static void localSimulation(String path) throws Exception {
     	System.out.println("Path: " + path);
         System.out.println("Reading files");
-        List<List<Simulation>> allSimulations = createAllSimulations(path);
+        List<List<Simulation>> allSimulations = createAllSimulations(makeSR(path));
         //Now start the simulations
         System.out.println("Starting simulations");
         SimulationManagement sm = new SimulationManagement(allSimulations);
@@ -185,16 +202,9 @@ public class Main {
         System.out.println("finish!");
     }
 
-    /**
-     * This method creates the simulations from the local mode
-     *
-     * @return List<List<Simulation>>
-     * @throws Exception
-     */
-    private static List<List<Simulation>> createAllSimulations(String path) throws Exception {
-
+    public static SimulationRequest makeSR(String path) throws FileNotFoundException {
         //Path of the simulation configuration files
-    	String separator = System.getProperty("file.separator");
+        String separator = System.getProperty("file.separator");
         String filesPath = path;
         String networkFilePath = filesPath + separator + "network";
         String simulationFilePath = filesPath + separator + "simulation";
@@ -203,7 +213,7 @@ public class Main {
         String physicalLayerFilePath = filesPath + separator + "physicalLayer";
         String othersFilePath = filesPath + separator + "others";
         Util.projectPath = filesPath;
-        
+
         //Read files
         Scanner scanner = new Scanner(new File(networkFilePath));
         String networkConfigJSON = "";
@@ -223,14 +233,14 @@ public class Main {
         scanner = new Scanner(new File(physicalLayerFilePath));
         String physicalLayerConfigJSON = "";
         while (scanner.hasNext()) {
-        	physicalLayerConfigJSON += scanner.next();
+            physicalLayerConfigJSON += scanner.next();
         }
         scanner = new Scanner(new File(othersFilePath));
         String othersConfigJSON = "";
         while (scanner.hasNext()) {
             othersConfigJSON += scanner.next();
         }
-        
+
         Gson gson = new GsonBuilder().create();
         NetworkConfig nc = gson.fromJson(networkConfigJSON, NetworkConfig.class);
         SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
@@ -239,20 +249,31 @@ public class Main {
         OthersConfig oc = gson.fromJson(othersConfigJSON,OthersConfig.class);
         scanner.close();
 
-        
-        return createAllSimulations(nc, sc, tc, plc, oc);
+        SimulationRequest sr = new SimulationRequest();
+        sr.setNetworkConfig(nc);
+        sr.setSimulationConfig(sc);
+        sr.setTrafficConfig(tc);
+        sr.setPhysicalLayerConfig(plc);
+        sr.setOthersConfig(oc);
+        sr.setStatus("new");
+        sr.setProgress(0.0);
+
+        return sr;
     }
 
     /**
-     * This method creates the simulations from server mode
-     * 
-     * @param nc NetworkConfig
-     * @param sc SimulationConfig
-     * @param tc TrafficConfig
-     * @return List<List<Simulation>>
+     * This method creates all simulations of an experiment
+     *
      * @throws Exception
      */
-    private static List<List<Simulation>> createAllSimulations(NetworkConfig nc, SimulationConfig sc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) throws Exception {
+    public static List<List<Simulation>> createAllSimulations(SimulationRequest sr) throws Exception {
+
+        NetworkConfig nc = sr.getNetworkConfig();
+        SimulationConfig sc = sr.getSimulationConfig();
+        TrafficConfig tc = sr.getTrafficConfig();
+        PhysicalLayerConfig plc = sr.getPhysicalLayerConfig();
+        OthersConfig oc = sr.getOthersConfig();
+
         // Create list of simulations
         List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
         int i, j;
@@ -269,6 +290,7 @@ public class Main {
 
         return allSimulations;
     }
+
 
     /**
      * This method sets the loading point of the simulation in each request generator
