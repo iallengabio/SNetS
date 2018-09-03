@@ -45,7 +45,7 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
     }
 
     @Override
-    public String simulationBundleRequest(String simReqJSON) throws Exception {
+    public String simulationBundleRequest(String simReqJSON, ClientProgressCallbackInterface cpci) throws Exception {
         Gson gson = new GsonBuilder().create();
         SimulationRequest sr = gson.fromJson(simReqJSON,SimulationRequest.class);
         List<List<Simulation>> simulations = Main.createAllSimulations(sr);
@@ -71,8 +71,8 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
                 executor.execute(new SimulationTask(server,mainMeasuremens,nSimE,p,simulationQueue));
             }
             Thread.sleep(200);
-            double progress = (double)nSimE[0]/(double)nSim * 100;
-            System.out.println("progress: "+ progress +"%");
+            double progress = (double)nSimE[0]/(double)nSim;
+            cpci.updateProgress(progress);
         }
 
         SimulationManagement sm = new SimulationManagement(simulations, mainMeasuremens);
@@ -116,7 +116,7 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
                 lazyServers.add(server);
             }catch (Exception ex){
                 simulationQueue.add(p);
-                //ex.printStackTrace();
+                ex.printStackTrace();
                 System.out.println("Server desconectado!");
             }
         }

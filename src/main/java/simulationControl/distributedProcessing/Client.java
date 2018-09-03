@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,7 @@ public class Client {
             SimulationRequest sr = Main.makeSR(path);
             Gson gson = new GsonBuilder().create();
             String simReqJSON = gson.toJson(sr);
-            simReqJSON = server.simulationBundleRequest(simReqJSON);
+            simReqJSON = server.simulationBundleRequest(simReqJSON, new ClientProgressCallback());
             sr = gson.fromJson(simReqJSON,SimulationRequest.class);
             System.out.println("Saving results.");
             saveResults(sr,path);
@@ -105,6 +106,18 @@ public class Client {
             e.printStackTrace();
         }
 
+    }
+
+    public static class ClientProgressCallback extends UnicastRemoteObject implements ClientProgressCallbackInterface {
+
+        protected ClientProgressCallback() throws RemoteException {
+
+        }
+
+        @Override
+        public void updateProgress(double progress) throws RemoteException {
+            System.out.println("progress: "+progress*100 + "%");
+        }
     }
 
 }

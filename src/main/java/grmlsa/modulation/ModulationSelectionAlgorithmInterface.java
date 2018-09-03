@@ -1,5 +1,6 @@
 package grmlsa.modulation;
 
+import java.io.Serializable;
 import java.util.List;
 
 import grmlsa.Route;
@@ -12,7 +13,7 @@ import network.ControlPlane;
  * 
  * @author Alexandre
  */
-public interface ModulationSelectionAlgorithmInterface {
+public interface ModulationSelectionAlgorithmInterface extends Serializable {
 	
 	/**
 	 * This method selects the appropriate modulation format for the establishment of the circuit.
