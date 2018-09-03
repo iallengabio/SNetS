@@ -33,7 +33,7 @@ public class ControlPlane implements Serializable {
     protected IntegratedRMLSAAlgorithmInterface integrated;
     protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
-	
+    
     protected Mesh mesh;
     
     /**
@@ -54,6 +54,7 @@ public class ControlPlane implements Serializable {
      * @param integratedRMLSAAlgorithm IntegratedRMLSAAlgorithmInterface
      * @param routingAlgorithm RoutingAlgorithmInterface
      * @param spectrumAssignmentAlgorithm SpectrumAssignmentAlgorithmInterface
+     * @param modulationSelection ModulationSelectionAlgorithmInterface
      */
     public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection) {
         this.activeCircuits = new HashMap<>();
@@ -69,7 +70,7 @@ public class ControlPlane implements Serializable {
         this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
 
         setMesh(mesh);
-        mesh.setTotalPowerConsumption(EnergyConsumption.computeNetworkPowerConsumption(this));
+        mesh.computesPowerConsmption(this);
     }
     
     /**
@@ -154,6 +155,23 @@ public class ControlPlane implements Serializable {
     	return spectrumAssignment;
     }
     
+    /**
+     * Returns the routing algorithm
+     * 
+     * @return RoutingAlgorithmInterface
+     */
+    public RoutingAlgorithmInterface getRouting(){
+    	return routing;
+    }
+    
+    /**
+     * Returns the integrated RMLSA algorithm
+     * 
+     * @return IntegratedRMLSAAlgorithmInterface
+     */
+    public IntegratedRMLSAAlgorithmInterface getIntegrated(){
+    	return integrated;
+    }
     
     /**
      * This method tries to satisfy a certain request by checking if there are available resources for the establishment of the circuit.
@@ -180,7 +198,7 @@ public class ControlPlane implements Serializable {
      *
      * @param circuit Circuit
      */
-    protected void allocateCircuit(Circuit circuit) throws Exception {
+    public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
@@ -274,6 +292,7 @@ public class ControlPlane implements Serializable {
                 if(isAdmissibleQualityOfTransmission(circuit)){
                     this.updateNetworkPowerConsumption();
                 	return true; // Admits the circuit
+                	
                 } else {
                 	// Circuit QoT is not acceptable, frees allocated resources
         			releaseCircuit(circuit);
@@ -294,14 +313,14 @@ public class ControlPlane implements Serializable {
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh(), this);
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
-                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, mesh);
+                    Modulation mod = modulationSelection.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
+                    circuit.setModulation(mod);
                     if(mod != null){
-	                    circuit.setModulation(mod);
-	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit);
+	                    return spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit, this);
                     }
                 }
         }
@@ -310,12 +329,12 @@ public class ControlPlane implements Serializable {
     }
 
     /**
-     * Increase the number of slots used by a given circuit
-     *
-     * @param circuit
-     * @param numSlotsUp
-     * @param numSlotsDown
-     * @return
+     * Increases the number of slots used by a given circuit
+     * 
+     * @param circuit Circuit
+     * @param numSlotsUp int
+     * @param numSlotsDown int
+     * @return boolean
      * @throws Exception
      */
     public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
@@ -361,8 +380,11 @@ public class ControlPlane implements Serializable {
             if (numSlotsDown>0) {
                 releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             }
+            
             circuit.setSpectrumAssigned(specAssigAt);
-            isAdmissibleQualityOfTransmission(circuit); //recompute QoT
+            //isAdmissibleQualityOfTransmission(circuit); //recompute QoT
+            computeQualityOfTransmission(circuit); // Recalculates the QoT and SNR of the circuit
+            
         }else{
             this.updateNetworkPowerConsumption();
         }
@@ -370,6 +392,14 @@ public class ControlPlane implements Serializable {
         return QoT;
     }
 
+    /**
+     * Decreases the number of slots used by a given circuit
+     * 
+     * @param circuit Circuit
+     * @param numSlotsDown int
+     * @param numSlotsUp int
+     * @throws Exception
+     */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
         //calculate the spectrum band at top
         int upperBand[] = new int[2];
@@ -381,6 +411,7 @@ public class ControlPlane implements Serializable {
         bottomBand[0] = circuit.getSpectrumAssigned()[0];
         bottomBand[1] = bottomBand[0] + numSlotsDown - 1;
         int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
+        
         if (numSlotsUp>0) {
             releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             newSpecAssign[1] = upperBand[0]-1;
@@ -390,8 +421,10 @@ public class ControlPlane implements Serializable {
             releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
             newSpecAssign[0] = bottomBand[1]+1;
         }
+        
         circuit.setSpectrumAssigned(newSpecAssign);
-        isAdmissibleQualityOfTransmission(circuit); //compute QoT
+        //isAdmissibleQualityOfTransmission(circuit); //compute QoT
+        computeQualityOfTransmission(circuit); // Recalculates the QoT and SNR of the circuit
         
         this.updateNetworkPowerConsumption();
     }
@@ -408,9 +441,9 @@ public class ControlPlane implements Serializable {
     }
     
     /**
+     * To find active circuits on the network with specified source
      * 
-     * 
-     * @param source
+     * @param source String
      * @return List<Circuit>
      */
     public List<Circuit> searchForActiveCircuits(String source){
@@ -422,7 +455,7 @@ public class ControlPlane implements Serializable {
     }
     
     /**
-     * 
+     * To find active circuits on the network
      * 
      * @return List<Circuit>
      */
@@ -476,7 +509,7 @@ public class ControlPlane implements Serializable {
      * @param circuit Circuit
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    protected boolean computeQualityOfTransmission(Circuit circuit){
+    public boolean computeQualityOfTransmission(Circuit circuit){
     	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
@@ -520,7 +553,7 @@ public class ControlPlane implements Serializable {
         	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
             circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
             
-        	// Recalculates the QoT and SNR of the circuits
+        	// Recalculates the QoT and SNR of the circuit
             boolean QoT = computeQualityOfTransmission(circuitTemp);
             if (!QoT) {
             	
@@ -698,6 +731,6 @@ public class ControlPlane implements Serializable {
 	}
 
     private void updateNetworkPowerConsumption(){
-        this.mesh.setTotalPowerConsumption(EnergyConsumption.computeNetworkPowerConsumption(this));
+        this.mesh.computesPowerConsmption(this);
     }
 }

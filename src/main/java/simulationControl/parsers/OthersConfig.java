@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class OthersConfig implements Serializable {
 
-    private Map<String, String> variables = new HashMap();
+    private Map<String, String> variables = new HashMap<>();
 
     public OthersConfig() {
     }

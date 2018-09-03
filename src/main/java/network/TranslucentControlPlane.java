@@ -1,6 +1,5 @@
 package network;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,7 @@ import util.IntersectionFreeSpectrum;
  * 
  * @author Alexandre
  */
-public class TranslucentControlPlane extends ControlPlane implements Serializable {
+public class TranslucentControlPlane extends ControlPlane {
 	
 	protected RegeneratorAssignmentAlgorithmInterface regeneratorAssignment;
 	
@@ -161,7 +160,7 @@ public class TranslucentControlPlane extends ControlPlane implements Serializabl
      * @param circuit Circuit
      */
 	@Override
-    protected void allocateCircuit(Circuit circuit) throws Exception {
+    public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
         
@@ -238,7 +237,7 @@ public class TranslucentControlPlane extends ControlPlane implements Serializabl
 
         switch (this.rsaType) {
             case GRMLSA.RSA_INTEGRATED:
-                return integrated.rsa(circuit, this.getMesh(), this);
+                return integrated.rsa(circuit, this);
 
             case GRMLSA.RSA_SEQUENCIAL:
                 if (routing.findRoute(circuit, this.getMesh())) {
@@ -275,11 +274,10 @@ public class TranslucentControlPlane extends ControlPlane implements Serializabl
 	 * @return boolean - True, if you could define the modulation format and put the spectrum, or false, otherwise
 	 */
 	public boolean withoutRegenerator(TranslucentCircuit circuit, Route route){
-		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, mesh);
+		Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, this);
+		circuit.setModulation(mod);
 		
 		if(mod != null){
-			circuit.setModulation(mod);
-			
 			HashMap<Link, Modulation> modulationByLink = new HashMap<Link, Modulation>();
 			Vector<Link> linkList = route.getLinkList();
 			for(int l = 0; l < linkList.size(); l++){
@@ -287,7 +285,7 @@ public class TranslucentControlPlane extends ControlPlane implements Serializabl
 			}
 			circuit.setModulationByLink(modulationByLink);
 			
-			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit)){
+			if(spectrumAssignment.assignSpectrum(mod.requiredSlots(circuit.getRequiredBandwidth()), circuit, this)){
 				int sa[] = circuit.getSpectrumAssigned();
 				
 				HashMap<Link, int[]> spectrumAssignedByLink = new HashMap<Link, int[]>();
@@ -413,7 +411,7 @@ public class TranslucentControlPlane extends ControlPlane implements Serializabl
 			Modulation mod = avaliableModulations.get(i);
 			int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 			
-			int band[] = spectrumAssignment.policy(numberOfSlots, composition, circuit);
+			int band[] = spectrumAssignment.policy(numberOfSlots, composition, circuit, this);
 			if(band != null){
 				if(alternativeMod == null){
 					alternativeMod = mod; // The first modulation that was able to allocate spectrum

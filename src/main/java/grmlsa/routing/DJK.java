@@ -131,6 +131,15 @@ public class DJK implements RoutingAlgorithmInterface {
     }
     
     /**
+	 * Returns the route list for all pairs
+	 * 
+	 * @return Vector<Route>
+	 */
+	public HashMap<String, Route> getRoutesForAllPairs() {
+		return routesForAllPairs;
+	}
+    
+    /**
      * This method saves in files the routes for all the pairs.
      * 
      * @param nodeList Vector<Node>

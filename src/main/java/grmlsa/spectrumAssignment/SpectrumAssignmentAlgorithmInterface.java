@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import network.Circuit;
+import network.ControlPlane;
 
 
 /**
@@ -19,9 +20,10 @@ public interface SpectrumAssignmentAlgorithmInterface extends Serializable {
 	 *
 	 * @param numberOfSlots int
 	 * @param circuit Circuit
+	 * @param cp ControlPlane
 	 * @return boolean
 	 */
-	public boolean assignSpectrum(int numberOfSlots, Circuit circuit);
+	public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp);
 	
 	/**
 	 * This method applies the specific policy of the spectrum allocation algorithm
@@ -29,8 +31,9 @@ public interface SpectrumAssignmentAlgorithmInterface extends Serializable {
 	 * @param numberOfSlots int
 	 * @param freeSpectrumBands List<int[]>
 	 * @param Circuit circuit
+	 * @param cp ControlPlane
 	 * @return int[]
 	 */
-	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit);
+	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp);
 
 }

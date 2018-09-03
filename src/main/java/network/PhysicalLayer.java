@@ -239,8 +239,8 @@ public class PhysicalLayer implements Serializable {
 	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
 		
 		double I = linearPower / referenceBandwidth; // Signal power density for the reference bandwidth
-		double Pase = 0.0;
-		double Pnli = 0.0;
+		double Iase = 0.0;
+		double Inli = 0.0;
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
 		double fs = route.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
@@ -270,7 +270,7 @@ public class PhysicalLayer implements Serializable {
 			
 			if(activeNLI){
 				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi, gamma, beta2, alpha, lowerFrequency);
-				Pnli = Pnli + noiseNli;
+				Inli = Inli + noiseNli;
 			}
 			
 			if(activeASE){
@@ -284,7 +284,7 @@ public class PhysicalLayer implements Serializable {
 				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, centerFrequency, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				preAmpNoiseAse = preAmp.getAseByGain(totalPower, centerFrequency, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				
-				Pase = Pase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
+				Iase = Iase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
 			}
 		}
 		
@@ -292,7 +292,7 @@ public class PhysicalLayer implements Serializable {
 			I = linearPower / Bsi; // Signal power spectral density calculated according to the requested bandwidth
 		}
 		
-		double SNR = I / (Pase + Pnli);
+		double SNR = I / (Iase + Inli);
 		
 		return SNR;
 	}

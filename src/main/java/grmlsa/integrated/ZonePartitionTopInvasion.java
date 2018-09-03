@@ -4,18 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelectionByDistance;
-import grmlsa.modulation.ModulationSelector;
 import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
-import network.Mesh;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -25,7 +23,8 @@ import util.IntersectionFreeSpectrum;
  */
 public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterface{
 
-	private NewKShortestPaths kShortestsPaths;
+	private int k = 3; //This algorithm uses 3 alternative paths
+	private KRoutingAlgorithmInterface kShortestsPaths;
 	private ModulationSelectionAlgorithmInterface modulationSelection;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment1;
 	private SpectrumAssignmentAlgorithmInterface spectrumAssignment2;
@@ -53,13 +52,12 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 	}
 	
 	@Override
-	public boolean rsa(Circuit circuit, Mesh mesh, ControlPlane cp) {
+	public boolean rsa(Circuit circuit, ControlPlane cp) {
 		if(kShortestsPaths == null){
-			kShortestsPaths = new NewKShortestPaths(mesh, 3); //This algorithm uses 3 alternative paths
+			kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
 		}
 		if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection();
-        	modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
         }
 		if(spectrumAssignment1 == null && spectrumAssignment2 == null){
 			spectrumAssignment1 = new FirstFit();
@@ -73,25 +71,27 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		
 		// Try to allocate in the primary zone
 		for (Route route : candidateRoutes) {
-			
 			circuit.setRoute(route);
-			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, mesh);
 			
-			// Calculate how many slots are needed for this route
-			int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-			int zone[] = this.zones.get(numSlots);
-			List<int[]> primaryZone = new ArrayList<>();
-			primaryZone.add(zone);			
-			
-			List<int[]> merge = IntersectionFreeSpectrum.merge(route);
-			merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
-			
-			int ff[] = spectrumAssignment1.policy(numSlots, merge, circuit);
-			
-			if(ff != null && ff[0] < chosenBand[0]){
-				chosenBand = ff;
-				chosenRoute = route;	
-				chosenMod = mod;
+			Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment1, cp);
+			if(mod != null){
+				
+				// Calculate how many slots are needed for this route
+				int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
+				int zone[] = this.zones.get(numSlots);
+				List<int[]> primaryZone = new ArrayList<>();
+				primaryZone.add(zone);			
+				
+				List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+				merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
+				
+				int ff[] = spectrumAssignment1.policy(numSlots, merge, circuit, cp);
+				
+				if(ff != null && ff[0] < chosenBand[0]){
+					chosenBand = ff;
+					chosenRoute = route;	
+					chosenMod = mod;
+				}
 			}
 		}
 		
@@ -103,37 +103,39 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 			double moreFree = 0;
 			
 			for (Route route : candidateRoutes) {
-				
 				circuit.setRoute(route);
-				Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, mesh);
 				
-				// Calculate how many slots are needed for this route
-				int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-				int zone[] = this.zones.get(numSlots);
-				List<int[]> merge = IntersectionFreeSpectrum.merge(route);
-				
-				int zoneMoreFree = this.searchMoreFreeZone(numSlots, merge);
-				
-				if(zoneMoreFree == -1){
-					//System.out.println("Impossible invasion!");
-					continue;
-				};
-				
-				//System.out.println("invasão viável");
-				List<int[]> secondaryZone = new ArrayList<>();
-				secondaryZone.add(zones.get(zoneMoreFree));
-				
-				merge = IntersectionFreeSpectrum.merge(merge, secondaryZone);
-				
-				double aux = ((double) numberFree(merge)) / ((double)(zones.get(zoneMoreFree)[1] - zones.get(zoneMoreFree)[0] + 1));
-				
-				int lf[] = spectrumAssignment2.policy(numSlots, merge, circuit);
-				
-				if(lf != null && aux > moreFree){
-					chosenBand = lf;
-					chosenRoute = route;
-					chosenMod = mod;
-					moreFree = aux;
+				Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, cp);
+				if(mod != null){
+					
+					// Calculate how many slots are needed for this route
+					int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
+					int zone[] = this.zones.get(numSlots);
+					List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+					
+					int zoneMoreFree = this.searchMoreFreeZone(numSlots, merge);
+					
+					if(zoneMoreFree == -1){
+						//System.out.println("Impossible invasion!");
+						continue;
+					};
+					
+					//System.out.println("invasão viável");
+					List<int[]> secondaryZone = new ArrayList<>();
+					secondaryZone.add(zones.get(zoneMoreFree));
+					
+					merge = IntersectionFreeSpectrum.merge(merge, secondaryZone);
+					
+					double aux = ((double) numberFree(merge)) / ((double)(zones.get(zoneMoreFree)[1] - zones.get(zoneMoreFree)[0] + 1));
+					
+					int lf[] = spectrumAssignment2.policy(numSlots, merge, circuit, cp);
+					
+					if(lf != null && aux > moreFree){
+						chosenBand = lf;
+						chosenRoute = route;
+						chosenMod = mod;
+						moreFree = aux;
+					}
 				}
 			}	
 		}
@@ -202,4 +204,13 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 		
 		return res;
 	}
+	
+	/**
+	 * Returns the routing algorithm
+	 * 
+	 * @return KRoutingAlgorithmInterface
+	 */
+    public KRoutingAlgorithmInterface getRoutingAlgorithm(){
+    	return kShortestsPaths;
+    }
 }
