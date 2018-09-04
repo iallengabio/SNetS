@@ -40,9 +40,9 @@ public class DJK implements RoutingAlgorithmInterface {
         Node destination = circuit.getDestination();
 
         Route route = routesForAllPairs.get(source.getName() + DIV + destination.getName());
-
+        circuit.setRoute(route);
+        
         if (route != null) {
-            circuit.setRoute(route);
             return true;
         }
 

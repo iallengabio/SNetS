@@ -87,7 +87,7 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 	 * @return a vector with size 2, the index 0 represents the number of slots to use below (lower),
 	 *                               the index 1 represents the number of slots to use above (upper).
 	 */
-	private int[] decideToExpand(int numMoreSlots, int lowerFreeSlots[], int upperFreeSlots[]){
+	protected int[] decideToExpand(int numMoreSlots, int lowerFreeSlots[], int upperFreeSlots[]){
 		int res[] = new int[2];
 
 		int numLowerFreeSlots = 0;

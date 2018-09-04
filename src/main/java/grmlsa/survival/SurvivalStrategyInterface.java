@@ -30,5 +30,13 @@ public interface SurvivalStrategyInterface {
 	 * @throws Exception
 	 */
 	public boolean survive(Circuit circuit) throws Exception;
+	
+	/**
+	 * Verifies if there are free transmitters and receivers for the establishment of the new circuit
+	 * 
+	 * @param circuit Circuit
+	 * @return boolean
+	 */
+	public boolean thereAreFreeTransponders(Circuit circuit);
 
 }

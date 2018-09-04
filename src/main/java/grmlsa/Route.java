@@ -196,7 +196,7 @@ public class Route implements Serializable, Comparable<Route> {
     }
 
     /**
-     * Print Route.
+     * Returns the string of the Route.
      */
     public String getRouteInString() {
         String list = "";

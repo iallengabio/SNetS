@@ -70,9 +70,9 @@ public class FixedRoutes implements RoutingAlgorithmInterface {
         Node destination = request.getDestination();
 
         Route route = routesForAllPairs.get(source.getName() + DIV + destination.getName());
-
+        request.setRoute(route);
+        
         if (route != null) {
-            request.setRoute(route);
             return true;
         }
 

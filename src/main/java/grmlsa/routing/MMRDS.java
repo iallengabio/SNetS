@@ -43,9 +43,9 @@ public class MMRDS implements RoutingAlgorithmInterface {
         Node destination = request.getDestination();
 
         Route r = routesForAllPairs.get(source.getName() + DIV + destination.getName());
-
+        request.setRoute(r);
+        
         if (r != null) {
-            request.setRoute(r);
             return true;
         }
 

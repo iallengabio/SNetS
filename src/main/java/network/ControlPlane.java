@@ -291,18 +291,18 @@ public class ControlPlane {
      */
     public boolean establishCircuit(Circuit circuit) throws Exception {
 
-    	// Check if there are free transmitters and receivers
-    	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
+    	// Checks if there are free transmitters and receivers
+    	if(thereAreFreeTransponders(circuit)) {
     		
     		// Can allocate spectrum
-            if (this.tryEstablishNewCircuit(circuit)) {
+            if (tryEstablishNewCircuit(circuit)) {
 
             	// Pre-admits the circuit for QoT verification
                 this.allocateCircuit(circuit);
                 
                 // QoT verification
                 if(isAdmissibleQualityOfTransmission(circuit)){
-                    this.updateNetworkPowerConsumption();
+                    updateNetworkPowerConsumption();
                 	return true; // Admits the circuit
                 	
                 } else {
@@ -315,6 +315,16 @@ public class ControlPlane {
         return false; // Rejects the circuit
     }
 
+    /**
+     * Verifies if there are free transmitters and receivers for the establishment of the new circuit
+     * 
+     * @param circuit Circuit
+     * @return boolean
+     */
+    public boolean thereAreFreeTransponders(Circuit circuit){
+    	return (circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers());
+    }
+    
     /**
      * This method tries to answer a given request by allocating the necessary resources to the same one
      *
@@ -742,7 +752,7 @@ public class ControlPlane {
 		return deltaSNR;
 	}
 
-    private void updateNetworkPowerConsumption(){
+    protected void updateNetworkPowerConsumption(){
         this.mesh.computesPowerConsmption(this);
     }
 }

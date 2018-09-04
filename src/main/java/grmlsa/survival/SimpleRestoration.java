@@ -18,6 +18,11 @@ public class SimpleRestoration implements SurvivalStrategyInterface {
 	}
 
 	@Override
+	public boolean thereAreFreeTransponders(Circuit circuit){
+    	return (circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers());
+    }
+	
+	@Override
 	public boolean survive(Circuit circuit){
 		
 		// libera os recursos da rota que falhou

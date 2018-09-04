@@ -98,5 +98,45 @@ public class SurvivalControlPlane extends ControlPlane {
         return survivalStrategy.applyStrategy(rfc, this);
     }
     
+    /**
+     * Verifies if there are free transmitters and receivers for the establishment of the new circuit
+     * 
+     * @param circuit Circuit
+     * @return boolean
+     */
+    public boolean thereAreFreeTransponders(Circuit circuit){
+    	return (circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers());
+    }
     
+    /**
+     * This method tries to establish a new circuit in the network
+     *
+     * @param circuit Circuit
+     * @return true if the circuit has been successfully allocated, false if the circuit can not be allocated.
+     */
+    public boolean establishCircuit(Circuit circuit) throws Exception {
+
+    	// Checks if there are free transmitters and receivers
+    	if(thereAreFreeTransponders(circuit)) {
+    		
+    		// Can allocate spectrum
+            if (tryEstablishNewCircuit(circuit)) {
+
+            	// Pre-admits the circuit for QoT verification
+                this.allocateCircuit(circuit);
+                
+                // QoT verification
+                if(isAdmissibleQualityOfTransmission(circuit)){
+                    updateNetworkPowerConsumption();
+                	return true; // Admits the circuit
+                	
+                } else {
+                	// Circuit QoT is not acceptable, frees allocated resources
+        			releaseCircuit(circuit);
+                }
+            }
+        }
+
+        return false; // Rejects the circuit
+    }
 }

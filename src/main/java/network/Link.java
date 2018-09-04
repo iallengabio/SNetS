@@ -16,6 +16,7 @@ public class Link {
     private double cost;
     private Spectrum spectrum;
     private double distance;
+    private boolean failed;
     
     private TreeSet<Circuit> circuitList;
 
@@ -33,6 +34,8 @@ public class Link {
         this.destination = d;
         this.spectrum = new Spectrum(numberOfSlots, spectrumBand);
         this.distance = distance;
+        
+        this.failed = false;
         
         this.circuitList = new TreeSet<Circuit>();
     }
@@ -226,4 +229,51 @@ public class Link {
 		circuitList.remove(circuit);
 	}
 	
+	/**
+	 * Returns the failed
+	 * 
+	 * @return boolean
+	 */
+	public boolean isFailed(){
+		return failed;
+	}
+	
+	/**
+     * Configures the link as faulty. Returns true if the operation was successful.
+     * 
+     * @return boolean
+     */
+    public boolean setFailed() {
+        if (!failed) {
+        	failed = true;
+            return true;
+            
+        } else {
+            String name = "<" + source.getName() + "," + destination.getName() + ">";
+            System.out.println("Attempt to fail the link" + name);
+            System.out.println("The link " + name + " was already failing");
+            System.out.println("Class: Link, method: setFailed()");
+            return false;
+        }
+    }
+
+    /**
+     * Corrected the link failure. Returns true if the operation was successful.
+     * 
+     * @return boolean
+     */
+    public boolean fixLink() {
+        if (failed) {
+        	failed = false;
+            return true;
+            
+        } else {
+            String name = "<" + source.getName() + "," + destination.getName() + ">";
+            System.out.println("Attempt to repair the link " + name);
+            System.out.println("The link " + name + " was not wrong");
+            System.out.println("Class: Link, method: fixLink()");
+            return false;
+        }
+    }
+    
 }
