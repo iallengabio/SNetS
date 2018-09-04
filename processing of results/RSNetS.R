@@ -88,13 +88,13 @@ auxExtractDFCB <- function(directory,replicacoes,alpha,legSol){
   #criar o dataframe extruturado para plotar os resultados usando ggplot2
   #bitCost = 0.000000006
   #energyCost = 0.0002
-  bitCost = 0.0000000000003 #de acordo com http://www2.telegeography.com/hubfs/2017/presentations/telegeography-ptc17-pricing.pdf
+  bitCost = 0.000000000003 #de acordo com http://www2.telegeography.com/hubfs/2017/presentations/telegeography-ptc17-pricing.pdf
   energyCost = 0.00000003 #de acordo com https://www.ovoenergy.com/guides/energy-guides/average-electricity-prices-kwh.html
   bsBB = 6
   bsCE = 3
   metricBB = "Bandwidth blocking probability"
   metricRB = "General requested bandwidth"
-  metricCE = "Total consumed energy"
+  metricCE = "Total consumed energy (Joule)"
   loads = c(plansBB[[1]][which(plansBB[[1]]$Metrics==metricBB),]$LoadPoint)
   medias = c()
   for(c in 1 : length(loads)){#para cada carga
@@ -147,7 +147,7 @@ auxExtractDFProfit <- function(directory,replicacoes,alpha,legSol){
   }
   
   #read consumed energy
-  arq="ConsumedEnergy.csv"
+  arq="_ConsumedEnergy.csv"
   arquivos = c(list.files(pattern=paste("*",arq,sep=""),recursive=TRUE))
   algoritmos = c(list.files(pattern=paste("*",arq,sep=""),recursive = TRUE))
   plansCE = list();
@@ -158,13 +158,13 @@ auxExtractDFProfit <- function(directory,replicacoes,alpha,legSol){
   #criar o dataframe extruturado para plotar os resultados usando ggplot2
   #bitCost = 0.000000006
   #energyCost = 0.0002
-  bitCost = 0.0000000000003 #de acordo com http://www2.telegeography.com/hubfs/2017/presentations/telegeography-ptc17-pricing.pdf
+  bitCost = 0.000000000003 #de acordo com http://www2.telegeography.com/hubfs/2017/presentations/telegeography-ptc17-pricing.pdf
   energyCost = 0.00000003 #de acordo com https://www.ovoenergy.com/guides/energy-guides/average-electricity-prices-kwh.html
   bsBB = 6
   bsCE = 3
   metricBB = "Bandwidth blocking probability"
   metricRB = "General requested bandwidth"
-  metricCE = "Total consumed energy"
+  metricCE = "Total consumed energy (Joule)"
   loads = c(plansBB[[1]][which(plansBB[[1]]$Metrics==metricBB),]$LoadPoint)
   medias = c()
   for(c in 1 : length(loads)){#para cada carga

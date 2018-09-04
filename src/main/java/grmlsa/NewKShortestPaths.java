@@ -16,7 +16,7 @@ import simulationControl.Util;
 
 /**
  * This class serves to compute the k shortest paths for all pairs of source (s) and destination (d) nodes 
- * of a given network topology
+ * of a given network topology. This class have some optimizations over original KShortestPaths.
  * 
  * @author Iallen
  */
@@ -91,6 +91,9 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
                     
                 } else { // Already has k chosen routes, should remain only the smallest k
                     chosenRoutes.add(expand);
+
+                    Route rl = chosenRoutes.pollLast();
+
 
                     highestAmongShortest = chosenRoutes.last().getDistanceAllLinks();
                 }
