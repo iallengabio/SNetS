@@ -25,9 +25,9 @@ public class PhysicalLayer implements Serializable {
 	
     private double power; // Power per channel, dBm
     private double L; // Size of a span, km
-    private double alpha; // dB/km, Fiber loss
-    private double gamma; // Fiber nonlinearity
-    private double beta2; // ps^2 = E-24, Dispersion parameter
+    private double alpha; // Fiber loss, dB/km
+    private double gamma; // Fiber nonlinearity,  W^-1*m^-1
+    private double D; // Dispersion parameter, s/m^2
     private double centerFrequency; //Frequency of light
 	
     private double h; // Constant of Planck
@@ -47,6 +47,8 @@ public class PhysicalLayer implements Serializable {
 	private Amplifier preAmp; // Pre amplifier
 	
 	private double linearPower; // Transmitter power, Watt
+	private double alphaLinear;
+	private double beta2; // Group-velocity dispersion
 	
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
@@ -66,7 +68,7 @@ public class PhysicalLayer implements Serializable {
         this.L = plc.getSpanLength();
         this.alpha = plc.getFiberLoss();
         this.gamma = plc.getFiberNonlinearity();
-        this.beta2 = plc.getFiberDispersion();
+        this.D = plc.getFiberDispersion();
         this.centerFrequency = plc.getCenterFrequency();
     	
         this.h = plc.getConstantOfPlanck();
@@ -85,6 +87,8 @@ public class PhysicalLayer implements Serializable {
         this.preAmp = new Amplifier((alpha * L) + Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
         
         this.linearPower = ratioOfDB(power) * 1.0E-3; // converting to Watt
+        this.alphaLinear = computeAlphaLinear(alpha);
+        this.beta2 = computeBeta2(D, centerFrequency);
     }
   
 	/**
@@ -269,7 +273,7 @@ public class PhysicalLayer implements Serializable {
 			Ns = getNumberOfLineAmplifiers(link.getDistance());
 			
 			if(activeNLI){
-				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi, gamma, beta2, alpha, lowerFrequency);
+				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi, lowerFrequency);
 				Inli = Inli + noiseNli;
 			}
 			
@@ -355,10 +359,10 @@ public class PhysicalLayer implements Serializable {
 	 * @param lowerFrequency double
 	 * @return double
 	 */
-	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double I, double fI, double gamma, double beta2, double alpha, double lowerFrequency){
-		double alphaLinear = ratioOfDB(alpha);
-		if(beta2 < 0.0){
-			beta2 = -1.0 * beta2;
+	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double I, double fI, double lowerFrequency){
+		double beta21 = beta2;
+		if(beta21 < 0.0){
+			beta21 = -1.0 * beta21;
 		}
 		
 		double Gi = I; // Power spectral density of the circuit i
@@ -366,9 +370,9 @@ public class PhysicalLayer implements Serializable {
 			Gi = powerI / BsI; // Power spectral density of the circuit i calculated according to the required bandwidth
 		}
 		
-		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta2);
-		double ro = (Math.PI * Math.PI * beta2) / (2.0 * alphaLinear);
-		double p1 = Gi * Gi * arcsinh(ro * BsI * BsI);
+		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
+		double ro = BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+		double p1 = Gi * Gi * arcsinh(ro);
 		
 		double p2 = 0.0;
 		double fs = 0.0;
@@ -534,5 +538,30 @@ public class PhysicalLayer implements Serializable {
 			res2++;
 		}
 		return res2;
+	}
+	
+	/**
+	 * Returns the beta2 parameter
+	 * 
+	 * @param D double
+	 * @param frequencia double
+	 * @return double
+	 */
+	public static double computeBeta2(double D, double frequencia){
+		double c = 299792458.0; //m/s
+		double lambda = c / frequencia;
+		double beta2 = -1.0 * D * (lambda * lambda) / (2.0 * Math.PI * c);
+		return beta2;
+	}
+	
+	/**
+	 * Returns the alpha linear value (1/m) of a value in dB/km
+	 * 
+	 * @param alpha double
+	 * @return double
+	 */
+	public static double computeAlphaLinear(double alpha){
+		double alphaLinear = alpha / (1.0E+4 * Math.log10(Math.E));
+		return alphaLinear;
 	}
 }
