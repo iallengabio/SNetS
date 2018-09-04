@@ -41,21 +41,21 @@ spectrumUtilization <- function(directory, replicacoes, alpha, legLoads, legSol)
 }
 
 energyConsumption <- function(directory, replicacoes, alpha, legLoads, legSol){
-  arq="EnergyConsumption.csv"
+  arq="_ConsumedEnergy.csv"
   metric="Average power consumption (Watt)"
   legX = "Load (Erlangs)"
   legY = "Average power consumption (Watt)"
-  bs = 6 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
   res = auxPlotLine(auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol),legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific)
   return(res)
 }
 
 consumedEnergy <- function(directory, replicacoes, alpha, legLoads, legSol){
-  arq="EnergyConsumption.csv"
-  metric="Total energy consumption (Joule)"
+  arq="_ConsumedEnergy.csv"
+  metric="Total consumed energy (Joule)"
   legX = "Load (Erlangs)"
   legY = "Total energy consumption (Joule)"
-  bs = 6 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
   df = auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol)
   return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
 }
@@ -71,41 +71,41 @@ consumedEnergyOld <- function(directory, replicacoes, alpha, legLoads, legSol){
 }
 
 consumedEnergyBVT <- function(directory, replicacoes, alpha, legLoads, legSol){
-  arq="EnergyConsumption.csv"
+  arq="_ConsumedEnergy.csv"
   metric="Total energy consumption by transponders (Joule)"
   legX = "Load (Erlangs)"
   legY = "Total energy consumption by transponders (Joule)"
-  bs = 6 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
   df = auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol)
   return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
 }
 
 consumedEnergyOXC <- function(directory, replicacoes, alpha, legLoads, legSol){
-  arq="EnergyConsumption.csv"
+  arq="_ConsumedEnergy.csv"
   metric="Total energy consumption by OXCs (Joule)"
   legX = "Load (Erlangs)"
   legY = "Total energy consumption by OXCs (Joule)"
-  bs = 6 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
   df = auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol)
   return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
 }
 
 consumedEnergyAmp <- function(directory, replicacoes, alpha, legLoads, legSol){
-  arq="EnergyConsumption.csv"
+  arq="_ConsumedEnergy.csv"
   metric="Total energy consumption by Amplifiers (Joule)"
   legX = "Load (Erlangs)"
   legY = "Total energy consumption by Amplifiers (Joule)"
-  bs = 6 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
   df = auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol)
   return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
 }
 
 EnergyEfficiency<- function(directory, replicacoes, alpha, legLoads, legSol){
-  arq="EnergyConsumption.csv"
+  arq="_ConsumedEnergy.csv"
   metric="Energy efficiency (bits/Joule)"
   legX = "Carga na rede (Erlangs)"
   legY = "Energy efficiency (bits/Joule)"
-  bs = 6 #quantidade de colunas antes de come?arem os valores de cada replica??o
+  bs = 3 #quantidade de colunas antes de come?arem os valores de cada replica??o
   df = auxExtractDF(arq,metric,directory,replicacoes,alpha,bs,legSol)
   return(auxPlotLine(df,legLoads,legSol,legX,legY)+scale_y_continuous(labels = scales::scientific))
 }
@@ -117,6 +117,7 @@ costBenefit <- function(directory, replicacoes, alpha, legLoads, legSol){
 
 profit <- function(directory, replicacoes, alpha, legLoads, legSol){
   df = auxExtractDFProfit(directory,replicacoes,alpha,legSol)
+  show(df)
   return(auxPlotLine(df,legLoads,legSol,"Carga na rede","Lucro ($)"))
 }
 
@@ -126,7 +127,7 @@ maxBVTUtilization <- function(directory, replicacoes, alpha, legLoads, legSol){
 }
 
 #Gere seus gr?ficos a partir daqui utilizando as fun??es auxiliares
-directory = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_NSFNet_New_3"
+directory = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_NSFNet_New_4"
 replicacoes = 10;
 alpha = 0.05
 legLoads = c("491","655","819")
