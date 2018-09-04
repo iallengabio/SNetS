@@ -92,6 +92,9 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
                 } else { // Already has k chosen routes, should remain only the smallest k
                     chosenRoutes.add(expand);
 
+                    Route rl = chosenRoutes.pollLast();
+
+
                     highestAmongShortest = chosenRoutes.last().getDistanceAllLinks();
                 }
                 continue;
