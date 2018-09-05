@@ -20,6 +20,7 @@ public class PhysicalLayer implements Serializable {
 	
     private boolean activeASE; // Active the ASE noise of the amplifier
     private boolean activeNLI; // Active nonlinear noise in the fibers
+    
     private double rateOfFEC; // FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
     private int typeOfTestQoT; //0, To check for the SNR threshold (Signal-to-Noise Ratio), or another value, to check for the BER threshold (Bit Error Rate)
 	
@@ -47,15 +48,18 @@ public class PhysicalLayer implements Serializable {
 	private Amplifier preAmp; // Pre amplifier
 	
 	private double linearPower; // Transmitter power, Watt
-	private double alphaLinear;
+	private double alphaLinear; // 1/m
 	private double beta2; // Group-velocity dispersion
+	
+	private double slotBandwidth; // Hz
+	private double lowerFrequency; // Hz
 	
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
 	 * 
 	 * @param plc PhysicalLayerConfig
 	 */
-    public PhysicalLayer(PhysicalLayerConfig plc){
+    public PhysicalLayer(PhysicalLayerConfig plc, Mesh mesh){
         this.activeQoT = plc.isActiveQoT();
         this.activeQoTForOther = plc.isActiveQoTForOther();
     	
@@ -89,6 +93,10 @@ public class PhysicalLayer implements Serializable {
         this.linearPower = ratioOfDB(power) * 1.0E-3; // converting to Watt
         this.alphaLinear = computeAlphaLinear(alpha);
         this.beta2 = computeBeta2(D, centerFrequency);
+        
+        this.slotBandwidth = mesh.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
+        double slotsTotal = mesh.getLinkList().firstElement().getNumOfSlots();
+		this.lowerFrequency = centerFrequency - (slotBandwidth * (slotsTotal / 2.0)); // Hz, Half slots are removed because center Frequency = 193.55E+12 is the central frequency of the optical spectrum
     }
   
 	/**
@@ -130,7 +138,7 @@ public class PhysicalLayer implements Serializable {
 	/**
 	 * This method returns the number of amplifiers on a link including the booster and pre
 	 * 
-	 * @param distance - double
+	 * @param distance double
 	 * @return double double
 	 */
 	public double getNumberOfAmplifiers(double distance){
@@ -140,7 +148,7 @@ public class PhysicalLayer implements Serializable {
 	/**
 	 * This method returns the number of line amplifiers on a link
 	 * 
-	 * @param distance - double
+	 * @param distance double
 	 * @return double
 	 */
 	public double getNumberOfLineAmplifiers(double distance){
@@ -161,9 +169,9 @@ public class PhysicalLayer implements Serializable {
 	/**
 	 * Verifies if the calculated SNR for the circuit agrees to the modulation format threshold
 	 * 
-	 * @param modulation
-	 * @param SNRdB
-	 * @param SNRlinear
+	 * @param modulation Modulation
+	 * @param SNRdB double
+	 * @param SNRlinear double
 	 * @return boolean
 	 */
 	public boolean isAdmissible(Modulation modulation, double SNRdB, double SNRlinear){
@@ -210,7 +218,7 @@ public class PhysicalLayer implements Serializable {
 	 * @param route Route
 	 * @param sourceNodeIndex int
 	 * @param destinationNodeIndex int
-	 * @param modulation Modulatin
+	 * @param modulation Modulation
 	 * @param spectrumAssigned int[]
 	 * @return boolean
 	 */
@@ -229,15 +237,15 @@ public class PhysicalLayer implements Serializable {
 	 *  - Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
 	 *  - Modeling of Nonlinear Signal Distortion in Fiber-Optic Networks (2014)
 	 *  
-	 * @param circuit - Circuit
-	 * @param bandwidth - double
-	 * @param route - Route
-	 * @param sourceNodeIndex - int - Segment start node index
-	 * @param destinationNodeIndex - int - Segment end node index
-	 * @param modulation - Modulation
-	 * @param spectrumAssigned - int[]
-	 * @param checksOnTotalPower - boolean - Used to verify if the spectrum allocated by the request is considered or not in the calculation 
-	 *                             of the total power that enters the amplifiers (true, considers, or false, does not consider)
+	 * @param circuit Circuit
+	 * @param bandwidth double
+	 * @param route Route
+	 * @param sourceNodeIndex int - Segment start node index
+	 * @param destinationNodeIndex int - Segment end node index
+	 * @param modulation Modulation
+	 * @param spectrumAssigned int[]
+	 * @param checksOnTotalPower boolean - Used to verify if the spectrum allocated by the request is considered or not in the calculation 
+	 *                                     of the total power that enters the amplifiers (true, considers, or false, does not consider)
 	 * @return double - SNR (linear)
 	 */
 	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
@@ -247,12 +255,8 @@ public class PhysicalLayer implements Serializable {
 		double Inli = 0.0;
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
-		double fs = route.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
-		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * fs; // Circuit bandwidth, less the guard band
-		
-		double slotsTotal = route.getLinkList().firstElement().getNumOfSlots();
-		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); // Hz, Half slots are removed because center Frequency = 193.0E+12 is the central frequency of the optical spectrum
-		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
+		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+		double fi = lowerFrequency + (slotBandwidth * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
 		
 		Node sourceNode = null;
 		Node destinationNode = null;
@@ -273,7 +277,7 @@ public class PhysicalLayer implements Serializable {
 			Ns = getNumberOfLineAmplifiers(link.getDistance());
 			
 			if(activeNLI){
-				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi, lowerFrequency);
+				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi);
 				Inli = Inli + noiseNli;
 			}
 			
@@ -317,7 +321,6 @@ public class PhysicalLayer implements Serializable {
 		double numOfSlots = 0.0;
 		double Bsj = 0.0;
 		double powerJ = powerI;
-		double fs = link.getSlotSpectrumBand(); //Hz
 		
 		if(checksOnTotalPower){ // Check if it is to add the power of the circuit under test
 			totalPower = powerI;
@@ -331,7 +334,7 @@ public class PhysicalLayer implements Serializable {
 			
 			saj = cricuitJ.getSpectrumAssignedByLink(link);;
 			numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-			Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * fs; // Circuit bandwidth, less the guard band
+			Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 			
 			circuitPower = powerJ;
 			if(fixedPowerSpectralDensity){
@@ -350,16 +353,13 @@ public class PhysicalLayer implements Serializable {
 	 * 
 	 * @param circuitI Circuit
 	 * @param link Link
-	 * @param I double
+	 * @param powerI double
 	 * @param BsI double
+	 * @param I double
 	 * @param fI double
-	 * @param gamma double
-	 * @param beta2 double
-	 * @param alpha double
-	 * @param lowerFrequency double
 	 * @return double
 	 */
-	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double I, double fI, double lowerFrequency){
+	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double I, double fI){
 		double beta21 = beta2;
 		if(beta21 < 0.0){
 			beta21 = -1.0 * beta21;
@@ -375,7 +375,6 @@ public class PhysicalLayer implements Serializable {
 		double p1 = Gi * Gi * arcsinh(ro);
 		
 		double p2 = 0.0;
-		double fs = 0.0;
 		int saJ[] = null;
 		double numOfSlots = 0.0;
 		double Bsj = 0.0;
@@ -392,12 +391,11 @@ public class PhysicalLayer implements Serializable {
 		for(Circuit cricuitJ : listCircuits){
 			
 			if(!circuitI.equals(cricuitJ)){
-				fs = link.getSlotSpectrumBand();
 				saJ = cricuitJ.getSpectrumAssignedByLink(link);
 				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * fs; // Circuit bandwidth, less the guard band
-				fJ = lowerFrequency + (fs * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
 				
 				if(!fixedPowerSpectralDensity){
 					Gj = powerJ / Bsj; // Power spectral density of the circuit j calculated according to the required bandwidth
@@ -428,7 +426,7 @@ public class PhysicalLayer implements Serializable {
 	 * Function that returns the inverse hyperbolic sine of the argument
 	 * asinh == arcsinh
 	 * 
-	 * @param x - double
+	 * @param x double
 	 * @return double
 	 */
 	public static double arcsinh(double x){
@@ -519,7 +517,7 @@ public class PhysicalLayer implements Serializable {
 	/**
 	 * Logarithm in base 2
 	 * 
-	 * @param x
+	 * @param x double
 	 * @return double
 	 */
 	public static double log2(double x){
