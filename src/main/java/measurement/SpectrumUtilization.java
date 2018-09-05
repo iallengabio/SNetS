@@ -22,8 +22,8 @@ public class SpectrumUtilization extends Measurement {
     private double utilizationGen;
     private int numberObservations;
     private HashMap<String, Double> utilizationPerLink;
-
     private int[] desUtilizationPerSlot;
+    private Integer maxSlotsByLinks;
 
     /**
      * Creates a new instance of SpectrumUtilization
@@ -39,7 +39,7 @@ public class SpectrumUtilization extends Measurement {
         numberObservations = 0;
         utilizationPerLink = new HashMap<String, Double>();
 
-        int maxSlotsByLinks = mesh.maximumSlotsByLinks();
+        maxSlotsByLinks = mesh.maximumSlotsByLinks();
         desUtilizationPerSlot = new int[maxSlotsByLinks];
         
         fileName = "_SpectrumUtilization.csv";
@@ -143,4 +143,12 @@ public class SpectrumUtilization extends Measurement {
         return 1 - desUt;
     }
 
+    /**
+     * Returns the maximum slots by links
+     * 
+     * @return int
+     */
+    public int getMaxSlotsByLinks(){
+    	return maxSlotsByLinks;
+    }
 }
