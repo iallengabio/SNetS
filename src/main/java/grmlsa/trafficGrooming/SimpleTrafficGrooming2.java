@@ -31,8 +31,16 @@ public class SimpleTrafficGrooming2 extends SimpleTrafficGrooming {
 			if(!workRoute.equals(circuit.getRoute())){
 				continue; // if it is different it goes to the next circuit
 			}
-			
-			((SurvivalCircuit)circuit).getBackupRoutes();
+			boolean flag = false;
+			List<Route> backupRoutes = ((SurvivalCircuit)circuit).getBackupRoutes();
+			for(Route bckRoute : backupRoutes){
+				if(backupRoute.equals(bckRoute)){
+					flag = true;
+				}
+			}
+			if(!flag){
+				continue;
+			}
 			
 			// Investigate if the active circuit is able to accommodate the new request
 			

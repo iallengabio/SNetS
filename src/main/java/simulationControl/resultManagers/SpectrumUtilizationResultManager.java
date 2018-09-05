@@ -18,6 +18,7 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
+	private Integer slotsNumber;
 	
 	/**
 	 * This method organizes the data by load point and replication.
@@ -34,11 +35,15 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 			
 			for (Measurement su : loadPoint) {
 				reps.put(su.getReplication(), (SpectrumUtilization)su);
+				
+				if(slotsNumber == null){
+					slotsNumber = ((SpectrumUtilization)su).getMaxSlotsByLinks();
+				}
 			}			
 		}
 		loadPoints = new ArrayList<>(sus.keySet());
 		replications = new ArrayList<>(sus.values().iterator().next().keySet());
-	} 
+	}
 	
 	/**
 	 * Returns a string corresponding to the result file for spectrum utilization
@@ -116,8 +121,7 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 		StringBuilder res = new StringBuilder();
 		for (Integer loadPoint : loadPoints) {
 			String aux = "Utilization Per Slot" + sep + loadPoint + sep + "all" + sep + " - " + sep;
-			int i;
-			for(i=1;i<=400;i++){
+			for(int i = 1 ; i <= slotsNumber; i++){
 				String aux2 = aux + i + sep + " ";
 				for (Integer rep : replications) {
 					aux2 = aux2 + sep + sus.get(loadPoint).get(rep).getUtilizationPerSlot(i);

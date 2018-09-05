@@ -79,7 +79,7 @@ public class Mesh {
         }
         
         // Information related to the physical layer of the network
-        this.physicalLayer = new PhysicalLayer(plc);
+        this.physicalLayer = new PhysicalLayer(plc, this);
     }
 
     /**
