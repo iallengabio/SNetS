@@ -13,17 +13,7 @@ import grmlsa.routing.DJK;
 import grmlsa.routing.FixedRoutes;
 import grmlsa.routing.MMRDS;
 import grmlsa.routing.RoutingAlgorithmInterface;
-import grmlsa.spectrumAssignment.BestFit;
-import grmlsa.spectrumAssignment.DispersionAdaptiveFirstLastFit;
-import grmlsa.spectrumAssignment.ExactFit;
-import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.FirstLastExactFit;
-import grmlsa.spectrumAssignment.FirstLastFit;
-import grmlsa.spectrumAssignment.LastFit;
-import grmlsa.spectrumAssignment.RandomFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
-import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
-import grmlsa.spectrumAssignment.WorstFit;
+import grmlsa.spectrumAssignment.*;
 import grmlsa.trafficGrooming.*;
 
 import java.io.Serializable;
@@ -72,6 +62,7 @@ public class GRMLSA implements Serializable {
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
     private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
     private static final String SPECTRUM_ASSIGNMENT_DAFLF = "daflf";
+    private static final String SPECTRUM_ASSIGNMENT_EXPANSIVENESSFIT = "expansivenessfit";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -82,6 +73,7 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
     private static final String INTEGRATED_KSPSA = "kspsa";
+    private static final String INTEGRATED_KROUTESEXPANSIVENESS = "kroutesexpansiveness";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -203,6 +195,8 @@ public class GRMLSA implements Serializable {
                 return new TrafficBalancingSpectrumAssignment();
             case SPECTRUM_ASSIGNMENT_DAFLF:
                 return new DispersionAdaptiveFirstLastFit();
+            case SPECTRUM_ASSIGNMENT_EXPANSIVENESSFIT:
+                return new ExpansivenessFit();
             default:
                 return null;
         }
@@ -232,6 +226,8 @@ public class GRMLSA implements Serializable {
                 return new KSPFirstFit();
             case INTEGRATED_KSPSA:
                 return new KShortestPathsAndSpectrumAssignment();
+            case INTEGRATED_KROUTESEXPANSIVENESS:
+                return new KRoutesExpansiveness();
             default:
                 return null;
         }
