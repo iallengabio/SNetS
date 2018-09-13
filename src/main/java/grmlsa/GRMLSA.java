@@ -74,6 +74,7 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
     private static final String INTEGRATED_KSPSA = "kspsa";
     private static final String INTEGRATED_KROUTESEXPANSIVENESS = "kroutesexpansiveness";
+    private static final String INTEGRATED_COMPLETESHARINGEX = "completesharingex";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -228,6 +229,8 @@ public class GRMLSA implements Serializable {
                 return new KShortestPathsAndSpectrumAssignment();
             case INTEGRATED_KROUTESEXPANSIVENESS:
                 return new KRoutesExpansiveness();
+            case INTEGRATED_COMPLETESHARINGEX:
+                return new CompleteSharingEx();
             default:
                 return null;
         }
