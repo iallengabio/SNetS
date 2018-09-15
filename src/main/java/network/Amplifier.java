@@ -13,7 +13,7 @@ public class Amplifier implements Serializable {
 	private double saturationPower; // Saturation power in dBm
 	private double noiseFigure; // Noise figure in dB
 	private double h; // Constant of Planck (Js)
-	private double f; // Optical signal frequency (Hz)
+	private double frequency; // Optical signal frequency (Hz)
 	private double position; // Position of the amplifier on the link (Km)
 	
 	private double gainLinear; // Linear gain
@@ -27,21 +27,21 @@ public class Amplifier implements Serializable {
 	/**
 	 * Creates a new instance of Amplifier.
 	 * 
-	 * @param gain - Unsaturated gain
-	 * @param saturationPower - Saturation power
-	 * @param noiseFigure - Noise figure
-	 * @param h - Constant of Planck
-	 * @param f - Optical signal frequency
-	 * @param position - Position of the amplifier on the link
-	 * @param A1 - Parameter for noise factor
-	 * @param A2 - Parameter for noise factor
+	 * @param gain double - Unsaturated gain
+	 * @param saturationPower double - Saturation power
+	 * @param noiseFigure double - Noise figure
+	 * @param h double - Constant of Planck
+	 * @param frequency double - Optical signal frequency
+	 * @param position double - Position of the amplifier on the link
+	 * @param A1 double - Parameter for noise factor
+	 * @param A2 double - Parameter for noise factor
 	 */
-	public Amplifier(double gain, double saturationPower, double noiseFigure, double h, double f, double position, double A1, double A2){
+	public Amplifier(double gain, double saturationPower, double noiseFigure, double h, double frequency, double position, double A1, double A2){
 		this.gain = gain; //dB
 		this.saturationPower = saturationPower; //dBm
 		this.noiseFigure = noiseFigure; //dB
 		this.h = h; //Js
-		this.f = f; //Hz
+		this.frequency = frequency; //Hz
 		this.position = position; //Km
 		this.A1 = A1;
 		this.A2 = A2;
@@ -54,7 +54,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the gain
 	 * 
-	 * @return
+	 * @return double gain
 	 */
 	public double getGain() {
 		return gain;
@@ -63,7 +63,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the gain
 	 * 
-	 * @param gain
+	 * @param gain double
 	 */
 	public void setGain(double gain) {
 		this.gain = gain;
@@ -73,7 +73,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the saturation power
 	 * 
-	 * @return saturationPower
+	 * @return double saturationPower
 	 */
 	public double getSaturationPower() {
 		return saturationPower;
@@ -82,7 +82,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the saturation power
 	 * 
-	 * @param saturationPower
+	 * @param saturationPower double
 	 */
 	public void setSaturationPower(double saturationPower) {
 		this.saturationPower = saturationPower; //dBm
@@ -92,7 +92,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the noise figure
 	 * 
-	 * @return noiseFigure
+	 * @return double noiseFigure
 	 */
 	public double getNoiseFigure() {
 		return noiseFigure;
@@ -101,7 +101,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the noise figure
 	 * 
-	 * @param noiseFigure
+	 * @param noiseFigure double
 	 */
 	public void setNoiseFigure(double noiseFigure) {
 		this.noiseFigure = noiseFigure;
@@ -111,7 +111,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the Constant of Planck
 	 * 
-	 * @return h
+	 * @return double h
 	 */
 	public double getH() {
 		return h;
@@ -120,34 +120,34 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the Constant of Planck
 	 * 
-	 * @param h
+	 * @param h double
 	 */
 	public void setH(double h) {
 		this.h = h;
 	}
 	
 	/**
-	 * Returns the f
+	 * Returns the frequency
 	 * 
-	 * @return f
+	 * @return double frequency
 	 */
-	public double getF() {
-		return f;
+	public double getFrequency() {
+		return frequency;
 	}
 	
 	/**
-	 * Sets the f
+	 * Sets the frequency
 	 * 
-	 * @param f
+	 * @param frequency double
 	 */
-	public void setF(double f) {
-		this.f = f;
+	public void setFrequency(double frequency) {
+		this.frequency = frequency;
 	}
 	
 	/**
 	 * Returns the position
 	 * 
-	 * @return position
+	 * @return double position
 	 */
 	public double getPosition() {
 		return position;
@@ -156,7 +156,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the position
 	 *
-	 * @param position
+	 * @param position double
 	 */
 	public void setPosition(double position) {
 		this.position = position;
@@ -166,12 +166,10 @@ public class Amplifier implements Serializable {
 	 * Based on article: 
 	 *  - OSNR model to consider physical layer impairments in transparent optical networks (2009)
 	 * 
-	 * @param gainSaturated, linear
-	 * @param pin, linear
-	 * @param frequency - double
+	 * @param pinTotal double - linear
 	 * @return double - ASE linear
 	 */
-	public double getAseBySaturation(double frequency, double pinTotal){
+	public double getAseBySaturation(double pinTotal){
 		double gainSaturated = getGainSaturated(pinTotal);
 		double famp = getFamp(pinTotal);
 		double ase = 0.5 * h * frequency * famp * gainSaturated;
@@ -182,12 +180,10 @@ public class Amplifier implements Serializable {
 	 * Based on articles: 
 	 *   - Closed-form expressions for nonlinear transmission performance of densely spaced coherent optical OFDM systems (2010)
 	 *   - A Quality-of-Transmission Aware Dynamic Routing and Spectrum Assignment Scheme for Future Elastic Optical Networks (2013)
-	 *   
-	 * @param gain, linear
-	 * @param frequency
+	 * 
 	 * @return double - ASE linear
 	 */
-	public double getAse(double frequency){
+	public double getAse(){
 		double ase = 0.5 * h * frequency * noiseFigureLinear * (gainLinear - 1.0);
 		return ase;
 	}
@@ -196,7 +192,7 @@ public class Amplifier implements Serializable {
 	 * Based on article: 
 	 *  - OSNR model to consider physical layer impairments in transparent optical networks (2009)
 	 *  
-	 * @param Pin - linear
+	 * @param pin double - linear
 	 * @return double - linear
 	 */
 	public double getFamp(double pin){
@@ -209,7 +205,7 @@ public class Amplifier implements Serializable {
 	 * Based on article: 
 	 *  - OSNR model to consider physical layer impairments in transparent optical networks (2009)
 	 * 
-	 * @param pinTotal - Total input power, value in Watt
+	 * @param pinTotal double - Total input power, value in Watt
 	 * @return double - Saturated gain, linear value
 	 */
 	public double getGainSaturated(double pinTotal){
@@ -223,8 +219,9 @@ public class Amplifier implements Serializable {
 	
 	/**
 	 * A method that calculates the gain in relation to an input power and verifying the saturation power
-	 * @param pinTotal
-	 * @return
+	 * 
+	 * @param pinTotal double
+	 * @return double
 	 */
 	public double getSaturatedGainByPsat(double totalPin){
 		double g = gainLinear;
@@ -244,14 +241,14 @@ public class Amplifier implements Serializable {
 	 * @return String
 	 */
 	public String toString(){
-		return "gain = " + this.gain + ", saturaionPower = " + this.saturationPower +", noiseFigure = " + this.noiseFigure + ", h = " + this.h + ", f = " + this.f + ", position = " + this.position;
+		return "gain = " + this.gain + ", saturaionPower = " + this.saturationPower +", noiseFigure = " + this.noiseFigure + ", h = " + this.h + ", frequency = " + this.frequency + ", position = " + this.position;
 	}
 	
 	/**
 	 * Returns the value of gain of the amplifier according to gain type of the amplifier
 	 * 
-	 * @param pinTotal - Total power at the amplifier input
-	 * @param typeOfAmplifierGain - Type of amplifier gain
+	 * @param pinTotal double - Total power at the amplifier input
+	 * @param typeOfAmplifierGain int - Type of amplifier gain
 	 * @return double - amplifier gain
 	 */
 	public double getGainByType(double pinTotal, int typeOfAmplifierGain){
@@ -270,18 +267,17 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the ASE noise value according to the gain type of the amplifier
 	 * 
-	 * @param pinTotal - Total power at the amplifier input
-	 * @param frequency - Signal frequency
-	 * @param gain - Amplifier gain
+	 * @param pinTotal double - Total power at the amplifier input
+	 * @param gain double - Amplifier gain
 	 * @return double - ASE
 	 */
-	public double getAseByGain(double pinTotal, double frequency, double gain){
+	public double getAseByGain(double pinTotal, double gain){
 		double aseNoise = 0.0;
 		
 		if(gain == gainLinear){
-			aseNoise = this.getAse(frequency);
+			aseNoise = this.getAse();
 		}else{
-			aseNoise = this.getAseBySaturation(frequency, pinTotal);
+			aseNoise = this.getAseBySaturation(pinTotal);
 		}
 		
 		return aseNoise;
@@ -290,7 +286,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the gain linear
 	 * 
-	 * @return gainLinear - double
+	 * @return double gainLinear
 	 */
 	public double getGainLinear() {
 		return gainLinear;
@@ -299,7 +295,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the gain linear
 	 * 
-	 * @param gainLinear - double
+	 * @param gainLinear double
 	 */
 	public void setGainLinear(double gainLinear) {
 		this.gainLinear = gainLinear;
@@ -308,7 +304,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the noise figure linear
 	 * 
-	 * @return noiseFigureLinear
+	 * @return double noiseFigureLinear
 	 */
 	public double getNoiseFigureLinear() {
 		return noiseFigureLinear;
@@ -317,7 +313,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the noise figure linear
 	 * 
-	 * @param noiseFigureLinear
+	 * @param noiseFigureLinear double
 	 */
 	public void setNoiseFigureLinear(double noiseFigureLinear) {
 		this.noiseFigureLinear = noiseFigureLinear;
@@ -326,7 +322,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Returns the famp
 	 * 
-	 * @return the famp
+	 * @return double the famp
 	 */
 	public double getFamp() {
 		return Famp;
@@ -335,7 +331,7 @@ public class Amplifier implements Serializable {
 	/**
 	 * Sets the famp
 	 * 
-	 * @param famp the famp to set
+	 * @param famp double - the famp to set
 	 */
 	public void setFamp(double famp) {
 		Famp = famp;
