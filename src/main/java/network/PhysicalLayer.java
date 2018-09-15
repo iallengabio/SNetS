@@ -26,7 +26,7 @@ public class PhysicalLayer {
     private double power; // Power per channel, dBm
     private double L; // Size of a span, km
     private double alpha; // Fiber loss, dB/km
-    private double gamma; // Fiber nonlinearity,  W^-1*m^-1
+    private double gamma; // Fiber nonlinearity,  (W*m)^-1
     private double D; // Dispersion parameter, s/m^2
     private double centerFrequency; //Frequency of light
 	
@@ -36,6 +36,7 @@ public class PhysicalLayer {
     private double A1; // Amplifier noise factor parameter, A1
     private double A2; // Amplifier noise factor parameter, A2
     private int typeOfAmplifierGain; // Type of amplifier gain, 0 to fixed gain and 1 to saturated gain
+    private double amplificationFrequency; // Frequency used for amplification
     
     private double Lsss; // Switch insertion loss, dB
     
@@ -64,6 +65,7 @@ public class PhysicalLayer {
     	
         this.activeASE = plc.isActiveASE();
         this.activeNLI = plc.isActiveNLI();
+        
         this.typeOfTestQoT = plc.getTypeOfTestQoT();
         this.rateOfFEC = plc.getRateOfFEC();
     	
@@ -79,19 +81,27 @@ public class PhysicalLayer {
         this.pSat = plc.getPowerSaturationOfOpticalAmplifier();
         this.A1 = plc.getNoiseFactorModelParameterA1();
         this.A2 = plc.getNoiseFactorModelParameterA2();
+        this.typeOfAmplifierGain = plc.getTypeOfAmplifierGain();
+        this.amplificationFrequency = plc.getAmplificationFrequency();
         
         this.Lsss = plc.getSwitchInsertionLoss();
         
         this.fixedPowerSpectralDensity = plc.isFixedPowerSpectralDensity();
         this.referenceBandwidth = plc.getReferenceBandwidthForPowerSpectralDensity();
         
-        this.boosterAmp = new Amplifier(Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-        this.lineAmp = new Amplifier(alpha * L, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-        this.preAmp = new Amplifier((alpha * L) + Lsss, pSat, NF, h, centerFrequency, 0.0, A1, A2);
-        
         this.linearPower = ratioOfDB(power) * 1.0E-3; // converting to Watt
         this.alphaLinear = computeAlphaLinear(alpha);
         this.beta2 = computeBeta2(D, centerFrequency);
+        
+        double spanMeter = L * 1000; // span in meter
+        double attenuationBySpan = Math.pow(Math.E, alphaLinear * spanMeter);
+        double boosterAmpGainLinear = ratioOfDB(Lsss);
+        double lineAmpGainLinear = attenuationBySpan;
+        double preAmpGainLinear = attenuationBySpan * ratioOfDB(Lsss);
+        
+        this.boosterAmp = new Amplifier(ratioForDB(boosterAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
+        this.lineAmp = new Amplifier(ratioForDB(lineAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
+        this.preAmp = new Amplifier(ratioForDB(preAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
         
         this.slotBandwidth = mesh.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
         double slotsTotal = mesh.getLinkList().firstElement().getNumOfSlots();
@@ -201,7 +211,7 @@ public class PhysicalLayer {
 	 * @return boolean
 	 */
 	public boolean isAdmissibleModultion(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
-		double SNR = computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, true);
+		double SNR = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, true);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -222,7 +232,7 @@ public class PhysicalLayer {
 	 * @return boolean
 	 */
 	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[]){
-		double SNR = computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, true);
+		double SNR = computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, true);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -247,7 +257,7 @@ public class PhysicalLayer {
 	 *                                     of the total power that enters the amplifiers (true, considers, or false, does not consider)
 	 * @return double - SNR (linear)
 	 */
-	public double computeSNRSegment(Circuit circuit, double bandwidth, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
+	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
 		
 		double I = linearPower / referenceBandwidth; // Signal power density for the reference bandwidth
 		double Iase = 0.0;
@@ -276,7 +286,7 @@ public class PhysicalLayer {
 			Ns = getNumberOfLineAmplifiers(link.getDistance());
 			
 			if(activeNLI){
-				noiseNli = Ns * getGnli(circuit, link, linearPower, Bsi, I, fi);
+				noiseNli = (Ns + 1.0) * getGnli(circuit, link, linearPower, Bsi, I, fi); // Ns + 1 corresponds to the line amplifiers span more the pre-amplifier span
 				Inli = Inli + noiseNli;
 			}
 			
@@ -284,12 +294,17 @@ public class PhysicalLayer {
 				if(typeOfAmplifierGain == 1){
 					totalPower = getTotalPowerInTheLink(link, linearPower, Bsi, I, numSlotsRequired, checksOnTotalPower);
 				}
-				lastFiberSegment = link.getDistance() - (Ns * L);
-				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
 				
-				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, centerFrequency, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
-				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, centerFrequency, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
-				preAmpNoiseAse = preAmp.getAseByGain(totalPower, centerFrequency, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				lastFiberSegment = link.getDistance() - (Ns * L);
+				if(lastFiberSegment != L){ // check if need to recalculate the gain of the preamplifier
+					double spanMeter = lastFiberSegment * 1000; // span in meter
+					double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
+					preAmp.setGain(ratioForDB(preAmpGainLinear));
+				}
+				
+				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				preAmpNoiseAse = preAmp.getAseByGain(totalPower, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				
 				Iase = Iase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
 			}
@@ -308,6 +323,8 @@ public class PhysicalLayer {
 	 * Total input power on the link
 	 * 
 	 * @param link Link
+	 * @param powerI double
+	 * @param Bsi double
 	 * @param I double
 	 * @param numSlotsRequired int
 	 * @param checksOnTotalPower boolean
@@ -331,7 +348,7 @@ public class PhysicalLayer {
 		TreeSet<Circuit> listCircuits = link.getCircuitList();
 		for(Circuit cricuitJ : listCircuits){
 			
-			saj = cricuitJ.getSpectrumAssignedByLink(link);;
+			saj = cricuitJ.getSpectrumAssignedByLink(link);
 			numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
 			Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 			
@@ -545,7 +562,7 @@ public class PhysicalLayer {
 	 * @return double
 	 */
 	public static double computeBeta2(double D, double frequencia){
-		double c = 299792458.0; //m/s
+		double c = 299792458.0; // speed of light, m/s
 		double lambda = c / frequencia;
 		double beta2 = -1.0 * D * (lambda * lambda) / (2.0 * Math.PI * c);
 		return beta2;
@@ -553,6 +570,16 @@ public class PhysicalLayer {
 	
 	/**
 	 * Returns the alpha linear value (1/m) of a value in dB/km
+	 * 
+	 * Example:
+	 * 10 * Log10(e^(alpha * km)) = 0.2 dB/km
+	 * (alpha * km) * 10 * Log10(e) = 0.2 dB/km
+	 * alpha = (0.2 dB/km) / (km * 10 * Log10(e))
+	 * alpha = (0.2 dB/km) / (1000 * m * 10 * Log10(e))
+	 * alpha = (0.2 dB/km) / (10000 * Log10(e) * m)
+	 * alpha (dB/km) = (0.2 dB/km) / (10000 * Log10(e) * m)
+	 * alpha (linear) = (0.2 dB/km) / (10000 * Log10(e) * m * dB/km)
+	 * alpha (linear) = 4.60517E-5 / m
 	 * 
 	 * @param alpha double
 	 * @return double

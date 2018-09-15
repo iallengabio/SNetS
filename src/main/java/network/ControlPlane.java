@@ -532,7 +532,7 @@ public class ControlPlane {
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
     public boolean computeQualityOfTransmission(Circuit circuit){
-    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -743,7 +743,7 @@ public class ControlPlane {
 	 * @return double - delta SNR (dB)
 	 */
 	public double getDeltaSNR(Circuit circuit){
-		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		
 		double modulationSNRthreshold = circuit.getModulation().getSNRthreshold();
