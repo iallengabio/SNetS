@@ -22,6 +22,7 @@ import grmlsa.spectrumAssignment.FirstLastFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.RandomFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentWithInterferenceReduction;
 import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
 import grmlsa.spectrumAssignment.WorstFit;
 import grmlsa.trafficGrooming.*;
@@ -72,6 +73,7 @@ public class GRMLSA implements Serializable {
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
     private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
     private static final String SPECTRUM_ASSIGNMENT_DAFLF = "daflf";
+    private static final String SPECTRUM_ASSIGNMENT_SAIR = "sair";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -203,6 +205,8 @@ public class GRMLSA implements Serializable {
                 return new TrafficBalancingSpectrumAssignment();
             case SPECTRUM_ASSIGNMENT_DAFLF:
                 return new DispersionAdaptiveFirstLastFit();
+            case SPECTRUM_ASSIGNMENT_SAIR:
+                return new SpectrumAssignmentWithInterferenceReduction();
             default:
                 return null;
         }

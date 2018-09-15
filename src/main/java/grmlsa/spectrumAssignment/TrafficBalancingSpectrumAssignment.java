@@ -15,6 +15,7 @@ import util.IntersectionFreeSpectrum;
  * @author Alexandre
  */
 public class TrafficBalancingSpectrumAssignment implements SpectrumAssignmentAlgorithmInterface {
+	
 	@Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
         List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
@@ -28,14 +29,6 @@ public class TrafficBalancingSpectrumAssignment implements SpectrumAssignmentAlg
         return true;
     }
 
-    /**
-     * Applies the policy of allocation of spectrum TBSA
-     * 
-     * @param numberOfSlots int
-     * @param freeSpectrumBands List<int[]>
-     * @param circuit Circuit
-     * @return int[]
-     */
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
     	if(freeSpectrumBands.size() == 0){

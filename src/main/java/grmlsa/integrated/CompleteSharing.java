@@ -50,6 +50,8 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
             circuit.setRoute(route);
             
             Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
+            circuit.setModulation(mod);
+            
             if(mod != null){
 	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 	

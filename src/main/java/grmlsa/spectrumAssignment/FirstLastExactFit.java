@@ -184,15 +184,8 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 		
 		return chosen;
 	}
-	
-	/**
-	 * Uses the disjoint connection group to choose between FirstExactFit or LastExactFit
-	 * 
-	 * @param numberOfSlots int
-	 * @param freeSpectrumBands List<int[]>
-	 * @param circuit Circuit
-	 * @return int[]
-	 */
+
+	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
 		createGraphCheckDisjoint(cp);
 		
