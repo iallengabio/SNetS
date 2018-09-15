@@ -86,14 +86,7 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 		return chosen;
 	}
 	
-	/**
-	 * Uses the largerBand parameter to choose between FirstFit or LastFit
-	 * 
-	 * @param numberOfSlots int
-	 * @param livres List<int[]>
-	 * @param circuit Circuit
-	 * @return int[]
-	 */
+	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
 		if(beta == null){
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();

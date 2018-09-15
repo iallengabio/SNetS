@@ -71,6 +71,8 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
             circuit.setRoute(route);
             
             Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
+            circuit.setModulation(mod);
+            
             if(mod != null){
             	
 	            // Calculate how many slots are needed for this route
