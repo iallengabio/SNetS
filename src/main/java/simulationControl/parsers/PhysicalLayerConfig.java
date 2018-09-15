@@ -14,6 +14,7 @@ public class PhysicalLayerConfig {
 	
 	private boolean activeASE; // Active the ASE noise of the amplifier
 	private boolean activeNLI; //  Active nonlinear noise in the fibers
+	
 	private double rateOfFEC; // Rate of FEC (Forward Error Correction), The most used rate is 7% which corresponds to the BER of 3.8E-3
 	private int typeOfTestQoT; // 0, To check for the SNR threshold (Signal-to-Noise Ratio), or another value, to check for the BER threshold (Bit Error Rate)
 	
@@ -30,6 +31,7 @@ public class PhysicalLayerConfig {
 	private double noiseFactorModelParameterA1; // A1, Amplifier noise factor parameter
 	private double noiseFactorModelParameterA2; // A2, Amplifier noise factor parameter
 	private int typeOfAmplifierGain; // Type of amplifier gain, 0 to fixed gain and 1 to saturated gain
+	private double amplificationFrequency; // Frequency used for amplification
 	
 	private double switchInsertionLoss; // dB
 	
@@ -253,6 +255,18 @@ public class PhysicalLayerConfig {
 	 */
 	public void setTypeOfAmplifierGain(int typeOfAmplifierGain) {
 		this.typeOfAmplifierGain = typeOfAmplifierGain;
+	}
+	/**
+	 * @return the amplificationFrequency
+	 */
+	public double getAmplificationFrequency() {
+		return amplificationFrequency;
+	}
+	/**
+	 * @param amplificationFrequency the amplificationFrequency to set
+	 */
+	public void setAmplificationFrequency(double amplificationFrequency) {
+		this.amplificationFrequency = amplificationFrequency;
 	}
 	/**
 	 * @return the switchInsertionLoss

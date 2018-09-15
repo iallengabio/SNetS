@@ -132,7 +132,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = circuit.getModulationByLink(link);
 			int sa[] = circuit.getSpectrumAssignedByLink(link);
 			
-			double SNR = getMesh().getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, mod, sa, false);
+			double SNR = getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, sa, false);
 			double SNRdB = PhysicalLayer.ratioForDB(SNR);
 			
 			boolean QoT = getMesh().getPhysicalLayer().isAdmissible(mod, SNRdB, SNR); 
