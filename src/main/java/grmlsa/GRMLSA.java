@@ -5,6 +5,7 @@ import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
 import grmlsa.modulation.ModulationSelectionByQoT;
+import grmlsa.modulation.ModulationSelectionByQoTAndSigma;
 import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
 import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
@@ -94,6 +95,7 @@ public class GRMLSA implements Serializable {
 	private static final String MODULATION_BY_DISTANCE = "modulationbydistance";
 	private static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
 	private static final String MODULATION_BY_QOT = "modulationbyqot";
+	private static final String MODULATION_BY_QOT_SIGMA = "modulationbyqotsigma";
 
     // End of constants
 
@@ -274,6 +276,8 @@ public class GRMLSA implements Serializable {
 	    		return new ModulationSelectionByDistance2();
 	    	case MODULATION_BY_QOT:
 	    		return new ModulationSelectionByQoT();
+	    	case MODULATION_BY_QOT_SIGMA:
+	    		return new ModulationSelectionByQoTAndSigma();
 	    	default:
 	    		return null;
     	}
