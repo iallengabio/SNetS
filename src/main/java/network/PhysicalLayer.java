@@ -286,7 +286,7 @@ public class PhysicalLayer {
 			Ns = getNumberOfLineAmplifiers(link.getDistance());
 			
 			if(activeNLI){
-				noiseNli = (Ns + 1.0) * getGnli(circuit, link, linearPower, Bsi, I, fi); // Ns + 1 corresponds to the line amplifiers span more the pre-amplifier span
+				noiseNli = (Ns + 1.0) * getGnli(circuit, link, linearPower, Bsi, I, fi); // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
 				Inli = Inli + noiseNli;
 			}
 			
@@ -348,12 +348,12 @@ public class PhysicalLayer {
 		TreeSet<Circuit> listCircuits = link.getCircuitList();
 		for(Circuit cricuitJ : listCircuits){
 			
-			saj = cricuitJ.getSpectrumAssignedByLink(link);
-			numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-			Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
-			
 			circuitPower = powerJ;
 			if(fixedPowerSpectralDensity){
+				saj = cricuitJ.getSpectrumAssignedByLink(link);
+				numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
+				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				
 				circuitPower = I * Bsj;
 			}
 			
@@ -387,7 +387,7 @@ public class PhysicalLayer {
 		}
 		
 		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
-		double ro =  BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+		double ro = BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
 		double p1 = Gi * Gi * arcsinh(ro);
 		
 		double p2 = 0.0;

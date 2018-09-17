@@ -233,7 +233,6 @@ public class Circuit implements Comparable<Object>{
 	 * @return int[]
 	 */
 	public int[] getSpectrumAssignedByLink(Link link){
-
 		int sa[] = getSpectrumAssigned();
 		return sa;
 	}

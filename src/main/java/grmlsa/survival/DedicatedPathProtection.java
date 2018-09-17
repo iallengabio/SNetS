@@ -33,45 +33,53 @@ public class DedicatedPathProtection implements SurvivalStrategyInterface {
 		List<Route> listRoutes = routingAlgorithm.findRoute(rfc, cp.getMesh());
 		Route workRoute = listRoutes.get(0);
 		Route backupRoute = listRoutes.get(1);
+		int indexBackupRoute = 0;
 		
-		boolean flagWorkRoute = false;
-		boolean flagBackupRoute = false;
-		
-		// Work route search
-		if(workRoute != null){
+		if(workRoute != null && backupRoute != null){
+			
 			// Applies the traffic aggregation algorithm
 			if(groomingAlgorithm.searchCircuitsForGroomingByRoute(rfc, cp, workRoute, backupRoute)){
-				flagWorkRoute = true;
+				return true;
 				
 			} else {
-				// Try to create a new circuit to accommodate that.
-		 		SurvivalCircuit workCircuit = (SurvivalCircuit)cp.createNewCircuit(rfc);
-		 		workCircuit.setRoute(workRoute);
+				// Try to create a new circuit to accommodate the request
+		 		SurvivalCircuit newCircuit = (SurvivalCircuit)cp.createNewCircuit(rfc);
+		 		newCircuit.setRoute(workRoute);
+		 		((SurvivalCircuit)newCircuit).getBackupRoutes().add(backupRoute);
+		 		((SurvivalCircuit)newCircuit).setIndexBackupRoute(indexBackupRoute);
 		 		
-		 		if(tryEstablishNewCircuit(workCircuit, workRoute, cp)){
-		 			flagWorkRoute = true;
-		 		}
-			}
-		}
- 		
-		// Backup route search
-		if(backupRoute != null){
-			// Applies the traffic aggregation algorithm
-			if(groomingAlgorithm.searchCircuitsForGroomingByRoute(rfc, cp, workRoute, backupRoute)){
-				flagBackupRoute = true;
+				Modulation workMod;
+				Modulation backupMod;
+				int workBand[];
+				int backupBand[];
 				
-			} else {
-				// Try to create a new circuit to accommodate that.
-				SurvivalCircuit backupCircuit = (SurvivalCircuit)cp.createNewCircuit(rfc);
-		 		backupCircuit.setRoute(backupRoute);
-		 		
-		 		if(tryEstablishNewCircuit(backupCircuit, workRoute, cp)){
-		 			flagBackupRoute = true;
+				// Check if it is possible to establish the circuit in the work route
+		 		if(tryEstablishNewCircuit(newCircuit, workRoute, cp)){
+		 			
+		 			workMod = newCircuit.getModulation();
+		 			workBand = newCircuit.getSpectrumAssigned();
+		 			
+		 			// Check if it is possible to establish the circuit in the backup route
+			 		if(tryEstablishNewCircuit(newCircuit, backupRoute, cp)){
+			 			
+			 			backupMod = newCircuit.getModulation();
+			 			backupBand = newCircuit.getSpectrumAssigned();
+			 			
+			 			newCircuit.setRoute(workRoute);
+			 			newCircuit.setModulation(workMod);
+			 			newCircuit.setSpectrumAssigned(workBand);
+			 			
+			 			((SurvivalCircuit)newCircuit).getBackupRoutes().set(indexBackupRoute, backupRoute);
+			 			((SurvivalCircuit)newCircuit).getModulationByBackupRoute().put(backupRoute, backupMod);
+			 			((SurvivalCircuit)newCircuit).getSpectrumAssignedByBackupRoute().put(backupRoute, backupBand);
+			 			
+			 			return true;
+			 		}
 		 		}
 			}
 		}
         
-		return (flagWorkRoute && flagBackupRoute);
+		return false;
 	}
 	
 	public boolean tryEstablishNewCircuit(Circuit circuit, Route route, SurvivalControlPlane cp){
@@ -82,6 +90,8 @@ public class DedicatedPathProtection implements SurvivalStrategyInterface {
         if(spectrumAssignment == null){
 			spectrumAssignment = cp.getSpectrumAssignment(); // Uses the spectrum assignment algorithm defined in the simulation file
 		}
+        
+        circuit.setRoute(route);
         
         // Modulation and spectrum range selected
         Modulation chosenMod = null;
