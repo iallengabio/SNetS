@@ -29,14 +29,6 @@ public class RandomFit implements SpectrumAssignmentAlgorithmInterface {
         return true;
     }
 
-    /**
-     * Applies the policy of allocation of spectrum RandomFit
-     * 
-     * @param numberOfSlots int
-     * @param freeSpectrumBands List<int[]>
-     * @param circuit Circuit
-     * @return int[]
-     */
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
     	int chosen[] = null;

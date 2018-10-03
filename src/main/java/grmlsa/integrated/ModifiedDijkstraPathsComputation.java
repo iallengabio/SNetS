@@ -124,16 +124,16 @@ public class ModifiedDijkstraPathsComputation implements IntegratedRMLSAAlgorith
 					
 					circuit.setRoute(routeTemp);
 					Modulation mod = modulationSelection.selectModulation(circuit, routeTemp, spectrumAssignment, cp);
+					circuit.setModulation(mod);
 					
 					if(mod != null){
 						int requeridSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 						
 						List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp);
 						int faixa[] = spectrumAssignment.policy(requeridSlots, merge, circuit, cp);
+						circuit.setSpectrumAssigned(faixa);
 						
 						if(faixa != null){
-							circuit.setModulation(mod);
-							circuit.setSpectrumAssigned(faixa);
 							boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, faixa);
 							
 							if(QoT){

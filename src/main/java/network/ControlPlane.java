@@ -280,17 +280,17 @@ public class ControlPlane implements Serializable {
     public boolean establishCircuit(Circuit circuit) throws Exception {
 
     	// Check if there are free transmitters and receivers
-    	if(circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers()) {
+    	if(thereAreFreeTransponders(circuit)) {
     		
     		// Can allocate spectrum
-            if (this.tryEstablishNewCircuit(circuit)) {
+            if (tryEstablishNewCircuit(circuit)) {
 
             	// Pre-admits the circuit for QoT verification
-                this.allocateCircuit(circuit);
+                allocateCircuit(circuit);
                 
                 // QoT verification
                 if(isAdmissibleQualityOfTransmission(circuit)){
-                    this.updateNetworkPowerConsumption();
+                    updateNetworkPowerConsumption();
                 	return true; // Admits the circuit
                 	
                 } else {
@@ -303,6 +303,16 @@ public class ControlPlane implements Serializable {
         return false; // Rejects the circuit
     }
 
+    /**
+     * Verifies if there are free transmitters and receivers for the establishment of the new circuit
+     * 
+     * @param circuit Circuit
+     * @return boolean
+     */
+    public boolean thereAreFreeTransponders(Circuit circuit){
+    	return (circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers());
+    }
+    
     /**
      * This method tries to answer a given request by allocating the necessary resources to the same one
      *
@@ -510,7 +520,7 @@ public class ControlPlane implements Serializable {
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
     public boolean computeQualityOfTransmission(Circuit circuit){
-    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -721,7 +731,7 @@ public class ControlPlane implements Serializable {
 	 * @return double - delta SNR (dB)
 	 */
 	public double getDeltaSNR(Circuit circuit){
-		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		
 		double modulationSNRthreshold = circuit.getModulation().getSNRthreshold();

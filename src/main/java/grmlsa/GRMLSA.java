@@ -5,6 +5,7 @@ import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
 import grmlsa.modulation.ModulationSelectionByQoT;
+import grmlsa.modulation.ModulationSelectionByQoTAndSigma;
 import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
 import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
@@ -13,7 +14,18 @@ import grmlsa.routing.DJK;
 import grmlsa.routing.FixedRoutes;
 import grmlsa.routing.MMRDS;
 import grmlsa.routing.RoutingAlgorithmInterface;
-import grmlsa.spectrumAssignment.*;
+import grmlsa.spectrumAssignment.BestFit;
+import grmlsa.spectrumAssignment.DispersionAdaptiveFirstLastFit;
+import grmlsa.spectrumAssignment.ExactFit;
+import grmlsa.spectrumAssignment.FirstFit;
+import grmlsa.spectrumAssignment.FirstLastExactFit;
+import grmlsa.spectrumAssignment.FirstLastFit;
+import grmlsa.spectrumAssignment.LastFit;
+import grmlsa.spectrumAssignment.RandomFit;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentWithInterferenceReduction;
+import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
+import grmlsa.spectrumAssignment.WorstFit;
 import grmlsa.trafficGrooming.*;
 
 import java.io.Serializable;
@@ -62,7 +74,7 @@ public class GRMLSA implements Serializable {
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
     private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
     private static final String SPECTRUM_ASSIGNMENT_DAFLF = "daflf";
-    private static final String SPECTRUM_ASSIGNMENT_EXPANSIVENESSFIT = "expansivenessfit";
+    private static final String SPECTRUM_ASSIGNMENT_SAIR = "sair";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -73,8 +85,6 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
     private static final String INTEGRATED_KSPSA = "kspsa";
-    private static final String INTEGRATED_KROUTESEXPANSIVENESS = "kroutesexpansiveness";
-    private static final String INTEGRATED_COMPLETESHARINGEX = "completesharingex";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -85,6 +95,7 @@ public class GRMLSA implements Serializable {
 	private static final String MODULATION_BY_DISTANCE = "modulationbydistance";
 	private static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
 	private static final String MODULATION_BY_QOT = "modulationbyqot";
+	private static final String MODULATION_BY_QOT_SIGMA = "modulationbyqotsigma";
 
     // End of constants
 
@@ -196,8 +207,8 @@ public class GRMLSA implements Serializable {
                 return new TrafficBalancingSpectrumAssignment();
             case SPECTRUM_ASSIGNMENT_DAFLF:
                 return new DispersionAdaptiveFirstLastFit();
-            case SPECTRUM_ASSIGNMENT_EXPANSIVENESSFIT:
-                return new ExpansivenessFit();
+            case SPECTRUM_ASSIGNMENT_SAIR:
+                return new SpectrumAssignmentWithInterferenceReduction();
             default:
                 return null;
         }
@@ -227,10 +238,6 @@ public class GRMLSA implements Serializable {
                 return new KSPFirstFit();
             case INTEGRATED_KSPSA:
                 return new KShortestPathsAndSpectrumAssignment();
-            case INTEGRATED_KROUTESEXPANSIVENESS:
-                return new KRoutesExpansiveness();
-            case INTEGRATED_COMPLETESHARINGEX:
-                return new CompleteSharingEx();
             default:
                 return null;
         }
@@ -269,6 +276,8 @@ public class GRMLSA implements Serializable {
 	    		return new ModulationSelectionByDistance2();
 	    	case MODULATION_BY_QOT:
 	    		return new ModulationSelectionByQoT();
+	    	case MODULATION_BY_QOT_SIGMA:
+	    		return new ModulationSelectionByQoTAndSigma();
 	    	default:
 	    		return null;
     	}
