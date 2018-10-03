@@ -40,7 +40,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
     public NewKShortestPaths(Mesh mesh, int k) {
         this.k = k;
         this.computeAllRoutes(mesh);
-        salveRoutesByPar(mesh.getNodeList());
+        //salveRoutesByPar(mesh.getNodeList());
     }
 
     /**
