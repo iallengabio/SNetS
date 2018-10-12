@@ -35,6 +35,7 @@ public class SimulationConfig {
         public boolean EnergyConsumption = true;
         public boolean ModulationUtilization = true;
         public boolean ConsumedEnergy = true;
+        public boolean GroomingStatistics = true;
     }
 
     /**

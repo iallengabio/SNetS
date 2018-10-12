@@ -132,6 +132,10 @@ public class Measurements implements Serializable {
 			ConsumedEnergy consumedEnergy = new ConsumedEnergy(loadPoint,replication);
 			this.consumedEnergyMetric = consumedEnergy; //fix this
 		}
+		if(measuringMetrics.GroomingStatistics){
+			GroomingStatistics groomingStatistics = new GroomingStatistics(loadPoint,replication);
+			this.metricsList.add(groomingStatistics);
+		}
     }
     
     /**
