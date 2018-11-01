@@ -20,5 +20,6 @@
 	 "TransmittersReceiversRegeneratorsUtilization":true,
 	 "EnergyConsumption":true,
 	 "ModulationUtilization":true,
-	 "ConsumedEnergy":true}
+	 "ConsumedEnergy":true,
+	 "GroomingStatistics":true}
 }
