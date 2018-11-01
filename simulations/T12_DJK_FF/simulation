@@ -4,7 +4,7 @@
 "requests":100000,
 "loadPoints":4,
 "replications":10,
-"grooming":"notrafficgrooming",
+"grooming":"mgfccf",
 "routing":"djk",
 "spectrumAssignment":"firstfit",
 "integratedRmlsa":"completesharing",
@@ -19,5 +19,6 @@
 	 "TransmittersReceiversRegeneratorsUtilization":false,
 	 "EnergyConsumption":true,
 	 "ModulationUtilization":false,
-	 "ConsumedEnergy":true}
+	 "ConsumedEnergy":true,
+	 "GroomingStatistics":true}
 }

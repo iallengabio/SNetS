@@ -1,5 +1,5 @@
 library("ggplot2")
-source("C:/Users/ialle/Documents/workspace/IdeaProjects/SNetS/processing of results/RSNetS.R",encoding = "utf-8")
+source("C:/Users/ialle/Dropbox/workspaces/ideaProjects/SNetS/processing of results/RSNetS.R",encoding = "utf-8")
 
 blockingProbability <- function(directory, replicacoes, alpha, legLoads, legSol){
   arq="_BlockingProbability.csv"
@@ -127,24 +127,24 @@ maxBVTUtilization <- function(directory, replicacoes, alpha, legLoads, legSol){
 }
 
 #Gere seus gr?ficos a partir daqui utilizando as fun??es auxiliares
-directory = "C:/Users/ialle/Documents/pen driver/Academico/Doutorado/Pesquisa/Grooming/Nova Modelagem Normalizado_Line_NSFNet_New_4"
+directory = "C:/Users/ialle/Dropbox/Doutorado/Pesquisa/Grooming/FCCF/Nova Modelagem Normalizado_Line_NSFNet"
 replicacoes = 10;
 alpha = 0.05
 legLoads = c("491","655","819")
 #legSol = c("20","25","30","35","40")
-legSol = c("MSM","MUE","MSV","MSF","FCCF")
+legSol = c("BAS","MUE","MSV","MSF","IACF")
 
-
+# 
 blockingProbability(directory, replicacoes, alpha, legLoads, legSol)
-bandwidthBlockingProbability(directory, replicacoes, alpha, legLoads, legSol)
-spectrumUtilization(directory, replicacoes, alpha, legLoads, legSol)
-txUtilization(directory, replicacoes, alpha, legLoads, legSol)
-costBenefit(directory, replicacoes, alpha, legLoads, legSol)
-maxBVTUtilization(directory, replicacoes, alpha, legLoads, legSol)
-profit(directory, replicacoes, alpha, legLoads, legSol)
-energyConsumption(directory, replicacoes, alpha, legLoads, legSol)
-consumedEnergy(directory, replicacoes, alpha, legLoads, legSol)
-consumedEnergyBVT(directory, replicacoes, alpha, legLoads, legSol)
-consumedEnergyOXC(directory, replicacoes, alpha, legLoads, legSol)
-consumedEnergyAmp(directory, replicacoes, alpha, legLoads, legSol)
-EnergyEfficiency(directory, replicacoes, alpha, legLoads, legSol)
+# bandwidthBlockingProbability(directory, replicacoes, alpha, legLoads, legSol)
+# spectrumUtilization(directory, replicacoes, alpha, legLoads, legSol)
+# txUtilization(directory, replicacoes, alpha, legLoads, legSol)
+# costBenefit(directory, replicacoes, alpha, legLoads, legSol)
+# maxBVTUtilization(directory, replicacoes, alpha, legLoads, legSol)
+# profit(directory, replicacoes, alpha, legLoads, legSol)
+# energyConsumption(directory, replicacoes, alpha, legLoads, legSol)
+# consumedEnergy(directory, replicacoes, alpha, legLoads, legSol)
+# consumedEnergyBVT(directory, replicacoes, alpha, legLoads, legSol)
+# consumedEnergyOXC(directory, replicacoes, alpha, legLoads, legSol)
+# consumedEnergyAmp(directory, replicacoes, alpha, legLoads, legSol)
+# EnergyEfficiency(directory, replicacoes, alpha, legLoads, legSol)
