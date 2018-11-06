@@ -144,16 +144,6 @@ public class GRMLSA implements Serializable {
                 return new NoTrafficGrooming();
             case GROOMING_OPT_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
-            case GROOMING_OPT_MGMVH:
-                return new MGMVH();
-            case GROOMING_OPT_MGMPH:
-                return new MGMPH();
-            case GROOMING_OPT_MGHMDS:
-                return new MGHMDS();
-            case GROOMING_OPT_MGHMS:
-                return new MGHMS();
-            case GROOMING_OPT_MGMSU:
-                return new MGMSU();
             case GROOMING_OPT_MGFCCF:
                 return new MGFCCF();
             default:
