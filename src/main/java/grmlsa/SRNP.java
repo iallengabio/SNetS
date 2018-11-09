@@ -25,7 +25,7 @@ public class SRNP {
             reservesByNode.put(iterator.next().getName(),0.0);
         }
         Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
-        this.reservationTarget = Integer.parseInt((String)uv.get("reservationTarget"));
+        this.reservationTarget = Double.parseDouble((String)uv.get("reservationTarget"));
     }
 
     public void computeResidualCapacity(){
