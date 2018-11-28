@@ -271,10 +271,6 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
             ms.needsComplement = false;
         }
 
-        if (this.badMS(ms, rfc)) {
-            System.out.println("opa");
-        }
-
         boolean hasSuficientResitualCapacity = this.hasSuficientResidualCapacity(ms, rfc);
         if (hasSuficientResitualCapacity) {
             Iterator var16 = ms.virtualRoute.iterator();

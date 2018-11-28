@@ -135,7 +135,9 @@ public class Circuit implements Comparable<Object>, Serializable {
      * @param sa int[]
      */
     public void setSpectrumAssigned(int sa[]){
-    	if(sa!=null && sa[0]>sa[1]) throw new UnsupportedOperationException();
+    	if(sa!=null && sa[0]>sa[1]){
+    		throw new UnsupportedOperationException();
+		}
         spectrumAssigned = sa;
     }
 
@@ -301,5 +303,9 @@ public class Circuit implements Comparable<Object>, Serializable {
 			return this.id == ((Circuit)o).getId();
 		}
 		return false;
+	}
+
+	public double getBandwidth(){
+		return getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
 	}
 }

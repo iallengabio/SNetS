@@ -15,7 +15,7 @@ import java.util.Map;
 public class SRNP {
 
     private ControlPlane cp;
-    private double reservationTarget =5.0E10;//50Gbps
+    private double reservationTarget = 0;
     private HashMap<String,Double> reservesByNode = new HashMap<>();
 
     public SRNP(ControlPlane cp){

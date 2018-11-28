@@ -424,9 +424,15 @@ public abstract class MultihopGroomingSRNP implements TrafficGroomingAlgorithmIn
                 srnp.computeResidualCapacity();
                 Double actualReserve = srnp.getReservesByNode().get(circuit.getPair().getName());
                 Double retract = actualReserve - srnp.getReservationTarget();
-                if(retract<0){//dont retract the circuit
+                Double retractInThisCirc;
+                if(circuit.getResidualCapacity()>retract){
+                    retractInThisCirc = retract;
+                }else{
+                    retractInThisCirc = circuit.getResidualCapacity();
+                }
+                if(retractInThisCirc>0){//retract the circuit
 
-                    int numFinalSlots = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth() - retract);
+                    int numFinalSlots = circuit.getModulation().requiredSlots(circuit.getBandwidth() - retractInThisCirc);
                     int numCurrentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
                     int release = numCurrentSlots - numFinalSlots;
                     int[] releaseBand = new int[2];
