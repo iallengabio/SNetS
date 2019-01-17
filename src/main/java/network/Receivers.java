@@ -39,12 +39,37 @@ public class Receivers {
 			return false;
 		}
 	}
+	
+	/**
+	 * Increases the number of receivers being used and updates the sum and peak receiver utilization
+	 * 
+	 * @param numberOfTxs int
+	 * @return boolean
+	 */
+	public boolean allocatesReceivers(int numberOfRxs) {
+		if((numberOfRx - rxUtilization) >= numberOfRxs){
+			this.rxUtilization += numberOfRxs;
+			
+			return true;
+		}else{
+			return false;
+		}		
+	}
 
 	/**
 	 * Decrements the number of receivers being used
 	 */
 	public void releasesReceivers() {
 		this.rxUtilization--;
+	}
+	
+	/**
+	 * Decrements the number of receivers being used
+	 * 
+	 * @param numberOfRxs int
+	 */
+	public void releasesReceivers(int numberOfRxs) {
+		this.rxUtilization -= numberOfRxs;
 	}
 
 	/**
@@ -98,5 +123,16 @@ public class Receivers {
 	 */
 	public boolean hasFreeRecivers(){
 		return (rxUtilization < numberOfRx);
+	}
+	
+	/**
+	 * Check if there are enough free receivers.
+	 * Returns true if there are free receivers, otherwise returns false.
+	 * 
+	 * @param numberOfTransmitters int
+	 * @return boolean
+	 */
+	public boolean hasEnoughFreeTransmitters(int numberOfReceivers){
+		return ((numberOfRx - rxUtilization) >= numberOfReceivers);
 	}
 }

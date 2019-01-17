@@ -1,9 +1,5 @@
 package network;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 
@@ -17,17 +13,17 @@ public class SurvivalCircuit extends Circuit {
 	// To verify that the primary route is in use
 	protected boolean isPrimaryRoute;
 	
-	// Index of the backup route in use
-	protected int indexBackupRoute;
-	
-	// List of backup routes
-	protected List<Route> backupRoutes;
+	// Backup route
+	protected Route backupRoute;
 	
 	// Spectrum assigned by backup route
-	protected HashMap<Route, int[]> spectrumAssignedByBackupRoute;
+	protected int[] spectrumAssignedByBackupRoute;
 	
 	// Modulation by backup route
-	protected HashMap<Route, Modulation> modulationByBackupRoute;
+	protected Modulation modulationByBackupRoute;
+	
+	protected int requiredNumberOfTxs;
+	protected int requiredNumberOfRxs;
 	
 	/**
 	 * Creates a new instance of SurvivalCircuit.
@@ -36,11 +32,9 @@ public class SurvivalCircuit extends Circuit {
 		super();
 		
 		this.isPrimaryRoute = true;
-		this.indexBackupRoute = -1;
 		
-		this.backupRoutes = new ArrayList<>();
-		this.spectrumAssignedByBackupRoute = new HashMap<>();
-		this.modulationByBackupRoute = new HashMap<>();
+		this.requiredNumberOfTxs = 1;
+		this.requiredNumberOfRxs = 1;
 	}
 
 	/**
@@ -58,61 +52,101 @@ public class SurvivalCircuit extends Circuit {
 	}
 
 	/**
-	 * @return the indexBackupRoute
+	 * @return the backupRoute
 	 */
-	public int getIndexBackupRoute() {
-		return indexBackupRoute;
+	public Route getBackupRoute() {
+		return backupRoute;
 	}
 
 	/**
-	 * @param indexBackupRoute the indexBackupRoute to set
+	 * @param backupRoute the backupRoute to set
 	 */
-	public void setIndexBackupRoute(int indexBackupRoute) {
-		this.indexBackupRoute = indexBackupRoute;
-	}
-
-	/**
-	 * @return the backupRoutes
-	 */
-	public List<Route> getBackupRoutes() {
-		return backupRoutes;
-	}
-
-	/**
-	 * @param backupRoutes the backupRoutes to set
-	 */
-	public void setBackupRoutes(List<Route> backupRoutes) {
-		this.backupRoutes = backupRoutes;
+	public void setBackupRoute(Route backupRoute) {
+		this.backupRoute = backupRoute;
 	}
 
 	/**
 	 * @return the spectrumAssignedByBackupRoute
 	 */
-	public HashMap<Route, int[]> getSpectrumAssignedByBackupRoute() {
+	public int[] getSpectrumAssignedByBackupRoute() {
 		return spectrumAssignedByBackupRoute;
 	}
 
 	/**
 	 * @param spectrumAssignedByBackupRoute the spectrumAssignedByBackupRoute to set
 	 */
-	public void setSpectrumAssignedByBackupRoute(HashMap<Route, int[]> spectrumAssignedByBackupRoute) {
+	public void setSpectrumAssignedByBackupRoute(int[] spectrumAssignedByBackupRoute) {
 		this.spectrumAssignedByBackupRoute = spectrumAssignedByBackupRoute;
 	}
 
 	/**
 	 * @return the modulationByBackupRoute
 	 */
-	public HashMap<Route, Modulation> getModulationByBackupRoute() {
+	public Modulation getModulationByBackupRoute() {
 		return modulationByBackupRoute;
 	}
 
 	/**
 	 * @param modulationByBackupRoute the modulationByBackupRoute to set
 	 */
-	public void setModulationByBackupRoute(HashMap<Route, Modulation> modulationByBackupRoute) {
+	public void setModulationByBackupRoute(Modulation modulationByBackupRoute) {
 		this.modulationByBackupRoute = modulationByBackupRoute;
 	}
+
+	/**
+	 * @return the requiredNumberOfTxs
+	 */
+	public int getRequiredNumberOfTxs() {
+		return requiredNumberOfTxs;
+	}
+
+	/**
+	 * @param requiredNumberOfTxs the requiredNumberOfTxs to set
+	 */
+	public void setRequiredNumberOfTxs(int requiredNumberOfTxs) {
+		this.requiredNumberOfTxs = requiredNumberOfTxs;
+	}
+
+	/**
+	 * @return the requiredNumberOfRxs
+	 */
+	public int getRequiredNumberOfRxs() {
+		return requiredNumberOfRxs;
+	}
+
+	/**
+	 * @param requiredNumberOfRxs the requiredNumberOfRxs to set
+	 */
+	public void setRequiredNumberOfRxs(int requiredNumberOfRxs) {
+		this.requiredNumberOfRxs = requiredNumberOfRxs;
+	}
 	
+	@Override
+	public int[] getSpectrumAssignedByLink(Link link){
+		int sa[] = null;
+		
+		if(route.containThisLink(link)){
+			sa = getSpectrumAssigned();
+			
+		}else if(backupRoute.containThisLink(link)){
+			sa = spectrumAssignedByBackupRoute;
+		}
+		
+		return sa;
+	}
 	
+	@Override
+	public Modulation getModulationByLink(Link link){
+		Modulation mod = null;
+		
+		if(route.containThisLink(link)){
+			mod = getModulation();
+			
+		}else if(backupRoute.containThisLink(link)){
+			mod = modulationByBackupRoute;
+		}
+		
+		return mod;
+	}
 	
 }

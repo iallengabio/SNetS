@@ -47,13 +47,10 @@ public class FixedDoubleRouteBacktracking {
 		Route workRoute = listRoutes.get(0);
 		Route backupRoute = listRoutes.get(1);
 		
-		List<Route> backupRoutes = new ArrayList<>();
 		circuit.setRoute(workRoute);
-		circuit.setBackupRoutes(backupRoutes);
+		circuit.setBackupRoute(backupRoute);
 		
 		if(workRoute != null && backupRoute != null){
-			backupRoutes.add(backupRoute);
-			
 			return true;
 		}
 		
@@ -79,41 +76,18 @@ public class FixedDoubleRouteBacktracking {
 	
 	/**
 	 * Utiliza a tecnica backtracking para computar as rotas disjuntas
-	 * @param s
-	 * @param d
-	 * @param mesh
-	 * @return
+	 * 
+	 * @param s Node
+	 * @param d Node
+	 * @param mesh Mesh
+	 * @return List<Route>
 	 */
 	private static List<Route> computeBacktracking(Node s, Node d, Mesh mesh) {
 		Route routePrimariaAux = shortestPathsCheckingFails(s, d, mesh);
 		Route routeBackupAux = disjointShortestPath(routePrimariaAux, mesh);
 		
 		if (routeBackupAux == null) {
-			Vector<Route> rotasPrimarias = new Vector<Route>();
-			Vector<Link> linkListWork = routePrimariaAux.getLinkList();
-			for (int i = 0; i < linkListWork.size(); i++) {
-				rotasPrimarias.add(disjointShortestPathOfLink(routePrimariaAux.getSource(), routePrimariaAux.getDestination(), linkListWork.get(i), mesh));
-			}
-			
-			Route newRouteA = null;
-			Route newRouteB = null;
-			while ((newRouteB == null) && (rotasPrimarias.size() > 0)) {
-				newRouteA = lessCostRoute(rotasPrimarias);
-				if (newRouteA != null) {
-					newRouteB = disjointShortestPath(newRouteA, mesh);
-				}
-				if (newRouteB != null) {
-					routePrimariaAux = new Route(newRouteA.getNodeList());
-				} else {
-					rotasPrimarias.remove(newRouteA);
-				}
-			}
-			
-			if (newRouteB == null) {
-				System.out.println("erro no backtracking");
-			} else {
-				routeBackupAux = new Route(newRouteB.getNodeList());
-			}
+			routeBackupAux = computeBacktrackingByRoute(routePrimariaAux, mesh);
 		}
 		
 		List<Route> rotas = new ArrayList<Route>(2);
@@ -121,6 +95,45 @@ public class FixedDoubleRouteBacktracking {
 		rotas.add(routeBackupAux);
 		
 		return rotas;
+	}
+	
+	/**
+	 * Utiliza a tecnica backtracking para computar as rotas disjuntas
+	 * 
+	 * @param routePrimaria Route
+	 * @param mesh Mesh
+	 * @return Route
+	 */
+	public static Route computeBacktrackingByRoute(Route routePrimaria, Mesh mesh){
+		Route routeBackup = null;
+		
+		Vector<Route> rotasPrimarias = new Vector<Route>();
+		Vector<Link> linkListWork = routePrimaria.getLinkList();
+		for (int i = 0; i < linkListWork.size(); i++) {
+			rotasPrimarias.add(disjointShortestPathOfLink(routePrimaria.getSource(), routePrimaria.getDestination(), linkListWork.get(i), mesh));
+		}
+		
+		Route newRouteA = null;
+		Route newRouteB = null;
+		while ((newRouteB == null) && (rotasPrimarias.size() > 0)) {
+			newRouteA = lessCostRoute(rotasPrimarias);
+			if (newRouteA != null) {
+				newRouteB = disjointShortestPath(newRouteA, mesh);
+			}
+			if (newRouteB != null) {
+				routePrimaria = new Route(newRouteA.getNodeList());
+			} else {
+				rotasPrimarias.remove(newRouteA);
+			}
+		}
+		
+		if (newRouteB == null) {
+			System.out.println("erro no backtracking");
+		} else {
+			routeBackup = new Route(newRouteB.getNodeList());
+		}
+		
+		return routeBackup;
 	}
 	
 	/**
@@ -297,7 +310,10 @@ public class FixedDoubleRouteBacktracking {
 			if (routes.get(i) == null) { //para de procurar na primeira rota se o vetor de rotas estiver vazio
 				break;
 			}
-			if (routes.get(i).size() < route.size()) {
+//			if (routes.get(i).size() < route.size()) {
+//				route = routes.get(i);
+//			}
+			if (routes.get(i).getDistanceAllLinks() < route.getDistanceAllLinks()) {
 				route = routes.get(i);
 			}
 		}

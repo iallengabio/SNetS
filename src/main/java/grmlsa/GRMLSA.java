@@ -22,9 +22,17 @@ import grmlsa.spectrumAssignment.FirstLastFit;
 import grmlsa.spectrumAssignment.LastFit;
 import grmlsa.spectrumAssignment.RandomFit;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.SpectrumAssignmentWithInterferenceReduction;
 import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
 import grmlsa.spectrumAssignment.WorstFit;
+import grmlsa.survival.BestSNRDedicatedPathProtection;
 import grmlsa.survival.DedicatedPathProtection;
+import grmlsa.survival.EnergyEfficientDedicatedPathProtection;
+import grmlsa.survival.EnergyEfficientDedicatedPathProtection_v2;
+import grmlsa.survival.MinCircuitDedicatedPathProtection;
+import grmlsa.survival.PowerConsumptionAwareDedicatedPathProtection;
+import grmlsa.survival.PowerConsumptionAwareDedicatedPathProtection_v2;
+import grmlsa.survival.ReductionQoTODedicatedPathProtection;
 import grmlsa.survival.SurvivalStrategyInterface;
 import grmlsa.survival.SimpleRestoration;
 import grmlsa.trafficGrooming.*;
@@ -74,6 +82,7 @@ public class GRMLSA {
     private static final String SPECTRUM_ASSIGNMENT_FIRSTLASTEXACTFIT = "firstlastexactfit";
     private static final String SPECTRUM_ASSIGNMENT_TBSA = "tbsa";
     private static final String SPECTRUM_ASSIGNMENT_DAFLF = "daflf";
+    private static final String SPECTRUM_ASSIGNMENT_SAIR = "sair";
     
     // Integrados
     private static final String INTEGRATED_COMPLETESHARING = "completesharing";
@@ -84,6 +93,10 @@ public class GRMLSA {
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
     private static final String INTEGRATED_KSPSA = "kspsa";
+    private static final String INTEGRATED_KSPSA_v2 = "kspsav2";
+    private static final String INTEGRATED_KSPC = "kspc";
+    private static final String INTEGRATED_MDPC= "mdpc";
+    private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -98,6 +111,13 @@ public class GRMLSA {
 	// Survival strategy
     private static final String SURVIVAL_DEDICATED_PROTECTION = "dedicatedprotection";
     private static final String SURVIVAL_SIMPLE_RESTORATION = "simplerestoration";
+    private static final String SURVIVAL_EEDPP = "eedpp";
+    private static final String SURVIVAL_EEDPP_v2 = "eedppv2";
+    private static final String SURVIVAL_PCDPP_v1 = "pcdppv1";
+    private static final String SURVIVAL_PCDPP_v2 = "pcdppv2";
+    private static final String SURVIVAL_BSNRDPP = "bsnrdpp";
+    private static final String SURVIVAL_MCDPP = "mcdpp";
+    private static final String SURVIVAL_RQOTODPP = "rqotodpp";
 
     // End of constants
 
@@ -118,13 +138,14 @@ public class GRMLSA {
      * @param modulationSelection String
      * @param spectrumAssignmentType String
      */
-    public GRMLSA(String grooming, String integrated, String routing, String modulationSelection, String spectrumAssignmentType, String regeneratorAssignment) {
+    public GRMLSA(String grooming, String integrated, String routing, String modulationSelection, String spectrumAssignmentType, String regeneratorAssignment, String survivalStrategy) {
         this.grooming = grooming;
         this.integrated = integrated;
         this.routing = routing;
         this.modulationSelection = modulationSelection;
         this.spectrumAssignmentType = spectrumAssignmentType;
         this.regeneratorAssignment = regeneratorAssignment;
+        this.survivalStrategy = survivalStrategy;
 
         if(grooming == null) this.grooming ="";
         if(integrated == null) this.integrated ="";
@@ -132,6 +153,7 @@ public class GRMLSA {
         if(modulationSelection == null) this.modulationSelection ="";
         if(spectrumAssignmentType == null) this.spectrumAssignmentType ="";
         if(regeneratorAssignment == null) this.regeneratorAssignment = "";
+        if(survivalStrategy == null) this.survivalStrategy = "";
     }
 
     /**
@@ -210,6 +232,8 @@ public class GRMLSA {
                 return new TrafficBalancingSpectrumAssignment();
             case SPECTRUM_ASSIGNMENT_DAFLF:
                 return new DispersionAdaptiveFirstLastFit();
+            case SPECTRUM_ASSIGNMENT_SAIR:
+                return new SpectrumAssignmentWithInterferenceReduction();
             default:
                 return null;
         }
@@ -239,6 +263,14 @@ public class GRMLSA {
                 return new KSPFirstFit();
             case INTEGRATED_KSPSA:
                 return new KShortestPathsAndSpectrumAssignment();
+            case INTEGRATED_KSPSA_v2:
+                return new KShortestPathsAndSpectrumAssignment_v2();
+            case INTEGRATED_KSPC:
+                return new KShortestPathsComputation();
+            case INTEGRATED_MDPC:
+                return new ModifiedDijkstraPathsComputation();
+            case INTEGRATED_KSPRQOTO:
+                return new KShortestPathsReductionQoTO();
             default:
                 return null;
         }
@@ -294,6 +326,20 @@ public class GRMLSA {
     			return new DedicatedPathProtection();
     		case SURVIVAL_SIMPLE_RESTORATION:
 				return new SimpleRestoration();
+    		case SURVIVAL_EEDPP:
+				return new EnergyEfficientDedicatedPathProtection();
+    		case SURVIVAL_EEDPP_v2:
+				return new EnergyEfficientDedicatedPathProtection_v2();
+    		case SURVIVAL_PCDPP_v1:
+				return new PowerConsumptionAwareDedicatedPathProtection();
+    		case SURVIVAL_PCDPP_v2:
+				return new PowerConsumptionAwareDedicatedPathProtection_v2();
+    		case SURVIVAL_BSNRDPP:
+				return new BestSNRDedicatedPathProtection();
+    		case SURVIVAL_MCDPP:
+				return new MinCircuitDedicatedPathProtection();
+    		case SURVIVAL_RQOTODPP:
+				return new ReductionQoTODedicatedPathProtection();
     		default:
     			return null;
     	}

@@ -5,6 +5,7 @@ import java.util.List;
 import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
+import grmlsa.YenKShortestPath;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -28,7 +29,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
         if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
+        	kShortestsPaths = new YenKShortestPath(cp.getMesh().getNodeList(), cp.getMesh().getLinkList(), k, 1);
         }
         if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection(); // Uses the modulation selection algorithm defined in the simulation file
@@ -55,7 +56,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
             	int requeridSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 	            int band[] = spectrumAssignment.policy(requeridSlots, merge, circuit, cp);
-	
+	            
 	            if (band != null) {
 	            	circuit.setSpectrumAssigned(band);
 					cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band);
@@ -72,7 +73,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
 						chosenTransmissionDistance = transmissionDistance;
 						chosenUnoccupiedSpectrum = unoccupiedSpectrum;
 						
-					}else if((SNR == chosenSNR) && (mod.getSNRthreshold() > chosenMod.getSNRthreshold())){
+					}else if((SNR == chosenSNR) && (mod.getBitsPerSymbol() > chosenMod.getBitsPerSymbol())){
 						chosenBand = band;
 						chosenRoute = route;
 						chosenMod = mod;
@@ -80,7 +81,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
 						chosenTransmissionDistance = transmissionDistance;
 						chosenUnoccupiedSpectrum = unoccupiedSpectrum;
 						
-					}else if((SNR == chosenSNR) && (mod.getSNRthreshold() == chosenMod.getSNRthreshold()) && 
+					}else if((SNR == chosenSNR) && (mod.getBitsPerSymbol() == chosenMod.getBitsPerSymbol()) && 
 							(transmissionDistance < chosenTransmissionDistance)){
 						chosenBand = band;
 						chosenRoute = route;
@@ -89,7 +90,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
 						chosenTransmissionDistance = transmissionDistance;
 						chosenUnoccupiedSpectrum = unoccupiedSpectrum;
 						
-					}else if((SNR == chosenSNR) && (mod.getSNRthreshold() == chosenMod.getSNRthreshold()) && 
+					}else if((SNR == chosenSNR) && (mod.getBitsPerSymbol() == chosenMod.getBitsPerSymbol()) && 
 							(transmissionDistance == chosenTransmissionDistance) && (unoccupiedSpectrum > chosenUnoccupiedSpectrum)){
 						chosenBand = band;
 						chosenRoute = route;

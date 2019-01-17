@@ -212,10 +212,9 @@ public class ControlPlane {
      */
     public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
-        List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
 
-        if(!allocateSpectrum(circuit, band, links)){
+        if(!allocateSpectrum(circuit, band, route.getLinkList())){
             throw new Exception("bad RMLSA choice. Spectrum cant be allocated.");
         }
 
@@ -548,7 +547,7 @@ public class ControlPlane {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    protected boolean computeQoTForOther(Circuit circuit){
+    public boolean computeQoTForOther(Circuit circuit){
     	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
     	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
     	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits

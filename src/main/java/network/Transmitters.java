@@ -30,10 +30,28 @@ public class Transmitters {
 
 	/**
 	 * Increases the number of transmitters being used and updates the sum and peak transmitter utilization
+	 *
+	 * @return boolean
 	 */
 	public boolean allocatesTransmitters() {
 		if(this.txUtilization < this.numberOfTx){
 			this.txUtilization++;
+			return true;
+		}else{
+			return false;
+		}		
+	}
+	
+	/**
+	 * Increases the number of transmitters being used and updates the sum and peak transmitter utilization
+	 * 
+	 * @param numberOfTxs int
+	 * @return boolean
+	 */
+	public boolean allocatesTransmitters(int numberOfTxs) {
+		if((numberOfTx - txUtilization) >= numberOfTxs){
+			this.txUtilization += numberOfTxs;
+			
 			return true;
 		}else{
 			return false;
@@ -46,6 +64,16 @@ public class Transmitters {
 	 */
 	public void releasesTransmitters() {
 		this.txUtilization--;
+	}
+	
+	/**
+	 * Decrements the number of transmitters being used
+	 * This method should be invoked when a connection originating from this node source is terminated
+	 * 
+	 * @param numberOfTxs int
+	 */
+	public void releasesTransmitters(int numberOfTxs) {
+		this.txUtilization -= numberOfTxs;
 	}
 
 	/**
@@ -99,5 +127,16 @@ public class Transmitters {
 	 */
 	public boolean hasFreeTransmitters(){
 		return (txUtilization < numberOfTx);
+	}
+	
+	/**
+	 * Check if there are enough free transmitters.
+	 * Returns true if there are free transmitters, otherwise returns false.
+	 * 
+	 * @param numberOfTransmitters int
+	 * @return boolean
+	 */
+	public boolean hasEnoughFreeTransmitters(int numberOfTransmitters){
+		return ((numberOfTx - txUtilization) >= numberOfTransmitters);
 	}
 }

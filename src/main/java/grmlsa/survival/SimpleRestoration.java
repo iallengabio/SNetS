@@ -16,6 +16,12 @@ public class SimpleRestoration implements SurvivalStrategyInterface {
 		// Applies the traffic aggregation algorithm
 		return cp.getGrooming().searchCircuitsForGrooming(rfc, cp);
 	}
+	
+	@Override
+	public boolean applyStrategy(Circuit circuit, SurvivalControlPlane cp) {
+		
+		return false;
+	}
 
 	@Override
 	public boolean thereAreFreeTransponders(Circuit circuit){

@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import grmlsa.KRoutingAlgorithmInterface;
-import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
+import grmlsa.YenKShortestPath;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -36,7 +36,7 @@ import util.IntersectionFreeSpectrum;
 public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInterface {
 	
     private static int k = 4; // Number of candidate routes
-	private NewKShortestPaths kShortestsPaths;
+	private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
     
@@ -52,7 +52,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 	@Override
 	public boolean rsa(Circuit circuit, ControlPlane cp) {
 		if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
+        	kShortestsPaths = new YenKShortestPath(cp.getMesh().getNodeList(), cp.getMesh().getLinkList(), k, 1);
         }
 		if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection(); // Uses the modulation selection algorithm defined in the simulation file

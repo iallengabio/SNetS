@@ -28,19 +28,15 @@ public class SimpleTrafficGrooming2 extends SimpleTrafficGrooming {
 
 		for (Circuit circuit : activeCircuits) {
 			
-			// Check if the route of the circuit is equal to the reported route
+			// Check if the work route of the circuit is equal to the reported work route
 			if(!workRoute.equals(circuit.getRoute())){
 				continue; // if it is different it goes to the next circuit
 			}
-			boolean flag = false;
-			List<Route> backupRoutes = ((SurvivalCircuit)circuit).getBackupRoutes();
-			for(Route bckRoute : backupRoutes){
-				if(backupRoute.equals(bckRoute)){
-					flag = true;
-				}
-			}
-			if(!flag){
-				continue;
+			
+			// Check if the backup route of the circuit is equal to the reported backup route
+			Route circuitBackupRoute = ((SurvivalCircuit)circuit).getBackupRoute();
+			if(!backupRoute.equals(circuitBackupRoute)){
+				continue; // if it is different it goes to the next circuit
 			}
 			
 			// Investigate if the active circuit is able to accommodate the new request
@@ -51,7 +47,7 @@ public class SimpleTrafficGrooming2 extends SimpleTrafficGrooming {
 			flagWorkRoute = tryGrooming(rfc, circuit, cp, workRoute, circuit.getModulation(), circuit.getSpectrumAssigned());
 			
 			// backup route
-			flagBackupRoute = tryGrooming(rfc, circuit, cp, backupRoute, ((SurvivalCircuit)circuit).getModulationByBackupRoute().get(backupRoute), ((SurvivalCircuit)circuit).getSpectrumAssignedByBackupRoute().get(backupRoute));
+			flagBackupRoute = tryGrooming(rfc, circuit, cp, backupRoute, ((SurvivalCircuit)circuit).getModulationByBackupRoute(), ((SurvivalCircuit)circuit).getSpectrumAssignedByBackupRoute());
 			
 			// if it is able to aggregate to the work and backup routes stops the search, otherwise it continues
 			if(flagWorkRoute && flagBackupRoute){

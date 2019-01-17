@@ -31,7 +31,6 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
         }
 
         if (simpleEletricGrooming(rfc)) {
-
             return true;
         }
 

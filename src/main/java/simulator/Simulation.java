@@ -39,7 +39,7 @@ public class Simulation implements Serializable {
         this.replication = replication;
         this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getActiveMetrics());
         this.mesh = mesh;
-        GRMLSA grmlsa = new GRMLSA(sc.getGrooming(),sc.getIntegratedRmlsa(),sc.getRouting(),sc.getModulationSelection(),sc.getSpectrumAssignment(), sc.getRegeneratorAssignment());
+        GRMLSA grmlsa = new GRMLSA(sc.getGrooming(),sc.getIntegratedRmlsa(),sc.getRouting(),sc.getModulationSelection(),sc.getSpectrumAssignment(), sc.getRegeneratorAssignment(), sc.getSurvivalStrategy());
         
         if(sc.getNetworkType() == GRMLSA.TRANSPARENT){
         	controlPlane = new ControlPlane(mesh, sc.getRmlsaType(), grmlsa.instantiateGrooming(), grmlsa.instantiateIntegratedRSA(), grmlsa.instantiateRouting(), grmlsa.instantiateSpectrumAssignment(), grmlsa.instantiateModulationSelection());	

@@ -1,6 +1,7 @@
 package grmlsa.survival;
 
 import network.Circuit;
+import network.SurvivalCircuit;
 import network.SurvivalControlPlane;
 import request.RequestForConnection;
 
@@ -21,6 +22,16 @@ public interface SurvivalStrategyInterface {
 	 * @throws Exception
 	 */
 	public boolean applyStrategy(RequestForConnection rfc, SurvivalControlPlane cp) throws Exception;
+	
+	/**
+	 * Applies the survival strategy
+	 * 
+	 * @param circuit SurvivalCircuit
+	 * @param cp SurvivalControlPlane
+	 * @return boolean
+	 * @throws Exception
+	 */
+	public boolean applyStrategy(Circuit circuit, SurvivalControlPlane cp);
 	
 	/**
 	 * Returns true if it can survive the fault and false otherwise.
