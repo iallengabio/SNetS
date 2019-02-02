@@ -30,7 +30,7 @@ public class ExpansivenessFit implements SpectrumAssignmentAlgorithmInterface {
     }
     
     /**
-     * Applies the policy of allocation of spectrum LastFit
+     * Applies the policy of allocation of spectrum expansiveness fit
      * 
      * @param numberOfSlots int
      * @param freeSpectrumBands List<int[]>

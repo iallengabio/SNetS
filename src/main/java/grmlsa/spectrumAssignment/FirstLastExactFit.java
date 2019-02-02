@@ -116,29 +116,27 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 	 */
 	public static int[] firstExactFit(int numberOfSlots, List<int[]> freeSpectrumBands){
 		int chosen[] = null;
+		
+		// applies exact fit starting from the lowest slot index
 		for (int[] band : freeSpectrumBands) {
-			int tamFaixa = band[1] - band[0] + 1;
-			if(tamFaixa == numberOfSlots){
+			int bandSize = band[1] - band[0] + 1;
+			if(bandSize == numberOfSlots){
 				chosen = band.clone();
-				chosen[1] = chosen[0] + numberOfSlots - 1;//nao eh necessario alocar a faixa inteira, apenas a quantidade de slots necessaria
+				chosen[1] = chosen[0] + numberOfSlots - 1; //It is not necessary to allocate the entire band, just the amount of slots required
 				break;
 			}
 		}
 		
-		if(chosen == null){//nao encontrou nenhuma faixa contigua e continua disponivel
-		//agora basta buscar a faixa livre com tamanho mais distante da quantidade de slots requisitados
-		
-			int maiorDif = -1;
+		if(chosen == null){ // did not find any contiguous tracks and is still available
+			// now just look for the free range and apply first fit policy
+			
 			for (int[] band : freeSpectrumBands) {
-				int tamFaixa = band[1] - band[0] + 1;
-				if(tamFaixa >= numberOfSlots){
-					if(tamFaixa - numberOfSlots > maiorDif){ //encontrou uma faixa com quantidade de slots mais "diferente"
-						chosen = band.clone();
-						chosen[1] = chosen[0] + numberOfSlots - 1;//nao eh necessario alocar a faixa inteira, apenas a quantidade de slots necessaria
-						maiorDif = tamFaixa - numberOfSlots;
-					}
-				}
-			}
+	            if (band[1] - band[0] + 1 >= numberOfSlots) {
+	                chosen = band.clone();
+	                chosen[1] = chosen[0] + numberOfSlots - 1; //It is not necessary to allocate the entire band, just the amount of slots required
+	                break;
+	            }
+	        }
 		}
 		
 		return chosen;
@@ -151,35 +149,32 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 	 * @param livres
 	 * @return
 	 */
-	public static int[] lastExactFit(int numberOfSlots, List<int[]> livres){
+	public static int[] lastExactFit(int numberOfSlots, List<int[]> freeSpectrumBands){
 		int chosen[] = null;
-		for (int i = livres.size()-1; i >= 0; i--) {
-			int band[] = livres.get(i);
+		
+		// applies exact fit starting from the largest slot index
+		for (int i = freeSpectrumBands.size()-1; i >= 0; i--) {
+			int band[] = freeSpectrumBands.get(i);
 			
-			int tamFaixa = band[1] - band[0] + 1;
-			if(tamFaixa == numberOfSlots){
+			int bandSize = band[1] - band[0] + 1;
+			if(bandSize == numberOfSlots){
 				chosen = band.clone();
 				chosen[0] = chosen[1] - numberOfSlots + 1;//nao eh necessario alocar a faixa inteira, apenas a quantidade de slots necessaria
 				break;
 			}
 		}		
 		
-		if(chosen == null){//nao encontrou nenhuma faixa contigua e continua disponivel
-		//agora basta buscar a faixa livre com tamanho mais distante da quantidade de slots requisitados
-		
-			int maiorDif = -1;
-			for (int i = livres.size()-1; i >= 0; i--) {
-				int band[] = livres.get(i);
-				
-				int tamFaixa = band[1] - band[0] + 1;
-				if(tamFaixa >= numberOfSlots){
-					if(tamFaixa - numberOfSlots > maiorDif){ //encontrou uma faixa com quantidade de slots mais "diferente"
-						chosen = band.clone();
-						chosen[0] = chosen[1] - numberOfSlots + 1;//nao eh necessario alocar a faixa inteira, apenas a quantidade de slots necessaria
-						maiorDif = tamFaixa - numberOfSlots;
-					}
-				}
-			}
+		if(chosen == null){ // did not find any contiguous tracks and is still available
+			// now just look for the free range and apply last fit policy
+			
+			for (int i = freeSpectrumBands.size() - 1; i >= 0; i--) {
+	            int band[] = freeSpectrumBands.get(i);
+	            if (band[1] - band[0] + 1 >= numberOfSlots) {
+	                chosen = band.clone();
+	                chosen[0] = chosen[1] - numberOfSlots + 1;//It is not necessary to allocate the entire band, just the amount of slots required
+	                break;
+	            }
+	        }
 		}
 		
 		return chosen;
