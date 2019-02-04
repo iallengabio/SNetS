@@ -27,10 +27,10 @@ public class SimulationConfig {
 
         public boolean BlockingProbability = true;
         public boolean BandwidthBlockingProbability = true;
-        public boolean ExternalFragmentation = true;
         public boolean SpectrumUtilization = true;
-        public boolean RelativeFragmentation = true;
         public boolean SpectrumSizeStatistics = true;
+        public boolean ExternalFragmentation = true;
+        public boolean RelativeFragmentation = true;
         public boolean TransmittersReceiversRegeneratorsUtilization = true;
         public boolean EnergyConsumption = true;
         public boolean ModulationUtilization = true;
