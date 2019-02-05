@@ -1,6 +1,7 @@
 package grmlsa.integrated;
 
 import java.util.List;
+import java.util.TreeSet;
 
 import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
@@ -10,15 +11,17 @@ import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
+import network.Link;
 import util.IntersectionFreeSpectrum;
 
 /**
  * RMLSA integrated algorithm that reads the spectrum assignment of the simulation configuration file
+ * Searches the modulation format from the most spectrally efficient to the least efficient
  * 
  * @author Alexandre
  *
  */
-public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgorithmInterface {
+public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAlgorithmInterface {
 	
 	private int k = 3; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
@@ -43,41 +46,47 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
         int chosenBand[] = null;
         
         List<Modulation> avaliableModulations = modulationSelection.getAvaliableModulations();
-
+        
         // to avoid metrics error
   		Route checkRoute = null;
   		Modulation checkMod = null;
   		int checkBand[] = null;
   		
+  		int minNumCircuits = Integer.MAX_VALUE;
+  		
         for (Route route : candidateRoutes) {
             circuit.setRoute(route);
             
-            for(Modulation mod : avaliableModulations){
-            	circuit.setModulation(mod);
+            int numCircuits = computeNumCircuitsByRoute(route);
+            
+            if(numCircuits < minNumCircuits){
+            	minNumCircuits = numCircuits;
             	
-            	int slotsNumber = mod.requiredSlots(circuit.getRequiredBandwidth());
-	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
-	            
-	            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
-	            circuit.setSpectrumAssigned(band);
-	
-	            if (band != null) {
-	            	if(checkRoute == null){
+            	// Begins with the most spectrally efficient modulation format
+        		for (int m = avaliableModulations.size()-1; m >= 0; m--) {
+        			Modulation mod = avaliableModulations.get(m);
+        			circuit.setModulation(mod);
+	            	
+	            	int slotsNumber = mod.requiredSlots(circuit.getRequiredBandwidth());
+		            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+		            
+		            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
+		            circuit.setSpectrumAssigned(band);
+		
+		            if (band != null) {
 	            		checkRoute = route;
 	            		checkMod = mod;
 	            		checkBand = band;
-	            	}
-	            	
-	            	if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){ //modulation has acceptable QoT
-	            		chosenRoute = route;
-	            		chosenBand = band;
-		                chosenMod = mod;
-	            	}
+		            	
+		            	if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){ //modulation has acceptable QoT
+		            		chosenRoute = route;
+		            		chosenBand = band;
+			                chosenMod = mod;
+			                
+			                break; // Stop when a modulation reaches admissible QoT
+		            	}
+		            }
 	            }
-            }
-            
-            if(chosenBand != null){
-            	break;
             }
         }
 
@@ -108,5 +117,22 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
 	 */
     public KRoutingAlgorithmInterface getRoutingAlgorithm(){
     	return kShortestsPaths;
+    }
+    
+    private int computeNumCircuitsByRoute(Route route){
+    	TreeSet<Circuit> circuits = new TreeSet<Circuit>();
+    	
+    	for(Link link : route.getLinkList()){
+    		
+    		TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+    		for(Circuit circuitTemp : circuitsTemp){
+    			
+    			if(!circuits.contains(circuitTemp)){
+    				circuits.add(circuitTemp);
+    			}
+    		}
+    	}
+    	
+    	return circuits.size();
     }
 }
