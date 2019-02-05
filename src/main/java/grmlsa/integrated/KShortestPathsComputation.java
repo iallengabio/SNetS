@@ -40,7 +40,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
         Route chosenRoute = null;
         Modulation chosenMod = null;
-        int chosenBand[] = {999999, 999999}; // Value never reached
+        int chosenBand[] = null;
         double chosenSNR = 0.0;
 		double chosenTransmissionDistance = Double.MAX_VALUE;
 		double chosenUnoccupiedSpectrum = 0.0;
