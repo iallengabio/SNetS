@@ -67,7 +67,7 @@ public class Main {
         initFirebase();
 
         DatabaseReference simSerRef = FirebaseDatabase.getInstance().getReference("simulationServers").push();
-        simSerRef.setValue(new SimulationServer());
+        simSerRef.setValue(new SimulationServer(),1);
         System.out.println("SNetS Simulation Server Running");
         System.out.println("simulation server key: " + simSerRef.getKey());
         FirebaseDatabase.getInstance().getReference("simulationServers/" +simSerRef.getKey()+"/online").addValueEventListener(new ValueEventListener() {
@@ -99,7 +99,7 @@ public class Main {
                         newRef.child("progress").setValue(0.0);
                         List<List<Simulation>> allSimulations = createAllSimulations(sr);
                         //remember to implement with thread
-                        SimulationManagement sm = new SimulationManagement(allSimulations);
+                        SimulationManagement sm = new SimulationManagement(allSimulations,1);
                         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
                             @Override
                             public void onSimulationProgressUpdate(double progress) {
@@ -183,9 +183,21 @@ public class Main {
     	System.out.println("Path: " + path);
         System.out.println("Reading files");
         List<List<Simulation>> allSimulations = createAllSimulations(makeSR(path));
+
+        String separator = System.getProperty("file.separator");
+        String simulationFilePath = path + separator + "simulation";
+        Scanner scanner = new Scanner(new File(simulationFilePath));
+        String simulationConfigJSON = "";
+        while (scanner.hasNext()) {
+            simulationConfigJSON += scanner.next();
+        }
+        Gson gson = new GsonBuilder().create();
+        SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
+        scanner.close();
+        System.out.println("Threads running: " + sc.getThreads());
         //Now start the simulations
         System.out.println("Starting simulations");
-        SimulationManagement sm = new SimulationManagement(allSimulations);
+        SimulationManagement sm = new SimulationManagement(allSimulations, sc.getThreads());
         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
             @Override
             public void onSimulationProgressUpdate(double progress) {

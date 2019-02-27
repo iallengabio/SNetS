@@ -22,6 +22,7 @@ public class SimulationConfig {
     private Metrics activeMetrics = new Metrics();
     private String regeneratorAssignment;
     private int networkType;
+    private int threads = 1;
 
     public static class Metrics implements Serializable {
 
@@ -253,5 +254,12 @@ public class SimulationConfig {
 	public void setNetworkType(int networkType) {
 		this.networkType = networkType;
 	}
-	
+
+    public int getThreads() {
+        return threads;
+    }
+
+    public void setThreads(int threads) {
+        this.threads = threads;
+    }
 }
