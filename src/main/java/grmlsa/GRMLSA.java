@@ -6,6 +6,7 @@ import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
 import grmlsa.modulation.ModulationSelectionByQoT;
 import grmlsa.modulation.ModulationSelectionByQoTAndSigma;
+import grmlsa.modulation.ModulationSelectionByQoTv2;
 import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
 import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
@@ -80,8 +81,12 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
-    private static final String INTEGRATED_KSPSA = "kspsa";
     private static final String INTEGRATED_COMPLETESHARINGEX = "completesharingex";
+    private static final String INTEGRATED_KSPSA = "kspsa";
+    private static final String INTEGRATED_KSPSA_v2 = "kspsav2";
+    private static final String INTEGRATED_KSPC = "kspc";
+    private static final String INTEGRATED_MDPC= "mdpc";
+    private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -93,6 +98,7 @@ public class GRMLSA implements Serializable {
 	private static final String MODULATION_BY_DISTANCE2 = "modulationbydistance2";
 	private static final String MODULATION_BY_QOT = "modulationbyqot";
 	private static final String MODULATION_BY_QOT_SIGMA = "modulationbyqotsigma";
+	private static final String MODULATION_BY_QOT_V2 = "modulationbyqotv2";
 
     // End of constants
 
@@ -225,10 +231,18 @@ public class GRMLSA implements Serializable {
                 return new ZonePartitionTopInvasion();
             case INTEGRATED_KSPFIRSTFIT:
                 return new KSPFirstFit();
-            case INTEGRATED_KSPSA:
-                return new KShortestPathsAndSpectrumAssignment();
             case INTEGRATED_COMPLETESHARINGEX:
                 return new CompleteSharingEx();
+            case INTEGRATED_KSPSA:
+                return new KShortestPathsAndSpectrumAssignment();
+            case INTEGRATED_KSPSA_v2:
+                return new KShortestPathsAndSpectrumAssignment_v2();
+            case INTEGRATED_KSPC:
+                return new KShortestPathsComputation();
+            case INTEGRATED_MDPC:
+                return new ModifiedDijkstraPathsComputation();
+            case INTEGRATED_KSPRQOTO:
+            	return new KShortestPathsReductionQoTO();
             default:
                 return null;
         }
@@ -269,6 +283,8 @@ public class GRMLSA implements Serializable {
 	    		return new ModulationSelectionByQoT();
 	    	case MODULATION_BY_QOT_SIGMA:
 	    		return new ModulationSelectionByQoTAndSigma();
+	    	case MODULATION_BY_QOT_V2:
+	    		return new ModulationSelectionByQoTv2();
 	    	default:
 	    		return null;
     	}

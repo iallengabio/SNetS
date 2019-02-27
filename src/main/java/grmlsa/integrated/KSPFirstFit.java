@@ -39,7 +39,7 @@ public class KSPFirstFit implements IntegratedRMLSAAlgorithmInterface {
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
         Route chosenRoute = null;
         Modulation chosenMod = null;
-        int chosenBand[] = {999999, 999999}; // Value never reached
+        int chosenBand[] = null;
 
         for (Route route : candidateRoutes) {
             circuit.setRoute(route);
