@@ -52,12 +52,8 @@ public class GRMLSA implements Serializable {
     // Optical traffic aggregation
     private static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     private static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
-    private static final String GROOMING_OPT_MGMVH = "mgmvh";
-    private static final String GROOMING_OPT_MGMPH = "mgmph";
-    private static final String GROOMING_OPT_MGHMDS = "mghmds";
-    private static final String GROOMING_OPT_MGHMS = "mghms";
-    private static final String GROOMING_OPT_MGMSU = "mgmsu";
     private static final String GROOMING_OPT_MGFCCF = "mgfccf";
+    private static final String GROOMING_OPT_MGFCCFSRNP = "mgfccfsrnp";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -150,18 +146,10 @@ public class GRMLSA implements Serializable {
                 return new NoTrafficGrooming();
             case GROOMING_OPT_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
-            case GROOMING_OPT_MGMVH:
-                return new MGMVH();
-            case GROOMING_OPT_MGMPH:
-                return new MGMPH();
-            case GROOMING_OPT_MGHMDS:
-                return new MGHMDS();
-            case GROOMING_OPT_MGHMS:
-                return new MGHMS();
-            case GROOMING_OPT_MGMSU:
-                return new MGMSU();
             case GROOMING_OPT_MGFCCF:
                 return new MGFCCF();
+            case GROOMING_OPT_MGFCCFSRNP:
+                return new MGFCCFSRNP();
             default:
                 return null;
         }

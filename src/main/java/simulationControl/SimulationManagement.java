@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private static final int NUMBER_OF_ACTIVE_THREADS = 30;
+    private int numberOfThreads = 1;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -36,7 +36,8 @@ public class SimulationManagement {
      * 
      * @param simulations List<List<Simulation>>
      */
-    public SimulationManagement(List<List<Simulation>> simulations) {
+    public SimulationManagement(List<List<Simulation>> simulations, int threads) {
+        numberOfThreads = threads;
         this.simulations = simulations;
         done = 0;
         numOfSimulations = 0;
@@ -67,7 +68,7 @@ public class SimulationManagement {
 
         Util.pairs.addAll(simulations.get(0).get(0).getMesh().getPairList());
 
-        ExecutorService executor = Executors.newScheduledThreadPool(NUMBER_OF_ACTIVE_THREADS);
+        ExecutorService executor = Executors.newScheduledThreadPool(numberOfThreads);
         done = 0;
         for(List<Simulation> loadPoint : simulations){
             for(Simulation replication : loadPoint){

@@ -18,10 +18,12 @@ auxPlotBar <- function(dataframe, legLoads, legSol, legX, legY){
   dodge <- position_dodge(width=0.9)
   p <- p + geom_col(position = dodge)+
     geom_errorbar(aes(ymin = lower, ymax = upper), position = dodge, width = 0.25)+
-    scale_x_discrete(limits=legLoads)+
+    theme_minimal()+
     labs(x = legX, y = legY)+
-    theme(legend.position="bottom",legend.text = element_text(size=20), legend.title = element_blank())+
-    theme(axis.text=element_text(size=20),axis.title=element_text(size=20,face="bold"))+
+    theme(legend.position="bottom",legend.text = element_text(size=25), legend.title = element_blank(),, legend.key.width = unit(2,"cm"))+
+    scale_x_discrete(limits=legLoads, expand = c(0, 0.1))+
+    scale_y_continuous(limits = c(0,NA))+
+    theme(axis.text=element_text(size=25),axis.title=element_text(size=20,face="bold"),panel.border = element_rect(colour = "black", fill=NA, size=2))+
     guides(fill=guide_legend(nrow=2,keywidth = 1,byrow=TRUE))
   
   return(p)

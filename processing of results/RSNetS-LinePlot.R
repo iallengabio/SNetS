@@ -127,15 +127,14 @@ maxBVTUtilization <- function(directory, replicacoes, alpha, legLoads, legSol){
 }
 
 #Gere seus gr?ficos a partir daqui utilizando as fun??es auxiliares
-directory = "C:/Users/ialle/Dropbox/Doutorado/Pesquisa/Grooming/FCCF/Nova Modelagem Normalizado_Line_NSFNet"
+directory = "C:/Users/ialle/Dropbox/Simulações/6 pontos de carga/Sigma"
 replicacoes = 10;
 alpha = 0.05
-legLoads = c("491","655","819")
-#legSol = c("20","25","30","35","40")
-legSol = c("BAS","MUE","MSV","MSF","IACF")
+legLoads = c("400","533","667","800","933","1067")
+legSol = c("s0","s10","s20","s30","s40","s50","s60","s70","s80","s90")
 
 # 
-blockingProbability(directory, replicacoes, alpha, legLoads, legSol)
+# blockingProbability(directory, replicacoes, alpha, legLoads, legSol)
 # bandwidthBlockingProbability(directory, replicacoes, alpha, legLoads, legSol)
 # spectrumUtilization(directory, replicacoes, alpha, legLoads, legSol)
 # txUtilization(directory, replicacoes, alpha, legLoads, legSol)
