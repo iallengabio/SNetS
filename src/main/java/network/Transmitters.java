@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public class Transmitters implements Serializable {
 
+	public static int MAX_SPECTRAL_AMPLITUDE = 40;
+
 	private int txUtilization;
 	private int numberOfTx;
 

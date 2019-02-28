@@ -447,9 +447,10 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         MultihopGrooming2.MultihopSolution ms;
         MultihopGrooming2.MultihopSolutionStatistics mss;
         Iterator var15;
+        MSSOptimizator msso = new MSSOptimizator();
         for(var15 = ams.iterator(); var15.hasNext(); ms.statistics = mss) {
             ms = (MultihopGrooming2.MultihopSolution)var15.next();
-            mss = new MultihopGrooming2.MultihopSolutionStatistics(ms, rfc, cp);
+            mss = new MultihopGrooming2.MultihopSolutionStatistics(ms, rfc, cp, msso);
             if (mss.physicalHops > physicalHops) {
                 physicalHops = mss.physicalHops;
             }
@@ -487,6 +488,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
     }
 
     protected static class MultihopSolutionStatistics {
+
         public double physicalHops = 0.0D;
         public double virtualHops;
         public double spectrumUtilization;
@@ -494,7 +496,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         public double meanSNR;
         public int transceivers;
 
-        public MultihopSolutionStatistics(MultihopGrooming2.MultihopSolution sol, RequestForConnection rfc, ControlPlane cp) {
+        public MultihopSolutionStatistics(MultihopGrooming2.MultihopSolution sol, RequestForConnection rfc, ControlPlane cp, MSSOptimizator msso) {
             this.virtualHops = (double)sol.virtualRoute.size();
             this.spectrumUtilization = 0.0D;
             this.minSNR = 1.0E8D;
@@ -517,36 +519,60 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
             }
 
             if (sol.needsComplement) {
-                Node s = sol.pairComplement.getSource();
-                Node d = sol.pairComplement.getDestination();
-                Circuit newCircuit = cp.createNewCircuit(rfc, new Pair(s, d));
+                if(msso.oCanEstabilish.get(sol.pairComplement.toString())==null){
+                    Node s = sol.pairComplement.getSource();
+                    Node d = sol.pairComplement.getDestination();
+                    Circuit newCircuit = cp.createNewCircuit(rfc, new Pair(s, d));
 
-                try {
-                    if (!cp.establishCircuit(newCircuit)) {
-                        this.physicalHops = 1.0E8D;
-                        this.meanSNR = 1.0E8D;
-                    } else {
-                        newCircuit.removeRequest(rfc);
-                        this.physicalHops += (double)newCircuit.getRoute().getHops();
-                        ++this.virtualHops;
-                        this.spectrumUtilization += (double)(newCircuit.getModulation().requiredSlots(rfc.getRequiredBandwidth()) * newCircuit.getRoute().getHops());
-                        snr = newCircuit.getSNR();
-                        if (snr < this.minSNR) {
-                            this.minSNR = snr;
+                    try {
+                        if (!cp.establishCircuit(newCircuit)) {
+                            msso.oCanEstabilish.put(sol.pairComplement.toString(),false);
+                            msso.oPhysicalHops.put(sol.pairComplement.toString(),1.0E8D);
+                            msso.oSNR.put(sol.pairComplement.toString(),1.0E8D);
+                        } else {
+                            newCircuit.removeRequest(rfc);
+                            msso.oPhysicalHops.put(sol.pairComplement.toString(),(double)newCircuit.getRoute().getHops());
+                            msso.oCanEstabilish.put(sol.pairComplement.toString(),true);
+                            msso.oSpectrumUtilization.put(sol.pairComplement.toString(), (double)(newCircuit.getModulation().requiredSlots(rfc.getRequiredBandwidth()) * newCircuit.getRoute().getHops()));
+                            msso.oSNR.put(sol.pairComplement.toString(),newCircuit.getSNR());
+                            cp.releaseCircuit(newCircuit);
                         }
-
-                        this.meanSNR += snr;
-                        ++this.transceivers;
-                        cp.releaseCircuit(newCircuit);
+                    } catch (Exception var9) {
+                        var9.printStackTrace();
                     }
-                } catch (Exception var9) {
-                    var9.printStackTrace();
+                    rfc.getCircuits().remove(newCircuit);
                 }
-
-                rfc.getCircuits().remove(newCircuit);
+                if (!msso.oCanEstabilish.get(sol.pairComplement.toString())) {
+                    this.physicalHops = 1.0E8D;
+                    this.meanSNR = 1.0E8D;
+                } else {
+                    this.physicalHops += msso.oPhysicalHops.get(sol.pairComplement.toString());
+                    ++this.virtualHops;
+                    this.spectrumUtilization += msso.oSpectrumUtilization.get(sol.pairComplement.toString());
+                    snr = msso.oSNR.get(sol.pairComplement.toString());
+                    if (snr < this.minSNR) {
+                        this.minSNR = snr;
+                    }
+                    this.meanSNR += snr;
+                    ++this.transceivers;
+                }
             }
 
             this.meanSNR /= this.virtualHops;
+        }
+    }
+
+    public class MSSOptimizator{
+        public HashMap<String,Boolean> oCanEstabilish;
+        public HashMap<String,Double> oPhysicalHops;
+        public HashMap<String,Double> oSNR;
+        public HashMap<String,Double> oSpectrumUtilization;
+
+        public MSSOptimizator(){
+            oCanEstabilish = new HashMap<>();
+            oPhysicalHops = new HashMap<>();
+            oSNR = new HashMap<>();
+            oSpectrumUtilization = new HashMap<>();
         }
     }
 

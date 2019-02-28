@@ -6,6 +6,7 @@ import java.util.Random;
 
 import network.Circuit;
 import network.ControlPlane;
+import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -31,6 +32,7 @@ public class RandomFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
+		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
     	int chosen[] = null;
 		ArrayList<int[]> bandList = new ArrayList<int[]>();
 		

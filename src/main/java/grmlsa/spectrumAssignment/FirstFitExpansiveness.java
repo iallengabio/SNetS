@@ -2,6 +2,7 @@ package grmlsa.spectrumAssignment;
 
 import network.Circuit;
 import network.ControlPlane;
+import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class FirstFitExpansiveness implements SpectrumAssignmentAlgorithmInterfa
      */
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
+        if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
     	int chosen[] = null;
         for (int[] band : freeSpectrumBands) {
             int bandSize = band[1] - band[0] + 1;

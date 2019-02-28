@@ -5,6 +5,7 @@ import java.util.Map;
 
 import network.Circuit;
 import network.ControlPlane;
+import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -88,6 +89,7 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 	
 	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
+		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
 		if(beta == null){
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
 			beta = Double.parseDouble((String)uv.get("beta"));

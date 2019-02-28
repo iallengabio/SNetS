@@ -16,6 +16,7 @@ public class NetworkConfig {
     private List<LinkConfig> links = new ArrayList<>();
     private List<ModulationConfig> modulations = new ArrayList<>();
     private int guardBand = 1;
+    private int bvtSpectralAmplitude=1000;
 
     /**
      * Returns the list of modulations
@@ -87,6 +88,14 @@ public class NetworkConfig {
      */
     public void setGuardBand(int guardBand) {
         this.guardBand = guardBand;
+    }
+
+    public int getBvtSpectralAmplitude() {
+        return bvtSpectralAmplitude;
+    }
+
+    public void setBvtSpectralAmplitude(int bvtSpectralAmplitude) {
+        this.bvtSpectralAmplitude = bvtSpectralAmplitude;
     }
 
     /**
