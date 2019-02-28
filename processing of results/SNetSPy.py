@@ -34,6 +34,46 @@ def extractDFS(path,arq,metric,alpha):
         dfs[i]['errors'] = errors[i]
     return dfs
 
+def extractDFSBCR(path,alpha):
+    p = path
+    arq1 = '_BandwidthBlockingProbability.csv'
+    arq2 = '_ConsumedEnergy.csv'
+    m1 = 'Bandwidth blocking probability'
+    m2 = 'General requested bandwidth'
+    m3 = 'Total consumed energy (Joule)'
+    vbt = 3e-12
+    cws = 3e-9
+    aux = glob.glob(p + '/*/*'+arq1)
+    aux = [s.replace('\\','/') for s in aux]
+    solutions = [s.split('/') for s in aux]
+    solutions = [s[len(s)-2] for s in solutions]#serach name of solutions
+    aux = [pd.read_csv(s) for s in aux] #read files
+    bbp = [d[d.Metrics==m1] for d in aux] #filter metric
+    loads = bbp[0]['LoadPoint'].tolist() #get load points
+    bbp = [d.filter(like='rep',axis=1) for d in bbp]
+    grb = [d[d.Metrics==m2] for d in aux] #filter metric
+    grb = [d.filter(like='rep',axis=1).reset_index(drop=True) for d in grb]
+    aux = glob.glob(p + '/*/*'+arq2)
+    aux = [s.replace('\\','/') for s in aux]
+    aux = [pd.read_csv(s) for s in aux] #read files
+    ce = [d[d.Metrics==m3] for d in aux] #filter metric
+    ce = [d.filter(like='rep',axis=1).reset_index(drop=True) for d in ce]
+    bcr = [(((1-bbp[i])*grb[i])*vbt)/(ce[i]*cws) for i in list(range(0,len(solutions)))]
+    avg = [d.mean(axis=1).tolist() for d in bcr]
+    numRep = len(bcr[0].columns)
+    sd = [st.sem(d,axis=1,ddof=numRep-1).tolist() for d in bcr]
+    errorIntervals = [st.t.interval(1-alpha,numRep-1,loc=avg[i],scale=sd[i]) for i in range(len(avg))]
+    dfs = [pd.DataFrame() for i in range(len(avg))]
+    errors = [[errorIntervals[i][1].tolist()[j] - avg[i][j] for j in range(len(avg[i]))] for i in range(len(avg))] #error = limSup - mean
+    errors = sd
+    for i in range(len(avg)):
+            dfs[i]['loads'] = loads
+            dfs[i]['mean'] = avg[i]
+            dfs[i]['errors'] = errors[i]
+    return dfs
+    
+    
+
 def auxPlotLine(dfs, loads, sol, xl="", yl="", lp = 'upper center'):
     fs = 18
     markers = ["o","v","^","s","P","x","D","_","*","2"]
@@ -56,7 +96,7 @@ def auxPlotLine(dfs, loads, sol, xl="", yl="", lp = 'upper center'):
     else:
         nc = len(sol)
     plt.legend(loc=lp, ncol = 1, fontsize=fs)
-    plt.savefig("S_EC_NSFNet_MPH.pdf", dpi=150,bbox_inches='tight')
+    #plt.savefig("S_EC_NSFNet_MPH.pdf", dpi=150,bbox_inches='tight')
     plt.show()
     
 def auxPlotBars(dfs, loads, sol, xl="", yl="", lp = 'upper center'):
@@ -77,33 +117,49 @@ def auxPlotBars(dfs, loads, sol, xl="", yl="", lp = 'upper center'):
     else:
         nc = len(sol)
     plt.legend(loc=lp, ncol = nc, fontsize=fs)
-    plt.savefig("TBB_NFSNet_MVH_SRNP.pdf", dpi=150,bbox_inches='tight')
+    #plt.savefig("TBB_NFSNet_MVH_SRNP.pdf", dpi=150,bbox_inches='tight')
     plt.show()
 
-p = 'C:/Users/ialle/Dropbox/Simulacoes/Simp/NSFNet/MPH'
+#arquivos
+ABBP = '_BandwidthBlockingProbability.csv'
+AGS = '_GroomingStatistics.csv'
+ACE = '_ConsumedEnergy.csv'
+ATRRU = '_TransmittersReceiversRegeneratorsUtilization.csv'
+
+#métricas
+MBBP = 'Bandwidth blocking probability'
+MRRC = 'Rate of requests by circuit'
+MTCE = 'Total consumed energy (Joule)'
+MTXU = 'Tx Utilization'
+
+p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/EON/politicas_espat_id'
 #a = '_BandwidthBlockingProbability.csv'
 #a = '_GroomingStatistics.csv'
-a = '_ConsumedEnergy.csv'
+#a = '_ConsumedEnergy.csv'
 #a = '_TransmittersReceiversRegeneratorsUtilization.csv'
 #m = 'Bandwidth blocking probability'
 #m = 'Rate of requests by circuit'
-m = 'Total consumed energy (Joule)'
+#m = 'Total consumed energy (Joule)'
 #m = 'Tx Utilization'
-al = 0.05
-
-dfs = extractDFS(p,a,m,al)
-loads = ['267','400','533','667']
-#sol = ['σ=0','σ=10','σ=20','σ=30','σ=40','σ=50','σ=60','σ=70','σ=80','σ=90']
+#al = 0.05
+#dfs = extractDFSBCR(p,al)
+#dfs = extractDFS(p,a,m,al)
+#loads = ['267','400','533','667']
+#sol = ['BAS','IACF','MPH','MSU','MVH']
+#sol = ['σ=0','σ=30','σ=60','σ=90']
 #sol = ['0Gbps','50Gbps','100Gbps','150Gbps','200Gbps','250Gbps','300Gbps','350Gbps','400Gbps']
-sol = ['SRNP (200Gbps)','Sem mecanismo', 'EsPEC (σ=40)']
+#sol = ['SRNP (200Gbps)','Sem mecanismo', 'EsPEC (σ=40)']
 xl = 'Carga na rede (erlangs)'
-yl = 'EC (Joules)'
+yl = 'BCR'
 
 #srnpGain = np.asarray(dfs[0]['mean'])/np.asarray(dfs[1]['mean']) - 1
 #especGain = np.asarray(dfs[2]['mean'])/np.asarray(dfs[1]['mean']) - 1
 
 #auxPlotBars(dfs,loads,sol,xl,yl)
-auxPlotLine(dfs,loads,sol,xl,yl,'upper right')
+#auxPlotLine(dfs,loads,sol,xl,yl,'lower right')
+
+
+
 
 
 
