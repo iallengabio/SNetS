@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import network.Circuit;
 import network.ControlPlane;
 import network.Link;
+import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -276,6 +277,7 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 	
 	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
+		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
 		if(largerBand == null){
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
 			largerBand = Double.parseDouble((String)uv.get("largerBand"));
