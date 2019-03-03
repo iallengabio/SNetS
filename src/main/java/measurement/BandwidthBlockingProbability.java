@@ -1,7 +1,9 @@
 package measurement;
 
 import java.util.HashMap;
+import java.util.List;
 
+import network.Circuit;
 import network.ControlPlane;
 import network.Pair;
 import request.RequestForConnection;
@@ -109,25 +111,33 @@ public class BandwidthBlockingProbability extends Measurement{
 		if(!success){
 			// Increment blocked requests general
 			this.generalBandwidthBlockingProbability += bandwidth;
-			
-			if (request.getPair().getSource().getTxs().isFullUtilized()) { // Check whether the cause of the block was the lack of transmitters
-                this.bandwidthBlockingByLackTransmitters += bandwidth;
-                
-            } else if (request.getPair().getDestination().getRxs().isFullUtilized()) { // Check whether the cause of the block was the lack receivers
-                this.bandwidthBlockingByLackReceivers += bandwidth;
-                
-            } else if (cp.isBlockingByQoTN(request.getCircuits())){ // Check whether the cause of the block was the QoTN
-            	this.bandwidthBlockingByQoTN += bandwidth;
-            	
-            } else if (cp.isBlockingByQoTO(request.getCircuits())) { // Check whether the cause of the block was the QoTO
-            	this.bandwidthBlockingByQoTO += bandwidth;
-            	
-            } else if (cp.isBlockingByFragmentation(request.getCircuits())) { // Check whether the cause of the block was the fragmentation
-                this.bandwidthBlockingByFragmentation += bandwidth;
-                
-            } else { // Blocking occurred due to lack of free slots
-            	this.bandwidthBlockingByOther += bandwidth;
-            }
+
+			for (Circuit c: request.getCircuits()) {
+				if(c.isWasBlocked()){//considers that only one circuit has been blocked
+					switch(c.getBlockCause()){
+						case Circuit.BY_LACK_TX:
+							this.bandwidthBlockingByLackTransmitters++;
+							break;
+						case Circuit.BY_LACK_RX:
+							this.bandwidthBlockingByLackReceivers++;
+							break;
+						case Circuit.BY_QOTN:
+							this.bandwidthBlockingByQoTN++;
+							break;
+						case Circuit.BY_QOTO:
+							this.bandwidthBlockingByQoTO++;
+							break;
+						case Circuit.BY_FRAGMENTATION:
+							this.bandwidthBlockingByFragmentation++;
+							break;
+						case Circuit.BY_OTHER:
+							this.bandwidthBlockingByOther++;
+							break;
+					}
+					break;
+				}
+			}
+
 			
 			// Increment blocked requests per pair
 			i = this.bandwidthBlockedPerPair.get(pairName);
@@ -150,7 +160,7 @@ public class BandwidthBlockingProbability extends Measurement{
 			bplb.put(request.getRequiredBandwidth(), i+bandwidth);
 		}
 	}
-	
+
 	/**
 	 * Returns the probability of blocking the general bandwidth on the network
 	 * 

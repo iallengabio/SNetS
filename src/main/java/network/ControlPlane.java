@@ -11,6 +11,7 @@ import grmlsa.Route;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
+import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -280,37 +281,50 @@ public class ControlPlane implements Serializable {
     public boolean establishCircuit(Circuit circuit) throws Exception {
 
     	// Check if there are free transmitters and receivers
-    	if(thereAreFreeTransponders(circuit)) {
-    		
-    		// Can allocate spectrum
-            if (tryEstablishNewCircuit(circuit)) {
-
-            	// Pre-admits the circuit for QoT verification
-                allocateCircuit(circuit);
-                
-                // QoT verification
-                if(isAdmissibleQualityOfTransmission(circuit)){
-                    updateNetworkPowerConsumption();
-                	return true; // Admits the circuit
-                	
-                } else {
-                	// Circuit QoT is not acceptable, frees allocated resources
-        			releaseCircuit(circuit);
+        if(circuit.getSource().getTxs().hasFreeTransmitters()){
+            if(circuit.getDestination().getRxs().hasFreeRecivers()){
+                // Can allocate spectrum
+                if (tryEstablishNewCircuit(circuit)) {
+                    // Pre-admits the circuit for QoT verification
+                    allocateCircuit(circuit);
+                    // QoT verification
+                    if(isAdmissibleQualityOfTransmission(circuit)){
+                        updateNetworkPowerConsumption();
+                        return true; // Admits the circuit
+                    } else {
+                        // Circuit QoT is not acceptable, frees allocated resources
+                        releaseCircuit(circuit);
+                    }
+                }else{
+                    if(shouldTestFragmentation(circuit)){//test fragmentation
+                        if(isBlockingByFragmentation(circuit)){
+                            circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
+                        }else{
+                            circuit.setBlockCause(Circuit.BY_OTHER);
+                        }
+                    }else{//test QoTN and QoTO
+                        if(isBlockingByQoTN(circuit)){
+                            circuit.setBlockCause(Circuit.BY_QOTN);
+                        }else{
+                            circuit.setBlockCause(Circuit.BY_QOTO);
+                        }
+                    }
                 }
+            }else{
+                circuit.setBlockCause(Circuit.BY_LACK_RX);
             }
+        }else{
+            circuit.setBlockCause(Circuit.BY_LACK_TX);
         }
-
+        circuit.setWasBlocked(true);
         return false; // Rejects the circuit
     }
 
-    /**
-     * Verifies if there are free transmitters and receivers for the establishment of the new circuit
-     * 
-     * @param circuit Circuit
-     * @return boolean
-     */
-    public boolean thereAreFreeTransponders(Circuit circuit){
-    	return (circuit.getSource().getTxs().hasFreeTransmitters() && circuit.getDestination().getRxs().hasFreeRecivers());
+    private boolean shouldTestFragmentation(Circuit circuit) {
+        ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
+        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
+        Modulation modCirc = circuit.getModulation();
+        return !(modBD.getSNRthreshold()>=modCirc.getSNRthreshold());
     }
     
     /**
@@ -645,35 +659,14 @@ public class ControlPlane implements Serializable {
 	 *
 	 * @return boolean
 	 */
-	public boolean isBlockingByQoTN(List<Circuit> circuits){
+	public boolean isBlockingByQoTN(Circuit circuit){
 		// Check if it is to test the QoT
         if(mesh.getPhysicalLayer().isActiveQoT()){
-        	for(Circuit circuit : circuits){
-                // Check if it is possible to compute the circuit QoT
-                if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
-                    // Check if the QoT is acceptable
-                	if(!computeQualityOfTransmission(circuit)){
-                    	return true;
-                    }
-                }
-            }
-	    }
-		return false;
-	}
-	
-	/**
-	 * This method checks whether the circuit blocking was by QoTO
-	 * Returns true if the blocking was by QoTO and false otherwise
-	 *
-	 * @return boolean
-	 */
-	public boolean isBlockingByQoTO(List<Circuit> circuits){
-		// Check if it is to test the QoT of other already active circuits
-        if(mesh.getPhysicalLayer().isActiveQoTForOther()){
-        	for(Circuit circuit : circuits){
-        		// Check if the QoTO is acceptable
-                if(!circuit.isQoTForOther()){
-                	return true;
+            // Check if it is possible to compute the circuit QoT
+            if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
+                // Check if the QoT is acceptable
+                if(!computeQualityOfTransmission(circuit)){
+                    return true;
                 }
             }
 	    }
@@ -686,32 +679,32 @@ public class ControlPlane implements Serializable {
 	 *
 	 * @return boolean
 	 */
-	public boolean isBlockingByFragmentation(List<Circuit> circuits){
-	    for(Circuit circuit : circuits) {
-            if (circuit.getRoute() == null) return false;
+	public boolean isBlockingByFragmentation(Circuit circuit){
 
-            List<Link> links = circuit.getRoute().getLinkList();
-            List<int[]> merge = links.get(0).getFreeSpectrumBands();
+        if (circuit.getRoute() == null) return false;
 
-            for (int i = 1; i < links.size(); i++) {
-                merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
-            }
+        List<Link> links = circuit.getRoute().getLinkList();
+        List<int[]> merge = links.get(0).getFreeSpectrumBands();
 
-            int totalFree = 0;
-            for (int[] band : merge) {
-                totalFree += (band[1] - band[0] + 1);
-            }
-
-            Modulation mod = circuit.getModulation();
-            if (mod == null) {
-                mod = modulationSelection.getAvaliableModulations().get(0);
-            }
-
-            int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
-            if (totalFree > numSlotsRequired) {
-                return true;
-            }
+        for (int i = 1; i < links.size(); i++) {
+            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
         }
+
+        int totalFree = 0;
+        for (int[] band : merge) {
+            totalFree += (band[1] - band[0] + 1);
+        }
+
+        Modulation mod = circuit.getModulation();
+        if (mod == null) {
+            mod = modulationSelection.getAvaliableModulations().get(0);
+        }
+
+        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+        if (totalFree > numSlotsRequired) {
+            return true;
+        }
+
         return false;
 	}
 	

@@ -2,6 +2,7 @@ package measurement;
 
 import java.util.HashMap;
 
+import network.Circuit;
 import network.ControlPlane;
 import network.Pair;
 import request.RequestForConnection;
@@ -112,23 +113,30 @@ public class BlockingProbability extends Measurement {
             // Increment blocked requests general
             this.numGeneralRegBlockProb++;
 
-            if (request.getPair().getSource().getTxs().isFullUtilized()) { // Check whether the cause of the block was the lack of transmitters
-                this.numReqBlockByLackTransmitters++;
-                
-            } else if (request.getPair().getDestination().getRxs().isFullUtilized()) { // Check whether the cause of the block was the lack receivers
-                this.numReqBlockByLackReceivers++;
-                
-            } else if (cp.isBlockingByQoTN(request.getCircuits())){ // Check whether the cause of the block was the QoTN
-            	this.numRegBlockByQoTN++;
-            	
-            } else if (cp.isBlockingByQoTO(request.getCircuits())) { // Check whether the cause of the block was the QoTO
-            	this.numRegBlockByQoTO++;
-            	
-            } else if (cp.isBlockingByFragmentation(request.getCircuits())) { // Check whether the cause of the block was the fragmentation
-                this.numReqBlockByFragmentation++;
-                
-            } else { // Blocking occurred due to lack of free slots
-            	this.numRegBlockByOther++;
+            for (Circuit c: request.getCircuits()) {
+                if(c.isWasBlocked()){//considers that only one circuit has been blocked
+                    switch(c.getBlockCause()){
+                        case Circuit.BY_LACK_TX:
+                            this.numReqBlockByLackTransmitters++;
+                            break;
+                        case Circuit.BY_LACK_RX:
+                            this.numReqBlockByLackReceivers++;
+                            break;
+                        case Circuit.BY_QOTN:
+                            this.numRegBlockByQoTN++;
+                            break;
+                        case Circuit.BY_QOTO:
+                            this.numRegBlockByQoTO++;
+                            break;
+                        case Circuit.BY_FRAGMENTATION:
+                            this.numReqBlockByFragmentation++;
+                            break;
+                        case Circuit.BY_OTHER:
+                            this.numRegBlockByOther++;
+                            break;
+                    }
+                    break;
+                }
             }
 
             // Increase requests blocked by pair
