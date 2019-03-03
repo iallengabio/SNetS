@@ -7,7 +7,7 @@ scripts gráficos qualificação
 import SNetSPy as sp
 #gráficos da PBB em função do sigma e carga
 path = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/NSFNet_CompleteSharing_EsPAT/NSFNet_CompleteSharing_EsPAT_'
-loads = ['267','400','533','667']
+loads = ['267','400','533']
 sol = ['σ=0','σ=10','σ=20','σ=30','σ=40']
 def pbb(policy):    
     p = path + policy
@@ -35,7 +35,7 @@ def bcr(policy):
     
 def pbbId():
     p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['BAS','IACF','MPH','MSU','MVH']
+    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
     al = 0.05
     dfs = sp.extractDFS(p,sp.ABBP,sp.MBBP,al) 
     xl = 'Carga na rede (erlangs)'
@@ -44,7 +44,7 @@ def pbbId():
     
 def ceId():
     p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['BAS','IACF','MPH','MSU','MVH']
+    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
     al = 0.05
     dfs = sp.extractDFS(p,sp.ACE,sp.MTCE,al)
     xl = 'Carga na rede (erlangs)'
@@ -53,16 +53,26 @@ def ceId():
     
 def bcrId():
     p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['BAS','IACF','MPH','MSU','MVH']
+    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
     al = 0.05
-    dfs = sp.extractDFSBCR(p,al)
+    dfs = sp.extractDFSBCR(p,al)    
     xl = 'Carga na rede (erlangs)'
     yl = 'BCR'
     sp.auxPlotLine(dfs,loads,s,xl,yl)
     
-#bcr('BAS')
-pbb('MVH')
+def txuId():
+    p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
+    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
+    al = 0.05
+    dfs = sp.extractDFS(p,sp.ATRRU,sp.MTXU,al)
+    xl = 'Carga na rede (erlangs)'
+    yl = 'CE'
+    sp.auxPlotLine(dfs,loads,s,xl,yl)
+    
+#bcr('MVH')
+pbb('IACF')
 #ce('BAS')
 #pbbId()
 #ceId()
 #bcrId()    
+#txuId()

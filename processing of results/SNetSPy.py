@@ -17,6 +17,7 @@ def extractDFS(path,arq,metric,alpha):
     bbp = [s.replace('\\','/') for s in bbp]
     solutions = [s.split('/') for s in bbp]
     solutions = [s[len(s)-2] for s in solutions]#serach name of solutions
+    print(solutions)
     bbp = [pd.read_csv(s) for s in bbp] #read files
     bbp = [d[d.Metrics==metric] for d in bbp] #filter metric
     loads = bbp[0]['LoadPoint'].tolist() #get load points
@@ -117,7 +118,7 @@ def auxPlotBars(dfs, loads, sol, xl="", yl="", lp = 'upper center'):
     else:
         nc = len(sol)
     plt.legend(loc=lp, ncol = nc, fontsize=fs)
-    #plt.savefig("TBB_NFSNet_MVH_SRNP.pdf", dpi=150,bbox_inches='tight')
+    plt.savefig("ajuste de potência.pdf", dpi=150,bbox_inches='tight')
     plt.show()
 
 #arquivos
@@ -132,7 +133,8 @@ MRRC = 'Rate of requests by circuit'
 MTCE = 'Total consumed energy (Joule)'
 MTXU = 'Tx Utilization'
 
-p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/EON/politicas_espat_id'
+path='C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Ajuste de potencia 3'
+#path='C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Controle/Controle 2'
 #a = '_BandwidthBlockingProbability.csv'
 #a = '_GroomingStatistics.csv'
 #a = '_ConsumedEnergy.csv'
@@ -141,22 +143,23 @@ p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/EON/politicas_espa
 #m = 'Rate of requests by circuit'
 #m = 'Total consumed energy (Joule)'
 #m = 'Tx Utilization'
-#al = 0.05
-#dfs = extractDFSBCR(p,al)
-#dfs = extractDFS(p,a,m,al)
-#loads = ['267','400','533','667']
-#sol = ['BAS','IACF','MPH','MSU','MVH']
+al = 0.05
+#dfs = extractDFSBCR(path,al)
+dfs = extractDFS(path,ABBP,MBBP,al)
+loads = ['267','400','533']
+#sol = ['BAS','MSU','MVH','MPH','IACF']
+sol = ['-7','-8','-9','-10','-11','-12','-13']
 #sol = ['σ=0','σ=30','σ=60','σ=90']
 #sol = ['0Gbps','50Gbps','100Gbps','150Gbps','200Gbps','250Gbps','300Gbps','350Gbps','400Gbps']
 #sol = ['SRNP (200Gbps)','Sem mecanismo', 'EsPEC (σ=40)']
 xl = 'Carga na rede (erlangs)'
-yl = 'BCR'
+yl = 'BBP'
 
 #srnpGain = np.asarray(dfs[0]['mean'])/np.asarray(dfs[1]['mean']) - 1
 #especGain = np.asarray(dfs[2]['mean'])/np.asarray(dfs[1]['mean']) - 1
 
-#auxPlotBars(dfs,loads,sol,xl,yl)
-#auxPlotLine(dfs,loads,sol,xl,yl,'lower right')
+auxPlotBars(dfs,loads,sol,xl,yl)
+#auxPlotLine(dfs,loads,sol,xl,yl,'upper left')
 
 
 
