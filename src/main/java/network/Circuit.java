@@ -24,7 +24,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 
 
 	
-	protected static int quantidade = 0;
+	protected static int quantity = 0;
     protected Integer id;
     protected Pair pair;
     protected Route route;
@@ -44,7 +44,7 @@ public class Circuit implements Comparable<Object>, Serializable {
      * Instantiates a circuit with the list of requests answered by it in empty
      */
     public Circuit() {
-    	this.id = quantidade++;
+    	this.id = quantity++;
         this.requests = new ArrayList<>();
         
         this.QoT = true; //Assuming that a request always starts with admissible QoT

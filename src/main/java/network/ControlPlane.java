@@ -283,6 +283,8 @@ public class ControlPlane implements Serializable {
     	// Check if there are free transmitters and receivers
         if(circuit.getSource().getTxs().hasFreeTransmitters()){
             if(circuit.getDestination().getRxs().hasFreeRecivers()){
+            	boolean blocked = false;
+            	
                 // Can allocate spectrum
                 if (tryEstablishNewCircuit(circuit)) {
                     // Pre-admits the circuit for QoT verification
@@ -291,24 +293,30 @@ public class ControlPlane implements Serializable {
                     if(isAdmissibleQualityOfTransmission(circuit)){
                         updateNetworkPowerConsumption();
                         return true; // Admits the circuit
+                        
                     } else {
                         // Circuit QoT is not acceptable, frees allocated resources
                         releaseCircuit(circuit);
+                        blocked = true;
                     }
-                }else{
-                    if(shouldTestFragmentation(circuit)){//test fragmentation
-                        if(isBlockingByFragmentation(circuit)){
-                            circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
-                        }else{
-                            circuit.setBlockCause(Circuit.BY_OTHER);
-                        }
-                    }else{//test QoTN and QoTO
-                        if(isBlockingByQoTN(circuit)){
-                            circuit.setBlockCause(Circuit.BY_QOTN);
-                        }else{
-                            circuit.setBlockCause(Circuit.BY_QOTO);
-                        }
-                    }
+                }else {
+                	blocked = true;
+                }
+                
+                if(blocked) {
+	                if(shouldTestFragmentation(circuit)){//test fragmentation
+	                    if(isBlockingByFragmentation(circuit)){
+	                        circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
+	                    }else{
+	                        circuit.setBlockCause(Circuit.BY_OTHER);
+	                    }
+	                }else{//test QoTN and QoTO
+	                    if(isBlockingByQoTN(circuit)){
+	                        circuit.setBlockCause(Circuit.BY_QOTN);
+	                    }else{
+	                        circuit.setBlockCause(Circuit.BY_QOTO);
+	                    }
+	                }
                 }
             }else{
                 circuit.setBlockCause(Circuit.BY_LACK_RX);

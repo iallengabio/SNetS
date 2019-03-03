@@ -112,7 +112,7 @@ public class BlockingProbability extends Measurement {
         if (!success) {
             // Increment blocked requests general
             this.numGeneralRegBlockProb++;
-
+            
             for (Circuit c: request.getCircuits()) {
                 if(c.isWasBlocked()){//considers that only one circuit has been blocked
                     switch(c.getBlockCause()){

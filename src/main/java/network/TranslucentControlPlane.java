@@ -493,44 +493,42 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * @return boolean
 	 */
 	@Override
-	public boolean isBlockingByQoTN(List<Circuit> circuits){
+	public boolean isBlockingByQoTN(Circuit circuit){
 		// Check if it is to test the QoT
-		for(Circuit circuit : circuits) {
-			if (mesh.getPhysicalLayer().isActiveQoT()) {
+		if (mesh.getPhysicalLayer().isActiveQoT()) {
 
-				if (circuit.getRoute() == null) return false;
+			if (circuit.getRoute() == null) return false;
 
-				Route route = circuit.getRoute();
-				int sourceNodeIndex = 0;
-				int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
+			Route route = circuit.getRoute();
+			int sourceNodeIndex = 0;
+			int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
 
-				// Verifies by transparent segment if they have modulation and spectrum selected
-				for (int i = 0; i < mumberTransparentSegments; i++) {
+			// Verifies by transparent segment if they have modulation and spectrum selected
+			for (int i = 0; i < mumberTransparentSegments; i++) {
 
-					int destinationNodeIndex = route.getNodeList().size() - 1;
-					if (i < mumberTransparentSegments - 1) {
-						destinationNodeIndex = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().get(i);
-					}
-
-					Node noSource = route.getNode(sourceNodeIndex);
-					Node noDestination = route.getNode(sourceNodeIndex + 1);
-					Link link = noSource.getOxc().linkTo(noDestination.getOxc());
-
-					Modulation mod = circuit.getModulationByLink(link);
-					int sa[] = circuit.getSpectrumAssignedByLink(link);
-
-					// If it does not have modulation or spectrum by segment the blockade is not by QoT
-					if (mod == null || sa == null) {
-						return false;
-					}
-
-					sourceNodeIndex = destinationNodeIndex;
+				int destinationNodeIndex = route.getNodeList().size() - 1;
+				if (i < mumberTransparentSegments - 1) {
+					destinationNodeIndex = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().get(i);
 				}
 
-				// Now you can check the QoT by transparent segment
-				if(!computeQualityOfTransmission(circuit)){
-					return true;
+				Node noSource = route.getNode(sourceNodeIndex);
+				Node noDestination = route.getNode(sourceNodeIndex + 1);
+				Link link = noSource.getOxc().linkTo(noDestination.getOxc());
+
+				Modulation mod = circuit.getModulationByLink(link);
+				int sa[] = circuit.getSpectrumAssignedByLink(link);
+
+				// If it does not have modulation or spectrum by segment the blockade is not by QoT
+				if (mod == null || sa == null) {
+					return false;
 				}
+
+				sourceNodeIndex = destinationNodeIndex;
+			}
+
+			// Now you can check the QoT by transparent segment
+			if(!computeQualityOfTransmission(circuit)){
+				return true;
 			}
 		}
 		
@@ -544,51 +542,49 @@ public class TranslucentControlPlane extends ControlPlane {
 	 * @return boolean
 	 */
 	@Override
-	public boolean isBlockingByFragmentation(List<Circuit> circuits){
-		for(Circuit circuit : circuits) {
-			if (circuit.getRoute() == null) return false;
+	public boolean isBlockingByFragmentation(Circuit circuit){
+		if (circuit.getRoute() == null) return false;
 
-			Route route = circuit.getRoute();
-			int sourceNodeIndex = 0;
-			int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
+		Route route = circuit.getRoute();
+		int sourceNodeIndex = 0;
+		int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
 
-			for (int i = 0; i < mumberTransparentSegments; i++) {
+		for (int i = 0; i < mumberTransparentSegments; i++) {
 
-				int destinationNodeIndex = route.getNodeList().size() - 1;
-				if (i < mumberTransparentSegments - 1) {
-					destinationNodeIndex = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().get(i);
-				}
-
-				Node sourceNode = route.getNode(sourceNodeIndex);
-				Node destinationNode = route.getNode(sourceNodeIndex + 1);
-				Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-
-				List<int[]> merge = link.getFreeSpectrumBands();
-				for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
-					sourceNode = route.getNode(n);
-					destinationNode = route.getNode(n + 1);
-					link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-
-					merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
-				}
-
-				int totalFree = 0;
-				for (int[] band : merge) {
-					totalFree += (band[1] - band[0] + 1);
-				}
-
-				Modulation mod = circuit.getModulationByLink(link);
-				if (mod == null) {
-					mod = modulationSelection.getAvaliableModulations().get(0);
-				}
-
-				int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
-				if (totalFree > numSlotsRequired) {
-					return true;
-				}
-
-				sourceNodeIndex = destinationNodeIndex;
+			int destinationNodeIndex = route.getNodeList().size() - 1;
+			if (i < mumberTransparentSegments - 1) {
+				destinationNodeIndex = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().get(i);
 			}
+
+			Node sourceNode = route.getNode(sourceNodeIndex);
+			Node destinationNode = route.getNode(sourceNodeIndex + 1);
+			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+
+			List<int[]> merge = link.getFreeSpectrumBands();
+			for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
+				sourceNode = route.getNode(n);
+				destinationNode = route.getNode(n + 1);
+				link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+
+				merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
+			}
+
+			int totalFree = 0;
+			for (int[] band : merge) {
+				totalFree += (band[1] - band[0] + 1);
+			}
+
+			Modulation mod = circuit.getModulationByLink(link);
+			if (mod == null) {
+				mod = modulationSelection.getAvaliableModulations().get(0);
+			}
+
+			int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+			if (totalFree > numSlotsRequired) {
+				return true;
+			}
+
+			sourceNodeIndex = destinationNodeIndex;
 		}
 
         return false;

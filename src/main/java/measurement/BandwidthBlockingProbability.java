@@ -111,7 +111,7 @@ public class BandwidthBlockingProbability extends Measurement{
 		if(!success){
 			// Increment blocked requests general
 			this.generalBandwidthBlockingProbability += bandwidth;
-
+			
 			for (Circuit c: request.getCircuits()) {
 				if(c.isWasBlocked()){//considers that only one circuit has been blocked
 					switch(c.getBlockCause()){
@@ -137,7 +137,6 @@ public class BandwidthBlockingProbability extends Measurement{
 					break;
 				}
 			}
-
 			
 			// Increment blocked requests per pair
 			i = this.bandwidthBlockedPerPair.get(pairName);
