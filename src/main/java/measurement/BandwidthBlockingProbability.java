@@ -116,22 +116,22 @@ public class BandwidthBlockingProbability extends Measurement{
 				if(c.isWasBlocked()){//considers that only one circuit has been blocked
 					switch(c.getBlockCause()){
 						case Circuit.BY_LACK_TX:
-							this.bandwidthBlockingByLackTransmitters++;
+							this.bandwidthBlockingByLackTransmitters += bandwidth;
 							break;
 						case Circuit.BY_LACK_RX:
-							this.bandwidthBlockingByLackReceivers++;
+							this.bandwidthBlockingByLackReceivers += bandwidth;
 							break;
 						case Circuit.BY_QOTN:
-							this.bandwidthBlockingByQoTN++;
+							this.bandwidthBlockingByQoTN += bandwidth;
 							break;
 						case Circuit.BY_QOTO:
-							this.bandwidthBlockingByQoTO++;
+							this.bandwidthBlockingByQoTO += bandwidth;
 							break;
 						case Circuit.BY_FRAGMENTATION:
-							this.bandwidthBlockingByFragmentation++;
+							this.bandwidthBlockingByFragmentation += bandwidth;
 							break;
 						case Circuit.BY_OTHER:
-							this.bandwidthBlockingByOther++;
+							this.bandwidthBlockingByOther += bandwidth;
 							break;
 					}
 					break;

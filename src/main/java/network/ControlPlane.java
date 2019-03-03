@@ -279,7 +279,7 @@ public class ControlPlane implements Serializable {
      * @return true if the circuit has been successfully allocated, false if the circuit can not be allocated.
      */
     public boolean establishCircuit(Circuit circuit) throws Exception {
-
+    	
     	// Check if there are free transmitters and receivers
         if(circuit.getSource().getTxs().hasFreeTransmitters()){
             if(circuit.getDestination().getRxs().hasFreeRecivers()){
@@ -313,8 +313,10 @@ public class ControlPlane implements Serializable {
 	                }else{//test QoTN and QoTO
 	                    if(isBlockingByQoTN(circuit)){
 	                        circuit.setBlockCause(Circuit.BY_QOTN);
-	                    }else{
+	                    }else if(!circuit.isQoTForOther()){
 	                        circuit.setBlockCause(Circuit.BY_QOTO);
+	                    }else {
+	                    	circuit.setBlockCause(Circuit.BY_OTHER);
 	                    }
 	                }
                 }
@@ -689,31 +691,42 @@ public class ControlPlane implements Serializable {
 	 * @return boolean
 	 */
 	public boolean isBlockingByFragmentation(Circuit circuit){
-
+		
         if (circuit.getRoute() == null) return false;
-
+        
+        // For fragmentation verification
+        ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
+        mbd.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
+        Modulation modCirc = circuit.getModulation();
+        
+        circuit.setModulation(modBD); // Sets a modulation selected by the distance
+        
         List<Link> links = circuit.getRoute().getLinkList();
         List<int[]> merge = links.get(0).getFreeSpectrumBands();
-
+        
         for (int i = 1; i < links.size(); i++) {
             merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
         }
-
+        
         int totalFree = 0;
         for (int[] band : merge) {
             totalFree += (band[1] - band[0] + 1);
         }
-
+        
         Modulation mod = circuit.getModulation();
         if (mod == null) {
             mod = modulationSelection.getAvaliableModulations().get(0);
         }
-
+        
         int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
         if (totalFree > numSlotsRequired) {
+        	
+        	circuit.setModulation(modCirc); // Sets the previous modulation
             return true;
         }
-
+        
+        circuit.setModulation(modCirc); // Sets the previous modulation
         return false;
 	}
 	
