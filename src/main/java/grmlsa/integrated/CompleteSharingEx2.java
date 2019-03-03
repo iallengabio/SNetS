@@ -5,9 +5,8 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.FirstFitExpansiveness;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.FirstFitExpansiveness2;
 import network.Circuit;
 import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
@@ -23,13 +22,13 @@ import java.util.Map;
  * 
  * @author Iallen
  */
-public class CompleteSharingEx implements IntegratedRMLSAAlgorithmInterface {
+public class CompleteSharingEx2 implements IntegratedRMLSAAlgorithmInterface {
 
 	private int k = 3; //This algorithm uses 3 alternative paths
     private int sigmaExpansiveness=0;
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
-    private FirstFitExpansiveness spectrumAssignment;
+    private FirstFitExpansiveness2 spectrumAssignment;
 
 
     @Override
@@ -37,7 +36,7 @@ public class CompleteSharingEx implements IntegratedRMLSAAlgorithmInterface {
         if (kShortestsPaths == null){
         	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
             modulationSelection = cp.getModulationSelection();
-            spectrumAssignment = new FirstFitExpansiveness();
+            spectrumAssignment = new FirstFitExpansiveness2();
             Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
             this.sigmaExpansiveness = Integer.parseInt((String)uv.get("sigmaExpansiveness"));
         }
