@@ -76,14 +76,14 @@ public class GroomingStatistics extends Measurement {
                 maxReqByCirc = next.getRequests().size();
             }
         }
-
+        
         double acli = activeClients.size();
         double acirc = cp.getConnections().size();
-
+        
         if(Double.isNaN(acli/acirc)){
-            System.out.println("ahaa");
+            return 0.0;
         }
-
+        
         return acli/acirc;
     }
 }

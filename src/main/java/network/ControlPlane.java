@@ -330,6 +330,7 @@ public class ControlPlane implements Serializable {
 
     private boolean shouldTestFragmentation(Circuit circuit) {
         ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
+        mbd.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
         Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
         Modulation modCirc = circuit.getModulation();
         return !(modBD.getSNRthreshold()>=modCirc.getSNRthreshold());
