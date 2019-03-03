@@ -10,7 +10,8 @@ import network.Mesh;
  * 
  * @author Iallen
  */
-public class ModulationSelector {
+public class
+ModulationSelector {
 	
 	/**
 	 * Distances based on articles:
