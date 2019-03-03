@@ -9,8 +9,7 @@ import java.io.Serializable;
  */
 public class Transmitters implements Serializable {
 
-	public static int MAX_SPECTRAL_AMPLITUDE = 40;
-
+	private int maxSpectralAmplitude = 80;
 	private int txUtilization;
 	private int numberOfTx;
 
@@ -27,9 +26,18 @@ public class Transmitters implements Serializable {
 	 * 
 	 * @param numberOfTx int
 	 */
-	public Transmitters(int numberOfTx){
+	public Transmitters(int numberOfTx, int maxSpectralAmplitude){
 		this.numberOfTx = numberOfTx;
 		this.txUtilization = 0;
+		this.maxSpectralAmplitude = maxSpectralAmplitude;
+	}
+
+	public int getMaxSpectralAmplitude() {
+		return maxSpectralAmplitude;
+	}
+
+	public void setMaxSpectralAmplitude(int maxSpectralAmplitude) {
+		this.maxSpectralAmplitude = maxSpectralAmplitude;
 	}
 
 	/**

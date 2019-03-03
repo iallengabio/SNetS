@@ -32,7 +32,8 @@ public class TrafficBalancingSpectrumAssignment implements SpectrumAssignmentAlg
 
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
-		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
+		int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+		if(numberOfSlots> maxAmplitude) return null;
     	if(freeSpectrumBands.size() == 0){
     		return null;
     	}

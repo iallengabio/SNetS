@@ -349,7 +349,8 @@ public class ControlPlane implements Serializable {
      */
     public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
         int currentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
-        if(currentSlots+numSlotsDown+numSlotsUp>Transmitters.MAX_SPECTRAL_AMPLITUDE) return false;
+        int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+        if(currentSlots+numSlotsDown+numSlotsUp>maxAmplitude) return false;
 
         //calculate the spectrum band at top
         int upperBand[] = new int[2];

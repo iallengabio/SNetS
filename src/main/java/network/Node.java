@@ -43,11 +43,11 @@ public class Node implements Serializable {
      * @param numTx int
      * @param numRx int
      */
-    public Node(String name, int numTx, int numRx, int numRegenerators) {
+    public Node(String name, int numTx, int numRx, int numRegenerators, int maxAmplitudeBVT) {
         this.name = name;
         this.oxc = new Oxc(name);
         this.trafficWeigth = 1;
-        this.txs = new Transmitters(numTx);
+        this.txs = new Transmitters(numTx,maxAmplitudeBVT);
         this.rxs = new Receivers(numRx);
         this.regenerators = new Regenerators(numRegenerators);
         this.numberReqGenerated = 0;

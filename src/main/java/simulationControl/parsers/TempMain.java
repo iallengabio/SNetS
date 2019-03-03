@@ -39,7 +39,7 @@ public class TempMain {
                 String[] split = descLink.split(";");
                 nc.getLinks().add(new NetworkConfig.LinkConfig(split[0],split[1],Integer.parseInt(split[3]),Double.parseDouble(split[4]),Double.parseDouble(split[5])));
             }
-            nc.setGuardBand(1);
+            //nc.setGuardBand(1);
 
             Gson gson = new GsonBuilder().create();
             System.out.println(gson.toJson(nc));
