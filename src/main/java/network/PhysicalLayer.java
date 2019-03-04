@@ -18,7 +18,7 @@ import simulationControl.parsers.PhysicalLayerConfig;
  */
 public class PhysicalLayer implements Serializable {
 
-	// Allows you to enable or disable transmission quality computing
+	// Allows you to enable or disable the calculations of physical layer
     private boolean activeQoT; // QoTN
     private boolean activeQoTForOther; // QoTO
 	
@@ -646,10 +646,6 @@ public class PhysicalLayer implements Serializable {
 			double Bsi = (slotNumber - guardBandSlot) * fs; //Hz
 			double circuitSeparation = Bsi + guardBand; //Hz
 			
-			double G = Pout / fs; //densidade espectral de potencia para um slot
-			double Gi = Pout / Bsi; //densidade espectral de potencia do sinal do circuito i
-			Gi = G; // para manter a densidade espectral de potencia fixa
-			
 			int quantCircuitos = (int)(totalSlots / slotNumber); //quantidade de circuitos
 			
 			ArrayList<Double> cricuitsFrequencies = new ArrayList<Double>(quantCircuitos); //frequencias dos circcuitos
@@ -659,6 +655,10 @@ public class PhysicalLayer implements Serializable {
 			
 			//double k = (cricuitsFrequencies.get(1) - cricuitsFrequencies.get(0)) / Bsi;
 			//System.out.println("k = " + k);
+			
+			double G = Pout / fs; //densidade espectral de potencia para um slot
+			double Gi = Pout / Bsi; //densidade espectral de potencia do sinal do circuito i
+			Gi = G; // para manter a densidade espectral de potencia fixa
 			
 			for(int ns = 1; ns <= quantTotalSpansPorEnlace; ns++){
 				int quantSpansPorEnlace = ns;

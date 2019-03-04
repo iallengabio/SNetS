@@ -270,7 +270,6 @@ public class Route implements Serializable, Comparable<Route> {
         Double d2 = o.distanceAllLinks;
         if (d1 < d2) return -1;
         else return 1;
-
     }
 
     /**
