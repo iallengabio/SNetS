@@ -275,7 +275,7 @@ public class PhysicalLayer implements Serializable {
 		double lowerFrequency = centerFrequency - (fs * (slotsTotal / 2.0)); //Hz, Half slots are removed because center Frequency = 193.0E + 12 is the central frequency of the optical spectrum
 		double fi = lowerFrequency + (fs * (spectrumAssigned[0] - 1)) + (Bsi / 2); // Central frequency of circuit
 		
-		double I = Ptx / (fs * 4.0); // Signal power density for the number of reference slots
+		double I = Ptx / referenceBandwidth; // Signal power density for the number of reference slots
 		
 		Node sourceNode = null;
 		Node destinationNode = null;

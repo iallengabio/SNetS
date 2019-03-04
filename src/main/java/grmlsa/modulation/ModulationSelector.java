@@ -43,7 +43,7 @@ ModulationSelector {
 		avaliableModulations.add(new Modulation("64QAM", 312.0, 64.0, 21.0, rateFEC, freqSlot, guardBand));
 		
 		if(mesh.getPhysicalLayer().isActiveQoT()) {
-			//mesh.getPhysicalLayer().computesDistances(mesh, avaliableModulations);
+			mesh.getPhysicalLayer().computesDistances(mesh, avaliableModulations);
 		}
 		
 		return avaliableModulations;
