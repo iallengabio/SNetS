@@ -112,6 +112,15 @@ public class Modulation implements Serializable {
     }
     
     /**
+     * Sets the maximum range
+     * 
+     * @param maxRange - double
+     */
+    public void setMaxRange(double maxRange) {
+    	this.maxRange = maxRange;
+    }
+    
+    /**
      * Returns the M
      * 
      * @return double

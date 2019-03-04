@@ -14,10 +14,16 @@ import java.util.List;
  * @author Iallen
  */
 public class Circuit implements Comparable<Object>, Serializable {
-	
-	protected static int quantidade = 0;
-    protected Integer id;
 
+	public static final int BY_LACK_TX = 1;
+	public static final int BY_LACK_RX = 2;
+	public static final int BY_FRAGMENTATION = 3;
+	public static final int BY_QOTN = 4;
+	public static final int BY_QOTO = 5;
+	public static final int BY_OTHER = 6;
+	
+	protected static int quantity = 0;
+    protected Integer id;
     protected Pair pair;
     protected Route route;
     protected int spectrumAssigned[];
@@ -27,14 +33,16 @@ public class Circuit implements Comparable<Object>, Serializable {
     protected double SNR; //dB
 	protected boolean QoT;
 	protected boolean QoTForOther;
-	
 	protected double powerConsumption;
+
+	protected boolean wasBlocked = false;
+	protected int blockCause;
 
     /**
      * Instantiates a circuit with the list of requests answered by it in empty
      */
     public Circuit() {
-    	this.id = quantidade++;
+    	this.id = quantity++;
         this.requests = new ArrayList<>();
         
         this.QoT = true; //Assuming that a request always starts with admissible QoT
@@ -214,6 +222,22 @@ public class Circuit implements Comparable<Object>, Serializable {
 		QoT = qoT;
 	}
 
+	public boolean isWasBlocked() {
+		return wasBlocked;
+	}
+
+	public void setWasBlocked(boolean wasBlocked) {
+		this.wasBlocked = wasBlocked;
+	}
+
+	public int getBlockCause() {
+		return blockCause;
+	}
+
+	public void setBlockCause(int blockCause) {
+		this.blockCause = blockCause;
+	}
+
 	/**
 	 * @return the qoTForOther
 	 */
@@ -308,4 +332,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 	public double getBandwidth(){
 		return getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
 	}
+
+
+
 }

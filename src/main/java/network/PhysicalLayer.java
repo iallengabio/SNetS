@@ -1,7 +1,11 @@
 package network;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -14,7 +18,7 @@ import simulationControl.parsers.PhysicalLayerConfig;
  */
 public class PhysicalLayer implements Serializable {
 
-	// Allows you to enable or disable transmission quality computing
+	// Allows you to enable or disable the calculations of physical layer
     private boolean activeQoT; // QoTN
     private boolean activeQoTForOther; // QoTO
 	
@@ -105,8 +109,8 @@ public class PhysicalLayer implements Serializable {
         this.preAmp = new Amplifier(ratioForDB(preAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
         
         this.slotBandwidth = mesh.getLinkList().firstElement().getSlotSpectrumBand(); //Hz
-        double slotsTotal = mesh.getLinkList().firstElement().getNumOfSlots();
-		this.lowerFrequency = centerFrequency - (slotBandwidth * (slotsTotal / 2.0)); // Hz, Half slots are removed because center Frequency = 193.55E+12 is the central frequency of the optical spectrum
+        double totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
+		this.lowerFrequency = centerFrequency - (slotBandwidth * (totalSlots / 2.0)); // Hz, Half slots are removed because center Frequency = 193.55E+12 is the central frequency of the optical spectrum
     }
   
 	/**
@@ -588,4 +592,159 @@ public class PhysicalLayer implements Serializable {
 		double alphaLinear = alpha / (1.0E+4 * Math.log10(Math.E));
 		return alphaLinear;
 	}
+	
+	/**
+	 * Calculates the transmission distances of the modulation formats
+	 * 
+	 * @param mesh Mesh
+	 * @param avaliableModulations List<Modulation>
+	 */
+	public void computesDistances(Mesh mesh, List<Modulation> avaliableModulations) {
+		
+		double totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
+		double beta21 = this.beta2;
+		if(beta21 < 0.0){
+			beta21 = -1.0 * beta21;
+		}
+		
+		Vector<Link> linkList = mesh.getLinkList();
+		double sumLastFiberSegment = 0.0;
+		for(int l = 0; l < linkList.size(); l++) {
+			double Ns = getNumberOfLineAmplifiers(linkList.get(l).getDistance());
+			double lastFiberSegment = linkList.get(l).getDistance() - (Ns * L);
+			sumLastFiberSegment += lastFiberSegment;
+		}
+		double averageLastFiberSegment = sumLastFiberSegment / linkList.size();
+		
+		Amplifier boosterAmp = new Amplifier(Lsss, pSat, NF, h, centerFrequency, 0, A1, A2);
+		Amplifier lineAmp = new Amplifier(L * alpha, pSat, NF, h, centerFrequency, 0, A1, A2);
+		Amplifier preAmp = new Amplifier((averageLastFiberSegment * alpha) + Lsss, pSat, NF, h, centerFrequency, 0, A1, A2);
+		
+		double Pout = PhysicalLayer.ratioOfDB(power) * 1.0E-3; //W, potencia de sinal no transmissor
+		double fs = referenceBandwidth;
+		
+		//double Rs = 28.0E+9; //Baud, taxa de simbolo
+		double transmissionRate = 10.0E+9; //bps
+		int guardBandSlot = 1;
+		double guardBand = guardBandSlot * 12.5E+9;
+		
+		double pinTotal = -35.0; //dBm
+		double pinTotalLinear = PhysicalLayer.ratioOfDB(pinTotal) * 1.0E-3; //Watt
+		
+		int quantTotalSpansPorEnlace = (int)(30000.0 / L); // quantidade de spans por enlaces
+		int quantEnlaces = 1; // quantidade de enlaces
+		
+		HashMap<Modulation, Double> distModulations = new HashMap<Modulation, Double>(avaliableModulations.size());
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			distModulations.put(avaliableModulations.get(m), 0.0);
+		}
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			
+			int slotNumber = mod.requiredSlots(transmissionRate);
+			double Bsi = (slotNumber - guardBandSlot) * fs; //Hz
+			double circuitSeparation = Bsi + guardBand; //Hz
+			
+			int quantCircuitos = (int)(totalSlots / slotNumber); //quantidade de circuitos
+			
+			ArrayList<Double> cricuitsFrequencies = new ArrayList<Double>(quantCircuitos); //frequencias dos circcuitos
+			for(int c = 0; c < quantCircuitos; c++){
+				cricuitsFrequencies.add(lowerFrequency + (circuitSeparation * c) + (Bsi / 2.0));
+			}
+			
+			//double k = (cricuitsFrequencies.get(1) - cricuitsFrequencies.get(0)) / Bsi;
+			//System.out.println("k = " + k);
+			
+			double G = Pout / fs; //densidade espectral de potencia para um slot
+			double Gi = Pout / Bsi; //densidade espectral de potencia do sinal do circuito i
+			Gi = G; // para manter a densidade espectral de potencia fixa
+			
+			for(int ns = 1; ns <= quantTotalSpansPorEnlace; ns++){
+				int quantSpansPorEnlace = ns;
+				
+				for(int c = 0; c < quantCircuitos; c++){
+					double fi = cricuitsFrequencies.get(c);
+						
+					double Nout = 0.0;
+					double distance = 0.0;
+					
+					for(int l = 0; l < quantEnlaces; l++){
+						
+						//ASE
+						double boosterAmpGain = boosterAmp.getGainByType(pinTotalLinear, 0);
+						double boosterAmpAse = boosterAmp.getAseByGain(pinTotalLinear, boosterAmpGain); //Watt
+						
+						double preAmpGain = preAmp.getGainByType(pinTotalLinear, 0);
+						double preAmpAse = preAmp.getAseByGain(pinTotalLinear, preAmpGain); //Watt
+						
+						double lineAmpGain = lineAmp.getGainByType(pinTotalLinear, 0);
+						double lineAmpAse = lineAmp.getAseByGain(pinTotalLinear, lineAmpGain); //Watt
+						lineAmpAse = (quantSpansPorEnlace - 1.0) * lineAmpAse; //retira o span do pre amplificador
+						
+						Nout = Nout + (boosterAmpAse + lineAmpAse + preAmpAse);
+						
+						//NLI
+						double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
+						double ro = Bsi * Bsi * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+						double p1 = Gi * Gi * PhysicalLayer.arcsinh(ro);
+						double p2 = 0.0;
+						
+						for(int j = 0; j < quantCircuitos; j++){
+							
+							if(c != j){
+								double Bsj = Bsi;
+								double fj = cricuitsFrequencies.get(j); //frequencia central do circuito j
+								
+								double deltaFij = fi - fj;
+								if(deltaFij < 0.0){
+									deltaFij = -1.0 * deltaFij;
+								}
+								
+								double d1 = deltaFij + (Bsj / 2.0);
+								double d2 = deltaFij - (Bsj / 2.0);
+								
+								double d3 = d1 / d2;
+								if(d3 < 0.0){
+									d3 = -1.0 * d3;
+								}
+								
+								double Gj = Pout / Bsj; //densidade espectral de potencia do sinal do circuito j
+								Gj = G; // para manter a densidade espectral de potencia fixa
+								
+								double ln = Gj * Gj * Math.log(d3);
+								p2 += ln;
+							}
+						}
+						
+						double gnli = mi * (p1 + p2); 
+						gnli = quantSpansPorEnlace * gnli; //
+						
+						Nout = Nout + gnli;
+						
+						distance = distance + ((quantSpansPorEnlace - 1.0) * L) + averageLastFiberSegment;
+					}
+					
+					double OSNR = Gi / Nout;
+					double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
+					
+					double modDist = distModulations.get(mod);
+					if((OSNRdB >= mod.getSNRthreshold()) && (distance > modDist)){
+						distModulations.put(mod, distance);
+					}
+					
+					//System.out.println("distance (km) = " + distance);
+					//System.out.println("c" + (c + 1) + ", p(dBm) = " + power + ", Ns: " + quantSpansPorEnlace + ", OSNR(dB) : " + OSNRdB);
+				}	
+			}
+		}
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			mod.setMaxRange(distModulations.get(mod));
+			
+			//System.out.println("Mod = " + mod.getName() + ", distance = " + distModulations.get(mod));
+		}
+	}
+	
 }
