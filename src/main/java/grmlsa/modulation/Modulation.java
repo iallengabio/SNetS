@@ -61,8 +61,11 @@ public class Modulation implements Serializable {
      * @return int - numberOfStos
      */
     public int requiredSlots(double bandwidth) {
-    	double slotsNumber = (bandwidth * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
-        
+    	//double slotsNumber = bandwidth / (bitsPerSymbol * freqSlot);
+    	
+    	//double slotsNumber = (bandwidth * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
+    	double slotsNumber = (1.1 * bandwidth * (1.0 + rateFEC)) / (2.0 * bitsPerSymbol * freqSlot);
+    	
         int slotsNumberTemp = (int) slotsNumber;
         if (slotsNumber - slotsNumberTemp != 0.0) {
         	slotsNumberTemp++;
@@ -81,7 +84,9 @@ public class Modulation implements Serializable {
     public double potentialBandwidth(int slotsNumber){
     	slotsNumber = slotsNumber - guardBand; // Remove the slot needed to be used as a guard band
         
-        return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
+        //return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
+        
+        return (slotsNumber * 2.0 * bitsPerSymbol * freqSlot) / ((1.0 + rateFEC) * 1.1);
     }
     
 	/**
