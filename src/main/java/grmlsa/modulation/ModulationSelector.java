@@ -28,6 +28,7 @@ ModulationSelector {
 	 * @return List<Modulation
 	 */
 	public static List<Modulation> configureModulations(Mesh mesh){
+		
 		double freqSlot = mesh.getLinkList().get(0).getSlotSpectrumBand();
 		double rateFEC = mesh.getPhysicalLayer().getRateOfFEC();
 		int guardBand = mesh.getGuardBand();
@@ -40,6 +41,10 @@ ModulationSelector {
 		avaliableModulations.add(new Modulation("16QAM", 1250.0, 16.0, 15.1, rateFEC, freqSlot, guardBand));
 		avaliableModulations.add(new Modulation("32QAM", 625.0, 32.0, 18.1, rateFEC, freqSlot, guardBand));
 		avaliableModulations.add(new Modulation("64QAM", 312.0, 64.0, 21.1, rateFEC, freqSlot, guardBand));
+		
+		if(mesh.getPhysicalLayer().isActiveQoT()) {
+			mesh.getPhysicalLayer().computesDistances(mesh, avaliableModulations);
+		}
 		
 		return avaliableModulations;
 	}

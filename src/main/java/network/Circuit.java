@@ -21,8 +21,6 @@ public class Circuit implements Comparable<Object>, Serializable {
 	public static final int BY_QOTN = 4;
 	public static final int BY_QOTO = 5;
 	public static final int BY_OTHER = 6;
-
-
 	
 	protected static int quantity = 0;
     protected Integer id;
