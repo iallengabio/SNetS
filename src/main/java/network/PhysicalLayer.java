@@ -630,7 +630,9 @@ public class PhysicalLayer implements Serializable {
 	public void computesDistances(Mesh mesh, List<Modulation> avaliableModulations) {
 		
 		double totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
-		double beta21 = this.beta2;
+		
+		double alphaLinear = ratioOfDB(alpha);
+		double beta21 = this.D;
 		if(beta21 < 0.0){
 			beta21 = -1.0 * beta21;
 		}
@@ -649,7 +651,7 @@ public class PhysicalLayer implements Serializable {
 		Amplifier preAmp = new Amplifier((averageLastFiberSegment * alpha) + Lsss, pSat, NF, h, centerFrequency, 0, A1, A2);
 		
 		double Pout = PhysicalLayer.ratioOfDB(power) * 1.0E-3; //W, potencia de sinal no transmissor
-		double fs = referenceBandwidth;
+		double fs = slotBandwidth;
 		
 		//double Rs = 28.0E+9; //Baud, taxa de simbolo
 		double transmissionRate = 10.0E+9; //bps
@@ -684,7 +686,7 @@ public class PhysicalLayer implements Serializable {
 			//double k = (cricuitsFrequencies.get(1) - cricuitsFrequencies.get(0)) / Bsi;
 			//System.out.println("k = " + k);
 			
-			double G = Pout / fs; //densidade espectral de potencia para um slot
+			double G = Pout / referenceBandwidth; //densidade espectral de potencia
 			double Gi = Pout / Bsi; //densidade espectral de potencia do sinal do circuito i
 			Gi = G; // para manter a densidade espectral de potencia fixa
 			
@@ -700,8 +702,8 @@ public class PhysicalLayer implements Serializable {
 					for(int l = 0; l < quantEnlaces; l++){
 						
 						//ASE
-						double boosterAmpGain = boosterAmp.getGainByType(pinTotalLinear, 0);
-						double boosterAmpAse = boosterAmp.getAseByGain(pinTotalLinear, boosterAmpGain); //Watt
+						//double boosterAmpGain = boosterAmp.getGainByType(pinTotalLinear, 0);
+						//double boosterAmpAse = boosterAmp.getAseByGain(pinTotalLinear, boosterAmpGain); //Watt
 						
 						double preAmpGain = preAmp.getGainByType(pinTotalLinear, 0);
 						double preAmpAse = preAmp.getAseByGain(pinTotalLinear, preAmpGain); //Watt
@@ -710,7 +712,8 @@ public class PhysicalLayer implements Serializable {
 						double lineAmpAse = lineAmp.getAseByGain(pinTotalLinear, lineAmpGain); //Watt
 						lineAmpAse = (quantSpansPorEnlace - 1.0) * lineAmpAse; //retira o span do pre amplificador
 						
-						Nout = Nout + (boosterAmpAse + lineAmpAse + preAmpAse);
+						//Nout = Nout + (boosterAmpAse + lineAmpAse + preAmpAse);
+						Nout = Nout + (lineAmpAse + preAmpAse);
 						
 						//NLI
 						double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
@@ -746,7 +749,7 @@ public class PhysicalLayer implements Serializable {
 						}
 						
 						double gnli = mi * (p1 + p2); 
-						gnli = quantSpansPorEnlace * gnli; //
+						gnli = quantSpansPorEnlace * gnli;
 						
 						Nout = Nout + gnli;
 						
