@@ -661,7 +661,7 @@ public class PhysicalLayer implements Serializable {
 		double pinTotal = -35.0; //dBm
 		double pinTotalLinear = PhysicalLayer.ratioOfDB(pinTotal) * 1.0E-3; //Watt
 		
-		int quantTotalSpansPorEnlace = (int)(20000.0 / L); // quantidade de spans por enlaces
+		int quantTotalSpansPorEnlace = (int)(50000.0 / L); // quantidade de spans por enlaces
 		int quantEnlaces = 1; // quantidade de enlaces
 		
 		HashMap<Modulation, Double> distModulations = new HashMap<Modulation, Double>(avaliableModulations.size());
@@ -693,9 +693,11 @@ public class PhysicalLayer implements Serializable {
 			for(int ns = 1; ns <= quantTotalSpansPorEnlace; ns++){
 				int quantSpansPorEnlace = ns;
 				
-				for(int c = 0; c < quantCircuitos; c++){
-					double fi = cricuitsFrequencies.get(c);
-						
+				//for(int ci = 0; ci < quantCircuitos; ci++){
+					//double fi = cricuitsFrequencies.get(ci);
+					int ci = 0;
+					double fi = cricuitsFrequencies.get(ci);
+					
 					double Nout = 0.0;
 					double distance = 0.0;
 					
@@ -721,11 +723,11 @@ public class PhysicalLayer implements Serializable {
 						double p1 = Gi * Gi * PhysicalLayer.arcsinh(ro);
 						double p2 = 0.0;
 						
-						for(int j = 0; j < quantCircuitos; j++){
+						for(int cj = 0; cj < quantCircuitos; cj++){
 							
-							if(c != j){
+							if(ci != cj){
 								double Bsj = Bsi;
-								double fj = cricuitsFrequencies.get(j); //frequencia central do circuito j
+								double fj = cricuitsFrequencies.get(cj); //frequencia central do circuito j
 								
 								double deltaFij = fi - fj;
 								if(deltaFij < 0.0){
@@ -766,7 +768,7 @@ public class PhysicalLayer implements Serializable {
 					
 					//System.out.println("distance (km) = " + distance);
 					//System.out.println("c" + (c + 1) + ", p(dBm) = " + power + ", Ns: " + quantSpansPorEnlace + ", OSNR(dB) : " + OSNRdB);
-				}	
+				//}
 			}
 		}
 		
