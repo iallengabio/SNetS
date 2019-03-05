@@ -33,6 +33,9 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 	
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
+		if(avaliableModulations == null) {
+			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
 		
 		if(sigma == null){ // read the sigma value
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
@@ -112,9 +115,5 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 	public List<Modulation> getAvaliableModulations() {
 		return avaliableModulations;
 	}
-
-	@Override
-	public void setAvaliableModulations(List<Modulation> avaliableModulations){
-		this.avaliableModulations = avaliableModulations;
-	}
+	
 }

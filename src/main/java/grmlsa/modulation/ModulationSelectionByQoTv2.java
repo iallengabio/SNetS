@@ -21,6 +21,10 @@ public class ModulationSelectionByQoTv2 implements ModulationSelectionAlgorithmI
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
+		if(avaliableModulations == null) {
+			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
+		
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
 		
 		// Modulation and spectrum selected
@@ -77,11 +81,6 @@ public class ModulationSelectionByQoTv2 implements ModulationSelectionAlgorithmI
 	@Override
 	public List<Modulation> getAvaliableModulations() {
 		return avaliableModulations;
-	}
-
-	@Override
-	public void setAvaliableModulations(List<Modulation> avaliableModulations){
-		this.avaliableModulations = avaliableModulations;
 	}
 	
 }
