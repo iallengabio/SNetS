@@ -20,6 +20,10 @@ public class ModulationSelectionByDistance2 implements ModulationSelectionAlgori
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
+		if(avaliableModulations == null) {
+			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
+		
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
 		
 		// Modulation and spectrum selected
@@ -75,8 +79,4 @@ public class ModulationSelectionByDistance2 implements ModulationSelectionAlgori
 		return avaliableModulations;
 	}
 	
-	@Override
-	public void setAvaliableModulations(List<Modulation> avaliableModulations){
-		this.avaliableModulations = avaliableModulations;
-	}
 }

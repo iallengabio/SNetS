@@ -600,6 +600,7 @@ public class PhysicalLayer implements Serializable {
 	 * @param avaliableModulations List<Modulation>
 	 */
 	public void computesDistances(Mesh mesh, List<Modulation> avaliableModulations) {
+		//System.out.println("Computing of the distances of the modulation formats");
 		
 		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
 		
