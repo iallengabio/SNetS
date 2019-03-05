@@ -10,8 +10,7 @@ import network.Mesh;
  * 
  * @author Iallen
  */
-public class
-ModulationSelector {
+public class ModulationSelector {
 	
 	/**
 	 * Distances based on articles:
@@ -34,6 +33,7 @@ ModulationSelector {
 		int guardBand = mesh.getGuardBand();
 		
 		List<Modulation> avaliableModulations = new ArrayList<>();
+		
 		// String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, boolean activeQoT
 		avaliableModulations.add(new Modulation("BPSK", 10000.0, 2.0, 6.0, rateFEC, freqSlot, guardBand));
 		avaliableModulations.add(new Modulation("QPSK", 5000.0, 4.0, 9.0, rateFEC, freqSlot, guardBand));
@@ -41,10 +41,6 @@ ModulationSelector {
 		avaliableModulations.add(new Modulation("16QAM", 1250.0, 16.0, 15.0, rateFEC, freqSlot, guardBand));
 		avaliableModulations.add(new Modulation("32QAM", 625.0, 32.0, 18.0, rateFEC, freqSlot, guardBand));
 		avaliableModulations.add(new Modulation("64QAM", 312.0, 64.0, 21.0, rateFEC, freqSlot, guardBand));
-		
-		if(mesh.getPhysicalLayer().isActiveQoT()) {
-			mesh.getPhysicalLayer().computesDistances(mesh, avaliableModulations);
-		}
 		
 		return avaliableModulations;
 	}

@@ -19,6 +19,10 @@ public class ModulationSelectionByDistance implements ModulationSelectionAlgorit
 	
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
+		if(avaliableModulations == null) {
+			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
+		
 		double maxBPS = 0.0;
 		Modulation resMod = null;
 		
@@ -43,9 +47,4 @@ public class ModulationSelectionByDistance implements ModulationSelectionAlgorit
 		return avaliableModulations;
 	}
 
-	@Override
-	public void setAvaliableModulations(List<Modulation> avaliableModulations){
-		this.avaliableModulations = avaliableModulations;
-	}
-	
 }

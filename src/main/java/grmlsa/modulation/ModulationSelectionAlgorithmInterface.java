@@ -33,10 +33,4 @@ public interface ModulationSelectionAlgorithmInterface extends Serializable {
 	 */
 	public List<Modulation> getAvaliableModulations();
 	
-	/**
-	 * Configures the available modulation formats.
-	 * 
-	 * @param avaliableModulations List<Modulation>
-	 */
-	public void setAvaliableModulations(List<Modulation> avaliableModulations);
 }

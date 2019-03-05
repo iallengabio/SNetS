@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelector;
 import simulationControl.parsers.NetworkConfig;
 import simulationControl.parsers.OthersConfig;
 import simulationControl.parsers.PhysicalLayerConfig;
@@ -30,6 +32,8 @@ public class Mesh implements Serializable {
     private double totalPowerConsumptionTransponders;
     private double totalPowerConsumptionOXCs;
     private double totalPowerConsumptionAmplifiers;
+    
+    private List<Modulation> avaliableModulations;
 
     /**
      * Creates a new instance of Mesh.
@@ -81,6 +85,13 @@ public class Mesh implements Serializable {
         
         // Information related to the physical layer of the network
         this.physicalLayer = new PhysicalLayer(plc, this);
+        
+        // Instance the modulation formats
+        this.avaliableModulations = ModulationSelector.configureModulations(this);
+        if(physicalLayer.isActiveQoT()) {
+        	// Computing of the distances of the modulation formats
+        	physicalLayer.computesDistances(this, this.avaliableModulations);
+        }
     }
 
     /**
@@ -248,4 +259,22 @@ public class Mesh implements Serializable {
     	
     	totalPowerConsumption = totalPowerConsumptionTransponders + totalPowerConsumptionOXCs + totalPowerConsumptionAmplifiers;
     }
+    
+    /**
+     * Returns the avaliableModulations
+     * 
+     * @return List<Modulation> avaliableModulations
+     */
+	public List<Modulation> getAvaliableModulations() {
+		return avaliableModulations;
+	}
+	
+	/**
+	 * Sets the avaliableModulations
+	 * 
+	 * @param avaliableModulations List<Modulation>
+	 */
+	public void setAvaliableModulations(List<Modulation> avaliableModulations) {
+		this.avaliableModulations = avaliableModulations;
+	}
 }

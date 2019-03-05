@@ -36,6 +36,8 @@ public class ControlPlane implements Serializable {
     protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
     
+    protected ModulationSelectionAlgorithmInterface modSelectByDistForEvaluation; // used to check the blocking types
+    
     protected Mesh mesh;
     
     /**
@@ -69,10 +71,9 @@ public class ControlPlane implements Serializable {
         this.spectrumAssignment = spectrumAssignmentAlgorithm;
         this.modulationSelection = modulationSelection;
         
-        this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
+        this.modSelectByDistForEvaluation = new ModulationSelectionByDistance();
 
         setMesh(mesh);
-        mesh.computesPowerConsmption(this);
     }
     
     /**
@@ -116,6 +117,8 @@ public class ControlPlane implements Serializable {
      */
     public void setMesh(Mesh mesh) {
         this.mesh = mesh;
+        
+        mesh.computesPowerConsmption(this);
         
         // Initialize the active circuit list
         for (Node node1 : mesh.getNodeList()) {
@@ -281,10 +284,10 @@ public class ControlPlane implements Serializable {
      */
     public boolean establishCircuit(Circuit circuit) throws Exception {
     	
-    	// Check if there are free transmitters and receivers
+    	// Check if there are free transmitters
         if(circuit.getSource().getTxs().hasFreeTransmitters()){
+        	// Check if there are free receivers
             if(circuit.getDestination().getRxs().hasFreeRecivers()){
-            	boolean blocked = false;
             	
                 // Can allocate spectrum
                 if (tryEstablishNewCircuit(circuit)) {
@@ -298,29 +301,25 @@ public class ControlPlane implements Serializable {
                     } else {
                         // Circuit QoT is not acceptable, frees allocated resources
                         releaseCircuit(circuit);
-                        blocked = true;
                     }
-                }else {
-                	blocked = true;
                 }
                 
-                if(blocked) {
-	                if(shouldTestFragmentation(circuit)){//test fragmentation
-	                    if(isBlockingByFragmentation(circuit)){
-	                        circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
-	                    }else{
-	                        circuit.setBlockCause(Circuit.BY_OTHER);
-	                    }
-	                }else{//test QoTN and QoTO
-	                    if(isBlockingByQoTN(circuit)){
-	                        circuit.setBlockCause(Circuit.BY_QOTN);
-	                    }else if(!circuit.isQoTForOther()){
-	                        circuit.setBlockCause(Circuit.BY_QOTO);
-	                    }else {
-	                    	circuit.setBlockCause(Circuit.BY_OTHER);
-	                    }
-	                }
-                }
+                if(isBlockingByQoTN(circuit)) {
+                    if(shouldTestFragmentation(circuit)){ // check whether it is to test whether the blocking was by fragmentation
+ 	                    if(isBlockingByFragmentation(circuit)){
+ 	                        circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
+ 	                    }else{
+ 	                        circuit.setBlockCause(Circuit.BY_OTHER);
+ 	                    }
+ 	                }else{
+ 	                	circuit.setBlockCause(Circuit.BY_QOTN);
+ 	                }
+            	}else if(!circuit.isQoTForOther()) {
+            		circuit.setBlockCause(Circuit.BY_QOTO);
+            	}else {
+            		circuit.setBlockCause(Circuit.BY_OTHER);
+            	}
+                
             }else{
                 circuit.setBlockCause(Circuit.BY_LACK_RX);
             }
@@ -332,9 +331,7 @@ public class ControlPlane implements Serializable {
     }
     
     private boolean shouldTestFragmentation(Circuit circuit) {
-        ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
-        mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
-        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
+        Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
         return !(modBD.getSNRthreshold() >= modCirc.getSNRthreshold());
     }
@@ -697,12 +694,7 @@ public class ControlPlane implements Serializable {
         if (circuit.getRoute() == null) return false;
         
         // For fragmentation verification
-        ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
-        mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
-        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
-        Modulation modCirc = circuit.getModulation();
-        
-        circuit.setModulation(modBD); // Sets a modulation selected by the distance
+        Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         
         List<Link> links = circuit.getRoute().getLinkList();
         List<int[]> merge = links.get(0).getFreeSpectrumBands();
@@ -716,19 +708,11 @@ public class ControlPlane implements Serializable {
             totalFree += (band[1] - band[0] + 1);
         }
         
-        Modulation mod = circuit.getModulation();
-        if (mod == null) {
-            mod = modulationSelection.getAvaliableModulations().get(0);
-        }
-        
-        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+        int numSlotsRequired = modBD.requiredSlots(circuit.getRequiredBandwidth());
         if (totalFree > numSlotsRequired) {
-        	
-        	circuit.setModulation(modCirc); // Sets the previous modulation
             return true;
         }
         
-        circuit.setModulation(modCirc); // Sets the previous modulation
         return false;
 	}
 	
