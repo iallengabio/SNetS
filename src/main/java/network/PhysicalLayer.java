@@ -599,7 +599,7 @@ public class PhysicalLayer implements Serializable {
 	 * @param mesh Mesh
 	 * @param avaliableModulations List<Modulation>
 	 */
-	public void computesDistances(Mesh mesh, List<Modulation> avaliableModulations) {
+	public void computesDistances2(Mesh mesh, List<Modulation> avaliableModulations) {
 		
 		double totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
 		double beta21 = this.beta2;
@@ -621,12 +621,12 @@ public class PhysicalLayer implements Serializable {
 		Amplifier preAmp = new Amplifier((averageLastFiberSegment * alpha) + Lsss, pSat, NF, h, centerFrequency, 0, A1, A2);
 		
 		double Pout = PhysicalLayer.ratioOfDB(power) * 1.0E-3; //W, potencia de sinal no transmissor
-		double fs = referenceBandwidth;
+		double refBand = referenceBandwidth;
 		
 		//double Rs = 28.0E+9; //Baud, taxa de simbolo
 		double transmissionRate = 10.0E+9; //bps
 		int guardBandSlot = 1;
-		double guardBand = guardBandSlot * 12.5E+9;
+		double guardBand = guardBandSlot * slotBandwidth;
 		
 		double pinTotal = -35.0; //dBm
 		double pinTotalLinear = PhysicalLayer.ratioOfDB(pinTotal) * 1.0E-3; //Watt
@@ -643,10 +643,10 @@ public class PhysicalLayer implements Serializable {
 			Modulation mod = avaliableModulations.get(m);
 			
 			int slotNumber = mod.requiredSlots(transmissionRate);
-			double Bsi = (slotNumber - guardBandSlot) * fs; //Hz
+			double Bsi = (slotNumber - guardBandSlot) * slotBandwidth; //Hz
 			double circuitSeparation = Bsi + guardBand; //Hz
 			
-			double G = Pout / fs; //densidade espectral de potencia para um slot
+			double G = Pout / refBand; //densidade espectral de potencia para um slot
 			double Gi = Pout / Bsi; //densidade espectral de potencia do sinal do circuito i
 			Gi = G; // para manter a densidade espectral de potencia fixa
 			
@@ -665,6 +665,8 @@ public class PhysicalLayer implements Serializable {
 				
 				for(int c = 0; c < quantCircuitos; c++){
 					double fi = cricuitsFrequencies.get(c);
+					//int c = 0;
+					//double fi = cricuitsFrequencies.get(c);
 						
 					double Nout = 0.0;
 					double distance = 0.0;
@@ -743,8 +745,96 @@ public class PhysicalLayer implements Serializable {
 			Modulation mod = avaliableModulations.get(m);
 			mod.setMaxRange(distModulations.get(mod));
 			
-			//System.out.println("Mod = " + mod.getName() + ", distance = " + distModulations.get(mod));
+			System.out.println("Mod = " + mod.getName() + ", distance = " + distModulations.get(mod));
 		}
+		
+		System.out.println("aqui");
 	}
 	
+	
+	public void computesDistances(Mesh mesh, List<Modulation> avaliableModulations) {
+		
+		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
+		
+		Vector<Link> linkList = mesh.getLinkList();
+		double sumLastFiberSegment = 0.0;
+		for(int l = 0; l < linkList.size(); l++) {
+			double Ns = getNumberOfLineAmplifiers(linkList.get(l).getDistance());
+			double lastFiberSegment = linkList.get(l).getDistance() - (Ns * L);
+			sumLastFiberSegment += lastFiberSegment;
+		}
+		double averageLastFiberSegment = sumLastFiberSegment / linkList.size();
+		
+		//double Rs = 28.0E+9; //Baud, taxa de simbolo
+		double transmissionRate = 10.0E+9; //bps
+		
+		int quantTotalSpansPorEnlace = (int)(30000.0 / L); // quantidade de spans por enlaces
+		
+		HashMap<Modulation, Double> distModulations = new HashMap<Modulation, Double>(avaliableModulations.size());
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			distModulations.put(avaliableModulations.get(m), 0.0);
+		}
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			
+			int slotNumber = mod.requiredSlots(transmissionRate);
+			int quantCircuits = (int)(totalSlots / slotNumber); //quantidade de circuitos
+			
+			ArrayList<int[]> circuitsSa = new ArrayList<int[]>(quantCircuits);
+			
+			for(int c = 0; c < quantCircuits; c++){
+				int sa[] = new int[2];
+				sa[0] = 1 + (c * slotNumber);
+				sa[1] = sa[0] + slotNumber - 1;
+				circuitsSa.add(sa);
+			}
+			
+			for(int ns = 1; ns <= quantTotalSpansPorEnlace; ns++){
+				int quantSpansPorEnlace = ns;
+				
+				double distance = ((quantSpansPorEnlace - 1.0) * L) + averageLastFiberSegment;
+				
+				Node n1 = new Node("1", 1000, 1000, 0);
+				Node n2 = new Node("2", 1000, 1000, 0);
+				n1.getOxc().addLink(new Link(n1.getOxc(), n2.getOxc(), totalSlots, slotBandwidth, distance));
+				
+				Vector<Node> listNodes = new Vector<Node>();
+				listNodes.add(n1);
+				listNodes.add(n2);
+				
+				Route route = new Route(listNodes);
+				Pair pair = new Pair(n1, n2);
+				
+				for(int c = 0; c < quantCircuits; c++){
+					Circuit circuitTemp = new Circuit();
+					circuitTemp.setPair(pair);
+					circuitTemp.setRoute(route);
+					circuitTemp.setModulation(mod);
+					circuitTemp.setSpectrumAssigned(circuitsSa.get(c));
+					
+					route.getLink(0).addCircuit(circuitTemp);
+				}
+				
+				Circuit circuit = route.getLink(0).getCircuitList().first();
+				double OSNR = computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+				double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
+				
+				double modDist = distModulations.get(mod);
+				if((OSNRdB >= mod.getSNRthreshold()) && (distance > modDist)){
+					distModulations.put(mod, distance);
+				}	
+			}
+		}
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			mod.setMaxRange(distModulations.get(mod));
+			
+			System.out.println("Mod = " + mod.getName() + ", distance = " + distModulations.get(mod));
+		}
+		
+		System.out.println("aqui");
+	}
+
 }
