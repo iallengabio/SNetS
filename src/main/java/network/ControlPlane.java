@@ -12,6 +12,7 @@ import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
+import grmlsa.modulation.ModulationSelectionByDistance2;
 import grmlsa.modulation.ModulationSelector;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -329,11 +330,11 @@ public class ControlPlane implements Serializable {
         circuit.setWasBlocked(true);
         return false; // Rejects the circuit
     }
-
+    
     private boolean shouldTestFragmentation(Circuit circuit) {
         ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
         mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
-        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
+        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
         return !(modBD.getSNRthreshold()>=modCirc.getSNRthreshold());
     }
