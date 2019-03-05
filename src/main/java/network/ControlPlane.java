@@ -336,7 +336,7 @@ public class ControlPlane implements Serializable {
         mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
         Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
-        return !(modBD.getSNRthreshold()>=modCirc.getSNRthreshold());
+        return !(modBD.getSNRthreshold() >= modCirc.getSNRthreshold());
     }
     
     /**
@@ -699,7 +699,7 @@ public class ControlPlane implements Serializable {
         // For fragmentation verification
         ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
         mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
-        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
+        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
         
         circuit.setModulation(modBD); // Sets a modulation selected by the distance

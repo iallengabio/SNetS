@@ -577,7 +577,8 @@ public class PhysicalLayer implements Serializable {
 		double averageLastFiberSegment = sumLastFiberSegment / linkList.size();
 		
 		double transmissionRate = 10.0E+9; //bps
-		int quantSpansPerEnlace = (int)(50000.0 / L); // number of spans per link
+		double totalDistance = 50000.0; //km
+		int quantSpansPerEnlace = (int)(totalDistance / L); // number of spans per link
 		
 		HashMap<Modulation, Double> distModulations = new HashMap<Modulation, Double>(avaliableModulations.size());
 		for(int m = 0; m < avaliableModulations.size(); m++) {
