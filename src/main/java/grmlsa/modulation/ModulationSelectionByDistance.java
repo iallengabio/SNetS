@@ -31,6 +31,10 @@ public class ModulationSelectionByDistance implements ModulationSelectionAlgorit
 			}
 		}
 		
+		if(resMod == null) {
+			resMod = avaliableModulations.get(0);
+		}
+		
 		return resMod;
 	}
 

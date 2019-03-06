@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelector;
+import simulationControl.Util;
 import simulationControl.parsers.PhysicalLayerConfig;
 
 /**
@@ -298,13 +301,12 @@ public class PhysicalLayer implements Serializable {
 				if(typeOfAmplifierGain == 1){
 					totalPower = getTotalPowerInTheLink(link, linearPower, Bsi, I, numSlotsRequired, checksOnTotalPower);
 				}
-
+				
 				lastFiberSegment = link.getDistance() - (Ns * L);
-				if(lastFiberSegment != L){ // check if need to recalculate the gain of the preamplifier
-					double spanMeter = lastFiberSegment * 1000; // span in meter
-					double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
-					preAmp.setGain(ratioForDB(preAmpGainLinear));
-				}
+				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
+				//double spanMeter = lastFiberSegment * 1000; // span in meter
+				//double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
+				//preAmp.setGain(ratioForDB(preAmpGainLinear));
 				
 				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
@@ -551,6 +553,10 @@ public class PhysicalLayer implements Serializable {
 	 * @return int
 	 */
 	public static int roundUp(double res){
+		if(res < 0.0) {
+			return 0;
+		}
+		
 		int res2 = (int) res;
 		if(res - res2 != 0.0){
 			res2++;
@@ -835,6 +841,210 @@ public class PhysicalLayer implements Serializable {
 		}
 		
 		System.out.println("aqui");
+	}
+	
+	/**
+	 * Calculates the transmission distances of the modulation formats
+	 * 
+	 * @param mesh Mesh
+	 * @param avaliableModulations List<Modulation>
+	 * @return HashMap<Modulation, HashMap<Double, Double>>
+	 */
+	public HashMap<String, HashMap<Double, Double>> computesModulationsDistances(Mesh mesh, List<Modulation> avaliableModulations) {
+		//System.out.println("Computing of the distances of the modulation formats");
+		
+		Set<Double> transmissionRateList = Util.bandwidths;
+		HashMap<String, HashMap<Double, Double>> modsTrsDistances = new HashMap<>();
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			
+			for(double transmissionRate : transmissionRateList) {
+				
+				HashMap<Double, Double> slotsDist = modsTrsDistances.get(mod.getName());
+				if(slotsDist == null) {
+					slotsDist = new HashMap<>();
+					modsTrsDistances.put(mod.getName(), slotsDist);
+				}
+				
+				Double dist = slotsDist.get(transmissionRate);
+				if(dist == null) {
+					dist = 0.0;
+				}
+				slotsDist.put(transmissionRate, dist);
+			}
+		}
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			
+			for(double transmissionRate : transmissionRateList) {
+				
+				double distance = computeModulationDistanceByBandwidth(mod, transmissionRate, mesh);
+				modsTrsDistances.get(mod.getName()).put(transmissionRate, distance);
+			}
+		}
+		
+//		for(double transmissionRate : transmissionRateList) {
+//			System.out.println("TR(Gbps) = " + (transmissionRate / 1.0E+9));
+//			
+//			for(int m = 0; m < avaliableModulations.size(); m++) {
+//				Modulation mod = avaliableModulations.get(m);
+//				
+//				double modTrDist = modTrDistance.get(mod).get(transmissionRate);
+//				System.out.println("Mod = " + mod.getName() + ", distance(km) = " + modTrDist);
+//			}
+//		}
+		
+		return modsTrsDistances;
+	}
+	
+	/**
+	 * Calculates the distance to a modulation format considering the bandwidth
+	 * 
+	 * @param mod
+	 * @param bandwidth
+	 * @param mesh
+	 * @return double
+	 */
+	public double computeModulationDistanceByBandwidth(Modulation mod, double bandwidth, Mesh mesh) {
+		
+		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
+		
+		Vector<Link> linkList = mesh.getLinkList();
+		double sumLastFiberSegment = 0.0;
+		for(int l = 0; l < linkList.size(); l++) {
+			double Ns = getNumberOfLineAmplifiers(linkList.get(l).getDistance());
+			double lastFiberSegment = linkList.get(l).getDistance() - (Ns * L);
+			sumLastFiberSegment += lastFiberSegment;
+		}
+		double averageLastFiberSegment = sumLastFiberSegment / linkList.size();
+		
+		double totalDistance = 50000.0; //km
+		int quantSpansPorEnlace = (int)(totalDistance / L); // number of spans per link
+		
+		int slotNumber = mod.requiredSlots(bandwidth);
+		int sa[] = new int[2];
+		sa[0] = 1;
+		sa[1] = sa[0] + slotNumber - 1;
+		
+		double modTrDistance = 0.0;
+		
+		for(int ns = 0; ns <= quantSpansPorEnlace; ns++){
+			double distance = (ns * L) + averageLastFiberSegment;
+			
+			Node n1 = new Node("1", 1000, 1000, 0);
+			Node n2 = new Node("2", 1000, 1000, 0);
+			n1.getOxc().addLink(new Link(n1.getOxc(), n2.getOxc(), totalSlots, slotBandwidth, distance));
+			
+			Vector<Node> listNodes = new Vector<Node>();
+			listNodes.add(n1);
+			listNodes.add(n2);
+			
+			Route route = new Route(listNodes);
+			Pair pair = new Pair(n1, n2);
+			
+			Circuit circuitTemp = new Circuit();
+			circuitTemp.setPair(pair);
+			circuitTemp.setRoute(route);
+			circuitTemp.setModulation(mod);
+			circuitTemp.setSpectrumAssigned(sa);
+			
+			route.getLink(0).addCircuit(circuitTemp);
+			
+			double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), false);
+			double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
+			
+			if((OSNRdB >= mod.getSNRthreshold()) && (distance > modTrDistance)){
+				modTrDistance = distance;
+			}
+		}
+		
+		return modTrDistance;
+	}
+	
+	
+	public void testCamadaFisica(Mesh mesh) {
+		
+		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
+		
+		double distance = 600.0;
+		
+		Node n1 = new Node("1", 1000, 1000, 0);
+		Node n2 = new Node("2", 1000, 1000, 0);
+		n1.getOxc().addLink(new Link(n1.getOxc(), n2.getOxc(), totalSlots, slotBandwidth, distance));
+		
+		Vector<Node> listNodes = new Vector<Node>();
+		listNodes.add(n1);
+		listNodes.add(n2);
+		
+		Route route = new Route(listNodes);
+		Pair pair = new Pair(n1, n2);
+		
+		List<Modulation> avaliableModulations = ModulationSelector.configureModulations(mesh);
+		Modulation mod_BPSK = avaliableModulations.get(0);
+		Modulation mod_QPSK = avaliableModulations.get(1);
+		Modulation mod_8QAM = avaliableModulations.get(2);
+		
+		// circuito 1
+		double tr1 = 40.0E+9; //bps
+		int slotNumber1 = 3; //mod_QPSK.requiredSlots(tr1); //com a banda de guarda
+		int sa1[] = new int[2];
+		sa1[0] = 1;
+		sa1[1] = sa1[0] + slotNumber1 - 1;
+		
+		Circuit circuit1 = new Circuit();
+		circuit1.setPair(pair);
+		circuit1.setRoute(route);
+		circuit1.setModulation(mod_QPSK);
+		circuit1.setSpectrumAssigned(sa1);
+		
+		// circuito 2
+		double tr2 = 100.0E+9; //bps
+		int slotNumber2 = 9; //mod_BPSK.requiredSlots(tr2); //com a banda de guarda
+		int sa2[] = new int[2];
+		sa2[0] = sa1[1] + 1;
+		sa2[1] = sa2[0] + slotNumber2 - 1;
+		
+		Circuit circuit2 = new Circuit();
+		circuit2.setPair(pair);
+		circuit2.setRoute(route);
+		circuit2.setModulation(mod_BPSK);
+		circuit2.setSpectrumAssigned(sa2);
+		
+		// circuito 3
+		double tr3 = 120.0E+9; //bps
+		int slotNumber3 = 5; //mod_8QAM.requiredSlots(tr3); //com a banda de guarda
+		int sa3[] = new int[2];
+		sa3[0] = sa2[1] + 1;
+		sa3[1] = sa3[0] + slotNumber3 - 1;
+		
+		Circuit circuit3 = new Circuit();
+		circuit3.setPair(pair);
+		circuit3.setRoute(route);
+		circuit3.setModulation(mod_8QAM);
+		circuit3.setSpectrumAssigned(sa3);
+		
+		route.getLink(0).addCircuit(circuit1);
+		route.getLink(0).addCircuit(circuit2);
+		route.getLink(0).addCircuit(circuit3);
+		
+		
+		double c1_OSNR = computeSNRSegment(circuit1, circuit1.getRoute(), 0, circuit1.getRoute().getNodeList().size() - 1, circuit1.getModulation(), circuit1.getSpectrumAssigned(), false);
+		double c1_OSNRdB = PhysicalLayer.ratioForDB(c1_OSNR);
+		
+		double c2_OSNR = computeSNRSegment(circuit2, circuit2.getRoute(), 0, circuit2.getRoute().getNodeList().size() - 1, circuit2.getModulation(), circuit2.getSpectrumAssigned(), false);
+		double c2_OSNRdB = PhysicalLayer.ratioForDB(c2_OSNR);
+		
+		double c3_OSNR = computeSNRSegment(circuit3, circuit3.getRoute(), 0, circuit3.getRoute().getNodeList().size() - 1, circuit3.getModulation(), circuit3.getSpectrumAssigned(), false);
+		double c3_OSNRdB = PhysicalLayer.ratioForDB(c3_OSNR);
+		
+		
+		System.out.println("c1: OSNR(dB) = " + c1_OSNRdB);
+		System.out.println("c2: OSNR(dB) = " + c2_OSNRdB);
+		System.out.println("c3: OSNR(dB) = " + c3_OSNRdB);
+		
+		System.out.println("fim");
 	}
 
 }
