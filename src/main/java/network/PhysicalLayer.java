@@ -1,7 +1,6 @@
 package network;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -302,15 +301,13 @@ public class PhysicalLayer implements Serializable {
 			
 			if(activeASE){
 				if(typeOfAmplifierGain == 1){
-					totalPower = getTotalPowerInTheLink(link, linearPower, Bsi, I, numSlotsRequired);
+					totalPower = getTotalPowerInTheLink(circuitList, link, linearPower, Bsi, I);
 				}
-
+				
 				lastFiberSegment = link.getDistance() - (Ns * L);
-				if(lastFiberSegment != L){ // check if need to recalculate the gain of the preamplifier
-					double spanMeter = lastFiberSegment * 1000; // span in meter
-					double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
-					preAmp.setGain(ratioForDB(preAmpGainLinear));
-				}
+				double spanMeter = lastFiberSegment * 1000; // span in meter
+				double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
+				preAmp.setGain(ratioForDB(preAmpGainLinear));
 				
 				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
@@ -366,7 +363,7 @@ public class PhysicalLayer implements Serializable {
 	 * @param checksOnTotalPower boolean
 	 * @return double
 	 */
-	public double getTotalPowerInTheLink(Link link, double powerI, double Bsi, double I, double numSlotsRequired){
+	public double getTotalPowerInTheLink(TreeSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
 		double totalPower = 0.0;
 		double circuitPower = 0.0;
 		int saj[] = null;
@@ -374,8 +371,7 @@ public class PhysicalLayer implements Serializable {
 		double Bsj = 0.0;
 		double powerJ = powerI;
 		
-		TreeSet<Circuit> listCircuits = link.getCircuitList();
-		for(Circuit cricuitJ : listCircuits){
+		for(Circuit cricuitJ : circuitList){
 			
 			circuitPower = powerJ;
 			if(fixedPowerSpectralDensity){

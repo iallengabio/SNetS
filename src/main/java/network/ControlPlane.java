@@ -38,9 +38,6 @@ public class ControlPlane implements Serializable {
     
     protected Mesh mesh;
     
-    boolean a1;
-    boolean b1;
-    
     /**
      * The first key represents the source node.
      * The second key represents the destination node.
@@ -514,10 +511,8 @@ public class ControlPlane implements Serializable {
     	// Check if it is to test the QoT
     	if(mesh.getPhysicalLayer().isActiveQoT()){
     		
-    		a1 = computeQualityOfTransmission(circuit, null);
-    		
     		// Verifies the QoT of the current circuit
-    		if(a1){
+    		if(computeQualityOfTransmission(circuit, null)){
     			boolean QoTForOther = true;
     			
     			// Check if it is to test the QoT of other already active circuits
@@ -563,7 +558,7 @@ public class ControlPlane implements Serializable {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    protected boolean computeQoTForOther2(Circuit circuit){
+    protected boolean computeQoTForOther(Circuit circuit){
     	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
     	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
     	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits
@@ -607,66 +602,6 @@ public class ControlPlane implements Serializable {
         
 		return true;
     }
-    
-    protected boolean computeQoTForOther(Circuit circuit){
-    	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
-    	
-    	// Search for all circuits that have links in common with the circuit under evaluation
-		Route route = circuit.getRoute();
-		for (Link link : route.getLinkList()) {
-			
-			// Picks up the active circuits that use the link
-			TreeSet<Circuit> circuitsTemp = link.getCircuitList();
-            for (Circuit circuitTemp : circuitsTemp) {
-            	
-            	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
-                if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {
-                    circuits.add(circuitTemp);
-                }
-            }
-		}
-		
-		List<Circuit> circutList = new ArrayList<>();
-		// Tests the QoT of circuits
-        for (Circuit circuitTemp : circuits) {
-        	
-        	circutList.add(circuitTemp);
-        	
-        	// Recalculates the QoT and SNR of the circuit
-            boolean QoT = computeQualityOfTransmission(circuitTemp, circuit);
-            
-            if (!QoT) {
-            	
-            	 for (Circuit circuitAux : circutList) {
-            		 computeQualityOfTransmission(circuitAux, null);
-            	 }
-            	
-                return false;
-            }
-        }
-        
-		return true;
-    }
-    
-    
-    public void printTest(Circuit cuircuit){
-		Route route = cuircuit.getRoute();
-		
-		System.out.println("----------------------------------------------------------");
-		System.out.println("Id = " + cuircuit.getId());
-    	System.out.print("Lista de nos: ");
-    	int size = route.getNodeList().size();
-    	for(int i = 0; i < size; i++){
-    		System.out.print(route.getNodeList().get(i).getName()+", ");
-    	}
-    	System.out.println();
-    	System.out.println("Taxa de bits (Gbps) = " + (cuircuit.getRequiredBandwidth() / 1000000000.0));
-    	System.out.println("Modulacao = " + cuircuit.getModulation().getName());
-    	System.out.println("Distancia = " + route.getDistanceAllLinks());
-		System.out.println("Quant slots requeridos = " + (cuircuit.getSpectrumAssigned()[1] - cuircuit.getSpectrumAssigned()[0] + 1));
-		System.out.println("Faixa de espectro = (" + cuircuit.getSpectrumAssigned()[0] + ", " + cuircuit.getSpectrumAssigned()[1] + ")");
-    	System.out.println("SNR (dB) = " + cuircuit.getSNR());
-	}
     
     /**
 	 * This method returns the power consumption of a given circuit.
