@@ -116,7 +116,7 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 	public static boolean aceitableDispersion(int numberOfSlots, int[] band, Circuit circuit, ControlPlane cp) {
 		circuit.setSpectrumAssigned(band);
 		
-		boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, circuit.getRoute(), circuit.getModulation(), band);
+		boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, circuit.getRoute(), circuit.getModulation(), band, null);
 		return QoT;
 	}
 }

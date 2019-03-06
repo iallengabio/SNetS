@@ -329,10 +329,11 @@ public class Circuit implements Comparable<Object>, Serializable {
 		return false;
 	}
 
+	/**
+	 * @return double
+	 */
 	public double getBandwidth(){
 		return getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
 	}
-
-
 
 }

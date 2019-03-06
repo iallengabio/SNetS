@@ -4,6 +4,7 @@ import grmlsa.integrated.*;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
 import grmlsa.modulation.ModulationSelectionByDistance2;
+import grmlsa.modulation.ModulationSelectionByDistanceAndBandwidth;
 import grmlsa.modulation.ModulationSelectionByQoT;
 import grmlsa.modulation.ModulationSelectionByQoTAndSigma;
 import grmlsa.modulation.ModulationSelectionByQoTv2;
@@ -100,7 +101,8 @@ public class GRMLSA implements Serializable {
 	private static final String MODULATION_BY_QOT = "modulationbyqot";
 	private static final String MODULATION_BY_QOT_SIGMA = "modulationbyqotsigma";
 	private static final String MODULATION_BY_QOT_V2 = "modulationbyqotv2";
-
+	private static final String MODULATION_BY_DISTANCE_BANDWIDTH = "modulationbydistancebandwidth";
+	
     // End of constants
 
     private String grooming;
@@ -288,6 +290,8 @@ public class GRMLSA implements Serializable {
 	    		return new ModulationSelectionByQoTAndSigma();
 	    	case MODULATION_BY_QOT_V2:
 	    		return new ModulationSelectionByQoTv2();
+	    	case MODULATION_BY_DISTANCE_BANDWIDTH:
+	    		return new ModulationSelectionByDistanceAndBandwidth();
 	    	default:
 	    		return null;
     	}
