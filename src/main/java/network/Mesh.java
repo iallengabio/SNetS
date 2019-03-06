@@ -41,7 +41,7 @@ public class Mesh implements Serializable {
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc, List<Modulation> avaliableModulations) {
         this.guarBand = nc.getGuardBand();
         this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
@@ -87,10 +87,15 @@ public class Mesh implements Serializable {
         this.physicalLayer = new PhysicalLayer(plc, this);
         
         // Instance the modulation formats
-        this.avaliableModulations = ModulationSelector.configureModulations(this);
         if(physicalLayer.isActiveQoT()) {
-        	// Computing of the distances of the modulation formats
-        	physicalLayer.computesDistances(this, this.avaliableModulations);
+        	if(avaliableModulations == null) {
+        		 this.avaliableModulations = ModulationSelector.configureModulations(this);
+        		// Computing of the distances of the modulation formats
+             	physicalLayer.computesDistances(this, this.avaliableModulations);
+             	
+        	}else {
+        		this.avaliableModulations = avaliableModulations;
+        	}
         }
     }
 
@@ -277,4 +282,5 @@ public class Mesh implements Serializable {
 	public void setAvaliableModulations(List<Modulation> avaliableModulations) {
 		this.avaliableModulations = avaliableModulations;
 	}
+	
 }

@@ -589,16 +589,9 @@ public class PhysicalLayer implements Serializable {
 			Modulation mod = avaliableModulations.get(m);
 			
 			int slotNumber = mod.requiredSlots(transmissionRate);
-			int quantCircuits = (int)(totalSlots / slotNumber); // number of circuits
-			
-			ArrayList<int[]> circuitsSa = new ArrayList<int[]>(quantCircuits);
-			
-			for(int c = 0; c < quantCircuits; c++){
-				int sa[] = new int[2];
-				sa[0] = 1 + (c * slotNumber);
-				sa[1] = sa[0] + slotNumber - 1;
-				circuitsSa.add(sa);
-			}
+			int sa[] = new int[2];
+			sa[0] = 1;
+			sa[1] = sa[0] + slotNumber - 1;
 			
 			for(int ns = 0; ns < quantSpansPerEnlace; ns++){
 				double distance = (ns * L) + averageLastFiberSegment;
@@ -614,18 +607,15 @@ public class PhysicalLayer implements Serializable {
 				Route route = new Route(listNodes);
 				Pair pair = new Pair(n1, n2);
 				
-				for(int c = 0; c < quantCircuits; c++){
-					Circuit circuitTemp = new Circuit();
-					circuitTemp.setPair(pair);
-					circuitTemp.setRoute(route);
-					circuitTemp.setModulation(mod);
-					circuitTemp.setSpectrumAssigned(circuitsSa.get(c));
-					
-					route.getLink(0).addCircuit(circuitTemp);
-				}
+				Circuit circuitTemp = new Circuit();
+				circuitTemp.setPair(pair);
+				circuitTemp.setRoute(route);
+				circuitTemp.setModulation(mod);
+				circuitTemp.setSpectrumAssigned(sa);
 				
-				Circuit circuit = route.getLink(0).getCircuitList().first();
-				double OSNR = computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+				route.getLink(0).addCircuit(circuitTemp);
+				
+				double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), false);
 				double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
 				
 				double modDist = distModulations.get(mod);
