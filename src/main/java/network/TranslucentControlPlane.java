@@ -111,7 +111,7 @@ public class TranslucentControlPlane extends ControlPlane {
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
 	@Override
-	public boolean computeQualityOfTransmission(Circuit circuit){
+	public boolean computeQualityOfTransmission(Circuit circuit, Circuit circuitTemp){
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
@@ -132,7 +132,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = circuit.getModulationByLink(link);
 			int sa[] = circuit.getSpectrumAssignedByLink(link);
 			
-			double SNR = getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, sa, false);
+			double SNR = getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, sa, circuitTemp);
 			double SNRdB = PhysicalLayer.ratioForDB(SNR);
 			
 			boolean QoT = getMesh().getPhysicalLayer().isAdmissible(mod, SNRdB, SNR); 
@@ -405,7 +405,7 @@ public class TranslucentControlPlane extends ControlPlane {
 		Modulation alternativeMod = null;
 		int alternativeBand[] = null;
 		
-		List<Modulation> avaliableModulations = modulationSelection.getAvaliableModulations();
+		List<Modulation> avaliableModulations = getMesh().getAvaliableModulations();
 		
 		for(int i = 0; i < avaliableModulations.size(); i++){
 			Modulation mod = avaliableModulations.get(i);
@@ -418,7 +418,7 @@ public class TranslucentControlPlane extends ControlPlane {
 					alternativeBand = band;
 				}
 				
-				boolean flag = mesh.getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, band);
+				boolean flag = mesh.getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, band, null);
 				if(flag){
 					chosenMod = mod; // Save the modulation that has admissible QoT
 					chosenBand = band;
@@ -527,7 +527,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			}
 
 			// Now you can check the QoT by transparent segment
-			if(!computeQualityOfTransmission(circuit)){
+			if(!computeQualityOfTransmission(circuit, null)){
 				return true;
 			}
 		}
@@ -576,7 +576,7 @@ public class TranslucentControlPlane extends ControlPlane {
 
 			Modulation mod = circuit.getModulationByLink(link);
 			if (mod == null) {
-				mod = modulationSelection.getAvaliableModulations().get(0);
+				mod = getMesh().getAvaliableModulations().get(0);
 			}
 
 			int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());

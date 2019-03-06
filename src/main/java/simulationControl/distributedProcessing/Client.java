@@ -69,7 +69,7 @@ public class Client {
             saveResult(path,bp.getFileName(),sr.getResult().relativeFragmentation);
         }
         if(sr.getSimulationConfig().getActiveMetrics().SpectrumUtilization){
-            SpectrumUtilization bp = new SpectrumUtilization(0,0,new Mesh(sr.getNetworkConfig(),sr.getTrafficConfig(),sr.getPhysicalLayerConfig(),sr.getOthersConfig()));
+            SpectrumUtilization bp = new SpectrumUtilization(0,0,new Mesh(sr.getNetworkConfig(),sr.getTrafficConfig(),sr.getPhysicalLayerConfig(),sr.getOthersConfig(), null));
             saveResult(path,bp.getFileName(),sr.getResult().spectrumUtilization);
         }
         if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics){

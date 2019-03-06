@@ -11,12 +11,12 @@ import java.util.List;
  * Created by Iallen on 04/05/2017.
  */
 public class NetworkConfig {
-
+	
     private List<NodeConfig> nodes = new ArrayList<>();
     private List<LinkConfig> links = new ArrayList<>();
     private List<ModulationConfig> modulations = new ArrayList<>();
     private int guardBand = 1;
-    private int bvtSpectralAmplitude=1000;
+    private int bvtSpectralAmplitude = 1000;
 
     /**
      * Returns the list of modulations

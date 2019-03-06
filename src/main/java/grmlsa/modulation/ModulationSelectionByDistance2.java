@@ -73,10 +73,5 @@ public class ModulationSelectionByDistance2 implements ModulationSelectionAlgori
 		
 		return chosenMod;
 	}
-
-	@Override
-	public List<Modulation> getAvaliableModulations() {
-		return avaliableModulations;
-	}
 	
 }
