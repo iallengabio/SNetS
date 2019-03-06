@@ -296,11 +296,10 @@ public class PhysicalLayer {
 				}
 				
 				lastFiberSegment = link.getDistance() - (Ns * L);
-				if(lastFiberSegment != L){ // check if need to recalculate the gain of the preamplifier
-					double spanMeter = lastFiberSegment * 1000; // span in meter
-					double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
-					preAmp.setGain(ratioForDB(preAmpGainLinear));
-				}
+				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
+				//double spanMeter = lastFiberSegment * 1000; // span in meter
+				//double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
+				//preAmp.setGain(ratioForDB(preAmpGainLinear));
 				
 				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
@@ -547,6 +546,10 @@ public class PhysicalLayer {
 	 * @return int
 	 */
 	public static int roundUp(double res){
+		if(res < 0.0) {
+			return 0;
+		}
+		
 		int res2 = (int) res;
 		if(res - res2 != 0.0){
 			res2++;
