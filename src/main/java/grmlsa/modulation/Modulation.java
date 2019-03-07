@@ -10,19 +10,19 @@ import java.io.Serializable;
  * @author Iallen
  */
 public class Modulation implements Serializable {
-
+	
     private String name;
-    private double bitsPerSymbol;
     private double maxRange; // max range in Km
-    
     private double M; // Number of modulation format symbols
+    private double bitsPerSymbol;
+    
     private double SNRthreshold; // dB
     private double SNRthresholdLinear;
 	
     private double rateFEC; // rate of Forward Error Correction
 	private double freqSlot;
 	private int guardBand;
-
+	
 	/**
 	 * Creates a new instance of Modulation
 	 * 

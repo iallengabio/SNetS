@@ -10,7 +10,6 @@ import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
-import grmlsa.modulation.ModulationSelector;
 import simulationControl.Util;
 import simulationControl.parsers.PhysicalLayerConfig;
 
@@ -985,10 +984,9 @@ public class PhysicalLayer implements Serializable {
 	}
 	
 	
-	public void testCamadaFisica(Mesh mesh) {
+	public void testCamadaFisica() {
 		
-		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
-		
+		int totalSlots = 320;
 		double distance = 600.0;
 		
 		Node n1 = new Node("1", 1000, 1000, 0, 100);
@@ -1002,10 +1000,9 @@ public class PhysicalLayer implements Serializable {
 		Route route = new Route(listNodes);
 		Pair pair = new Pair(n1, n2);
 		
-		List<Modulation> avaliableModulations = ModulationSelector.configureModulations(mesh);
-		Modulation mod_BPSK = avaliableModulations.get(0);
-		Modulation mod_QPSK = avaliableModulations.get(1);
-		Modulation mod_8QAM = avaliableModulations.get(2);
+		Modulation mod_BPSK = new Modulation("BPSK", 10000.0, 2.0, 5.5, 0.0, 12.5E+9, 1);
+		Modulation mod_QPSK = new Modulation("QPSK", 5000.0, 4.0, 8.5, 0.0, 12.5E+9, 1);
+		Modulation mod_8QAM = new Modulation("8QAM", 2500.0, 8.0, 12.5, 0.0, 12.5E+9, 1);
 		
 		// circuito 1
 		double tr1 = 40.0E+9; //bps

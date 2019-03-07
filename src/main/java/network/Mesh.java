@@ -88,10 +88,18 @@ public class Mesh implements Serializable {
         this.physicalLayer = new PhysicalLayer(plc, this);
         
         // Instance the modulation formats
-        this.avaliableModulations = ModulationSelector.configureModulations(this);
+        this.avaliableModulations = new ArrayList<>();
+        for (NetworkConfig.ModulationConfig modConf : nc.getModulations()) {
+        	Modulation mod = new Modulation(modConf.getName(), modConf.getMaxRange(), modConf.getM(), modConf.getSNR(), linkList.get(0).getSlotSpectrumBand(), plc.getRateOfFEC(), guarBand);
+        	avaliableModulations.add(mod);
+        }
+        
+        if (avaliableModulations.isEmpty()) {
+        	this.avaliableModulations = ModulationSelector.configureModulations(this);
+        }
         
         // Computing of the distances of the modulation formats
-        if(physicalLayer.isActiveQoT()) {
+        if (physicalLayer.isActiveQoT()) {
         	if(modTrDistance == null) {
         		this.modTrDistance = physicalLayer.computesModulationsDistances(this, this.avaliableModulations);
         	}else {

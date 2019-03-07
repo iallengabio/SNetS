@@ -183,7 +183,7 @@ public class Main {
     	System.out.println("Path: " + path);
         System.out.println("Reading files");
         List<List<Simulation>> allSimulations = createAllSimulations(makeSR(path));
-
+        
         String separator = System.getProperty("file.separator");
         String simulationFilePath = path + separator + "simulation";
         Scanner scanner = new Scanner(new File(simulationFilePath));
