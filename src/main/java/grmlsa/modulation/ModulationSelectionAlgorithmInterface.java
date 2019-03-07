@@ -26,17 +26,4 @@ public interface ModulationSelectionAlgorithmInterface extends Serializable {
 	 */
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp);
 	
-	/**
-	 * This method returns the available modulation formats.
-	 * 
-	 * @return List<Modulation>
-	 */
-	public List<Modulation> getAvaliableModulations();
-	
-	/**
-	 * Configures the available modulation formats.
-	 * 
-	 * @param avaliableModulations List<Modulation>
-	 */
-	public void setAvaliableModulations(List<Modulation> avaliableModulations);
 }

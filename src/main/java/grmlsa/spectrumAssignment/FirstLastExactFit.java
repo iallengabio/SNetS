@@ -183,7 +183,8 @@ public class FirstLastExactFit implements SpectrumAssignmentAlgorithmInterface {
 
 	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
-		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
+		int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+		if(numberOfSlots> maxAmplitude) return null;
 		createGraphCheckDisjoint(cp);
 		
 		if (disjointConnectionGroup.contains(circuit.getRoute())) {

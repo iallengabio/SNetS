@@ -83,7 +83,8 @@ public class FirstLastFit implements SpectrumAssignmentAlgorithmInterface {
 
 	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
-		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
+		int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+		if(numberOfSlots> maxAmplitude) return null;
 		if(largerBand == null){
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
 			largerBand = Double.parseDouble((String)uv.get("largerBand"));

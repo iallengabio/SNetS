@@ -43,7 +43,8 @@ public class FirstFitExpansiveness2 implements SpectrumAssignmentAlgorithmInterf
      */
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
-        if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
+        int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+        if(numberOfSlots> maxAmplitude) return null;
     	int chosen[] = null;
     	int aux = ffeSigma;
     	if(numberOfSlots>ffeSigma) aux = numberOfSlots;

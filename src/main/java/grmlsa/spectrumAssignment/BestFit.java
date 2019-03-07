@@ -30,7 +30,8 @@ public class BestFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
-        if(numberOfSlots>Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
+        int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+        if(numberOfSlots>maxAmplitude) return null;
     	int chosen[] = null;
         int lessDifference = 999999999;
         

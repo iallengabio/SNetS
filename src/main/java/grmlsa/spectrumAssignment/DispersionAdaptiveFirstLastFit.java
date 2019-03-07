@@ -89,7 +89,8 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 	
 	@Override
 	public int[] policy(int numberOfSlots, List<int[]> freeSpectrumBands, Circuit circuit, ControlPlane cp){
-		if(numberOfSlots> Transmitters.MAX_SPECTRAL_AMPLITUDE) return null;
+		int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+		if(numberOfSlots> maxAmplitude) return null;
 		if(beta == null){
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
 			beta = Double.parseDouble((String)uv.get("beta"));
@@ -115,7 +116,7 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 	public static boolean aceitableDispersion(int numberOfSlots, int[] band, Circuit circuit, ControlPlane cp) {
 		circuit.setSpectrumAssigned(band);
 		
-		boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, circuit.getRoute(), circuit.getModulation(), band);
+		boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, circuit.getRoute(), circuit.getModulation(), band, null);
 		return QoT;
 	}
 }

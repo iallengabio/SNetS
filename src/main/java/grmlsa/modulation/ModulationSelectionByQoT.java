@@ -17,9 +17,13 @@ import network.ControlPlane;
 public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInterface {
 	
 	private List<Modulation> avaliableModulations;
-
+	
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
+		if(avaliableModulations == null) {
+			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
+		
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
 		
 		// Modulation and spectrum selected
@@ -43,7 +47,7 @@ public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInt
 					alternativeBand = band;
 				}
 				
-				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){
+				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null)){
 					chosenMod = mod; // Save the modulation that has admissible QoT
 					chosenBand = band;
 					
@@ -70,14 +74,4 @@ public class ModulationSelectionByQoT implements ModulationSelectionAlgorithmInt
 		return chosenMod;
 	}
 	
-	@Override
-	public List<Modulation> getAvaliableModulations() {
-		return avaliableModulations;
-	}
-
-	@Override
-	public void setAvaliableModulations(List<Modulation> avaliableModulations){
-		this.avaliableModulations = avaliableModulations;
-	}
-
 }

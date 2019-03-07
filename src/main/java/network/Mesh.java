@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelector;
 import simulationControl.parsers.NetworkConfig;
 import simulationControl.parsers.OthersConfig;
 import simulationControl.parsers.PhysicalLayerConfig;
@@ -30,6 +32,9 @@ public class Mesh implements Serializable {
     private double totalPowerConsumptionTransponders;
     private double totalPowerConsumptionOXCs;
     private double totalPowerConsumptionAmplifiers;
+    
+    private List<Modulation> avaliableModulations;
+    private HashMap<String, HashMap<Double, Double>> modTrDistance;
 
     /**
      * Creates a new instance of Mesh.
@@ -37,7 +42,7 @@ public class Mesh implements Serializable {
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc, HashMap<String, HashMap<Double, Double>> modTrDistance) {
         this.guarBand = nc.getGuardBand();
         this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
@@ -46,7 +51,7 @@ public class Mesh implements Serializable {
         // Create nodes
         this.nodeList = new Vector<>();
         for (NetworkConfig.NodeConfig nodeConf : nc.getNodes()) {
-            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmitters(), nodeConf.getReceivers(), nodeConf.getRegenerators());
+            Node aux = new Node(nodeConf.getName(), nodeConf.getTransmitters(), nodeConf.getReceivers(), nodeConf.getRegenerators(), nc.getBvtSpectralAmplitude());
             this.nodeList.add(aux);
             nodesAux.put(aux.getName(), aux);
         }
@@ -72,7 +77,7 @@ public class Mesh implements Serializable {
                 }
             }
         }
-
+        
         // Add request generators in pairs
         for (TrafficConfig.RequestGeneratorConfig rgc : tc.getRequestGenerators()) {
             Pair p = pairsAux.get(rgc.getSource()).get(rgc.getDestination());
@@ -81,6 +86,43 @@ public class Mesh implements Serializable {
         
         // Information related to the physical layer of the network
         this.physicalLayer = new PhysicalLayer(plc, this);
+        
+        // Instance the modulation formats
+        this.avaliableModulations = ModulationSelector.configureModulations(this);
+        
+        // Computing of the distances of the modulation formats
+        if(physicalLayer.isActiveQoT()) {
+        	if(modTrDistance == null) {
+        		this.modTrDistance = physicalLayer.computesModulationsDistances(this, this.avaliableModulations);
+        	}else {
+        		this.modTrDistance = modTrDistance;
+        	}
+        }
+    }
+    
+    /**
+     * Returns the modulation transmission range by transmission rate
+     * 
+     * @param modulation Modulation
+     * @param bandwidth double
+     * @return double - max transmission range
+     */
+    public double getModulationDistanceByBandwith(Modulation modulation, double bandwidth) {
+    	Double distance = null;
+    	
+    	if (physicalLayer.isActiveQoT()) {
+    		distance = modTrDistance.get(modulation.getName()).get(bandwidth);
+    		
+    		if(distance == null) {
+    			distance = physicalLayer.computeModulationDistanceByBandwidth(modulation, bandwidth, this);
+    			modTrDistance.get(modulation.getName()).put(bandwidth, distance);
+    		}
+			
+    	} else {
+    		distance = modulation.getMaxRange();
+    	}
+    	
+    	return distance;
     }
 
     /**
@@ -248,4 +290,32 @@ public class Mesh implements Serializable {
     	
     	totalPowerConsumption = totalPowerConsumptionTransponders + totalPowerConsumptionOXCs + totalPowerConsumptionAmplifiers;
     }
+    
+    /**
+     * Returns the avaliableModulations
+     * 
+     * @return List<Modulation> avaliableModulations
+     */
+	public List<Modulation> getAvaliableModulations() {
+		return avaliableModulations;
+	}
+	
+	/**
+	 * Sets the avaliableModulations
+	 * 
+	 * @param avaliableModulations List<Modulation>
+	 */
+	public void setAvaliableModulations(List<Modulation> avaliableModulations) {
+		this.avaliableModulations = avaliableModulations;
+	}
+
+	/**
+	 * Return the modTrDistance
+	 * 
+	 * @return HashMap<Modulation, HashMap<Double, Double>>
+	 */
+	public HashMap<String, HashMap<Double, Double>> getModTrDistance() {
+		return modTrDistance;
+	}
+    
 }

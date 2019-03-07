@@ -11,8 +11,7 @@ import grmlsa.Route;
 import grmlsa.integrated.IntegratedRMLSAAlgorithmInterface;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelectionByDistance;
-import grmlsa.modulation.ModulationSelector;
+import grmlsa.modulation.ModulationSelectionByDistanceAndBandwidth;
 import grmlsa.routing.RoutingAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import grmlsa.trafficGrooming.TrafficGroomingAlgorithmInterface;
@@ -35,6 +34,8 @@ public class ControlPlane implements Serializable {
     protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
     
+    ModulationSelectionAlgorithmInterface modSelectByDistForEvaluation; // used to check the blocking types
+    
     protected Mesh mesh;
     
     /**
@@ -42,7 +43,6 @@ public class ControlPlane implements Serializable {
      * The second key represents the destination node.
      */
     protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
-
     
     private TreeSet<Circuit> connectionList;
 
@@ -68,10 +68,9 @@ public class ControlPlane implements Serializable {
         this.spectrumAssignment = spectrumAssignmentAlgorithm;
         this.modulationSelection = modulationSelection;
         
-        this.modulationSelection.setAvaliableModulations(ModulationSelector.configureModulations(mesh));
-
+        this.modSelectByDistForEvaluation = new ModulationSelectionByDistanceAndBandwidth();
+        
         setMesh(mesh);
-        mesh.computesPowerConsmption(this);
     }
     
     /**
@@ -115,6 +114,8 @@ public class ControlPlane implements Serializable {
      */
     public void setMesh(Mesh mesh) {
         this.mesh = mesh;
+        
+        mesh.computesPowerConsmption(this);
         
         // Initialize the active circuit list
         for (Node node1 : mesh.getNodeList()) {
@@ -201,10 +202,9 @@ public class ControlPlane implements Serializable {
      */
     public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
-        List<Link> links = new ArrayList<>(route.getLinkList());
         int band[] = circuit.getSpectrumAssigned();
-
-        if(!allocateSpectrum(circuit, band, links)){
+        
+        if(!allocateSpectrum(circuit, band, route.getLinkList())){
             throw new Exception("bad RMLSA choice. Spectrum cant be allocated.");
         }
 
@@ -225,8 +225,8 @@ public class ControlPlane implements Serializable {
     protected boolean allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-
-            if(!link.useSpectrum(band)){//spectrum already in use
+            
+            if(!link.useSpectrum(band)){ //spectrum already in use
                 i--;
                 for(;i>=0;i--){
                     links.get(i).liberateSpectrum(band);
@@ -280,46 +280,39 @@ public class ControlPlane implements Serializable {
      */
     public boolean establishCircuit(Circuit circuit) throws Exception {
     	
-    	// Check if there are free transmitters and receivers
+    	// Check if there are free transmitters
         if(circuit.getSource().getTxs().hasFreeTransmitters()){
+        	// Check if there are free receivers
             if(circuit.getDestination().getRxs().hasFreeRecivers()){
-            	boolean blocked = false;
             	
                 // Can allocate spectrum
                 if (tryEstablishNewCircuit(circuit)) {
-                    // Pre-admits the circuit for QoT verification
-                    allocateCircuit(circuit);
+                	
                     // QoT verification
                     if(isAdmissibleQualityOfTransmission(circuit)){
                         updateNetworkPowerConsumption();
-                        return true; // Admits the circuit
+                        allocateCircuit(circuit);
                         
-                    } else {
-                        // Circuit QoT is not acceptable, frees allocated resources
-                        releaseCircuit(circuit);
-                        blocked = true;
+                        return true; // Admits the circuit
                     }
-                }else {
-                	blocked = true;
                 }
                 
-                if(blocked) {
-	                if(shouldTestFragmentation(circuit)){//test fragmentation
-	                    if(isBlockingByFragmentation(circuit)){
-	                        circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
-	                    }else{
-	                        circuit.setBlockCause(Circuit.BY_OTHER);
-	                    }
-	                }else{//test QoTN and QoTO
-	                    if(isBlockingByQoTN(circuit)){
-	                        circuit.setBlockCause(Circuit.BY_QOTN);
-	                    }else if(!circuit.isQoTForOther()){
-	                        circuit.setBlockCause(Circuit.BY_QOTO);
-	                    }else {
-	                    	circuit.setBlockCause(Circuit.BY_OTHER);
-	                    }
-	                }
-                }
+                if(isBlockingByQoTN(circuit)) {
+                    if(shouldTestFragmentation(circuit)){ // check whether it is to test whether the blocking was by fragmentation
+ 	                    if(isBlockingByFragmentation(circuit)){
+ 	                        circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
+ 	                    }else{
+ 	                        circuit.setBlockCause(Circuit.BY_OTHER);
+ 	                    }
+ 	                }else{
+ 	                	circuit.setBlockCause(Circuit.BY_QOTN);
+ 	                }
+            	}else if(!circuit.isQoTForOther()) {
+            		circuit.setBlockCause(Circuit.BY_QOTO);
+            	}else {
+            		circuit.setBlockCause(Circuit.BY_OTHER);
+            	}
+                
             }else{
                 circuit.setBlockCause(Circuit.BY_LACK_RX);
             }
@@ -331,11 +324,9 @@ public class ControlPlane implements Serializable {
     }
 
     private boolean shouldTestFragmentation(Circuit circuit) {
-        ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
-        mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
-        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
+        Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
-        return !(modBD.getSNRthreshold()>=modCirc.getSNRthreshold());
+        return !(modBD.getSNRthreshold() >= modCirc.getSNRthreshold());
     }
     
     /**
@@ -374,7 +365,8 @@ public class ControlPlane implements Serializable {
      */
     public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
         int currentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
-        if(currentSlots+numSlotsDown+numSlotsUp>Transmitters.MAX_SPECTRAL_AMPLITUDE) return false;
+        int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
+        if(currentSlots+numSlotsDown+numSlotsUp>maxAmplitude) return false;
 
         //calculate the spectrum band at top
         int upperBand[] = new int[2];
@@ -421,7 +413,7 @@ public class ControlPlane implements Serializable {
             
             circuit.setSpectrumAssigned(specAssigAt);
             //isAdmissibleQualityOfTransmission(circuit); //recompute QoT
-            computeQualityOfTransmission(circuit); // Recalculates the QoT and SNR of the circuit
+            computeQualityOfTransmission(circuit, null); // Recalculates the QoT and SNR of the circuit
             
         }else{
             this.updateNetworkPowerConsumption();
@@ -462,7 +454,7 @@ public class ControlPlane implements Serializable {
         
         circuit.setSpectrumAssigned(newSpecAssign);
         //isAdmissibleQualityOfTransmission(circuit); //compute QoT
-        computeQualityOfTransmission(circuit); // Recalculates the QoT and SNR of the circuit
+        computeQualityOfTransmission(circuit, null); // Recalculates the QoT and SNR of the circuit
         
         this.updateNetworkPowerConsumption();
     }
@@ -520,7 +512,7 @@ public class ControlPlane implements Serializable {
     	if(mesh.getPhysicalLayer().isActiveQoT()){
     		
     		// Verifies the QoT of the current circuit
-    		if(computeQualityOfTransmission(circuit)){
+    		if(computeQualityOfTransmission(circuit, null)){
     			boolean QoTForOther = true;
     			
     			// Check if it is to test the QoT of other already active circuits
@@ -534,7 +526,7 @@ public class ControlPlane implements Serializable {
     			return QoTForOther;
     		}
     		
-    		return false;
+    		return false; // Circuit can not be established
     	}
     	
 		// If it does not check the QoT then it returns acceptable
@@ -543,12 +535,14 @@ public class ControlPlane implements Serializable {
     
     /**
      * This method verifies the quality of the transmission of the circuit
+     * The circuit in question has already allocated the network resources
      * 
      * @param circuit Circuit
+     * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    public boolean computeQualityOfTransmission(Circuit circuit){
-    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+    public boolean computeQualityOfTransmission(Circuit circuit, Circuit circuitTest){
+    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), circuitTest);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -586,13 +580,14 @@ public class ControlPlane implements Serializable {
 		
 		// Tests the QoT of circuits
         for (Circuit circuitTemp : circuits) {
-
+        	
         	// Stores the SNR and QoT values
         	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
             circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
             
         	// Recalculates the QoT and SNR of the circuit
-            boolean QoT = computeQualityOfTransmission(circuitTemp);
+            boolean QoT = computeQualityOfTransmission(circuitTemp, circuit);
+            
             if (!QoT) {
             	
             	// Returns the SNR and QoT values of circuits before the establishment of the circuit in evaluation
@@ -604,7 +599,7 @@ public class ControlPlane implements Serializable {
                 return false;
             }
         }
-		
+        
 		return true;
     }
     
@@ -640,9 +635,8 @@ public class ControlPlane implements Serializable {
 			connectionList.add(circuit);
 		}
 		
-		List<Link> links = new ArrayList<Link>(circuit.getRoute().getLinkList());
-	    for (int i = 0; i < links.size(); i++) {
-	    	links.get(i).addCircuit(circuit);
+	    for (int i = 0; i < circuit.getRoute().getLinkList().size(); i++) {
+	    	circuit.getRoute().getLinkList().get(i).addCircuit(circuit);
 	    }
 	}
 	
@@ -658,9 +652,8 @@ public class ControlPlane implements Serializable {
 			connectionList.remove(circuit);
 		}
 		
-		List<Link> links = new ArrayList<Link>(circuit.getRoute().getLinkList());
-	    for (int i = 0; i < links.size(); i++) {
-	    	links.get(i).removeCircuit(circuit);
+	    for (int i = 0; i < circuit.getRoute().getLinkList().size(); i++) {
+	    	circuit.getRoute().getLinkList().get(i).removeCircuit(circuit);
 	    }
 	}
 	
@@ -676,7 +669,7 @@ public class ControlPlane implements Serializable {
             // Check if it is possible to compute the circuit QoT
             if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
                 // Check if the QoT is acceptable
-                if(!computeQualityOfTransmission(circuit)){
+                if(!computeQualityOfTransmission(circuit, null)){
                     return true;
                 }
             }
@@ -695,12 +688,7 @@ public class ControlPlane implements Serializable {
         if (circuit.getRoute() == null) return false;
         
         // For fragmentation verification
-        ModulationSelectionAlgorithmInterface mbd = new ModulationSelectionByDistance();
-        mbd.setAvaliableModulations(modulationSelection.getAvaliableModulations());
-        Modulation modBD = mbd.selectModulation(circuit, circuit.getRoute(), null, this);
-        Modulation modCirc = circuit.getModulation();
-        
-        circuit.setModulation(modBD); // Sets a modulation selected by the distance
+        Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         
         List<Link> links = circuit.getRoute().getLinkList();
         List<int[]> merge = links.get(0).getFreeSpectrumBands();
@@ -714,19 +702,11 @@ public class ControlPlane implements Serializable {
             totalFree += (band[1] - band[0] + 1);
         }
         
-        Modulation mod = circuit.getModulation();
-        if (mod == null) {
-            mod = modulationSelection.getAvaliableModulations().get(0);
-        }
-        
-        int numSlotsRequired = mod.requiredSlots(circuit.getRequiredBandwidth());
+        int numSlotsRequired = modBD.requiredSlots(circuit.getRequiredBandwidth());
         if (totalFree > numSlotsRequired) {
-        	
-        	circuit.setModulation(modCirc); // Sets the previous modulation
             return true;
         }
         
-        circuit.setModulation(modCirc); // Sets the previous modulation
         return false;
 	}
 	
@@ -749,7 +729,7 @@ public class ControlPlane implements Serializable {
 	 * @return double - delta SNR (dB)
 	 */
 	public double getDeltaSNR(Circuit circuit){
-		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), false);
+		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), null);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		
 		double modulationSNRthreshold = circuit.getModulation().getSNRthreshold();
@@ -757,7 +737,10 @@ public class ControlPlane implements Serializable {
 		
 		return deltaSNR;
 	}
-
+	
+	/**
+	 * Updates the network's power consumption
+	 */
     private void updateNetworkPowerConsumption(){
         this.mesh.computesPowerConsmption(this);
     }

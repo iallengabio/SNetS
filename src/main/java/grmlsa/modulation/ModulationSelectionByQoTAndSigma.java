@@ -33,6 +33,9 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 	
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
+		if(avaliableModulations == null) {
+			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
 		
 		if(sigma == null){ // read the sigma value
 			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
@@ -68,7 +71,7 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 					alternativeBand = band;
 				}
 				
-				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){
+				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null)){
 					alternativeMod2 = mod; // Save the modulation that has admissible QoT
 					alternativeBand2 = band;
 					
@@ -108,13 +111,4 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 		return chosenMod;
 	}
 	
-	@Override
-	public List<Modulation> getAvaliableModulations() {
-		return avaliableModulations;
-	}
-
-	@Override
-	public void setAvaliableModulations(List<Modulation> avaliableModulations){
-		this.avaliableModulations = avaliableModulations;
-	}
 }

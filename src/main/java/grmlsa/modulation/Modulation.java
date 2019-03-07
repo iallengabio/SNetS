@@ -79,7 +79,7 @@ public class Modulation implements Serializable {
      * @return
      */
     public double potentialBandwidth(int slotsNumber){
-    	slotsNumber = slotsNumber - guardBand; // Remove the slot needed to be used as a guard band
+    	slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
         
         return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
     }
