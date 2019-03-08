@@ -37,11 +37,6 @@ public class ArriveRequestForConexionListener implements EventListener {
      */
     @Override
     public void execute(Event e) throws Exception {
-    	
-    	simulation.getControlPlane().getMesh().getPhysicalLayer().testCamadaFisica();
-    	
-    	
-    	
         RequestForConnection requestForConnection = (RequestForConnection) e.getObject();
 
         // Schedule next request to connect to this same requestGenerator
