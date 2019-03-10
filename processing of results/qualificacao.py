@@ -5,74 +5,16 @@ scripts gráficos qualificação
 @author: Iallen
 """
 import SNetSPy as sp
-#gráficos da PBB em função do sigma e carga
-path = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/NSFNet_CompleteSharing_EsPAT/NSFNet_CompleteSharing_EsPAT_'
-loads = ['267','400','533']
-sol = ['σ=0','σ=10','σ=20','σ=30','σ=40']
-def pbb(policy):    
-    p = path + policy
-    al = 0.05
-    dfs = sp.extractDFS(p,sp.ABBP,sp.MBBP,al)    
-    xl = 'Carga na rede (erlangs)'
-    yl = 'BBR'
-    sp.auxPlotBars(dfs,loads,sol,xl,yl)
-    
-def ce(policy):
-    p = path + policy    
-    al = 0.05
-    dfs = sp.extractDFS(p,sp.ACE,sp.MTCE,al)
-    xl = 'Carga na rede (erlangs)'
-    yl = 'CE'
-    sp.auxPlotBars(dfs,loads,sol,xl,yl)
-    
-def bcr(policy):
-    p = path + policy    
-    al = 0.05
-    dfs = sp.extractDFSBCR(p,al)
-    xl = 'Carga na rede (erlangs)'
-    yl = 'BCR'
-    sp.auxPlotBars(dfs,loads,sol,xl,yl)
-    
-def pbbId():
-    p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
-    al = 0.05
-    dfs = sp.extractDFS(p,sp.ABBP,sp.MBBP,al) 
-    xl = 'Carga na rede (erlangs)'
-    yl = 'BBR'
-    sp.auxPlotLine(dfs,loads,s,xl,yl)
-    
-def ceId():
-    p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
-    al = 0.05
-    dfs = sp.extractDFS(p,sp.ACE,sp.MTCE,al)
-    xl = 'Carga na rede (erlangs)'
-    yl = 'CE'
-    sp.auxPlotLine(dfs,loads,s,xl,yl)
-    
-def bcrId():
-    p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
-    al = 0.05
-    dfs = sp.extractDFSBCR(p,al)    
-    xl = 'Carga na rede (erlangs)'
-    yl = 'BCR'
-    sp.auxPlotLine(dfs,loads,s,xl,yl)
-    
-def txuId():
-    p = 'C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos/NSFNet/politicas_espat_id'
-    s = ['IACF_E2','BAS','IACF','MPH','MSU','MVH']
-    al = 0.05
-    dfs = sp.extractDFS(p,sp.ATRRU,sp.MTXU,al)
-    xl = 'Carga na rede (erlangs)'
-    yl = 'CE'
-    sp.auxPlotLine(dfs,loads,s,xl,yl)
-    
-#bcr('MVH')
-pbb('IACF')
-#ce('BAS')
-#pbbId()
-#ceId()
-#bcrId()    
-#txuId()
+import pandas as pd
+
+#s = ['BAS','MSU','MVH','MPH','IACF']
+#s = ['σ=0','σ=10','σ=20','σ=30','σ=40']
+s = ['EsPAT (σ=40)','SRNP100','Sem mecanismo']
+l = ['800','1200','1600']
+lp = ['326','653','979']
+#sp.plotBars('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/Pacific/EsPAT_TP/MSU',loads=l,sol=s)
+#sp.plotLines('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/Pacific/ZComp/IACF',loads=lp,sol=s)
+
+#dfs = sp.extractDFS('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos 2/Pacific/Politicas_TP',sp.ABBP,sp.MBBP,0.05)
+
+sp.computeGains('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/NSFNet/Politicas_TP',4,save='gains')

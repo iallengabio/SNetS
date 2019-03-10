@@ -187,6 +187,7 @@ public class Measurements implements Serializable {
      * @return boolean
      */
     public boolean finished() {
+    	//System.out.println(numGeneratedReq);
         if (this.numGeneratedReq >= this.numMinRequest) {
             return true;
         }
