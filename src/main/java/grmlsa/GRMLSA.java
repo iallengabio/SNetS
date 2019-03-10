@@ -89,6 +89,7 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPC = "kspc";
     private static final String INTEGRATED_MDPC= "mdpc";
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
+    private static final String INTEGRATED_KSPSA_v3 = "kspsav3";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -248,6 +249,8 @@ public class GRMLSA implements Serializable {
                 return new ModifiedDijkstraPathsComputation();
             case INTEGRATED_KSPRQOTO:
             	return new KShortestPathsReductionQoTO();
+            case INTEGRATED_KSPSA_v3:
+                return new KShortestPathsAndSpectrumAssignment_v3();
             default:
                 return null;
         }

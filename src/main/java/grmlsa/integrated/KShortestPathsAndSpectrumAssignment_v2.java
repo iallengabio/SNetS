@@ -57,10 +57,10 @@ public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAl
         for (Route route : candidateRoutes) {
             circuit.setRoute(route);
             
-            int numCircuits = computeNumCircuitsByRoute(route);
+            //int numCircuits = computeNumCircuitsByRoute(route);
             
-            if(numCircuits < minNumCircuits){
-            	minNumCircuits = numCircuits;
+            //if(numCircuits < minNumCircuits){
+            	//minNumCircuits = numCircuits;
             	
             	// Begins with the most spectrally efficient modulation format
         		for (int m = avaliableModulations.size()-1; m >= 0; m--) {
@@ -72,7 +72,7 @@ public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAl
 		            
 		            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
 		            circuit.setSpectrumAssigned(band);
-		
+		            
 		            if (band != null) {
 	            		checkRoute = route;
 	            		checkMod = mod;
@@ -87,7 +87,11 @@ public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAl
 		            	}
 		            }
 	            }
-            }
+        		
+        		if(chosenBand != null){
+                	break;
+                }
+            //}
         }
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes

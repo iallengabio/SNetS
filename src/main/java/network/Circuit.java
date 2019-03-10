@@ -37,6 +37,8 @@ public class Circuit implements Comparable<Object>, Serializable {
 
 	protected boolean wasBlocked = false;
 	protected int blockCause;
+	
+	protected double launchPowerLinear;
 
     /**
      * Instantiates a circuit with the list of requests answered by it in empty
@@ -47,6 +49,8 @@ public class Circuit implements Comparable<Object>, Serializable {
         
         this.QoT = true; //Assuming that a request always starts with admissible QoT
         this.QoTForOther = true; //Assuming that it is admissible for the other requirements
+        
+        this.launchPowerLinear = Double.POSITIVE_INFINITY;
     }
 
     /**
@@ -334,6 +338,24 @@ public class Circuit implements Comparable<Object>, Serializable {
 	 */
 	public double getBandwidth(){
 		return getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
+	}
+
+	/**
+	 * Returns the launch power
+	 * 
+	 * @return double
+	 */
+	public double getLaunchPowerLinear() {
+		return launchPowerLinear;
+	}
+
+	/** 
+	 * Sets the launch power
+	 * 
+	 * @param launchPowerLinear double
+	 */
+	public void setLaunchPowerLinear(double launchPowerLinear) {
+		this.launchPowerLinear = launchPowerLinear;
 	}
 
 }

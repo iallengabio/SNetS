@@ -558,7 +558,7 @@ public class ControlPlane implements Serializable {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    protected boolean computeQoTForOther(Circuit circuit){
+    public boolean computeQoTForOther(Circuit circuit){
     	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
     	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
     	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits

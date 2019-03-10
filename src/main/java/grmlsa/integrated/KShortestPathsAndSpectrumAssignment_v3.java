@@ -2,6 +2,7 @@ package grmlsa.integrated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
@@ -15,10 +16,15 @@ import util.IntersectionFreeSpectrum;
 
 public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAlgorithmInterface {
 	
-	private int k = 3; //This algorithm uses 3 alternative paths
+	private int k = 2; //This algorithm uses 3 alternative paths
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+    
+    
+    Double factorMult;
+    
+    ArrayList<Double> accurateValueList = new ArrayList<Double>();
 
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
@@ -31,19 +37,27 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
         if(spectrumAssignment == null){
             spectrumAssignment = cp.getSpectrumAssignment();
         }
-
+        
+        
+        if(factorMult == null){
+			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
+			factorMult = Double.parseDouble((String)uv.get("factorMult"));
+		}
+        
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
         Route chosenRoute = null;
         Modulation chosenMod = null;
         int chosenBand[] = null;
         
         List<Modulation> avaliableModulations = cp.getMesh().getAvaliableModulations();
-        int kFF = 3;
+        int kFF = 3; // for the k-FirstFit spectrum allocation algorithm
         
         // to avoid metrics error
   		Route checkRoute = null;
   		Modulation checkMod = null;
   		int checkBand[] = null;
+  		
+  		boolean QoTO = false;
   		
         for (Route route : candidateRoutes) {
             circuit.setRoute(route);
@@ -58,10 +72,10 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	            
 	            // for the k-FirstFit spectrum allocation algorithm
 	            ArrayList<int[]> bandList = new ArrayList<int[]>();
-	    		for (int[] band : merge) { // checks and guard the free bands that can establish the requisition
-	    			if(band[1] - band[0] + 1 >= slotsNumber){
+	    		for (int[] bandTemp : merge) { // checks and guard the free bands that can establish the requisition
+	    			if(bandTemp[1] - bandTemp[0] + 1 >= slotsNumber){
 	    				
-	    				int faixaTemp[] = band.clone();
+	    				int faixaTemp[] = bandTemp.clone();
 	    				bandList.add(faixaTemp);
 	    				
 	    				if(bandList.size() == kFF) { // stop when you reach the k value of free bands
@@ -71,21 +85,45 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	    		}
 	            
 	    		// traverses the free spectrum bands
-	    		for (int[] band : bandList) {
-	    			checkBand = band.clone();
-	    			checkBand[1] = checkBand[0] + slotsNumber - 1;
+	    		for (int[] bandTemp : bandList) {
+	    			int band[] = bandTemp.clone();
+	    			band[1] = band[0] + slotsNumber - 1;
 	    			
+	    			checkBand = band;
+	    			checkRoute = route;
             		checkMod = mod;
-            		checkBand = band;
+            		
+            		circuit.setSpectrumAssigned(band);
 	    			
+            		// enter the power assignment block
+            		//double lauchPower = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit, route, 0, route.getNodeList().size() - 1, mod, band);
+            		//circuit.setLaunchPowerLinear(lauchPower);
+            		
+            		//double lauchPower2 = cp.getMesh().getPhysicalLayer().computePowerThreshold3(circuit, route, mod, band, factorMult);
+            		//circuit.setLaunchPowerLinear(lauchPower2);
+            		
+            		
 	    			if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null)){ //modulation has acceptable QoT
-	            		chosenRoute = route;
-	            		chosenBand = band;
+	    				chosenBand = band;
+	    				chosenRoute = route;
 		                chosenMod = mod;
 		                
-		                break; // Stop when a modulation reaches admissible QoT
+		                QoTO = cp.computeQoTForOther(circuit);
+		                if(QoTO) {
+		                	break; // Stop when a modulation reaches admissible QoTO
+		                }
+		                
+		                //break; // Stop when a modulation reaches admissible QoT
 	            	}
 	            }
+	    		
+	    		if(QoTO){
+	            	break;
+	            }
+            }
+    		
+    		if(QoTO){
+            	break;
             }
         }
 
@@ -93,7 +131,7 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
             circuit.setRoute(chosenRoute);
             circuit.setModulation(chosenMod);
             circuit.setSpectrumAssigned(chosenBand);
-
+            
             return true;
 
         } else {
