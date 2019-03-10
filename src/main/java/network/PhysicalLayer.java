@@ -1,14 +1,15 @@
 package network;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import simulationControl.Util;
 import simulationControl.parsers.PhysicalLayerConfig;
 
 /**
@@ -215,8 +216,8 @@ public class PhysicalLayer implements Serializable {
 	 * @param spectrumAssigned int[]
 	 * @return boolean
 	 */
-	public boolean isAdmissibleModultion(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
-		double SNR = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, true);
+	public boolean isAdmissibleModultion(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
+		double SNR = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, circuitTest);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -236,8 +237,8 @@ public class PhysicalLayer implements Serializable {
 	 * @param spectrumAssigned int[]
 	 * @return boolean
 	 */
-	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[]){
-		double SNR = computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, true);
+	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
+		double SNR = computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, circuitTest);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -257,11 +258,10 @@ public class PhysicalLayer implements Serializable {
 	 * @param destinationNodeIndex int - Segment end node index
 	 * @param modulation Modulation
 	 * @param spectrumAssigned int[]
-	 * @param checksOnTotalPower boolean - Used to verify if the spectrum allocated by the request is considered or not in the calculation 
-	 *                                     of the total power that enters the amplifiers (true, considers, or false, does not consider)
+	 * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
 	 * @return double - SNR (linear)
 	 */
-	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], boolean checksOnTotalPower){
+	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
 		
 		double Ptx = ratioOfDB(power) * 1.0E-3; //W, Transmitter power
 		double Pase = 0.0;
@@ -280,6 +280,7 @@ public class PhysicalLayer implements Serializable {
 		Node sourceNode = null;
 		Node destinationNode = null;
 		Link link = null;
+		TreeSet<Circuit> circuitList = null;
 		
 		double G0 = alpha * L; // Gain in dB of the amplifier
 		Amplifier amp = new Amplifier(G0, pSat, NF, h, centerFrequency, 0.0, A1, A2);
@@ -290,18 +291,19 @@ public class PhysicalLayer implements Serializable {
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			double Ns = PhysicalLayer.roundUp(link.getDistance() / L); // Number of spans
 			
-			double numSlotsUsed = link.getUsedSlots();
-			if(checksOnTotalPower){
-				numSlotsUsed += numSlotsRequired;
-			}
+			circuitList = getCircuitList(link, circuit, circuitTest);
 			
 			if(activeNLI){
-				double noiseNli = Ns * getGnli(circuit, link, I, Bsi, fi, gamma, D, alpha, lowerFrequency);
+				double noiseNli = Ns * getGnli(circuit, link, I, Bsi, fi, gamma, D, alpha, lowerFrequency, circuitList);
 				Pnli = Pnli + noiseNli;
 			}
 			
 			if(activeASE){
-				double totalPower = numSlotsUsed * fs * I;
+				double totalPower = 0.0;
+				if(typeOfAmplifierGain == 1){
+					totalPower = getTotalPowerInTheLink(circuitList, link, Ptx, Bsi, I);
+				}
+				
 				double noiseAse = Ns * 2.0 * amp.getAseByGain(totalPower, amp.getGainByType(totalPower, typeOfAmplifierGain));
 				Pase = Pase + noiseAse;
 			}
@@ -310,6 +312,32 @@ public class PhysicalLayer implements Serializable {
 		double SNR = I / (Pase + Pnli);
 		
 		return SNR;
+	}
+	
+	/**
+	 * Create a list of the circuits that use the link
+	 * 
+	 * @param link Link
+	 * @param circuit Circuit
+	 * @param circuitTest Circuit
+	 * @return TreeSet<Circuit>
+	 */
+	private TreeSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit circuitTest){
+		TreeSet<Circuit> circuitList = new TreeSet<Circuit>();
+		
+		for (Circuit circtuiTemp : link.getCircuitList()) {
+			circuitList.add(circtuiTemp);
+		}
+		
+		if(!circuitList.contains(circuit)){
+			circuitList.add(circuit);
+		}
+		
+		if(circuitTest != null && circuitTest.getRoute().containThisLink(link) && !circuitList.contains(circuitTest)) {
+			circuitList.add(circuitTest);
+		}
+		
+		return circuitList;
 	}
 	
 	/**
@@ -323,7 +351,7 @@ public class PhysicalLayer implements Serializable {
 	 * @param checksOnTotalPower boolean
 	 * @return double
 	 */
-	public double getTotalPowerInTheLink(Link link, double powerI, double Bsi, double I, double numSlotsRequired, boolean checksOnTotalPower){
+	public double getTotalPowerInTheLink(TreeSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
 		double totalPower = 0.0;
 		double circuitPower = 0.0;
 		int saj[] = null;
@@ -331,15 +359,7 @@ public class PhysicalLayer implements Serializable {
 		double Bsj = 0.0;
 		double powerJ = powerI;
 		
-		if(checksOnTotalPower){ // Check if it is to add the power of the circuit under test
-			totalPower = powerI;
-			if(fixedPowerSpectralDensity){
-				totalPower = I * Bsi;
-			}
-		}
-		
-		TreeSet<Circuit> listCircuits = link.getCircuitList();
-		for(Circuit cricuitJ : listCircuits){
+		for(Circuit cricuitJ : circuitList){
 			
 			circuitPower = powerJ;
 			if(fixedPowerSpectralDensity){
@@ -368,7 +388,7 @@ public class PhysicalLayer implements Serializable {
 	 * @param fI double
 	 * @return double
 	 */
-	public double getGnli(Circuit circuit, Link link, double I, double Bsi, double fi, double gamma, double beta2, double alpha, double lowerFrequency){
+	public double getGnli(Circuit circuit, Link link, double I, double Bsi, double fi, double gamma, double beta2, double alpha, double lowerFrequency, TreeSet<Circuit> circuitList){
 		double alphaLinear = ratioOfDB(alpha);
 		if(beta2 < 0.0){
 			beta2 = -1.0 * beta2;
@@ -380,8 +400,7 @@ public class PhysicalLayer implements Serializable {
 		double p1 = arcsinh(ro * Bsi * Bsi);
 		double p2 = 0.0;
 		
-		TreeSet<Circuit> listRequests = link.getCircuitList();
-		for(Circuit cricuitTemp : listRequests){
+		for(Circuit cricuitTemp : circuitList){
 			
 			if(!circuit.equals(cricuitTemp)){
 				double fs = link.getSlotSpectrumBand();
@@ -515,6 +534,10 @@ public class PhysicalLayer implements Serializable {
 	 * @return int
 	 */
 	public static int roundUp(double res){
+		if(res < 0.0) {
+			return 0;
+		}
+		
 		int res2 = (int) res;
 		if(res - res2 != 0.0){
 			res2++;
@@ -555,6 +578,126 @@ public class PhysicalLayer implements Serializable {
 	public static double computeAlphaLinear(double alpha){
 		double alphaLinear = alpha / (1.0E+4 * Math.log10(Math.E));
 		return alphaLinear;
+	}
+	
+	/**
+	 * Calculates the transmission distances of the modulation formats
+	 * 
+	 * @param mesh Mesh
+	 * @param avaliableModulations List<Modulation>
+	 * @return HashMap<Modulation, HashMap<Double, Double>>
+	 */
+	public HashMap<String, HashMap<Double, Double>> computesModulationsDistances(Mesh mesh, List<Modulation> avaliableModulations) {
+		//System.out.println("Computing of the distances of the modulation formats");
+		
+		Set<Double> transmissionRateList = Util.bandwidths;
+		HashMap<String, HashMap<Double, Double>> modsTrsDistances = new HashMap<>();
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			
+			for(double transmissionRate : transmissionRateList) {
+				
+				HashMap<Double, Double> slotsDist = modsTrsDistances.get(mod.getName());
+				if(slotsDist == null) {
+					slotsDist = new HashMap<>();
+					modsTrsDistances.put(mod.getName(), slotsDist);
+				}
+				
+				Double dist = slotsDist.get(transmissionRate);
+				if(dist == null) {
+					dist = 0.0;
+				}
+				slotsDist.put(transmissionRate, dist);
+			}
+		}
+		
+		for(int m = 0; m < avaliableModulations.size(); m++) {
+			Modulation mod = avaliableModulations.get(m);
+			
+			for(double transmissionRate : transmissionRateList) {
+				
+				double distance = computeModulationDistanceByBandwidth(mod, transmissionRate, mesh);
+				modsTrsDistances.get(mod.getName()).put(transmissionRate, distance);
+			}
+		}
+		
+//		for(double transmissionRate : transmissionRateList) {
+//			System.out.println("TR(Gbps) = " + (transmissionRate / 1.0E+9));
+//			
+//			for(int m = 0; m < avaliableModulations.size(); m++) {
+//				Modulation mod = avaliableModulations.get(m);
+//				
+//				double modTrDist = modTrDistance.get(mod).get(transmissionRate);
+//				System.out.println("Mod = " + mod.getName() + ", distance(km) = " + modTrDist);
+//			}
+//		}
+		
+		return modsTrsDistances;
+	}
+	
+	/**
+	 * Calculates the distance to a modulation format considering the bandwidth
+	 * 
+	 * @param mod
+	 * @param bandwidth
+	 * @param mesh
+	 * @return double
+	 */
+	public double computeModulationDistanceByBandwidth(Modulation mod, double bandwidth, Mesh mesh) {
+		
+		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
+		
+		Vector<Link> linkList = mesh.getLinkList();
+		double sumLastFiberSegment = 0.0;
+		for(int l = 0; l < linkList.size(); l++) {
+			double Ns = getNumberOfLineAmplifiers(linkList.get(l).getDistance());
+			double lastFiberSegment = linkList.get(l).getDistance() - (Ns * L);
+			sumLastFiberSegment += lastFiberSegment;
+		}
+		double averageLastFiberSegment = sumLastFiberSegment / linkList.size();
+		
+		double totalDistance = 50000.0; //km
+		int quantSpansPorEnlace = (int)(totalDistance / L); // number of spans per link
+		
+		int slotNumber = mod.requiredSlots(bandwidth);
+		int sa[] = new int[2];
+		sa[0] = 1;
+		sa[1] = sa[0] + slotNumber - 1;
+		
+		double modTrDistance = 0.0;
+		
+		for(int ns = 0; ns <= quantSpansPorEnlace; ns++){
+			double distance = (ns * L) + averageLastFiberSegment;
+			
+			Node n1 = new Node("1", 1000, 1000, 0, 100);
+			Node n2 = new Node("2", 1000, 1000, 0, 100);
+			n1.getOxc().addLink(new Link(n1.getOxc(), n2.getOxc(), totalSlots, slotBandwidth, distance));
+			
+			Vector<Node> listNodes = new Vector<Node>();
+			listNodes.add(n1);
+			listNodes.add(n2);
+			
+			Route route = new Route(listNodes);
+			Pair pair = new Pair(n1, n2);
+			
+			Circuit circuitTemp = new Circuit();
+			circuitTemp.setPair(pair);
+			circuitTemp.setRoute(route);
+			circuitTemp.setModulation(mod);
+			circuitTemp.setSpectrumAssigned(sa);
+			
+			route.getLink(0).addCircuit(circuitTemp);
+			
+			double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), null);
+			double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
+			
+			if((OSNRdB >= mod.getSNRthreshold()) && (distance > modTrDistance)){
+				modTrDistance = distance;
+			}
+		}
+		
+		return modTrDistance;
 	}
 	
 	/**
@@ -615,7 +758,7 @@ public class PhysicalLayer implements Serializable {
 				
 				route.getLink(0).addCircuit(circuitTemp);
 				
-				double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), false);
+				double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), null);
 				double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
 				
 				double modDist = distModulations.get(mod);

@@ -41,10 +41,5 @@ public class ModulationSelectionByDistance implements ModulationSelectionAlgorit
 		
 		return resMod;
 	}
-
-	@Override
-	public List<Modulation> getAvaliableModulations() {
-		return avaliableModulations;
-	}
-
+	
 }

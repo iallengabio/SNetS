@@ -65,7 +65,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 			spectrumAssignment = cp.getSpectrumAssignment(); // Uses the spectrum assignment algorithm defined in the simulation file
 		}
 
-        List<Modulation> avaliableModulations = modulationSelection.getAvaliableModulations();
+        List<Modulation> avaliableModulations = cp.getMesh().getAvaliableModulations();
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
         Route chosenRoute = null;
         Modulation chosenMod = null;
@@ -111,16 +111,9 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						checkBand = band;
 					}
 					
-					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band);
+					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band, null);
 					
 					if(circuitQoT){
-						//pre establishes the circuit, to check the impact on other already active circuits
-						try {
-							cp.allocateCircuit(circuit);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						
 						double circuitDeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
 						
 						List<Circuit> circuits = new ArrayList<Circuit>();
@@ -140,7 +133,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						for(int i = 0; i < circuits.size(); i++){
 							Circuit circuitTemp = circuits.get(i);
 							
-							boolean QoT = cp.computeQualityOfTransmission(circuitTemp);
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit);
 							double deltaSNR = circuitTemp.getSNR() - circuitTemp.getModulation().getSNRthreshold();
 							
 							if(deltaSNR < worstDeltaSNR){
@@ -163,13 +156,6 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 								secondModulation = mod;
 								highestLevel = mod.getBitsPerSymbol();
 							}
-						}
-						
-						//releases the resources used by the circuit
-						try {
-							cp.releaseCircuit(circuit);
-						} catch (Exception e) {
-							e.printStackTrace();
 						}
 					}
 				}

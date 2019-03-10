@@ -34,6 +34,7 @@ public class Mesh implements Serializable {
     private double totalPowerConsumptionAmplifiers;
     
     private List<Modulation> avaliableModulations;
+    private HashMap<String, HashMap<Double, Double>> modTrDistance;
 
     /**
      * Creates a new instance of Mesh.
@@ -41,7 +42,7 @@ public class Mesh implements Serializable {
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc, List<Modulation> avaliableModulations) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc, HashMap<String, HashMap<Double, Double>> modTrDistance) {
         this.guarBand = nc.getGuardBand();
         this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
@@ -76,7 +77,7 @@ public class Mesh implements Serializable {
                 }
             }
         }
-
+        
         // Add request generators in pairs
         for (TrafficConfig.RequestGeneratorConfig rgc : tc.getRequestGenerators()) {
             Pair p = pairsAux.get(rgc.getSource()).get(rgc.getDestination());
@@ -87,18 +88,51 @@ public class Mesh implements Serializable {
         this.physicalLayer = new PhysicalLayer(plc, this);
         
         // Instance the modulation formats
-        if(physicalLayer.isActiveQoT()) {
-        	if(avaliableModulations == null) {
-        		 this.avaliableModulations = ModulationSelector.configureModulations(this);
-        		// Computing of the distances of the modulation formats
-             	physicalLayer.computesDistances(this, this.avaliableModulations);
-             	
-        	}else {
-        		this.avaliableModulations = avaliableModulations;
+        this.avaliableModulations = new ArrayList<>();
+        for (NetworkConfig.ModulationConfig modConf : nc.getModulations()) {
+        	Modulation mod = new Modulation(modConf.getName(), modConf.getMaxRange(), modConf.getM(), modConf.getSNR(), plc.getRateOfFEC(), linkList.get(0).getSlotSpectrumBand(), guarBand);
+        	avaliableModulations.add(mod);
+        }
+        
+        if (avaliableModulations.isEmpty()) {
+        	this.avaliableModulations = ModulationSelector.configureModulations(this);
+        }
+        
+        // Computing of the distances of the modulation formats
+        if (physicalLayer.isActiveQoT()) {
+        	if (modTrDistance == null) {
+        		this.modTrDistance = physicalLayer.computesModulationsDistances(this, this.avaliableModulations);
+        	} else {
+        		this.modTrDistance = modTrDistance;
         	}
         }
     }
 
+    /**
+     * Returns the modulation transmission range by transmission rate
+     * 
+     * @param modulation Modulation
+     * @param bandwidth double
+     * @return double - max transmission range
+     */
+    public double getModulationDistanceByBandwith(Modulation modulation, double bandwidth) {
+    	Double distance = null;
+    	
+    	if (physicalLayer.isActiveQoT()) {
+    		distance = modTrDistance.get(modulation.getName()).get(bandwidth);
+    		
+    		if(distance == null) {
+    			distance = physicalLayer.computeModulationDistanceByBandwidth(modulation, bandwidth, this);
+    			modTrDistance.get(modulation.getName()).put(bandwidth, distance);
+    		}
+			
+    	} else {
+    		distance = modulation.getMaxRange();
+    	}
+    	
+    	return distance;
+    }
+    
     /**
      * Returns a link to a given pair of source and destination nodes
      * 
@@ -281,6 +315,15 @@ public class Mesh implements Serializable {
 	 */
 	public void setAvaliableModulations(List<Modulation> avaliableModulations) {
 		this.avaliableModulations = avaliableModulations;
+	}
+	
+	/**
+	 * Return the modTrDistance
+	 * 
+	 * @return HashMap<Modulation, HashMap<Double, Double>>
+	 */
+	public HashMap<String, HashMap<Double, Double>> getModTrDistance() {
+		return modTrDistance;
 	}
 	
 }

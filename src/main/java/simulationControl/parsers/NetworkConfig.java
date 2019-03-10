@@ -11,12 +11,12 @@ import java.util.List;
  * Created by Iallen on 04/05/2017.
  */
 public class NetworkConfig {
-
+	
     private List<NodeConfig> nodes = new ArrayList<>();
     private List<LinkConfig> links = new ArrayList<>();
     private List<ModulationConfig> modulations = new ArrayList<>();
     private int guardBand = 1;
-    private int bvtSpectralAmplitude=1000;
+    private int bvtSpectralAmplitude = 1000;
 
     /**
      * Returns the list of modulations
@@ -323,12 +323,13 @@ public class NetworkConfig {
      * 
      * @author Iallen
      */
-    public static class ModulationConfig{
+    public static class ModulationConfig {
     	
         private String name;
-        private double bitsPerSymbol;
-        private double maxRange;
-
+        private double maxRange; // km
+        private double M; // Number of modulation format symbols
+        private double SNR; // SNR threshold (dB)
+        
         /**
          * Creates a new instance of ModulationConfig
          * 
@@ -336,9 +337,9 @@ public class NetworkConfig {
          * @param bitsPerSymbol
          * @param maxRange
          */
-        public ModulationConfig(String name, double bitsPerSymbol, double maxRange) {
+        public ModulationConfig(String name, double M, double maxRange, double SNR) {
             this.name = name;
-            this.bitsPerSymbol = bitsPerSymbol;
+            this.M = M;
             this.maxRange = maxRange;
         }
 
@@ -365,8 +366,8 @@ public class NetworkConfig {
          * 
          * @return double
          */
-        public double getBitsPerSymbol() {
-            return bitsPerSymbol;
+        public double getM() {
+            return M;
         }
 
         /**
@@ -374,8 +375,8 @@ public class NetworkConfig {
          * 
          * @param bitsPerSymbol
          */
-        public void setBitsPerSymbol(double bitsPerSymbol) {
-            this.bitsPerSymbol = bitsPerSymbol;
+        public void setM(double M) {
+            this.M = M;
         }
         
         /**
@@ -395,6 +396,24 @@ public class NetworkConfig {
         public void setMaxRange(double maxRange) {
             this.maxRange = maxRange;
         }
-    }
+        
+        /**
+         * Returns the SNR threshold
+         * 
+         * @return double
+         */
+		public double getSNR() {
+			return SNR;
+		}
+		
+		/**
+		 * Sets the SNR threshold
+		 * 
+		 * @param SNR double
+		 */
+		public void setSNR(double sNR) {
+			SNR = sNR;
+		}
+	}
 
 }
