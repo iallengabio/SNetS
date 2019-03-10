@@ -183,7 +183,7 @@ def extractDFSProfit(path,alpha):
 def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
     fs = 30
     width = 0.05
-    indmult = 0.35
+    indmult = 0.6
     ind = dfs[0]['loads']
     plt.figure(figsize=(20,6))
     for i in range(len(dfs)):

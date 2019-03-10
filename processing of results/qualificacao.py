@@ -12,9 +12,9 @@ import pandas as pd
 s = ['EsPAT (σ=40)','SRNP100','Sem mecanismo']
 l = ['800','1200','1600']
 lp = ['326','653','979']
-#sp.plotBars('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/Pacific/EsPAT_TP/MSU',loads=l,sol=s)
-#sp.plotLines('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/Pacific/ZComp/IACF',loads=lp,sol=s)
+sp.plotBars('C:/Users/ialle/Dropbox/Simulacoes/Alexandre')
+#sp.plotLines('C:/Users/ialle/Dropbox/Simulacoes/Alexandre')
 
 #dfs = sp.extractDFS('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos 2/Pacific/Politicas_TP',sp.ABBP,sp.MBBP,0.05)
 
-sp.computeGains('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/NSFNet/Politicas_TP',4,save='gains')
+#sp.computeGains('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/NSFNet/Politicas_TP',4,save='gains')
