@@ -34,7 +34,7 @@ public class ControlPlane implements Serializable {
     protected ModulationSelectionAlgorithmInterface modulationSelection;
     protected TrafficGroomingAlgorithmInterface grooming;
     
-    ModulationSelectionAlgorithmInterface modSelectByDistForEvaluation; // used to check the blocking types
+    protected ModulationSelectionAlgorithmInterface modSelectByDistForEvaluation; // used to check the blocking types
     
     protected Mesh mesh;
     

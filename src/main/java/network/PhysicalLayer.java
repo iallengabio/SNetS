@@ -3,7 +3,6 @@ package network;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -269,12 +268,12 @@ public class PhysicalLayer implements Serializable {
 	 */
 	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
 		
-		double PowerLinear = this.PowerLinear;
+		double circuitPowerLinear = this.PowerLinear;
 		if(circuit.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
-			PowerLinear = circuit.getLaunchPowerLinear();
+			circuitPowerLinear = circuit.getLaunchPowerLinear();
 		}
 		
-		double I = PowerLinear / referenceBandwidth; // Signal power density for the reference bandwidth
+		double I = circuitPowerLinear / referenceBandwidth; // Signal power density for the reference bandwidth
 		double Iase = 0.0;
 		double Inli = 0.0;
 		
@@ -304,13 +303,13 @@ public class PhysicalLayer implements Serializable {
 			circuitList = getCircuitList(link, circuit, circuitTest);
 			
 			if(activeNLI){
-				noiseNli = (Ns + 1.0) * getGnli(circuit, link, PowerLinear, Bsi, I, fi, circuitList); // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
+				noiseNli = (Ns + 1.0) * getGnli(circuit, link, circuitPowerLinear, Bsi, I, fi, circuitList); // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
 				Inli = Inli + noiseNli;
 			}
 			
 			if(activeASE){
 				if(typeOfAmplifierGain == 1){
-					totalPower = getTotalPowerInTheLink(circuitList, link, PowerLinear, Bsi, I);
+					totalPower = getTotalPowerInTheLink(circuitList, link, circuitPowerLinear, Bsi, I);
 				}
 				
 				lastFiberSegment = link.getDistance() - (Ns * L);
@@ -328,7 +327,7 @@ public class PhysicalLayer implements Serializable {
 		}
 		
 		if(!fixedPowerSpectralDensity){
-			I = PowerLinear / Bsi; // Signal power spectral density calculated according to the requested bandwidth
+			I = circuitPowerLinear / Bsi; // Signal power spectral density calculated according to the requested bandwidth
 		}
 		
 		double SNR = I / (Iase + Inli);
@@ -496,15 +495,14 @@ public class PhysicalLayer implements Serializable {
 		return Pmax;
 	}
 	
-	public double computePowerThreshold2(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
+	public double computePowerByExhaustiveSearch(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
 		
 		double Pth = 0.0; //W
-		double Pmin = 1.0E-5; //W, -20 dBm
+		double Pmin = 1.0E-11; //W, -80 dBm
 		double Pmax = 1.0E-3; //W, 0 dBm
 		double Pinc = 1.0E-8; //W, -40 dBm
 		double SNR = 0.0;
-		double SNRdB = 0.0;
-		double SNRthdB =  modulation.getSNRthreshold();
+		double SNRth =  modulation.getSNRthresholdLinear();
 		
 		while(Pmin < Pmax) {
 			
@@ -512,9 +510,8 @@ public class PhysicalLayer implements Serializable {
 			circuit.setLaunchPowerLinear(Pmin);
 			
 			SNR = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
-			SNRdB = ratioForDB(SNR);
 			
-			if(SNRdB >= SNRthdB) {
+			if(SNR >= SNRth) {
 				break;
 			}
 			
@@ -524,74 +521,81 @@ public class PhysicalLayer implements Serializable {
 		return Pth;
 	}
 	
-	public double computePowerThreshold3(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult){
+	public double computePowerByBinarySearch(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult){
 		
 		double SNRth = modulation.getSNRthresholdLinear();
 		double Pmax = computeMaximumPower2(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
 		
 		double Pmin = 1.0E-11; //W, -80 dBm
-		double Pchosen = Pmin;
+		double Pcurrent = Pmin;
 		double error = 0.01;
 		double SNRdif = 0.0;
-		double SNRchosen = 0.0;
+		double SNRcurrent = 0.0;
 		
-		SNRth *= factorMult;
+		//SNRth = SNRth * factorMult;
+		SNRth = SNRth + factorMult;
 		
 		circuit.setLaunchPowerLinear(Pmax);
-		SNRchosen = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+		SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
 		
-		if (SNRchosen < SNRth) {
+		if (SNRcurrent - SNRth < 0.0) {
 			return Pmax;
 		}
 		
 		circuit.setLaunchPowerLinear(Pmin);
-		SNRchosen = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+		SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
 		
-		if(SNRchosen - SNRth > error) {
+		if(SNRcurrent - SNRth > 0.0) {
 			return Pmin;
 		}
 		
 		while (true) {
 			
-			Pchosen = (Pmin + Pmax) / 2.0;
+			Pcurrent = (Pmin + Pmax) / 2.0;
 			
-			circuit.setLaunchPowerLinear(Pchosen);
-			SNRchosen = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+			circuit.setLaunchPowerLinear(Pcurrent);
+			SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
 			
-			SNRdif = SNRchosen - SNRth;
+			SNRdif = SNRcurrent - SNRth;
 			
 			if (SNRdif < error && SNRdif > 0.0) {
 				break;
 				
 			} else {
 				if(SNRdif > 0.0) {
-					Pmax = Pchosen;
+					Pmax = Pcurrent;
 					
 				}else {
-					Pmin = Pchosen;
+					Pmin = Pcurrent;
 				}
 			}
 		}
 		
-		return Pchosen;
+		return Pcurrent;
 	}
 	
-	public double computePowerThreshold(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
+	public double computePowerByLinearInterpolation(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
 		
 		double SNRth = modulation.getSNRthresholdLinear();
 		
-		double Pmin = 1.0E-5; //W, -20 dBm
+		double Pmin = 1.0E-11; //W, -80 dBm
 		circuit.setLaunchPowerLinear(Pmin);
 		double SNRmin = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+		
+		if(SNRmin - SNRth > 0.0) {
+			return Pmin;
+		}
 		
 		double Pmax = computeMaximumPower2(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
 		circuit.setLaunchPowerLinear(Pmax);
 		double SNRmax = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
 		
+		if (SNRmax - SNRth < 0.0) {
+			return Pmax;
+		}
+		
 		// linear interpolation
 		double Pchosen = Pmin + (Pmax - Pmin) * ((SNRth - SNRmin) / (SNRmax - SNRmin));
-		
-		Pchosen = Pchosen + 2.9636828927575705E-5;
 		
 		return Pchosen;
 	}
@@ -641,13 +645,17 @@ public class PhysicalLayer implements Serializable {
 		double Bsj = 0.0;
 		double powerJ = powerI;
 		
-		for(Circuit cricuitJ : circuitList){
+		for(Circuit circuitJ : circuitList){
 			
 			circuitPower = powerJ;
+			if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+				circuitPower = circuitJ.getLaunchPowerLinear();
+			}
+			
 			if(fixedPowerSpectralDensity){
-				saj = cricuitJ.getSpectrumAssignedByLink(link);;
+				saj = circuitJ.getSpectrumAssignedByLink(link);;
 				numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 				
 				circuitPower = I * Bsj;
 			}
@@ -695,17 +703,21 @@ public class PhysicalLayer implements Serializable {
 		double d2 = 0.0;
 		double d3 = 0.0;
 		double ln = 0.0;
-		double powerJ = powerI;
+		double powerJ = powerI; // Power of the circuit j
 		double Gj = I; // Power spectral density of the circuit j
 		
-		for(Circuit cricuitJ : circuitList){
+		for(Circuit circuitJ : circuitList){
 			
-			if(!circuitI.equals(cricuitJ)){
-				saJ = cricuitJ.getSpectrumAssignedByLink(link);
+			if(!circuitI.equals(circuitJ)){
+				saJ = circuitJ.getSpectrumAssignedByLink(link);
 				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				
+				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+					powerJ = circuitJ.getLaunchPowerLinear();
+				}
 				
 				if(!fixedPowerSpectralDensity){
 					Gj = powerJ / Bsj; // Power spectral density of the circuit j calculated according to the required bandwidth
@@ -887,6 +899,15 @@ public class PhysicalLayer implements Serializable {
 		return alphaLinear;
 	}
 	
+	/**
+	 * Returns the power linear
+	 * 
+	 * @return double
+	 */
+	public double getPowerLinear() {
+		return PowerLinear;
+	}
+
 	/**
 	 * Calculates the transmission distances of the modulation formats
 	 * 

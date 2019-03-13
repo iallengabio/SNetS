@@ -9,7 +9,6 @@ import grmlsa.Route;
 import network.Circuit;
 import network.ControlPlane;
 import network.Link;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
