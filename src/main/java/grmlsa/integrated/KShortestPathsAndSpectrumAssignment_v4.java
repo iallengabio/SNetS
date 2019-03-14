@@ -21,7 +21,7 @@ import request.RequestForConnection;
 import simulationControl.Util;
 import util.IntersectionFreeSpectrum;
 
-public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAlgorithmInterface {
+public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAlgorithmInterface {
 	
 	private int k = 3; // Number of alternative routes
     private KRoutingAlgorithmInterface kShortestsPaths;
@@ -68,10 +68,14 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
   		int checkBand[] = null;
   		Double checkPower = 0.0;
   		
-  		boolean QoTO = false;
+  		int chosenUsedNumSlots = Integer.MAX_VALUE;
+  		double chosenBiggerSNR = 0.0;
+  		double chosenBiggerDeltaSNR = 0.0;
   		
         for (Route route : candidateRoutes) {
             circuit.setRoute(route);
+            
+            boolean QoTO = false;
             
         	// Begins with the most spectrally efficient modulation format
     		for (int m = avaliableModulations.size()-1; m >= 0; m--) {
@@ -139,9 +143,57 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 		                chosenMod = mod;
 		                chosenPower = lauchPower;
 		                
-		                QoTO = cp.computeQoTForOther(circuit);
-		                if(QoTO) {
-			                break; // Stop when reaches admissible QoTO
+		                boolean QoTOtest = false;
+		                
+		                if(routeSelection.equals("lessUsedSlots")) {
+		                	 int numUsedSlots = computeNumUsedSlotsOfRoute(route);
+		                	 
+		                	 if(numUsedSlots < chosenUsedNumSlots) {
+		                		 QoTOtest = true;
+		                	 }
+		                }else if(routeSelection.equals("biggerOSNR")) {
+		                	double SNR = circuit.getSNR();
+		                	
+		                	if(SNR > chosenBiggerSNR) {
+		                		QoTOtest = true;
+		                	}
+		                }else if(routeSelection.equals("biggerDeltaOSNR")) {
+		                	double DeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
+		                	
+		                	if(DeltaSNR > chosenBiggerDeltaSNR) {
+		                		QoTOtest = true;
+		                	}
+		                }else if(routeSelection.equals("first")){
+		                	QoTOtest = true;
+		                }
+		                
+		                if(QoTOtest) {
+			                QoTO = cp.computeQoTForOther(circuit);
+			                
+			                if(QoTO) { // to exit the search for free bands
+			                	
+			                	if(routeSelection.equals("lessUsedSlots")) {
+				                	 int numUsedSlots = computeNumUsedSlotsOfRoute(route);
+				                	 
+				                	 if(numUsedSlots < chosenUsedNumSlots) {
+				                		 chosenUsedNumSlots = numUsedSlots;
+				                	 }
+				                }else if(routeSelection.equals("biggerOSNR")) {
+				                	double SNR = circuit.getSNR();
+				                	
+				                	if(SNR > chosenBiggerSNR) {
+				                		chosenBiggerSNR = SNR;
+				                	}
+				                }else if(routeSelection.equals("biggerDeltaOSNR")) {
+				                	double DeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
+				                	
+				                	if(DeltaSNR > chosenBiggerDeltaSNR) {
+				                		chosenBiggerDeltaSNR = DeltaSNR;
+				                	}
+				                }
+			                	
+			                	break; // Stop when reaches admissible QoTO
+			                }
 		                }
 	            	}
 	            }
@@ -151,7 +203,7 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	            }
             }
     		
-    		if(QoTO){ // to exit search for route
+    		if(QoTO && routeSelection.equals("first")){ // to exit search for route
             	break;
             }
         }
