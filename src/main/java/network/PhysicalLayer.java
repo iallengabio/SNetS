@@ -45,6 +45,7 @@ public class PhysicalLayer implements Serializable {
     private double amplificationFrequency; // Frequency used for amplification
     
     private double Lsss; // Switch insertion loss, dB
+    private double LsssLinear;
     
     private boolean fixedPowerSpectralDensity; // To enable or disable fixed power spectral density
 	private double referenceBandwidth; // Reference bandwidth for power spectral density
@@ -53,9 +54,10 @@ public class PhysicalLayer implements Serializable {
 	private Amplifier lineAmp; // Line amplifier
 	private Amplifier preAmp; // Pre amplifier
 	
-	private double linearPower; // Transmitter power, Watt
+	private double powerLinear; // Transmitter power, Watt
 	private double alphaLinear; // 1/m
 	private double beta2; // Group-velocity dispersion
+	private double attenuationBySpanLinear;
 	
 	private double slotBandwidth; // Hz
 	private double lowerFrequency; // Hz
@@ -91,19 +93,20 @@ public class PhysicalLayer implements Serializable {
         this.amplificationFrequency = plc.getAmplificationFrequency();
         
         this.Lsss = plc.getSwitchInsertionLoss();
+        this.LsssLinear = ratioOfDB(Lsss);
         
         this.fixedPowerSpectralDensity = plc.isFixedPowerSpectralDensity();
         this.referenceBandwidth = plc.getReferenceBandwidthForPowerSpectralDensity();
         
-        this.linearPower = ratioOfDB(power) * 1.0E-3; // converting to Watt
+        this.powerLinear = ratioOfDB(power) * 1.0E-3; // converting to Watt
         this.alphaLinear = computeAlphaLinear(alpha);
         this.beta2 = computeBeta2(D, centerFrequency);
         
         double spanMeter = L * 1000; // span in meter
-        double attenuationBySpan = Math.pow(Math.E, alphaLinear * spanMeter);
-        double boosterAmpGainLinear = ratioOfDB(Lsss);
-        double lineAmpGainLinear = attenuationBySpan;
-        double preAmpGainLinear = attenuationBySpan * ratioOfDB(Lsss);
+        this.attenuationBySpanLinear = Math.pow(Math.E, alphaLinear * spanMeter);
+        double boosterAmpGainLinear = LsssLinear;
+        double lineAmpGainLinear = attenuationBySpanLinear;
+        double preAmpGainLinear = attenuationBySpanLinear * ratioOfDB(Lsss);
         
         this.boosterAmp = new Amplifier(ratioForDB(boosterAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
         this.lineAmp = new Amplifier(ratioForDB(lineAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
@@ -265,13 +268,22 @@ public class PhysicalLayer implements Serializable {
 	 */
 	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
 		
-		double I = linearPower / referenceBandwidth; // Signal power density for the reference bandwidth
-		double Iase = 0.0;
-		double Inli = 0.0;
-		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
 		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 		double fi = lowerFrequency + (slotBandwidth * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
+		
+		double circuitPowerLinear = this.powerLinear;
+		if(circuit.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+			circuitPowerLinear = circuit.getLaunchPowerLinear();
+		}
+		
+		double I = circuitPowerLinear / referenceBandwidth; // Signal power density for the reference bandwidth
+		if(!fixedPowerSpectralDensity){
+			I = circuitPowerLinear / Bsi; // Signal power spectral density calculated according to the requested bandwidth
+		}
+		
+		double Iase = 0.0;
+		double Inli = 0.0;
 		
 		Node sourceNode = null;
 		Node destinationNode = null;
@@ -295,13 +307,13 @@ public class PhysicalLayer implements Serializable {
 			circuitList = getCircuitList(link, circuit, circuitTest);
 			
 			if(activeNLI){
-				noiseNli = (Ns + 1.0) * getGnli(circuit, link, linearPower, Bsi, I, fi, circuitList); // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
+				noiseNli = (Ns + 1.0) * getGnli(circuit, link, circuitPowerLinear, Bsi, I, fi, circuitList); // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
 				Inli = Inli + noiseNli;
 			}
 			
 			if(activeASE){
 				if(typeOfAmplifierGain == 1){
-					totalPower = getTotalPowerInTheLink(circuitList, link, linearPower, Bsi, I);
+					totalPower = getTotalPowerInTheLink(circuitList, link, circuitPowerLinear, Bsi, I);
 				}
 				
 				lastFiberSegment = link.getDistance() - (Ns * L);
@@ -316,10 +328,6 @@ public class PhysicalLayer implements Serializable {
 				
 				Iase = Iase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
 			}
-		}
-		
-		if(!fixedPowerSpectralDensity){
-			I = linearPower / Bsi; // Signal power spectral density calculated according to the requested bandwidth
 		}
 		
 		double SNR = I / (Iase + Inli);
@@ -372,13 +380,17 @@ public class PhysicalLayer implements Serializable {
 		double Bsj = 0.0;
 		double powerJ = powerI;
 		
-		for(Circuit cricuitJ : circuitList){
+		for(Circuit circuitJ : circuitList){
 			
 			circuitPower = powerJ;
+			if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+				circuitPower = circuitJ.getLaunchPowerLinear();
+			}
+			
 			if(fixedPowerSpectralDensity){
-				saj = cricuitJ.getSpectrumAssignedByLink(link);;
+				saj = circuitJ.getSpectrumAssignedByLink(link);;
 				numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 				
 				circuitPower = I * Bsj;
 			}
@@ -401,15 +413,10 @@ public class PhysicalLayer implements Serializable {
 	 * @param fI double
 	 * @return double
 	 */
-	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double I, double fI, TreeSet<Circuit> circuitList){
+	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double Gi, double fI, TreeSet<Circuit> circuitList){
 		double beta21 = beta2;
 		if(beta21 < 0.0){
 			beta21 = -1.0 * beta21;
-		}
-		
-		double Gi = I; // Power spectral density of the circuit i
-		if(!fixedPowerSpectralDensity){
-			Gi = powerI / BsI; // Power spectral density of the circuit i calculated according to the required bandwidth
 		}
 		
 		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
@@ -426,25 +433,30 @@ public class PhysicalLayer implements Serializable {
 		double d2 = 0.0;
 		double d3 = 0.0;
 		double ln = 0.0;
-		double powerJ = powerI;
-		double Gj = I; // Power spectral density of the circuit j
+		double powerJ = powerI; // Power of the circuit j
+		double Gj = Gi; // Power spectral density of the circuit j
 		
-		for(Circuit cricuitJ : circuitList){
+		for(Circuit circuitJ : circuitList){
 			
-			if(!circuitI.equals(cricuitJ)){
-				saJ = cricuitJ.getSpectrumAssignedByLink(link);
+			if(!circuitI.equals(circuitJ)){
+				saJ = circuitJ.getSpectrumAssignedByLink(link);
 				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = (numOfSlots - cricuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				
+				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+					powerJ = circuitJ.getLaunchPowerLinear();
+				}
 				
 				if(!fixedPowerSpectralDensity){
 					Gj = powerJ / Bsj; // Power spectral density of the circuit j calculated according to the required bandwidth
 				}
 				
 				deltaFij = fI - fJ;
-				if(deltaFij < 0.0)
+				if(deltaFij < 0.0) {
 					deltaFij = -1.0 * deltaFij;
+				}
 				
 				d1 = deltaFij + (Bsj / 2.0);
 				d2 = deltaFij - (Bsj / 2.0);
@@ -659,6 +671,17 @@ public class PhysicalLayer implements Serializable {
 				modsTrsDistances.get(mod.getName()).put(transmissionRate, distance);
 			}
 		}
+
+//		for(double transmissionRate : transmissionRateList) {
+//			System.out.println("TR(Gbps) = " + (transmissionRate / 1.0E+9));
+//			
+//			for(int m = 0; m < avaliableModulations.size(); m++) {
+//				Modulation mod = avaliableModulations.get(m);
+//				int slotNumber = mod.requiredSlots(transmissionRate) - mod.getGuardBand();
+//				
+//				System.out.println("Mod = " + mod.getName() + ", slot num = " + slotNumber);
+//			}
+//		}
 		
 //		for(double transmissionRate : transmissionRateList) {
 //			System.out.println("TR(Gbps) = " + (transmissionRate / 1.0E+9));
@@ -666,7 +689,7 @@ public class PhysicalLayer implements Serializable {
 //			for(int m = 0; m < avaliableModulations.size(); m++) {
 //				Modulation mod = avaliableModulations.get(m);
 //				
-//				double modTrDist = modTrDistance.get(mod).get(transmissionRate);
+//				double modTrDist = modsTrsDistances.get(mod.getName()).get(transmissionRate);
 //				System.out.println("Mod = " + mod.getName() + ", distance(km) = " + modTrDist);
 //			}
 //		}
