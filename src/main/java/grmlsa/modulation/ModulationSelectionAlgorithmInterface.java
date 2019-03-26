@@ -1,7 +1,6 @@
 package grmlsa.modulation;
 
 import java.io.Serializable;
-import java.util.List;
 
 import grmlsa.Route;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -25,12 +24,5 @@ public interface ModulationSelectionAlgorithmInterface extends Serializable {
 	 * @return Modulation
 	 */
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp);
-	
-	/**
-	 * This method returns the available modulation formats.
-	 * 
-	 * @return List<Modulation>
-	 */
-	public List<Modulation> getAvaliableModulations();
 	
 }

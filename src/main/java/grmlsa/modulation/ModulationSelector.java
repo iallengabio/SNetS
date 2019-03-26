@@ -27,7 +27,6 @@ public class ModulationSelector {
 	 * @return List<Modulation
 	 */
 	public static List<Modulation> configureModulations(Mesh mesh){
-		
 		double freqSlot = mesh.getLinkList().get(0).getSlotSpectrumBand();
 		double rateFEC = mesh.getPhysicalLayer().getRateOfFEC();
 		int guardBand = mesh.getGuardBand();

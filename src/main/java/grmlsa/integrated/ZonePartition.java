@@ -129,7 +129,7 @@ public class ZonePartition implements IntegratedRMLSAAlgorithmInterface {
 
         } else {
             circuit.setRoute(candidateRoutes.get(0));
-            circuit.setModulation(modulationSelection.getAvaliableModulations().get(0));
+            circuit.setModulation(cp.getMesh().getAvaliableModulations().get(0));
             circuit.setSpectrumAssigned(null);
             
             return false;

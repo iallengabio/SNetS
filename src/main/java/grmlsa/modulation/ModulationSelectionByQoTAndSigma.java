@@ -71,7 +71,7 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 					alternativeBand = band;
 				}
 				
-				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){
+				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null)){
 					alternativeMod2 = mod; // Save the modulation that has admissible QoT
 					alternativeBand2 = band;
 					
@@ -111,9 +111,4 @@ public class ModulationSelectionByQoTAndSigma implements ModulationSelectionAlgo
 		return chosenMod;
 	}
 	
-	@Override
-	public List<Modulation> getAvaliableModulations() {
-		return avaliableModulations;
-	}
-
 }

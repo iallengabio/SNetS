@@ -8,7 +8,6 @@ import java.util.TreeSet;
 import network.Circuit;
 import network.ControlPlane;
 import network.Link;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -105,18 +104,12 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						
 						circuit.setSpectrumAssigned(bandTemp);
 						
-						try {
-							cp.allocateCircuit(circuit);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						
 						double worstDeltaSNR = Double.MAX_VALUE; // minimum delta SNR
 						boolean impactOnOtherRequest = false; // without significant impact on other circuits
 						
 						for(int i = 0; i < circuits.size(); i++){
 							Circuit circuitTemp = circuits.get(i);
-							boolean QoT = cp.computeQualityOfTransmission(circuitTemp);
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit);
 							
 							double SNRthreshold = circuitTemp.getModulation().getSNRthreshold();
 							double deltaSNR = circuitTemp.getSNR() - SNRthreshold;
@@ -138,12 +131,6 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						} else if(worstDeltaSNR > chosenWorstDeltaSNR2){
 							chosenWorstDeltaSNR2 = worstDeltaSNR;
 							chosenBand2 = bandTemp;
-						}
-						
-						try {
-							cp.releaseCircuit(circuit);
-						} catch (Exception e) {
-							e.printStackTrace();
 						}
 					}
 				}
@@ -221,18 +208,13 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						}
 						
 						circuit.setSpectrumAssigned(bandTemp);
-						try {
-							cp.allocateCircuit(circuit);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
 						
 						double worstDeltaSNR = Double.MAX_VALUE; // minimum delta SNR
 						boolean impactOnOtherRequest = false; // without significant impact on other circuits
 						
 						for(int i = 0; i < circuits.size(); i++){
 							Circuit circuitTemp = circuits.get(i);
-							boolean QoT = cp.computeQualityOfTransmission(circuit);
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit);
 							
 							double SNRthreshold = circuitTemp.getModulation().getSNRthreshold();
 							double deltaSNR = circuitTemp.getSNR() - SNRthreshold;
@@ -254,12 +236,6 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						} else if(worstDeltaSNR > chosenWorstDeltaSNR2){
 							chosenWorstDeltaSNR2 = worstDeltaSNR;
 							chosenBand2 = bandTemp;
-						}
-						
-						try {
-							cp.releaseCircuit(circuit);
-						} catch (Exception e) {
-							e.printStackTrace();
 						}
 					}
 				}

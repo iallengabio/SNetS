@@ -1,13 +1,23 @@
 package simulationControl;
 
-import java.io.*;
-import java.net.SocketImpl;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Vector;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseCredentials;
-import com.google.firebase.database.*;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -17,7 +27,13 @@ import network.RequestGenerator;
 import simulationControl.distributedProcessing.Client;
 import simulationControl.distributedProcessing.ServerM;
 import simulationControl.distributedProcessing.ServerS;
-import simulationControl.parsers.*;
+import simulationControl.parsers.NetworkConfig;
+import simulationControl.parsers.OthersConfig;
+import simulationControl.parsers.PhysicalLayerConfig;
+import simulationControl.parsers.SimulationConfig;
+import simulationControl.parsers.SimulationRequest;
+import simulationControl.parsers.SimulationServer;
+import simulationControl.parsers.TrafficConfig;
 import simulator.Simulation;
 
 /**
@@ -295,7 +311,7 @@ public class Main {
         for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
             List<Simulation> reps = new ArrayList<>();
             for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
-                Mesh m = new Mesh(nc, tc, plc, oc, meshTemp.getAvaliableModulations());
+                Mesh m = new Mesh(nc, tc, plc, oc, meshTemp.getModTrDistance());
                 incArrivedRate(m.getPairList(), i);
                 Simulation s = new Simulation(sc, m, i, j);
                 reps.add(s);

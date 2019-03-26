@@ -42,7 +42,7 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
         Modulation chosenMod = null;
         int chosenBand[] = null;
         
-        List<Modulation> avaliableModulations = modulationSelection.getAvaliableModulations();
+        List<Modulation> avaliableModulations = cp.getMesh().getAvaliableModulations();
 
         // to avoid metrics error
   		Route checkRoute = null;
@@ -68,7 +68,7 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
 	            		checkBand = band;
 	            	}
 	            	
-	            	if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band)){ //modulation has acceptable QoT
+	            	if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null)){ //modulation has acceptable QoT
 	            		chosenRoute = route;
 	            		chosenBand = band;
 		                chosenMod = mod;
