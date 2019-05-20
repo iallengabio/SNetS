@@ -64,6 +64,10 @@ public class GroomingStatisticsResultManager implements ResultManagerInterface {
 		res.append("\n\n");
 		res.append(resultMaxVirtualHopsGeneral());
 		res.append("\n\n");
+		res.append(resultAverageActiveCircuits());
+		res.append("\n\n");
+		res.append(resultMaximumActiveCircuits());
+		res.append("\n\n");
 		return res.toString();
 	}
 	
@@ -129,6 +133,40 @@ public class GroomingStatisticsResultManager implements ResultManagerInterface {
 			res.append("Maximum virtual hops" + sep + loadPoint + sep + " ");
 			for (Integer replic : replications) {
 				res.append(sep + gss.get(loadPoint).get(replic).getMaxVirtualHops());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the average active circuits
+	 * 
+	 * @return String
+	 */
+	private String resultAverageActiveCircuits(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Average active circuits" + sep + loadPoint + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + gss.get(loadPoint).get(replic).getAverageActiveCircuits());
+			}
+			res.append("\n");
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the maximum active circuits
+	 * 
+	 * @return String
+	 */
+	private String resultMaximumActiveCircuits(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			res.append("Maximum active circuits" + sep + loadPoint + sep + " ");
+			for (Integer replic : replications) {
+				res.append(sep + gss.get(loadPoint).get(replic).getMaximumActiveCircuits());
 			}
 			res.append("\n");
 		}

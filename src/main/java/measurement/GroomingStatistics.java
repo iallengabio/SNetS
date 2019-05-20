@@ -7,6 +7,7 @@ import simulationControl.resultManagers.GroomingStatisticsResultManager;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 /**
  * This measurement computes grooming statistics like rate of requests attended by circuit and mean of virtual hops.
@@ -19,6 +20,9 @@ public class GroomingStatistics extends Measurement {
     private double sumVirtualHops;
     private int attendedRequests;
     private int maxReqByCirc;
+    
+    private double averageActiveCircuits;
+    private double maximumActiveCircuits;
 
     /**
      * Creates a new instance of Measurement
@@ -31,10 +35,14 @@ public class GroomingStatistics extends Measurement {
         this.resultManager = new GroomingStatisticsResultManager();
         fileName = "_GroomingStatistics.csv";
         observations = 0;
-        sumReqByCirc = 0;
+        sumReqByCirc = 0.0;
         maxVirtualHops = 0;
+        sumVirtualHops = 0.0;
         attendedRequests = 0;
         maxReqByCirc = 0;
+        
+        averageActiveCircuits = 0.0;
+        maximumActiveCircuits = 0.0;
     }
 
     @Override
@@ -48,6 +56,12 @@ public class GroomingStatistics extends Measurement {
                 maxVirtualHops = request.getCircuits().size();
             }
         }
+        
+        TreeSet<Circuit> circuitList = cp.getConnections();
+		averageActiveCircuits += circuitList.size();
+		if(circuitList.size() > maximumActiveCircuits) {
+			maximumActiveCircuits = circuitList.size();
+		}
     }
 
     public double getReqByCirc(){
@@ -57,13 +71,21 @@ public class GroomingStatistics extends Measurement {
     public double getVirtualHops(){
         return sumVirtualHops/(double)attendedRequests;
     }
-
+    
     public int getMaxVirtualHops() {
         return maxVirtualHops;
     }
 
     public int getMaxReqByCirc() {
         return maxReqByCirc;
+    }
+    
+    public double getAverageActiveCircuits() {
+    	return averageActiveCircuits/(double)observations;
+    }
+    
+    public double getMaximumActiveCircuits() {
+    	return maximumActiveCircuits;
     }
 
     private double computeReqByCirc(ControlPlane cp){

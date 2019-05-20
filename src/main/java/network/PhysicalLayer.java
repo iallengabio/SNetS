@@ -532,7 +532,7 @@ public class PhysicalLayer implements Serializable {
 		double SNRdif = 0.0;
 		double SNRcurrent = 0.0;
 		
-		SNRth = SNRth * factorMult;
+		SNRth = SNRth * (1.0 + factorMult);
 		//SNRth = SNRth + factorMult;
 		
 		circuit.setLaunchPowerLinear(Pmax);
@@ -567,6 +567,71 @@ public class PhysicalLayer implements Serializable {
 					
 				}else {
 					Pmin = Pcurrent;
+				}
+			}
+		}
+		
+		return Pcurrent;
+	}
+	
+	public double computePowerSpectralDensityByBinarySearch(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult){
+		
+		double SNRth = modulation.getSNRthresholdLinear();
+		double Pmax = computeMaximumPower2(route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
+		
+		double Pmin = 1.0E-11; //W, -80 dBm
+		double Pcurrent = Pmin;
+		double error = 0.01;
+		double SNRdif = 0.0;
+		double SNRcurrent = 0.0;
+		
+		double PSDcurrent = 0.0; //power spectral density current
+    	double PSDmax = 0.0;
+    	double PSDmin = 0.0;
+		
+		double slotBandwidth = route.getLinkList().firstElement().getSlotSpectrumBand();
+		double numOfSlots = spectrumAssigned[1] - spectrumAssigned[0] + 1.0;
+		double Bsi = (numOfSlots - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+		
+		PSDmax = Pmax / Bsi;
+		PSDmin = Pmin / Bsi;
+		
+		SNRth = SNRth * (1.0 + factorMult);
+		//SNRth = SNRth + factorMult;
+		
+		circuit.setLaunchPowerLinear(Pmax);
+		SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+		
+		if (SNRcurrent - SNRth < 0.0) {
+			return Pmax;
+		}
+		
+		circuit.setLaunchPowerLinear(Pmin);
+		SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+		
+		if(SNRcurrent - SNRth > 0.0) {
+			return Pmin;
+		}
+		
+		while (true) {
+			
+			PSDcurrent = (PSDmin + PSDmax) / 2.0;
+			Pcurrent = PSDcurrent * Bsi;
+			
+			circuit.setLaunchPowerLinear(Pcurrent);
+			SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null);
+			
+			SNRdif = SNRcurrent - SNRth;
+			
+			if (SNRdif < error && SNRdif > 0.0) {
+				break;
+				
+			} else {
+				if(SNRdif > 0.0) {
+					PSDmax = PSDcurrent;
+					
+				}else {
+					PSDmin = PSDcurrent;
 				}
 			}
 		}
@@ -1023,7 +1088,10 @@ public class PhysicalLayer implements Serializable {
 			circuitTemp.setModulation(mod);
 			circuitTemp.setSpectrumAssigned(sa);
 			
-			double launchPower = computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
+			double launchPower = Double.POSITIVE_INFINITY;
+			if(!fixedPowerSpectralDensity){
+				launchPower = computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
+			}
 			circuitTemp.setLaunchPowerLinear(launchPower);
 			
 			route.getLink(0).addCircuit(circuitTemp);
