@@ -104,7 +104,7 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	    			
 	    			// enter the power assignment block
 	    			
-	    			//CPA
+	    			//CPA or CPSD
 	    			double lauchPower = Double.POSITIVE_INFINITY;
 	    			
 	    			if(algo.equals("EPA")) { // EPA
@@ -124,6 +124,12 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	            		
 	    			}else if(algo.equals("APA2")) { // APA2
 	            		lauchPower = AdaptivePowerAssignment2(circuit, route, mod, band, cp);
+	            		
+	    			}else if(algo.equals("APSD")) { // APSD
+	            		lauchPower = AdaptivePowerSpectralDensity(circuit, route, mod, band, cp);
+	            		
+	    			}else if(algo.equals("APSDb")) { // APSD binary search
+	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerSpectralDensityByBinarySearch(circuit, route, mod, band, factorMult);
 	    			}
             		
             		checkBand = band;
@@ -330,6 +336,139 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
     	if(!isPowerDB) {
     		Pcurrent = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
     	}
+		
+    	return Pcurrent;
+    }
+    
+    public double AdaptivePowerSpectralDensity(Circuit circuit, Route route, Modulation mod, int sa[], ControlPlane cp){
+    	
+    	if(powerDatabase == null) {
+    		powerDatabase = new HashMap<Route, HashMap<Double, HashMap<Modulation, Double>>>();
+    	}
+    	
+    	int NewCall = 0;
+    	int CountSub = 0;
+    	int CountAdd = 0;
+    	
+    	double PSDcurrent = 0.0; //power spectral density current
+    	double PSDmax = 0.0;
+    	double PSDmin = 0.0;
+    	
+    	double Pcurrent = 0.0;
+    	double Pmin = 1.0E-11; //W, -80 dBm
+    	double SNRth = mod.getSNRthreshold();
+    	
+    	double slotBandwidth = route.getLinkList().firstElement().getSlotSpectrumBand();
+		double numOfSlots = sa[1] - sa[0] + 1.0;
+		double Bsi = (numOfSlots - mod.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+		
+    	double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
+		circuit.setLaunchPowerLinear(Pmax);
+		cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null);
+		double SNRmax = circuit.getSNR();
+		
+		boolean isPowerDB = false;
+		HashMap<Double, HashMap<Modulation, Double>> trsModsPower = powerDatabase.get(route);
+    	if(trsModsPower != null) {
+    		HashMap<Modulation, Double> modsPower = trsModsPower.get(circuit.getRequiredBandwidth());
+    		if(modsPower != null) {
+    			Double power = modsPower.get(mod);
+    			if(power != null) {
+    				Pcurrent = power;
+    				isPowerDB = true;
+    				
+    				PSDcurrent = Pcurrent / Bsi;
+    			}
+    		}
+    	}
+    	
+    	PSDmax = Pmax / Bsi;
+		PSDmin = Pmin / Bsi;
+    	
+    	boolean search = true;
+    	if(!isPowerDB) { // if this does not exist in the database
+    		NewCall++;
+    		
+    		if(SNRmax >= SNRth) {
+    			//Pcurrent = Pmin + (factorMult * (Pmax - Pmin));
+    			PSDcurrent = PSDmin + (factorMult * (PSDmax - PSDmin));
+    			
+    		}else { // SNRmax < SNRth
+    			//Pcurrent = Pmax;
+    			PSDcurrent = PSDmax;
+    			search = false;
+    		}
+    		
+    		Pcurrent = PSDcurrent * Bsi;
+    	}
+    	
+		while (search) {
+			
+			Pcurrent = PSDcurrent * Bsi;
+			//PSDcurrent = Pcurrent / Bsi;
+			
+			circuit.setLaunchPowerLinear(Pcurrent);
+			boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null);
+			double SNRcurrent = circuit.getSNR();
+			
+			if(SNRcurrent >= SNRth) { // line 3
+				
+				boolean QoTO = cp.computeQoTForOther(circuit);
+				
+				if(QoT && QoTO) {
+					if(NewCall > 0) {
+						NewCall++;
+					}
+					break;
+					
+				} else {
+					CountSub++;
+					
+					if(CountSub >= 6) {
+						break;
+						
+					} else { // ContSub < 6
+						//Pcurrent = Pcurrent - 0.1 * Pcurrent;
+						PSDcurrent = PSDcurrent - 0.1 * PSDcurrent;
+					}
+				}
+				
+			} else { // SNRcurrent < SNRth
+				//if(Pcurrent + 0.1 * Pcurrent > Pmax) {
+				if(PSDcurrent + 0.1 * PSDcurrent > PSDmax) {
+					break;
+					
+				} else { // Pcurrent + 0.1 * Pcurrent <= Pmax
+					CountAdd++;
+					
+					if(CountAdd >= 6) {
+						break;
+						
+					} else { // CountAdd < 6
+						//Pcurrent = Pcurrent + 0.1 * Pcurrent;
+						PSDcurrent = PSDcurrent + 0.1 * PSDcurrent;
+					}
+				}
+			}
+		}
+    	
+		if (NewCall > 1) { // line 5
+			// saves the power in the database
+			
+			trsModsPower = powerDatabase.get(route);
+	    	if(trsModsPower == null) {
+	    		trsModsPower = new HashMap<Double, HashMap<Modulation,Double>>();
+	    		powerDatabase.put(route, trsModsPower);
+	    	}
+	    	
+	    	HashMap<Modulation, Double> modsPower = trsModsPower.get(circuit.getRequiredBandwidth());
+    		if(modsPower == null) {
+    			modsPower = new HashMap<Modulation, Double>();
+    			trsModsPower.put(circuit.getRequiredBandwidth(), modsPower);
+    		}
+	    	
+    		modsPower.put(mod, Pcurrent);
+		}
 		
     	return Pcurrent;
     }

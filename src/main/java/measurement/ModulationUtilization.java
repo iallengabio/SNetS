@@ -54,31 +54,31 @@ public class ModulationUtilization extends Measurement {
 	   }
 	   
 	   if(success){
-	   	for(Circuit circuit : request.getCircuits()) {
-			numObservations++;
-
-			double bandwidth = circuit.getRequiredBandwidth();
-			List<Modulation> modList = cp.getModulationsUsedByCircuit(circuit);
-
-			for (int i = 0; i < modList.size(); i++) {
-				String modName = modList.get(i).getName();
-
-				// Number of circuits per modulation
-				Integer numCirc = numCircuitsPerMod.get(modName);
-				if (numCirc == null) numCirc = 0;
-				numCircuitsPerMod.put(modName, numCirc + 1);
-
-				// Number of circuits per modulation and bandwidth
-				HashMap<Double, Integer> numCircBw = numCircuitsPerModPerBw.get(modName);
-				if (numCircBw == null) {
-					numCircBw = new HashMap<>();
-					numCircuitsPerModPerBw.put(modName, numCircBw);
+	   	   for(Circuit circuit : request.getCircuits()) {
+		       numObservations++;
+	           
+		       double bandwidth = circuit.getRequiredBandwidth();
+		       List<Modulation> modList = cp.getModulationsUsedByCircuit(circuit);
+		       
+		       for (int i = 0; i < modList.size(); i++) {
+		    	   String modName = modList.get(i).getName();
+		    	   
+		    	   // Number of circuits per modulation
+		    	   Integer numCirc = numCircuitsPerMod.get(modName);
+		    	   if (numCirc == null) numCirc = 0;
+		    	   numCircuitsPerMod.put(modName, numCirc + 1);
+		    	   
+		    	   // Number of circuits per modulation and bandwidth
+		    	   HashMap<Double, Integer> numCircBw = numCircuitsPerModPerBw.get(modName);
+		    	   if (numCircBw == null) {
+		    		   numCircBw = new HashMap<>();
+		    		   numCircuitsPerModPerBw.put(modName, numCircBw);
+		    	   }
+		    	   numCirc = numCircBw.get(bandwidth);
+		    	   if (numCirc == null) numCirc = 0;
+		    	   numCircBw.put(bandwidth, numCirc + 1);
 				}
-				numCirc = numCircBw.get(bandwidth);
-				if (numCirc == null) numCirc = 0;
-				numCircBw.put(bandwidth, numCirc + 1);
 			}
-		}
 		}
 	}
 	

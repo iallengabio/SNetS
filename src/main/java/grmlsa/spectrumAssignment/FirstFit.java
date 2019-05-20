@@ -1,11 +1,10 @@
 package grmlsa.spectrumAssignment;
 
+import java.util.List;
+
 import network.Circuit;
 import network.ControlPlane;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
-
-import java.util.List;
 
 /**
  * This class represents the spectrum allocation technique called First Fit.
