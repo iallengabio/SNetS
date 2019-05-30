@@ -6,10 +6,9 @@ import request.RequestForConnection;
 import java.util.Map;
 
 /**
- * This class represents a Multihop Traffic Grooming algorithm. This algorithm selects the traffic grooming solution for each request based at a composite cost function.
- * The parameters alfa, beta, gama, delta and epsilon has to be seted at 'others' config file.
+ * This class implements the mechanism Spectrum Reservation for each Node Pair in MTGSR algorithm.
  */
-public class MGFCCF extends MultihopGrooming2 {
+public class MTGSR_SRNP extends MultihopGroomingSRNP {
     private Double alfa;
     private Double beta;
     private Double gama;
