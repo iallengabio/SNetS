@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-Este é um arquivo de script temporário.
-"""
 
 import pandas as pd #for csv manipulation
 import glob #for filtering
@@ -179,16 +174,16 @@ def extractDFSProfit(path,alpha):
 
 
 
-    
+
 def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
     fs = 30
-    width = 0.05
+    width = 0.08
     indmult = 0.6
     ind = dfs[0]['loads']
     plt.figure(figsize=(20,6))
     for i in range(len(dfs)):
         plt.bar(ind*indmult+i*width, dfs[i]['mean'], width*0.95, yerr=dfs[i]['errors'], label=sol[i])
-    
+
     plt.ylabel(yl, fontsize=fs)
     plt.xlabel(xl, fontsize=fs)
     plt.xticks(ind*indmult+width*2, loads, fontsize=fs)
@@ -203,102 +198,104 @@ def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower cent
     if show:
         plt.show()
     plt.close()
-    
+
 def plotLines(path,loads=[],sol=[], al=0.05):
     n = path.split('/')
     n = n[len(n)-1]
     n = n + '_Line_'
     #PBB
-    dfs = extractDFS(path,ABBP,MBBP,al)   
+    dfs = extractDFS(path,ABBP,MBBP,al)
     if loads==[]:
         loads = dfs[0]['loads'].tolist()
     if sol==[]:
         sol = range(len(dfs))
-    a = path + '/' + n + 'BB.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Bloqueio de banda',show=True,arq=a)
-    
+    a = path + '/' + n + 'BB.png'
+    xl = 'Carga na rede (Erlangs)'
+    auxPlotLine(dfs,loads,sol,xl,yl='Bandwidth Blocking',show=True,arq=a)
+
     #CE
     dfs = extractDFS(path,ACE,MTCE,al)
-    a = path + '/' + n + 'CE.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Energia consumida (J)',show=False,arq=a)
-    
+    a = path + '/' + n + 'CE.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Consumed Energy (J)',show=False,arq=a)
+
     #PCE
     dfs = extractDFS(path,ACE,MAPC,al)
-    a = path + '/' + n + 'PCE.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Potência de consumo (W)',show=False,arq=a)
-    
+    a = path + '/' + n + 'PCE.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Power Consumption (W)',show=False,arq=a)
+
     #BCR
     dfs = extractDFSBCR(path,al)
-    a = path + '/' + n + 'BCR.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Relação custo-benefício',show=False,arq=a)
-    
+    a = path + '/' + n + 'BCR.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Benefit-Cost Ratio',show=False,arq=a)
+
     #PROFIT
     dfs = extractDFSProfit(path,al)
-    a = path + '/' + n + 'PROFIT.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Lucro ($)',show=False,arq=a)
-    
+    a = path + '/' + n + 'PROFIT.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Simplified Profit ($)',show=False,arq=a)
+
     #TXU
     dfs = extractDFS(path,ATRRU,MTXU,al)
-    a = path + '/' + n + 'TXU.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Utilização de Tx',show=False,arq=a)
-    
+    a = path + '/' + n + 'TXU.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Average Transponder Utilization',show=False,arq=a)
+
     #RRC
     dfs = extractDFS(path,AGS,MRRC,al)
-    a = path + '/' + n + 'RRC.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Requisições por circuito',show=False,arq=a)
-    
+    a = path + '/' + n + 'RRC.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Request-Circuit Ratio',show=False,arq=a)
+
     #MBVTU
     dfs = extractDFSMBVTU(path,al)
-    a = path + '/' + n + 'MBVTU.pdf'
-    auxPlotLine(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Utilização máxima de BVTs',show=False,arq=a)
-    
+    a = path + '/' + n + 'MBVTU.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Maximum Number of BVTs Used',show=False,arq=a)
+
 def plotBars(path,loads=[],sol=[], al=0.05):
     n = path.split('/')
     n = n[len(n)-1]
     n = n + '_Bar_'
     #PBB
-    dfs = extractDFS(path,ABBP,MBBP,al)   
+    dfs = extractDFS(path,ABBP,MBBP,al)
     if loads==[]:
         loads = dfs[0]['loads'].tolist()
     if sol==[]:
         sol = range(len(dfs))
-    a = path + '/' + n + 'BB.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Bloqueio de banda',show=False,arq=a,lp='upper left')
-    
+    a = path + '/' + n + 'BB.png'
+    xl = 'Network load (Erlangs)'
+    auxPlotBars(dfs,loads,sol,xl,yl='Bandwidth Blocking',show=True,arq=a,lp='upper left')
+
     #CE
     dfs = extractDFS(path,ACE,MTCE,al)
-    a = path + '/' + n + 'CE.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Energia consumida (J)',show=False,arq=a,lp='upper right')
-    
+    a = path + '/' + n + 'CE.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Consumed Energy (J)',show=False,arq=a,lp='upper right')
+
     #PCE
     dfs = extractDFS(path,ACE,MAPC,al)
-    a = path + '/' + n + 'PCE.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Potência de consumo (W)',show=False,arq=a,lp='lower right')
-    
+    a = path + '/' + n + 'PCE.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Power Consumption (W)',show=False,arq=a,lp='lower right')
+
     #BCR
     dfs = extractDFSBCR(path,al)
-    a = path + '/' + n + 'BCR.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Relação custo-benefício',show=False,arq=a,lp='upper left')
-    
+    a = path + '/' + n + 'BCR.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Benefit-Cost Ratio',show=False,arq=a,lp='upper left')
+
     #PROFIT
     dfs = extractDFSProfit(path,al)
-    a = path + '/' + n + 'PROFIT.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Lucro ($)',show=False,arq=a,lp='upper left')
-    
+    a = path + '/' + n + 'PROFIT.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Simplified Profit ($)',show=False,arq=a,lp='upper left')
+
     #TXU
     dfs = extractDFS(path,ATRRU,MTXU,al)
-    a = path + '/' + n + 'TXU.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Utilização de Tx',show=False,arq=a,lp='upper left')
-    
+    a = path + '/' + n + 'TXU.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Average Transponder Utilization',show=False,arq=a,lp='upper left')
+
     #RRC
     dfs = extractDFS(path,AGS,MRRC,al)
-    a = path + '/' + n + 'RRC.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Requisições por circuito',show=False,arq=a,lp='upper left')
-    
+    a = path + '/' + n + 'RRC.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Request-Circuit Ratio',show=False,arq=a,lp='upper left')
+
     #MBVTU
     dfs = extractDFSMBVTU(path,al)
-    a = path + '/' + n + 'MBVTU.pdf'
-    auxPlotBars(dfs,loads,sol,xl='Carga na rede (Erlangs)',yl='Utilização máxima de BVTs',show=False,arq=a,lp='upper left')
+    a = path + '/' + n + 'MBVTU.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Maximum Number of BVTs Used',show=False,arq=a,lp='upper left')
 
 
 def computeGains(path, ims, save = ""):
@@ -309,14 +306,14 @@ def computeGains(path, ims, save = ""):
     df = pd.DataFrame()
     for i in range(len(metr)):
         df[metr[i]] = gains[i]
-    
+
     #metricas comuns positivas
     arqs = [AGS]
     metr = [MRRC]
     gains = [minGains(extractDFS(path,arqs[i],metr[i],0.05),ims,inv=True) for i in range(len(arqs))]
     for i in range(len(metr)):
         df[metr[i]] = gains[i]
-    
+
     #metricas especiais
     df['Benefit to cost ratio'] = minGains(extractDFSBCR(path,0.05),ims,inv=True)
     df['Profit'] = minGains(extractDFSProfit(path,0.05),ims,inv=True)
@@ -326,39 +323,31 @@ def computeGains(path, ims, save = ""):
     return df;
 #------------------------------------------ // -----------------------------------------------------------------------------------
 
-def auxPlotLine(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 3):
-    fs = 17
-    #plt.figure(figsize=(10,7))
+def auxPlotLine(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
+    fs = 27
+    plt.figure(figsize=(10,7))
     for i in range(len(dfs)):
         x = dfs[i]['loads'];
         y = dfs[i]['mean']
         e = dfs[i]['errors']
         plt.errorbar(x, y, xerr=0, yerr=e, linestyle=linestyles[i], marker=markers[i], label=sol[i])
         plt.xticks(x, loads)
-        
+
     plt.xlabel(xl,fontsize=fs)
-    plt.ylabel(yl,fontsize=fs)   
+    plt.ylabel(yl,fontsize=fs)
     plt.xticks(fontsize=fs)
     plt.yticks(fontsize=fs)
     plt.grid(axis='y')
     if len(sol) < nc:
         nc = len(sol)
-    
-    plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(0.5,-0.42))
+
+    plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(0.5,-0.43))
     if arq != "":
         plt.savefig(arq, dpi=150,bbox_inches='tight')
     if show:
         plt.show()
     plt.close()
 
-s = ['EsPAT (σ=40)','SRNP (MRLB=100)','SRNP (MRLB=200)','SRNP (MRLB=400)','Sem mecanismo']
-ln = ['800','1200','1600']
-lp = ['326','653','979']
-#sp.plotBars('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos 2/Pacific/EsPAT_TP/MSU',loads=l,sol=s)
-#plotLines('C:/Users/ialle/Dropbox/Simulacoes/Doutorado/Experimentos qualificacao/Pacific/ZComp/IACF',loads=lp,sol=s)
-
-#srnpGain = np.asarray(dfs[0]['mean'])/np.asarray(dfs[1]['mean']) - 1
-#especGain = np.asarray(dfs[2]['mean'])/np.asarray(dfs[1]['mean']) - 1
 
 
 

@@ -28,4 +28,4 @@ target/
 .classpath
 .project
 simulations/
-processing of results/__pycache__
+*__pycache__
