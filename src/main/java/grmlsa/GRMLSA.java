@@ -53,8 +53,10 @@ public class GRMLSA implements Serializable {
     // Optical traffic aggregation
     private static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
     private static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
-    private static final String GROOMING_OPT_MGFCCF = "mgfccf";
-    private static final String GROOMING_OPT_MGFCCFSRNP = "mgfccfsrnp";
+    private static final String GROOMING_OPT_MGFCCF = "mgfccf";//equivalent to mtgsr
+    private static final String GROOMING_OPT_MTGSR = "mtgsr";
+    private static final String GROOMING_OPT_MGFCCFSRNP = "mgfccfsrnp";//equivalent to mtgsr_srnp
+    private static final String GROOMING_OPT_MTGSRSRNP = "mtgsr_srnp";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -83,7 +85,9 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
     private static final String INTEGRATED_COMPLETESHARINGEX = "completesharingex";
+    private static final String INTEGRATED_COMPLETESHARINGESPAT = "completesharing_espat";
     private static final String INTEGRATED_COMPLETESHARINGEX2 = "completesharingex2";
+    private static final String INTEGRATED_COMPLETESHARINGSSTG = "completesharing_sstg";
     private static final String INTEGRATED_KSPSA = "kspsa";
     private static final String INTEGRATED_KSPSA_v2 = "kspsav2";
     private static final String INTEGRATED_KSPC = "kspc";
@@ -150,9 +154,11 @@ public class GRMLSA implements Serializable {
             case GROOMING_OPT_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
             case GROOMING_OPT_MGFCCF:
-                return new MGFCCF();
+            case GROOMING_OPT_MTGSR: //equivalent
+                return new MTGSR();
             case GROOMING_OPT_MGFCCFSRNP:
-                return new MGFCCFSRNP();
+            case GROOMING_OPT_MTGSRSRNP: //equivalent
+                return new MTGSR_SRNP();
             default:
                 return null;
         }
@@ -235,9 +241,11 @@ public class GRMLSA implements Serializable {
             case INTEGRATED_KSPFIRSTFIT:
                 return new KSPFirstFit();
             case INTEGRATED_COMPLETESHARINGEX:
-                return new CompleteSharingEx();
+            case INTEGRATED_COMPLETESHARINGESPAT:
+                return new CompleteSharingEsPAT();
             case INTEGRATED_COMPLETESHARINGEX2:
-                return new CompleteSharingEx2();
+            case INTEGRATED_COMPLETESHARINGSSTG:
+                return new CompleteSharingSSTG();
             case INTEGRATED_KSPSA:
                 return new KShortestPathsAndSpectrumAssignment();
             case INTEGRATED_KSPSA_v2:

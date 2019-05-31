@@ -5,8 +5,9 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
+import grmlsa.spectrumAssignment.FirstFit;
 import grmlsa.spectrumAssignment.FirstFitExpansiveness;
-import grmlsa.spectrumAssignment.FirstFitExpansiveness2;
+import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import network.Circuit;
 import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
@@ -15,20 +16,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class implements an RMLSA algotithm based on Complete Sharing algorithm considering the expansiveness of the circuits.
- *  
- * In the Complete Sharing the route and the frequency slots are selected in order to allocate a range of 
- * spectrum closer to the beginning of the optical spectrum.
+ * This class implements the mechanism EsPAT over algorithm CompleteSharing.
+ * EsPAT is presented at: "Um Mecanismo para Potencialização da Agregação de Tráfego em Redes Ópticas Elásticas" SBRC2019
  * 
  * @author Iallen
  */
-public class CompleteSharingEx2 implements IntegratedRMLSAAlgorithmInterface {
+public class CompleteSharingEsPAT implements IntegratedRMLSAAlgorithmInterface {
 
 	private int k = 3; //This algorithm uses 3 alternative paths
     private int sigmaExpansiveness=0;
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
-    private FirstFitExpansiveness2 spectrumAssignment;
+    private FirstFitExpansiveness spectrumAssignment;
 
 
     @Override
@@ -36,7 +35,7 @@ public class CompleteSharingEx2 implements IntegratedRMLSAAlgorithmInterface {
         if (kShortestsPaths == null){
         	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
             modulationSelection = cp.getModulationSelection();
-            spectrumAssignment = new FirstFitExpansiveness2();
+            spectrumAssignment = new FirstFitExpansiveness();
             Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
             this.sigmaExpansiveness = Integer.parseInt((String)uv.get("sigmaExpansiveness"));
         }
