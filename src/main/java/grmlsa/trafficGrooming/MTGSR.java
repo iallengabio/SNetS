@@ -9,7 +9,7 @@ import java.util.Map;
  * This class represents a Multihop Traffic Grooming based on Solution Ranking (MTGSR). This algorithm selects the traffic grooming solution for each request based at a composite cost function.
  * The parameters alfa, beta, gama, delta and epsilon has to be seted at 'others' config file.
  */
-public class MTGSR extends MultihopGrooming2 {
+public class MTGSR extends MultihopGrooming {
     private Double alfa;
     private Double beta;
     private Double gama;

@@ -10,13 +10,13 @@ import util.IntersectionFreeSpectrum;
 
 import java.util.*;
 
-public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInterface {
+public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterface {
     protected static int microRegionsDeep = 2;
     protected int maxVirtualHops = 3;
     protected HashMap<String, HashMap<String, ArrayList<MultihopSolution>>> virtualRouting;
     protected HashMap<String, ArrayList<String>> microRegions;
 
-    public MultihopGrooming2() {
+    public MultihopGrooming() {
     }
 
     private void initVirtualRouting(ControlPlane cp) {
@@ -102,25 +102,25 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
     private void addNewCircuitVirtualRouting(Circuit circuit) {
         String dst = circuit.getPair().getDestination().getName();
         String src = circuit.getPair().getSource().getName();
-        MultihopGrooming2.MultihopSolution al = new MultihopGrooming2.MultihopSolution();
+        MultihopGrooming.MultihopSolution al = new MultihopGrooming.MultihopSolution();
         al.virtualRoute.add(circuit);
         al.src = src;
         al.dst = dst;
-        ((ArrayList)((HashMap)this.virtualRouting.get(src)).get(dst)).add(al);
-        ArrayList<MultihopGrooming2.MultihopSolution> aalAux = new ArrayList();
+        this.virtualRouting.get(src).get(dst).add(al);
+        ArrayList<MultihopGrooming.MultihopSolution> aalAux = new ArrayList();
         aalAux.add(al);
-        Iterator it = ((HashMap)this.virtualRouting.get(dst)).values().iterator();
+        Iterator it = this.virtualRouting.get(dst).values().iterator();
 
         Iterator it2;
         while(it.hasNext()) {
             it2 = ((ArrayList)it.next()).iterator();
 
             while(it2.hasNext()) {
-                MultihopGrooming2.MultihopSolution clone = ((MultihopGrooming2.MultihopSolution)it2.next()).clone();
+                MultihopGrooming.MultihopSolution clone = ((MultihopGrooming.MultihopSolution)it2.next()).clone();
                 clone.virtualRoute.add(0, circuit);
                 clone.src = circuit.getSource().getName();
-                if (clone.virtualRoute.size() < this.maxVirtualHops && !hasVirtualLoop(clone.virtualRoute)) {
-                    ((ArrayList)((HashMap)this.virtualRouting.get(clone.src)).get(clone.dst)).add(clone);
+                if (clone.virtualRoute.size() <= this.maxVirtualHops && !hasVirtualLoop(clone.virtualRoute)) {
+                    this.virtualRouting.get(clone.src).get(clone.dst).add(clone);
                     aalAux.add(clone);
                 }
             }
@@ -130,19 +130,19 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
 
         while(it2.hasNext()) {
             String sA = (String)it2.next();
-            Iterator it3 = ((ArrayList)((HashMap)this.virtualRouting.get(sA)).get(src)).iterator();
+            Iterator it3 = this.virtualRouting.get(sA).get(src).iterator();
 
             while(it3.hasNext()) {
-                MultihopGrooming2.MultihopSolution c1 = (MultihopGrooming2.MultihopSolution)it3.next();
+                MultihopGrooming.MultihopSolution c1 = (MultihopGrooming.MultihopSolution)it3.next();
                 Iterator it4 = aalAux.iterator();
 
                 while(it4.hasNext()) {
-                    MultihopGrooming2.MultihopSolution cAux = c1.clone();
-                    MultihopGrooming2.MultihopSolution c2 = ((MultihopGrooming2.MultihopSolution)it4.next()).clone();
+                    MultihopGrooming.MultihopSolution cAux = c1.clone();
+                    MultihopGrooming.MultihopSolution c2 = ((MultihopGrooming.MultihopSolution)it4.next()).clone();
                     cAux.virtualRoute.addAll(c2.virtualRoute);
                     cAux.dst = c2.dst;
-                    if (cAux.virtualRoute.size() < this.maxVirtualHops && !hasVirtualLoop(cAux.virtualRoute)) {
-                        ((ArrayList)((HashMap)this.virtualRouting.get(cAux.src)).get(cAux.dst)).add(cAux);
+                    if (cAux.virtualRoute.size() <= this.maxVirtualHops && !hasVirtualLoop(cAux.virtualRoute)) {
+                        this.virtualRouting.get(cAux.src).get(cAux.dst).add(cAux);
                     }
                 }
             }
@@ -161,12 +161,12 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
 
             while(var6.hasNext()) {
                 String dst = (String)var6.next();
-                ArrayList<MultihopGrooming2.MultihopSolution> virtRoutes = (ArrayList)((HashMap)this.virtualRouting.get(src)).get(dst);
-                ArrayList<MultihopGrooming2.MultihopSolution> newVR = new ArrayList();
+                ArrayList<MultihopGrooming.MultihopSolution> virtRoutes = (ArrayList)((HashMap)this.virtualRouting.get(src)).get(dst);
+                ArrayList<MultihopGrooming.MultihopSolution> newVR = new ArrayList();
                 Iterator var10 = virtRoutes.iterator();
 
                 while(var10.hasNext()) {
-                    MultihopGrooming2.MultihopSolution vr = (MultihopGrooming2.MultihopSolution)var10.next();
+                    MultihopGrooming.MultihopSolution vr = (MultihopGrooming.MultihopSolution)var10.next();
                     if (!vr.virtualRoute.contains(circuit)) {
                         newVR.add(vr);
                     }
@@ -178,33 +178,35 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
 
     }
 
-    private ArrayList<MultihopGrooming2.MultihopSolution> allVirtualRouting(RequestForConnection rfc) {
-        ArrayList<MultihopGrooming2.MultihopSolution> allSolutions = new ArrayList();
-        Iterator var3 = ((ArrayList)((HashMap)this.virtualRouting.get(rfc.getPair().getSource().getName())).get(rfc.getPair().getDestination().getName())).iterator();
+    private ArrayList<MultihopGrooming.MultihopSolution> allVirtualRouting(RequestForConnection rfc) {
+        ArrayList<MultihopGrooming.MultihopSolution> allSolutions = new ArrayList();
+        Iterator var3 = this.virtualRouting.get(rfc.getPair().getSource().getName()).get(rfc.getPair().getDestination().getName()).iterator();
 
         while(var3.hasNext()) {
-            MultihopGrooming2.MultihopSolution ms = (MultihopGrooming2.MultihopSolution)var3.next();
+            MultihopGrooming.MultihopSolution ms = (MultihopGrooming.MultihopSolution)var3.next();
             allSolutions.add(ms.clone());
         }
 
-        var3 = ((ArrayList)this.microRegions.get(rfc.getPair().getDestination().getName())).iterator();
+        var3 = this.microRegions.get(rfc.getPair().getDestination().getName()).iterator();
 
-        while(var3.hasNext()) {
+        while(var3.hasNext()) {//for TGS who needs complement
             String nearNode = (String)var3.next();
-            ArrayList<MultihopGrooming2.MultihopSolution> multihopSolutions = (ArrayList)((HashMap)this.virtualRouting.get(rfc.getPair().getSource().getName())).get(nearNode);
+            ArrayList<MultihopGrooming.MultihopSolution> multihopSolutions = this.virtualRouting.get(rfc.getPair().getSource().getName()).get(nearNode);
             Iterator var7 = multihopSolutions.iterator();
 
             while(var7.hasNext()) {
-                MultihopGrooming2.MultihopSolution ms = (MultihopGrooming2.MultihopSolution)var7.next();
-                MultihopGrooming2.MultihopSolution msAux = ms.clone();
-                msAux.needsComplement = true;
-                msAux.pairComplement = new Pair(((Circuit)msAux.virtualRoute.get(msAux.virtualRoute.size() - 1)).getDestination(), rfc.getPair().getDestination());
-                msAux.dst = rfc.getPair().getDestination().getName();
-                allSolutions.add(msAux);
+                MultihopGrooming.MultihopSolution ms = (MultihopGrooming.MultihopSolution)var7.next();
+                if(ms.virtualRoute.size()<this.maxVirtualHops) {
+                    MultihopGrooming.MultihopSolution msAux = ms.clone();
+                    msAux.needsComplement = true;
+                    msAux.pairComplement = new Pair(((Circuit) msAux.virtualRoute.get(msAux.virtualRoute.size() - 1)).getDestination(), rfc.getPair().getDestination());
+                    msAux.dst = rfc.getPair().getDestination().getName();
+                    allSolutions.add(msAux);
+                }
             }
         }
 
-        MultihopGrooming2.MultihopSolution ms = new MultihopGrooming2.MultihopSolution();
+        MultihopGrooming.MultihopSolution ms = new MultihopGrooming.MultihopSolution();
         ms.src = rfc.getPair().getSource().getName();
         ms.dst = rfc.getPair().getDestination().getName();
         ms.virtualRoute = new ArrayList();
@@ -227,7 +229,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         return res;
     }
 
-    private Circuit complementSolution(MultihopGrooming2.MultihopSolution ms, RequestForConnection rfc, ControlPlane cp) throws Exception {
+    private Circuit complementSolution(MultihopGrooming.MultihopSolution ms, RequestForConnection rfc, ControlPlane cp) throws Exception {
         Node s = ms.pairComplement.getSource();
         Node d = ms.pairComplement.getDestination();
         Circuit newCircuit = cp.createNewCircuit(rfc, new Pair(s, d));
@@ -240,7 +242,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         }
     }
 
-    private boolean hasSuficientResidualCapacity(MultihopGrooming2.MultihopSolution ms, RequestForConnection rfc) {
+    private boolean hasSuficientResidualCapacity(MultihopGrooming.MultihopSolution ms, RequestForConnection rfc) {
         boolean hasSuficientResitualCapacity = true;
 
         Circuit circuit;
@@ -258,7 +260,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         return circExCap >= slotsNeeded;
     }
 
-    private boolean aplySolution(MultihopGrooming2.MultihopSolution ms, RequestForConnection rfc, ControlPlane cp) throws Exception {
+    private boolean aplySolution(MultihopGrooming.MultihopSolution ms, RequestForConnection rfc, ControlPlane cp) throws Exception {
         Circuit newCircuit = null;
         rfc.setCircuit(new ArrayList());
         if (ms.needsComplement) {
@@ -356,25 +358,25 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
             this.initMicroRegions(cp);
         }
 
-        ArrayList<MultihopGrooming2.MultihopSolution> multihopSolutions = this.allVirtualRouting(rfc);
+        ArrayList<MultihopGrooming.MultihopSolution> multihopSolutions = this.allVirtualRouting(rfc);
         this.avMS(multihopSolutions, rfc, cp);
-        Collections.sort(multihopSolutions, new Comparator<MultihopGrooming2.MultihopSolution>() {
-            public int compare(MultihopGrooming2.MultihopSolution o1, MultihopGrooming2.MultihopSolution o2) {
-                Double c1 = MultihopGrooming2.this.costFunction(o1, rfc, cp);
-                Double c2 = MultihopGrooming2.this.costFunction(o2, rfc, cp);
+        Collections.sort(multihopSolutions, new Comparator<MultihopGrooming.MultihopSolution>() {
+            public int compare(MultihopGrooming.MultihopSolution o1, MultihopGrooming.MultihopSolution o2) {
+                Double c1 = MultihopGrooming.this.costFunction(o1, rfc, cp);
+                Double c2 = MultihopGrooming.this.costFunction(o2, rfc, cp);
                 int res = c1.compareTo(c2);
                 return res;
             }
         });
         Iterator var4 = multihopSolutions.iterator();
 
-        MultihopGrooming2.MultihopSolution ms;
+        MultihopGrooming.MultihopSolution ms;
         do {
             if (!var4.hasNext()) {
                 return false;
             }
 
-            ms = (MultihopGrooming2.MultihopSolution)var4.next();
+            ms = (MultihopGrooming.MultihopSolution)var4.next();
         } while(!this.aplySolution(ms, rfc, cp));
 
         return true;
@@ -409,34 +411,15 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
 
     }
 
-    protected abstract double costFunction(MultihopGrooming2.MultihopSolution var1, RequestForConnection var2, ControlPlane var3);
+    protected abstract double costFunction(MultihopGrooming.MultihopSolution var1, RequestForConnection var2, ControlPlane var3);
 
-    private boolean badMS(MultihopGrooming2.MultihopSolution sol, RequestForConnection rfc) {
-        boolean res = true;
-        if (sol.virtualRoute.size() == 0) {
-            res = res && sol.needsComplement;
-            res = res && sol.pairComplement.getSource().getName().equals(rfc.getPair().getSource().getName());
-            res = res && sol.pairComplement.getDestination().getName().equals(rfc.getPair().getDestination().getName());
-            return !res;
-        } else {
-            int i;
-            for(i = 0; i < sol.virtualRoute.size() - 1; ++i) {
-                res = res && ((Circuit)sol.virtualRoute.get(i)).getDestination().getName().equals(((Circuit)sol.virtualRoute.get(i + 1)).getSource().getName());
-            }
-
-            res = res && ((Circuit)sol.virtualRoute.get(0)).getSource().getName().equals(rfc.getPair().getSource().getName());
-            if (!sol.needsComplement) {
-                res = res && ((Circuit)sol.virtualRoute.get(sol.virtualRoute.size() - 1)).getDestination().getName().equals(rfc.getPair().getDestination().getName());
-            } else {
-                res = res && sol.pairComplement.getSource().getName().equals(((Circuit)sol.virtualRoute.get(i)).getDestination().getName());
-                res = res && sol.pairComplement.getDestination().getName().equals(rfc.getPair().getDestination().getName());
-            }
-
-            return !res;
-        }
-    }
-
-    private void avMS(ArrayList<MultihopGrooming2.MultihopSolution> ams, RequestForConnection rfc, ControlPlane cp) {
+    /**
+     * Compute the statistics for each traffic grooming solution.
+     * @param ams traffic grooming solutions
+     * @param rfc request to be served
+     * @param cp control plane
+     */
+    private void avMS(ArrayList<MultihopGrooming.MultihopSolution> ams, RequestForConnection rfc, ControlPlane cp) {
         double physicalHops = -1.0D;
         double virtualHops = -1.0D;
         double spectrumUtilization = -1.0D;
@@ -444,13 +427,13 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         double meanSNR = -1.0D;
         int transceivers = 1;
 
-        MultihopGrooming2.MultihopSolution ms;
-        MultihopGrooming2.MultihopSolutionStatistics mss;
-        Iterator var15;
+        MultihopGrooming.MultihopSolution ms;
+        MultihopGrooming.MultihopSolutionStatistics mss;
+        Iterator it;
         MSSOptimizator msso = new MSSOptimizator();
-        for(var15 = ams.iterator(); var15.hasNext(); ms.statistics = mss) {
-            ms = (MultihopGrooming2.MultihopSolution)var15.next();
-            mss = new MultihopGrooming2.MultihopSolutionStatistics(ms, rfc, cp, msso);
+        for(it = ams.iterator(); it.hasNext(); ms.statistics = mss) {
+            ms = (MultihopGrooming.MultihopSolution)it.next(); //for each TGS
+            mss = new MultihopGrooming.MultihopSolutionStatistics(ms, rfc, cp, msso); //compute statistics
             if (mss.physicalHops > physicalHops) {
                 physicalHops = mss.physicalHops;
             }
@@ -476,8 +459,8 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
             }
         }
 
-        for(var15 = ams.iterator(); var15.hasNext(); ms.statistics.transceivers /= transceivers) {
-            ms = (MultihopGrooming2.MultihopSolution)var15.next();
+        for(it = ams.iterator(); it.hasNext(); ms.statistics.transceivers /= transceivers) {
+            ms = (MultihopGrooming.MultihopSolution)it.next();
             ms.statistics.physicalHops /= physicalHops;
             ms.statistics.virtualHops /= virtualHops;
             ms.statistics.spectrumUtilization /= spectrumUtilization;
@@ -496,7 +479,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         public double meanSNR;
         public int transceivers;
 
-        public MultihopSolutionStatistics(MultihopGrooming2.MultihopSolution sol, RequestForConnection rfc, ControlPlane cp, MSSOptimizator msso) {
+        public MultihopSolutionStatistics(MultihopGrooming.MultihopSolution sol, RequestForConnection rfc, ControlPlane cp, MSSOptimizator msso) {
             this.virtualHops = (double)sol.virtualRoute.size();
             this.spectrumUtilization = 0.0D;
             this.minSNR = 1.0E8D;
@@ -554,7 +537,7 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
                         this.minSNR = snr;
                     }
                     this.meanSNR += snr;
-                    ++this.transceivers;
+                    this.transceivers++;
                 }
             }
 
@@ -582,13 +565,13 @@ public abstract class MultihopGrooming2 implements TrafficGroomingAlgorithmInter
         public ArrayList<Circuit> virtualRoute = new ArrayList();
         public boolean needsComplement = false;
         public Pair pairComplement = null;
-        public MultihopGrooming2.MultihopSolutionStatistics statistics = null;
+        public MultihopGrooming.MultihopSolutionStatistics statistics = null;
 
         protected MultihopSolution() {
         }
 
-        public MultihopGrooming2.MultihopSolution clone() {
-            MultihopGrooming2.MultihopSolution n = new MultihopGrooming2.MultihopSolution();
+        public MultihopGrooming.MultihopSolution clone() {
+            MultihopGrooming.MultihopSolution n = new MultihopGrooming.MultihopSolution();
             n.src = this.src + "";
             n.dst = this.dst + "";
             n.virtualRoute = (ArrayList)this.virtualRoute.clone();
