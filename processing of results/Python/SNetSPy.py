@@ -20,6 +20,8 @@ MTCE = 'Total consumed energy (Joule)'
 MAPC = 'Average power consumption (Watt)'
 MTXU = 'Tx Utilization'
 MRRC = 'Rate of requests by circuit'
+MMRC = 'Maximum requests by circuit'
+MVH = 'Virtual hops'
 
 #aux
 markers = ["o","v","^","s","P","x","D","_","*","2"]
@@ -175,7 +177,8 @@ def extractDFSProfit(path,alpha):
 
 
 
-def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
+def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", nc = 5):
+    lp = 'upper left'
     fs = 30
     width = 0.08
     indmult = 0.6
@@ -247,6 +250,17 @@ def plotLines(path,loads=[],sol=[], al=0.05):
     dfs = extractDFSMBVTU(path,al)
     a = path + '/' + n + 'MBVTU.png'
     auxPlotLine(dfs,loads,sol,xl,yl='Maximum Number of BVTs Used',show=False,arq=a)
+    
+    #MRC
+    dfs = extractDFS(path,AGS,MMRC,al)
+    a = path + '/' + n + 'MRC.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Maximum requests by circuit',show=False,arq=a)
+    
+    #MRC
+    dfs = extractDFS(path,AGS,MMRC,al)
+    a = path + '/' + n + 'VH.png'
+    auxPlotLine(dfs,loads,sol,xl,yl='Virtual hops',show=False,arq=a)
+    
 
 def plotBars(path,loads=[],sol=[], al=0.05):
     n = path.split('/')
@@ -260,42 +274,53 @@ def plotBars(path,loads=[],sol=[], al=0.05):
         sol = range(len(dfs))
     a = path + '/' + n + 'BB.png'
     xl = 'Network load (Erlangs)'
-    auxPlotBars(dfs,loads,sol,xl,yl='Bandwidth Blocking',show=True,arq=a,lp='upper left')
+    auxPlotBars(dfs,loads,sol,xl,yl='Bandwidth Blocking',show=True,arq=a)
 
     #CE
     dfs = extractDFS(path,ACE,MTCE,al)
     a = path + '/' + n + 'CE.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Consumed Energy (J)',show=False,arq=a,lp='upper right')
+    auxPlotBars(dfs,loads,sol,xl,yl='Consumed Energy (J)',show=False,arq=a)
 
     #PCE
     dfs = extractDFS(path,ACE,MAPC,al)
     a = path + '/' + n + 'PCE.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Power Consumption (W)',show=False,arq=a,lp='lower right')
+    auxPlotBars(dfs,loads,sol,xl,yl='Power Consumption (W)',show=False,arq=a)
 
     #BCR
     dfs = extractDFSBCR(path,al)
     a = path + '/' + n + 'BCR.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Benefit-Cost Ratio',show=False,arq=a,lp='upper left')
+    auxPlotBars(dfs,loads,sol,xl,yl='Benefit-Cost Ratio',show=False,arq=a)
 
     #PROFIT
     dfs = extractDFSProfit(path,al)
     a = path + '/' + n + 'PROFIT.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Simplified Profit ($)',show=False,arq=a,lp='upper left')
+    auxPlotBars(dfs,loads,sol,xl,yl='Simplified Profit ($)',show=False,arq=a)
 
     #TXU
     dfs = extractDFS(path,ATRRU,MTXU,al)
     a = path + '/' + n + 'TXU.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Average Transponder Utilization',show=False,arq=a,lp='upper left')
+    auxPlotBars(dfs,loads,sol,xl,yl='Average Transponder Utilization',show=False,arq=a)
 
     #RRC
     dfs = extractDFS(path,AGS,MRRC,al)
     a = path + '/' + n + 'RRC.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Request-Circuit Ratio',show=False,arq=a,lp='upper left')
+    auxPlotBars(dfs,loads,sol,xl,yl='Request-Circuit Ratio',show=False,arq=a)
 
     #MBVTU
     dfs = extractDFSMBVTU(path,al)
     a = path + '/' + n + 'MBVTU.png'
-    auxPlotBars(dfs,loads,sol,xl,yl='Maximum Number of BVTs Used',show=False,arq=a,lp='upper left')
+    auxPlotBars(dfs,loads,sol,xl,yl='Maximum Number of BVTs Used',show=False,arq=a)
+    
+    #MRC
+    dfs = extractDFS(path,AGS,MMRC,al)
+    a = path + '/' + n + 'MRC.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Maximum requests by circuit',show=False,arq=a)
+    
+    #MRC
+    dfs = extractDFS(path,AGS,MMRC,al)
+    a = path + '/' + n + 'VH.png'
+    auxPlotBars(dfs,loads,sol,xl,yl='Virtual hops',show=False,arq=a)
+    
 
 
 def computeGains(path, ims, save = ""):
