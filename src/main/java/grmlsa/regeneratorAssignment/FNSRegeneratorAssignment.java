@@ -182,7 +182,7 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 		int band[] = cp.getSpectrumAssignment().policy(numberOfSlots, composition, circuit, cp);
 		if(band != null){
 			
-			flagQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinatinNodeIndex, modulation, band, null);
+			flagQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinatinNodeIndex, modulation, band, null, false);
 			if(flagQoT){
 				flagSuccess = true;
 			}
