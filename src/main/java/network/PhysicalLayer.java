@@ -214,10 +214,12 @@ public class PhysicalLayer implements Serializable {
 	 * @param route Route
 	 * @param modulation Modulation
 	 * @param spectrumAssigned int[]
+	 * @param testCircuit Circuit
+	 * @param addTestCircuit boolean
 	 * @return boolean
 	 */
-	public boolean isAdmissibleModultion(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
-		double SNR = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, circuitTest);
+	public boolean isAdmissibleModultion(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
+		double SNR = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, testCircuit, addTestCircuit);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -235,10 +237,12 @@ public class PhysicalLayer implements Serializable {
 	 * @param destinationNodeIndex int
 	 * @param modulation Modulation
 	 * @param spectrumAssigned int[]
+	 * @param testCircuit Circuit
+	 * @param addTestCircuit boolean
 	 * @return boolean
 	 */
-	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
-		double SNR = computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, circuitTest);
+	public boolean isAdmissibleModultionBySegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
+		double SNR = computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, testCircuit, addTestCircuit);
 		double SNRdB = ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -258,10 +262,11 @@ public class PhysicalLayer implements Serializable {
 	 * @param destinationNodeIndex int - Segment end node index
 	 * @param modulation Modulation
 	 * @param spectrumAssigned int[]
-	 * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
+	 * @param testCircuit Circuit - Circuit used to verify the impact on the other circuit informed
+	 * @param addTestCircuit boolean - To add the test circuit to the circuit list
 	 * @return double - SNR (linear)
 	 */
-	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit circuitTest){
+	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
 		
 		double Ptx = ratioOfDB(power) * 1.0E-3; //W, Transmitter power
 		double Pase = 0.0;
@@ -291,7 +296,7 @@ public class PhysicalLayer implements Serializable {
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			double Ns = PhysicalLayer.roundUp(link.getDistance() / L); // Number of spans
 			
-			circuitList = getCircuitList(link, circuit, circuitTest);
+			circuitList = getCircuitList(link, circuit, testCircuit, addTestCircuit);
 			
 			if(activeNLI){
 				double noiseNli = Ns * getGnli(circuit, link, I, Bsi, fi, gamma, D, alpha, lowerFrequency, circuitList);
@@ -319,10 +324,11 @@ public class PhysicalLayer implements Serializable {
 	 * 
 	 * @param link Link
 	 * @param circuit Circuit
-	 * @param circuitTest Circuit
+	 * @param testCircuit Circuit
+	 * @param addTestCircuit boolean
 	 * @return TreeSet<Circuit>
 	 */
-	private TreeSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit circuitTest){
+	private TreeSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
 		TreeSet<Circuit> circuitList = new TreeSet<Circuit>();
 		
 		for (Circuit circtuiTemp : link.getCircuitList()) {
@@ -333,8 +339,15 @@ public class PhysicalLayer implements Serializable {
 			circuitList.add(circuit);
 		}
 		
-		if(circuitTest != null && circuitTest.getRoute().containThisLink(link) && !circuitList.contains(circuitTest)) {
-			circuitList.add(circuitTest);
+		if(testCircuit != null && testCircuit.getRoute().containThisLink(link)) {
+			
+			if(!circuitList.contains(testCircuit) && addTestCircuit) {
+				circuitList.add(testCircuit);
+			}
+			
+			if(circuitList.contains(testCircuit) && !addTestCircuit) {
+				circuitList.remove(testCircuit);
+			}
 		}
 		
 		return circuitList;
@@ -347,8 +360,6 @@ public class PhysicalLayer implements Serializable {
 	 * @param powerI double
 	 * @param Bsi double
 	 * @param I double
-	 * @param numSlotsRequired int
-	 * @param checksOnTotalPower boolean
 	 * @return double
 	 */
 	public double getTotalPowerInTheLink(TreeSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
@@ -380,12 +391,11 @@ public class PhysicalLayer implements Serializable {
 	 * Based on article:
 	 *  - Nonlinear Impairment Aware Resource Allocation in Elastic Optical Networks (2015)
 	 * 
-	 * @param circuitI Circuit
+	 * @param circuit Circuit
 	 * @param link Link
-	 * @param powerI double
-	 * @param BsI double
+	 * @param Bsi double
 	 * @param I double
-	 * @param fI double
+	 * @param fi double
 	 * @return double
 	 */
 	public double getGnli(Circuit circuit, Link link, double I, double Bsi, double fi, double gamma, double beta2, double alpha, double lowerFrequency, TreeSet<Circuit> circuitList){
@@ -689,7 +699,7 @@ public class PhysicalLayer implements Serializable {
 			
 			route.getLink(0).addCircuit(circuitTemp);
 			
-			double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), null);
+			double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), null, false);
 			double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
 			
 			if((OSNRdB >= mod.getSNRthreshold()) && (distance > modTrDistance)){
@@ -758,7 +768,7 @@ public class PhysicalLayer implements Serializable {
 				
 				route.getLink(0).addCircuit(circuitTemp);
 				
-				double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), null);
+				double OSNR = computeSNRSegment(circuitTemp, circuitTemp.getRoute(), 0, circuitTemp.getRoute().getNodeList().size() - 1, circuitTemp.getModulation(), circuitTemp.getSpectrumAssigned(), null, false);
 				double OSNRdB = PhysicalLayer.ratioForDB(OSNR);
 				
 				double modDist = distModulations.get(mod);
