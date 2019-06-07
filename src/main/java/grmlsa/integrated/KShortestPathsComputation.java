@@ -58,7 +58,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
 	
 	            if (band != null) {
 	            	circuit.setSpectrumAssigned(band);
-					cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null);
+					cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null, false);
 					
 					double SNR = circuit.getSNR();
 					double transmissionDistance = route.getDistanceAllLinks();

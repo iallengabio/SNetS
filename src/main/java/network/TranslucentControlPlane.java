@@ -108,10 +108,11 @@ public class TranslucentControlPlane extends ControlPlane {
      * This method verifies the quality of the transmission of the circuit
      * 
      * @param circuit Circuit
+     * @param addCircuitTemp boolean
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
 	@Override
-	public boolean computeQualityOfTransmission(Circuit circuit, Circuit circuitTemp){
+	public boolean computeQualityOfTransmission(Circuit circuit, Circuit circuitTemp, boolean addCircuitTemp){
     	boolean minQoT = true;
 		int sourceNodeIndex = 0;
 		double minSNRdB = Double.MAX_VALUE;
@@ -132,7 +133,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = circuit.getModulationByLink(link);
 			int sa[] = circuit.getSpectrumAssignedByLink(link);
 			
-			double SNR = getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, sa, circuitTemp);
+			double SNR = getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, sa, circuitTemp, addCircuitTemp);
 			double SNRdB = PhysicalLayer.ratioForDB(SNR);
 			
 			boolean QoT = getMesh().getPhysicalLayer().isAdmissible(mod, SNRdB, SNR); 
@@ -418,7 +419,7 @@ public class TranslucentControlPlane extends ControlPlane {
 					alternativeBand = band;
 				}
 				
-				boolean flag = mesh.getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, band, null);
+				boolean flag = mesh.getPhysicalLayer().isAdmissibleModultionBySegment(circuit, route, sourceNodeIndex, destinationNodeIndex, mod, band, null, false);
 				if(flag){
 					chosenMod = mod; // Save the modulation that has admissible QoT
 					chosenBand = band;
@@ -527,7 +528,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			}
 
 			// Now you can check the QoT by transparent segment
-			if(!computeQualityOfTransmission(circuit, null)){
+			if(!computeQualityOfTransmission(circuit, null, false)){
 				return true;
 			}
 		}
