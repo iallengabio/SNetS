@@ -55,6 +55,10 @@ public class ArriveRequestForConexionListener implements EventListener {
         Boolean success = simulation.getControlPlane().handleRequisition(requestForConnection);
         if (success) {// Schedule the end of the requisition and release of resources
             em.insert(new Event(requestForConnection, new HoldRequestListener(simulation), requestForConnection.getTimeOfFinalizeHours()));
+        
+            
+            
+            simulation.getControlPlane().computesImpactOfQoTO(requestForConnection.getCircuits().get(0));
         }
         
         afterReq(requestForConnection, success);

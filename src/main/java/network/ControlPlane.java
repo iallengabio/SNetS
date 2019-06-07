@@ -413,7 +413,7 @@ public class ControlPlane implements Serializable {
             
             circuit.setSpectrumAssigned(specAssigAt);
             //isAdmissibleQualityOfTransmission(circuit); //recompute QoT
-            computeQualityOfTransmission(circuit, null); // Recalculates the QoT and SNR of the circuit
+            computeQualityOfTransmission(circuit, null, false); // Recalculates the QoT and SNR of the circuit
             
         }else{
             this.updateNetworkPowerConsumption();
@@ -454,7 +454,7 @@ public class ControlPlane implements Serializable {
         
         circuit.setSpectrumAssigned(newSpecAssign);
         //isAdmissibleQualityOfTransmission(circuit); //compute QoT
-        computeQualityOfTransmission(circuit, null); // Recalculates the QoT and SNR of the circuit
+        computeQualityOfTransmission(circuit, null, false); // Recalculates the QoT and SNR of the circuit
         
         this.updateNetworkPowerConsumption();
     }
@@ -512,7 +512,7 @@ public class ControlPlane implements Serializable {
     	if(mesh.getPhysicalLayer().isActiveQoT()){
     		
     		// Verifies the QoT of the current circuit
-    		if(computeQualityOfTransmission(circuit, null)){
+    		if(computeQualityOfTransmission(circuit, null, false)){
     			boolean QoTForOther = true;
     			
     			// Check if it is to test the QoT of other already active circuits
@@ -538,11 +538,12 @@ public class ControlPlane implements Serializable {
      * The circuit in question has already allocated the network resources
      * 
      * @param circuit Circuit
-     * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
+     * @param testCircuit Circuit - Circuit used to verify the impact on the other circuit informed
+     * @param addTestCircuit boolean - To add the test circuit to the circuit list
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
-    public boolean computeQualityOfTransmission(Circuit circuit, Circuit circuitTest){
-    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), circuitTest);
+    public boolean computeQualityOfTransmission(Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
+    	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), testCircuit, addTestCircuit);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		circuit.setSNR(SNRdB);
 		
@@ -586,7 +587,7 @@ public class ControlPlane implements Serializable {
             circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
             
         	// Recalculates the QoT and SNR of the circuit
-            boolean QoT = computeQualityOfTransmission(circuitTemp, circuit);
+            boolean QoT = computeQualityOfTransmission(circuitTemp, circuit, true);
             
             if (!QoT) {
             	
@@ -601,6 +602,44 @@ public class ControlPlane implements Serializable {
         }
         
 		return true;
+    }
+    
+    public double computesImpactOfQoTO(Circuit circuit){
+    	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
+    	
+    	// Search for all circuits that have links in common with the circuit under evaluation
+		Route route = circuit.getRoute();
+		for (Link link : route.getLinkList()) {
+			
+			// Picks up the active circuits that use the link
+			TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+            for (Circuit circuitTemp : circuitsTemp) {
+            	
+            	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
+                if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {
+                    circuits.add(circuitTemp);
+                }
+            }
+		}
+		
+		double SNRimpact = 0.0;
+		
+        for (Circuit circuitTemp : circuits) {
+        	
+        	// Computes the SNR of the circuitTemp without considering the circuit
+            computeQualityOfTransmission(circuitTemp, circuit, false);
+            double SNRtemp = circuitTemp.getSNR();
+            
+            // Computes the SNR of the circuitTemp considering the circuit
+        	computeQualityOfTransmission(circuitTemp, circuit, true);
+        	double SNRtemp2 = circuitTemp.getSNR();
+        	
+        	double SNRdif = SNRtemp - SNRtemp2;
+            
+        	SNRimpact += SNRdif;
+        }
+        
+		return SNRimpact;
     }
     
     /**
@@ -669,7 +708,7 @@ public class ControlPlane implements Serializable {
             // Check if it is possible to compute the circuit QoT
             if(circuit.getRoute() != null && circuit.getModulation() != null && circuit.getSpectrumAssigned() != null){
                 // Check if the QoT is acceptable
-                if(!computeQualityOfTransmission(circuit, null)){
+                if(!computeQualityOfTransmission(circuit, null, false)){
                     return true;
                 }
             }
@@ -729,7 +768,7 @@ public class ControlPlane implements Serializable {
 	 * @return double - delta SNR (dB)
 	 */
 	public double getDeltaSNR(Circuit circuit){
-		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), null);
+		double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), null, false);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
 		
 		double modulationSNRthreshold = circuit.getModulation().getSNRthreshold();

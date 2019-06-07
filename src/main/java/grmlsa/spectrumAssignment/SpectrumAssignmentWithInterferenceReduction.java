@@ -109,7 +109,7 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						
 						for(int i = 0; i < circuitList.size(); i++){
 							Circuit circuitTemp = circuitList.get(i);
-							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit);
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
 							
 							double SNRthreshold = circuitTemp.getModulation().getSNRthreshold();
 							double deltaSNR = circuitTemp.getSNR() - SNRthreshold;
@@ -214,7 +214,7 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						
 						for(int i = 0; i < circuitList.size(); i++){
 							Circuit circuitTemp = circuitList.get(i);
-							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit);
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
 							
 							double SNRthreshold = circuitTemp.getModulation().getSNRthreshold();
 							double deltaSNR = circuitTemp.getSNR() - SNRthreshold;

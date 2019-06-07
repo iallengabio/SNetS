@@ -137,7 +137,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
             		
             		circuit.setLaunchPowerLinear(lauchPower);
             		
-	    			if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null)){ //modulation has acceptable QoT
+	    			if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null, false)){ //modulation has acceptable QoT
 	    				chosenBand = band;
 	    				chosenRoute = route;
 		                chosenMod = mod;
@@ -265,7 +265,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
     	
     	double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
 		circuit.setLaunchPowerLinear(Pmax);
-		cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null);
+		cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null, false);
 		double SNRmax = circuit.getSNR();
 		
 		boolean isPowerDB = false;
@@ -296,7 +296,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
 		
 		while (search) {
 			circuit.setLaunchPowerLinear(Pcurrent);
-			boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null);
+			boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null, false);
 			double SNRcurrent = circuit.getSNR();
 			
 			if(SNRcurrent >= SNRth) { // line 3
@@ -462,7 +462,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
 	    				while(Pcurrent < Pmax) {
 	    					
 	    					circuitTest.setLaunchPowerLinear(Pcurrent);
-	        				double SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuitTest, circuitTest.getRoute(), 0, circuitTest.getRoute().getNodeList().size() - 1, circuitTest.getModulation(), circuitTest.getSpectrumAssigned(), null);
+	        				double SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuitTest, circuitTest.getRoute(), 0, circuitTest.getRoute().getNodeList().size() - 1, circuitTest.getModulation(), circuitTest.getSpectrumAssigned(), null, false);
 	        				
 	        				if(SNRcurrent >= SNRth) {
 		        				//boolean QoTO = cp.computeQoTForOther(circuitTest);
@@ -499,7 +499,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
 	    				Pcurrent = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch(circuitTest, circuitTest.getRoute(), circuitTest.getModulation(), circuitTest.getSpectrumAssigned(), factorMult);
 	    				
 	    				circuitTest.setLaunchPowerLinear(Pcurrent);
-	    				double SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuitTest, circuitTest.getRoute(), 0, circuitTest.getRoute().getNodeList().size() - 1, circuitTest.getModulation(), circuitTest.getSpectrumAssigned(), null);
+	    				double SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuitTest, circuitTest.getRoute(), 0, circuitTest.getRoute().getNodeList().size() - 1, circuitTest.getModulation(), circuitTest.getSpectrumAssigned(), null, false);
 	    				
 	    				if(SNRcurrent >= SNRth) {
 	        				//boolean QoTO = cp.computeQoTForOther(circuitTest);

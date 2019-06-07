@@ -134,7 +134,7 @@ public class ModifiedDijkstraPathsComputation implements IntegratedRMLSAAlgorith
 						circuit.setSpectrumAssigned(faixa);
 						
 						if(faixa != null){
-							boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, faixa, null);
+							boolean QoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, faixa, null, false);
 							
 							if(QoT){
 								Double cust = dist.get(u) + link.getDistance();
