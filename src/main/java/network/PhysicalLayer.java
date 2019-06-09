@@ -579,6 +579,58 @@ public class PhysicalLayer implements Serializable {
 		return Pcurrent;
 	}
 	
+	public double computePowerByBinarySearch2(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult){
+		
+		double SNRth = modulation.getSNRthresholdLinear();
+		double Pmax = computeMaximumPower2(route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
+		
+		double Pmin = 1.0E-11; //W, -80 dBm
+		double Pcurrent = Pmin;
+		double error = 0.01;
+		double SNRdif = 0.0;
+		double SNRcurrent = 0.0;
+		
+		SNRth = SNRth + factorMult;
+		
+		circuit.setLaunchPowerLinear(Pmax);
+		SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+		
+		if (SNRcurrent - SNRth < 0.0) {
+			return Pmax;
+		}
+		
+		circuit.setLaunchPowerLinear(Pmin);
+		SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+		
+		if(SNRcurrent - SNRth > 0.0) {
+			return Pmin;
+		}
+		
+		while (true) {
+			
+			Pcurrent = (Pmin + Pmax) / 2.0;
+			
+			circuit.setLaunchPowerLinear(Pcurrent);
+			SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+			
+			SNRdif = SNRcurrent - SNRth;
+			
+			if (SNRdif < error && SNRdif > 0.0) {
+				break;
+				
+			} else {
+				if(SNRdif > 0.0) {
+					Pmax = Pcurrent;
+					
+				}else {
+					Pmin = Pcurrent;
+				}
+			}
+		}
+		
+		return Pcurrent;
+	}
+	
 	public double computePowerSpectralDensityByBinarySearch(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult){
 		
 		double SNRth = modulation.getSNRthresholdLinear();

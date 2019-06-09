@@ -110,9 +110,6 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	    			if(algo.equals("EPA")) { // EPA
 		    		    lauchPower = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, band);
 	            		
-	    			}else if(algo.equals("APAb")) { // APA binary search
-	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch(circuit, route, mod, band, factorMult);
-	            		
 	    			}else if(algo.equals("EnPA")) { // EnPA with linear interpolation
 	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, band);
 	            		
@@ -130,6 +127,12 @@ public class KShortestPathsAndSpectrumAssignment_v3 implements IntegratedRMLSAAl
 	            		
 	    			}else if(algo.equals("APSDb")) { // APSD binary search
 	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerSpectralDensityByBinarySearch(circuit, route, mod, band, factorMult);
+	            		
+	    			}else if(algo.equals("APAb")) { // APA binary search
+	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch(circuit, route, mod, band, factorMult);
+	            		
+	    			}else if(algo.equals("APAb2")) { // APA binary search 2
+		            	lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch2(circuit, route, mod, band, factorMult);
 	    			}
             		
             		checkBand = band;

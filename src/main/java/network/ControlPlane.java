@@ -604,7 +604,13 @@ public class ControlPlane implements Serializable {
 		return true;
     }
     
-    public double computesImpactOfQoTO(Circuit circuit){
+    /**
+     * Calculates the amount of SNR impacted by a circuit in other circuits
+     * 
+     * @param circuit Circuit
+     * @return double - SNR impact
+     */
+    public double computesImpactOnSNROther(Circuit circuit){
     	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
     	
     	// Search for all circuits that have links in common with the circuit under evaluation
@@ -623,19 +629,25 @@ public class ControlPlane implements Serializable {
 		}
 		
 		double SNRimpact = 0.0;
+		double SNRtemp = 0.0;
+		double SNRtemp2 = 0.0;
+		double SNRdif = 0.0;
 		
         for (Circuit circuitTemp : circuits) {
         	
         	// Computes the SNR of the circuitTemp without considering the circuit
             computeQualityOfTransmission(circuitTemp, circuit, false);
-            double SNRtemp = circuitTemp.getSNR();
+            SNRtemp = circuitTemp.getSNR();
             
             // Computes the SNR of the circuitTemp considering the circuit
         	computeQualityOfTransmission(circuitTemp, circuit, true);
-        	double SNRtemp2 = circuitTemp.getSNR();
+        	SNRtemp2 = circuitTemp.getSNR();
         	
-        	double SNRdif = SNRtemp - SNRtemp2;
-            
+        	SNRdif = SNRtemp - SNRtemp2;
+        	if(SNRdif < 0.0) {
+        		SNRdif = -1.0 * SNRdif;
+        	}
+        	
         	SNRimpact += SNRdif;
         }
         
