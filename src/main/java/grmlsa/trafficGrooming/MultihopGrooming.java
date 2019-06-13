@@ -478,6 +478,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
         public double minSNR;
         public double meanSNR;
         public int transceivers;
+        public double SNRImpact;
 
         public MultihopSolutionStatistics(MultihopGrooming.MultihopSolution sol, RequestForConnection rfc, ControlPlane cp, MSSOptimizator msso) {
             this.virtualHops = (double)sol.virtualRoute.size();
@@ -485,6 +486,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
             this.minSNR = 1.0E8D;
             this.meanSNR = 0.0D;
             this.transceivers = 0;
+            this.SNRImpact = 0;
 
             Iterator iterator;
             double snr;
@@ -499,6 +501,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
                     this.minSNR = snr;
                 }
                 this.meanSNR += snr;
+                this.SNRImpact += cp.computesImpactOnSNROther(circuit);
             }
 
             if (sol.needsComplement) {
@@ -512,12 +515,14 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
                             msso.oCanEstabilish.put(sol.pairComplement.toString(),false);
                             msso.oPhysicalHops.put(sol.pairComplement.toString(),1.0E8D);
                             msso.oSNR.put(sol.pairComplement.toString(),1.0E8D);
+                            msso.oSNRImpact.put(sol.pairComplement.toString(),1.0E8D);
                         } else {
                             newCircuit.removeRequest(rfc);
                             msso.oPhysicalHops.put(sol.pairComplement.toString(),(double)newCircuit.getRoute().getHops());
                             msso.oCanEstabilish.put(sol.pairComplement.toString(),true);
                             msso.oSpectrumUtilization.put(sol.pairComplement.toString(), (double)(newCircuit.getModulation().requiredSlots(rfc.getRequiredBandwidth()) * newCircuit.getRoute().getHops()));
                             msso.oSNR.put(sol.pairComplement.toString(),newCircuit.getSNR());
+                            msso.oSNRImpact.put(sol.pairComplement.toString(),cp.computesImpactOnSNROther(newCircuit));
                             cp.releaseCircuit(newCircuit);
                         }
                     } catch (Exception var9) {
@@ -528,6 +533,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
                 if (!msso.oCanEstabilish.get(sol.pairComplement.toString())) {
                     this.physicalHops = 1.0E8D;
                     this.meanSNR = 1.0E8D;
+                    this.SNRImpact = 1.0E8D;
                 } else {
                     this.physicalHops += msso.oPhysicalHops.get(sol.pairComplement.toString());
                     ++this.virtualHops;
@@ -537,6 +543,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
                         this.minSNR = snr;
                     }
                     this.meanSNR += snr;
+                    this.SNRImpact += msso.oSNRImpact.get(sol.pairComplement.toString());
                     this.transceivers++;
                 }
             }
@@ -549,12 +556,14 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
         public HashMap<String,Boolean> oCanEstabilish;
         public HashMap<String,Double> oPhysicalHops;
         public HashMap<String,Double> oSNR;
+        public HashMap<String,Double> oSNRImpact;
         public HashMap<String,Double> oSpectrumUtilization;
 
         public MSSOptimizator(){
             oCanEstabilish = new HashMap<>();
             oPhysicalHops = new HashMap<>();
             oSNR = new HashMap<>();
+            oSNRImpact = new HashMap<>();
             oSpectrumUtilization = new HashMap<>();
         }
     }
