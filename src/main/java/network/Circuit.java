@@ -110,7 +110,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 	 */
 	public double getResidualCapacity(){
     	double rb = getRequiredBandwidth();
-    	double cap = getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
+    	double cap = getModulation().potentialBitRate(spectrumAssigned[1]-spectrumAssigned[0]+1);
 		return cap-rb;
 	}
 
@@ -337,7 +337,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 	 * @return double
 	 */
 	public double getBandwidth(){
-		return getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
+		return getModulation().potentialBitRate(spectrumAssigned[1]-spectrumAssigned[0]+1);
 	}
 
 	/**
