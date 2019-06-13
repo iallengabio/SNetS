@@ -257,7 +257,7 @@ def plotLines(path,loads=[],sol=[], al=0.05):
     auxPlotLine(dfs,loads,sol,xl,yl='Maximum requests by circuit',show=False,arq=a)
     
     #MRC
-    dfs = extractDFS(path,AGS,MMRC,al)
+    dfs = extractDFS(path,AGS,MVH,al)
     a = path + '/' + n + 'VH.png'
     auxPlotLine(dfs,loads,sol,xl,yl='Virtual hops',show=False,arq=a)
     
@@ -317,7 +317,7 @@ def plotBars(path,loads=[],sol=[], al=0.05):
     auxPlotBars(dfs,loads,sol,xl,yl='Maximum requests by circuit',show=False,arq=a)
     
     #MRC
-    dfs = extractDFS(path,AGS,MMRC,al)
+    dfs = extractDFS(path,AGS,MVH,al)
     a = path + '/' + n + 'VH.png'
     auxPlotBars(dfs,loads,sol,xl,yl='Virtual hops',show=False,arq=a)
     
