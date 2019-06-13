@@ -50,7 +50,7 @@ public class ModifiedDijkstraPathsComputation implements IntegratedRMLSAAlgorith
 			if(mod != null){
 				
 				int requeridSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-				List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+				List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 				int band[] = spectrumAssignment.policy(requeridSlots, merge, circuit, cp);
 				
 				circuit.setSpectrumAssigned(band);
@@ -129,7 +129,7 @@ public class ModifiedDijkstraPathsComputation implements IntegratedRMLSAAlgorith
 					if(mod != null){
 						int requeridSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 						
-						List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp);
+						List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp, circuit.getGuardBand());
 						int faixa[] = spectrumAssignment.policy(requeridSlots, merge, circuit, cp);
 						circuit.setSpectrumAssigned(faixa);
 						

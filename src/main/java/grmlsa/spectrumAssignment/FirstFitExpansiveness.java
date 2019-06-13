@@ -19,7 +19,7 @@ public class FirstFitExpansiveness implements SpectrumAssignmentAlgorithmInterfa
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
         int aux = ffeSigma;
         int chosen[] = null;
 

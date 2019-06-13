@@ -203,8 +203,9 @@ public class ControlPlane implements Serializable {
     public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         int band[] = circuit.getSpectrumAssigned();
+        int guardBand = circuit.getGuardBand();
         
-        if(!allocateSpectrum(circuit, band, route.getLinkList())){
+        if(!allocateSpectrum(circuit, band, route.getLinkList(), guardBand)){
             throw new Exception("bad RMLSA choice. Spectrum cant be allocated.");
         }
 
@@ -222,14 +223,14 @@ public class ControlPlane implements Serializable {
      * @param band int[]
      * @param links List<Link>
      */
-    protected boolean allocateSpectrum(Circuit circuit, int[] band, List<Link> links) throws Exception {
+    protected boolean allocateSpectrum(Circuit circuit, int[] band, List<Link> links, int guardBand) throws Exception {
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
             
-            if(!link.useSpectrum(band)){ //spectrum already in use
+            if(!link.useSpectrum(band, guardBand)){ //spectrum already in use
                 i--;
                 for(;i>=0;i--){
-                    links.get(i).liberateSpectrum(band);
+                    links.get(i).liberateSpectrum(band, guardBand);
                 }
                 return false;
             }
@@ -245,8 +246,9 @@ public class ControlPlane implements Serializable {
     public void releaseCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         int band[] = circuit.getSpectrumAssigned();
+        int guardBand = circuit.getGuardBand();
         
-        releaseSpectrum(circuit, band, route.getLinkList());
+        releaseSpectrum(circuit, band, route.getLinkList(), guardBand);
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -264,11 +266,11 @@ public class ControlPlane implements Serializable {
      * @param band int[]
      * @param links List<Link>
      */
-    protected void releaseSpectrum(Circuit circuit, int band[], List<Link> links) throws Exception {
+    protected void releaseSpectrum(Circuit circuit, int band[], List<Link> links, int guardBand) throws Exception {
         for (int i = 0; i < links.size(); i++) {
         	Link link = links.get(i);
         	
-            link.liberateSpectrum(band);
+            link.liberateSpectrum(band, guardBand);
         }
     }
     
@@ -367,7 +369,9 @@ public class ControlPlane implements Serializable {
         int currentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
         int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
         if(currentSlots+numSlotsDown+numSlotsUp>maxAmplitude) return false;
-
+        
+        int guardBand = circuit.getGuardBand();
+        
         //calculate the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[0] = circuit.getSpectrumAssigned()[1] + 1;
@@ -383,14 +387,14 @@ public class ControlPlane implements Serializable {
 
         //try to expand circuit
         if (numSlotsUp > 0){
-            if(allocateSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()))){
+            if(allocateSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()), guardBand)){
                 newSpecAssigAt[1] = upperBand[1];
             }else{
                 throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
             }
         }
         if(numSlotsDown > 0) {
-            if(allocateSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()))) {
+            if(allocateSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()), guardBand)) {
                 newSpecAssigAt[0] = bottomBand[0];
             }else{
                 throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
@@ -404,11 +408,11 @@ public class ControlPlane implements Serializable {
 
         if(!QoT){
             if (numSlotsUp>0) {
-                releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()));
+                releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()), guardBand);
             }
 
             if (numSlotsDown>0) {
-                releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
+                releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()), guardBand);
             }
             
             circuit.setSpectrumAssigned(specAssigAt);
@@ -431,6 +435,8 @@ public class ControlPlane implements Serializable {
      * @throws Exception
      */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
+    	int guardBand = circuit.getGuardBand();
+    	
         //calculate the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[1] = circuit.getSpectrumAssigned()[1];
@@ -443,12 +449,12 @@ public class ControlPlane implements Serializable {
         int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
         
         if (numSlotsUp>0) {
-            releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()));
+            releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()), guardBand);
             newSpecAssign[1] = upperBand[0]-1;
         }
 
         if (numSlotsDown>0) {
-            releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()));
+            releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()), guardBand);
             newSpecAssign[0] = bottomBand[1]+1;
         }
         
@@ -741,11 +747,13 @@ public class ControlPlane implements Serializable {
         // For fragmentation verification
         Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         
+        int guardBand = circuit.getGuardBand();
+        
         List<Link> links = circuit.getRoute().getLinkList();
-        List<int[]> merge = links.get(0).getFreeSpectrumBands();
+        List<int[]> merge = links.get(0).getFreeSpectrumBands(guardBand);
         
         for (int i = 1; i < links.size(); i++) {
-            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
+            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands(guardBand));
         }
         
         int totalFree = 0;
@@ -794,5 +802,17 @@ public class ControlPlane implements Serializable {
 	 */
     private void updateNetworkPowerConsumption(){
         this.mesh.computesPowerConsmption(this);
+    }
+    
+    public boolean verifySpectrumAssignment(Circuit circuit, int numberOfSlots, int[] band) {
+    	
+    	
+    	if (band[1] - band[0] + 1 >= numberOfSlots) {
+    		
+    		
+    		
+    	}
+    	
+    	return false;
     }
 }

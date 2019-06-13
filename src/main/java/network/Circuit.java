@@ -39,6 +39,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 	protected int blockCause;
 	
 	protected double launchPowerLinear;
+	protected int guardBand;
 
     /**
      * Instantiates a circuit with the list of requests answered by it in empty
@@ -169,6 +170,7 @@ public class Circuit implements Comparable<Object>, Serializable {
      */
     public void setModulation(Modulation modulation) {
         this.modulation = modulation;
+        setGuardBand(modulation.getGuardBand());
     }
 
     /**
@@ -357,5 +359,24 @@ public class Circuit implements Comparable<Object>, Serializable {
 	public void setLaunchPowerLinear(double launchPowerLinear) {
 		this.launchPowerLinear = launchPowerLinear;
 	}
+	
+	/**
+	 * Returns the guard band
+	 * 
+	 * @return int
+	 */
+	public int getGuardBand() {
+		return guardBand;
+	}
+
+	/**
+	 * Sets the guard band
+	 * 
+	 * @param guardBand int
+	 */
+	public void setGuardBand(int guardBand) {
+		this.guardBand = guardBand;
+	}
+	
 	
 }

@@ -91,12 +91,12 @@ public class IntersectionFreeSpectrum {
      * @param route Route
      * @return List<int[]>
      */
-    public static List<int[]> merge(Route route) {
+    public static List<int[]> merge(Route route, int guardBand) {
         List<Link> links = new ArrayList<>(route.getLinkList());
-        List<int[]> composition = links.get(0).getFreeSpectrumBands();
+        List<int[]> composition = links.get(0).getFreeSpectrumBands(guardBand);
         
         for (int i = 1; i < links.size(); i++) {
-            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands(guardBand));
         }
 
         return composition;

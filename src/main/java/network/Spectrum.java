@@ -13,6 +13,12 @@ import java.util.TreeSet;
  */
 public class Spectrum implements Serializable {
 	
+	public static final char FREE = 'l';
+	public static final char BUSY = 'u';
+	public static final char GB_FOR_ONE = 'b';
+	public static final char GB_FOR_TWO = 'B';
+	
+	private char spectrum[];
 	private TreeSet<int[]> freeSpectrumBands;
 	private int numOfSlots;
 	private double slotSpectrumBand;
@@ -26,13 +32,20 @@ public class Spectrum implements Serializable {
 	 */
 	public Spectrum(int numOfSlots, double slotSpectrumBand){
 		
-		freeSpectrumBands = new TreeSet<int[]>(new MyComparator());
 		this.numOfSlots = numOfSlots;
 		this.slotSpectrumBand = slotSpectrumBand;
+		
+		spectrum = new char[numOfSlots];
+		for(int i = 0; i < numOfSlots; i++) {
+			spectrum[i] = FREE;
+		}
+		
 		int fsin[] = new int[2];
 		fsin[0] = 1;
-		fsin[1] = numOfSlots;		
+		fsin[1] = numOfSlots;
+		freeSpectrumBands = new TreeSet<int[]>(new MyComparator());
 		freeSpectrumBands.add(fsin);
+		
 		usedSlots = 0; 
 	}
 
@@ -52,33 +65,35 @@ public class Spectrum implements Serializable {
 	 * @param spectrumBand int
 	 * @return boolean
 	 */
-	public boolean useSpectrum(int spectrumBand[]) throws Exception {
+	public boolean useSpectrum(int spectrumBand[], int guardBand) throws Exception {
 
 		if(spectrumBand[0]>spectrumBand[1]){
 			throw new Exception("invalid spectrum band");
 		}
 
-		for (int freSpecBand[] : this.freeSpectrumBands) {
-			if(isInInterval(spectrumBand, freSpecBand)){
-				freeSpectrumBands.remove(freSpecBand); // Remove free bands
+		for (int freeSpecBand[] : this.freeSpectrumBands) {
+			if(isInInterval(spectrumBand, freeSpecBand)){
+				freeSpectrumBands.remove(freeSpecBand); // Remove free bands
 				
 				// Create new free bands
 				int newSpecBand[];
-				if(spectrumBand[0] - freSpecBand[0] != 0){ // Create band of what's left behind
+				if(spectrumBand[0] - freeSpecBand[0] != 0){ // Create band of what's left behind
 					newSpecBand = new int[2];
-					newSpecBand[0] = freSpecBand[0];
+					newSpecBand[0] = freeSpecBand[0];
 					newSpecBand[1] = spectrumBand[0] - 1;
 					this.freeSpectrumBands.add(newSpecBand);
 				}
 				
-				if(freSpecBand[1] - spectrumBand[1] != 0){ // Create band of what's left ahead
+				if(freeSpecBand[1] - spectrumBand[1] != 0){ // Create band of what's left ahead
 					newSpecBand = new int[2];
 					newSpecBand[0] = spectrumBand[1] + 1;
-					newSpecBand[1] = freSpecBand[1];
+					newSpecBand[1] = freeSpecBand[1];
 					this.freeSpectrumBands.add(newSpecBand);
 				}
 
 				usedSlots = usedSlots + (spectrumBand[1] - spectrumBand[0] + 1);
+				
+				usedSpectrumUpdate(spectrumBand, guardBand);
 				
 				return true;
 			}			
@@ -108,17 +123,19 @@ public class Spectrum implements Serializable {
 	 * 
 	 * @param spectrumBand int[]
 	 */
-	public void freeSpectrum(int spectrumBand[]) throws Exception {
-
+	public void freeSpectrum(int spectrumBand[], int guardBand) throws Exception {
+		
 		if(spectrumBand[0]>spectrumBand[1]){
 			throw new Exception("invalid spectrum band");
 		}
 
-		for (int freSpecBand[] : this.freeSpectrumBands) {
-			if(isInInterval(spectrumBand, freSpecBand)){
+		for (int freeSpecBand[] : this.freeSpectrumBands) {
+			if(isInInterval(spectrumBand, freeSpecBand)){
 				throw new Exception("spectrum is already free. spectrum band: " + spectrumBand[0] + " - " + spectrumBand[1]);
 			}
 		}
+		
+		freeSpectrumUpdate(spectrumBand, guardBand);
 		
 		this.freeSpectrumBands.add(spectrumBand); //liberando spectro
 
@@ -154,16 +171,209 @@ public class Spectrum implements Serializable {
 	}
 	
 	/**
+	 * Updating the used spectrum
+	 * 
+	 * @param spectrumBand
+	 * @param guardBand
+	 */
+	private void usedSpectrumUpdate(int spectrumBand[], int guardBand) {
+		
+		int index = spectrumBand[0] - 1;
+		
+		int leftGuardBand = guardBand;
+		if(spectrumBand[0] == 1) {
+			leftGuardBand = 0;
+		}
+		int rightGuardBand = guardBand;
+		if(spectrumBand[1] == numOfSlots) {
+			rightGuardBand = 0;
+		}
+		
+		int slotsNumber = (spectrumBand[1] - spectrumBand[0] + 1) - (leftGuardBand + rightGuardBand);
+		
+		for(int i = 0; i < leftGuardBand; i++) {
+			if(spectrum[index] == FREE) {
+				spectrum[index] = GB_FOR_ONE;
+				
+			}else if(spectrum[index] == GB_FOR_ONE) {
+				spectrum[index] = GB_FOR_TWO;
+				
+			}else {
+				System.out.println("Error 1!!! spectrum = " + spectrum[index]);
+			}
+			index++;
+		}
+		
+		for(int i = 0; i < slotsNumber; i++) {
+			if(spectrum[index] == FREE) {
+				spectrum[index] = BUSY;
+				
+			}else{
+				System.out.println("Error 2!!! spectrum = " + spectrum[index]);
+			}
+			index++;
+		}
+		
+		for(int i = 0; i < rightGuardBand; i++) {
+			if(spectrum[index] == FREE) {
+				spectrum[index] = GB_FOR_ONE;
+				
+			}else if(spectrum[index] == GB_FOR_ONE) {
+				spectrum[index] = GB_FOR_TWO;
+				
+			}else {
+				System.out.println("Error 3!!! spectrum = " + spectrum[index]);
+			}
+			index++;
+		}
+	}
+	
+	/**
+	 * Updating the free spectrum
+	 * 
+	 * @param spectrumBand
+	 * @param guardBand
+	 */
+	private void freeSpectrumUpdate(int spectrumBand[], int guardBand) {
+		
+		int index = spectrumBand[0] - 1;
+		
+		int leftGuardBand = guardBand;
+		if(spectrumBand[0] == 1) {
+			leftGuardBand = 0;
+		}
+		int rightGuardBand = guardBand;
+		if(spectrumBand[1] == numOfSlots) {
+			rightGuardBand = 0;
+		}
+		
+		int slotsNumber = (spectrumBand[1] - spectrumBand[0] + 1) - (leftGuardBand + rightGuardBand);
+		
+		for(int i = 0; i < leftGuardBand; i++) {
+			if(spectrum[index] == GB_FOR_ONE) {
+				spectrum[index] = FREE;
+				
+			}else if(spectrum[index] == GB_FOR_TWO) {
+				spectrum[index] = GB_FOR_ONE;
+				
+			}else {
+				System.out.println("Error 4!!! spectrum = " + spectrum[index]);
+			}
+			index++;
+		}
+		
+		for(int i = 0; i < slotsNumber; i++) {
+			if(spectrum[index] == BUSY) {
+				spectrum[index] = FREE;
+				
+			}else{
+				System.out.println("Error 5!!! spectrum = " + spectrum[index]);
+			}
+			index++;
+		}
+		
+		for(int i = 0; i < rightGuardBand; i++) {
+			if(spectrum[index] == GB_FOR_ONE) {
+				spectrum[index] = FREE;
+				
+			}else if(spectrum[index] == GB_FOR_TWO) {
+				spectrum[index] = GB_FOR_ONE;
+				
+			}else {
+				System.out.println("Error 6!!! spectrum = " + spectrum[index]);
+			}
+			index++;
+		}
+	}
+	
+	/**
 	 * Returns the free spectrum bands at the moment
 	 * 
 	 * @return List<int[]>
 	 */
-	public List<int[]> getFreeSpectrumBands(){
+	public List<int[]> getFreeSpectrumBands(int guardBand){
 		
 		ArrayList<int[]> res = new ArrayList<>();
 		
 		for (int[] is : this.freeSpectrumBands) {
 			res.add(is.clone());
+		}
+		
+		
+		getFreeSpectrumBands2(guardBand);
+		
+		return res;
+	}
+	
+	public List<int[]> getFreeSpectrumBands2(int guardBand){
+		
+		ArrayList<int[]> res = new ArrayList<>();
+		
+		for (int[] fsb : this.freeSpectrumBands) {
+			
+			boolean flagLeftBG = false;
+			boolean flagRightBG = false;
+			int contLeft = 0;
+			int contRight = 0;
+			
+			int numSlots = fsb[1] - fsb[0] + 1;
+			
+			for(int n = 0; n < numSlots; n++) {
+				int contLeftBG = 0;
+				int contLeftFree = 0;
+				int index = (fsb[0] - 1) + n;
+				
+				for (int b = 0; b < guardBand; b++) {
+					if (spectrum[index - b] == GB_FOR_ONE) {
+						contLeftBG++;
+						
+					} else if (spectrum[index - b] == FREE) {
+						contLeftFree++;
+					
+					}else {
+						break;
+					}
+				}
+				
+				if(contLeftBG + contLeftFree == guardBand) {
+					flagLeftBG = true;
+					contLeft = contLeftBG;
+					break;
+				}
+			}
+			
+			for(int n = 0; n < numSlots; n++) {
+				int contRightBG = 0;
+				int contRightFree = 0;
+				int index = (fsb[1] + 1) - n;
+				
+				for (int b = 0; b < guardBand; b++) {
+					if (spectrum[index + b] == GB_FOR_ONE) {
+						contRightBG++;
+					
+					} else if (spectrum[index + b] == FREE) {
+						contRightFree++;
+						
+					} else {
+						break;
+					}
+				}
+				
+				if(contRightBG + contRightFree == guardBand) {
+					flagRightBG = true;
+					contRight = contRightBG;
+					break;
+				}
+			}
+			
+			if(flagLeftBG && flagRightBG) {
+				
+				int newfsb[] = new int[2];
+				newfsb[0] = fsb[0] - contLeft;
+				newfsb[1] = fsb[1] + contRight;
+				
+				res.add(newfsb);
+			}
 		}
 		
 		return res;

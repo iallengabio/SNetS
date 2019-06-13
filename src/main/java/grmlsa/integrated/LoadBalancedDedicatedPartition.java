@@ -81,12 +81,12 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
 	            List<int[]> primaryZone = new ArrayList<>();
 	            primaryZone.add(zone);
 	
-	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 	            merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 	
 	            int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);
 	
-	            int ut = this.numSlotsUsedZone(route, zone);
+	            int ut = this.numSlotsUsedZone(route, zone, circuit.getGuardBand());
 	
 	            if (ff != null && ut < leastUsed) {
 	                chosenBand = ff;
@@ -120,13 +120,13 @@ public class LoadBalancedDedicatedPartition implements IntegratedRMLSAAlgorithmI
      * @param zone int[]
      * @return int
      */
-    private int numSlotsUsedZone(Route route, int zone[]) {
+    private int numSlotsUsedZone(Route route, int zone[], int guardBand) {
         int res = 0;
         List<int[]> zoneAux = new ArrayList<int[]>();
         zoneAux.add(zone);
 
         for (Link link : route.getLinkList()) {
-            List<int[]> merge = IntersectionFreeSpectrum.merge(link.getFreeSpectrumBands(), zoneAux);
+            List<int[]> merge = IntersectionFreeSpectrum.merge(link.getFreeSpectrumBands(guardBand), zoneAux);
 
             int free = 0;
             for (int[] is : merge) {

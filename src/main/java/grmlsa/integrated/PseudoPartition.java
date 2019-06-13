@@ -73,7 +73,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
                 circuit.setModulation(mod);
                 
                 if(mod != null){
-	                List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	                List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 	
 	                // Calculate how many slots are needed for this route
 	                int ff[] = spectrumAssignment1.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);
@@ -96,7 +96,7 @@ public class PseudoPartition implements IntegratedRMLSAAlgorithmInterface {
                 
                 Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment2, cp);
                 if(mod != null){
-	                List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	                List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 	
 	                // Calculate how many slots are needed for this route
 	                int lf[] = spectrumAssignment2.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);

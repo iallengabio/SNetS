@@ -84,7 +84,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 				List<int[]> primaryZone = new ArrayList<>();
 				primaryZone.add(zone);			
 				
-				List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+				List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 				merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 				
 				int ff[] = spectrumAssignment1.policy(numSlots, merge, circuit, cp);
@@ -113,7 +113,7 @@ public class ZonePartitionTopInvasion implements IntegratedRMLSAAlgorithmInterfa
 					// Calculate how many slots are needed for this route
 					int numSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 					int zone[] = this.zones.get(numSlots);
-					List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+					List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 					
 					int zoneMoreFree = this.searchMoreFreeZone(numSlots, merge);
 					
