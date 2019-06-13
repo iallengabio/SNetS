@@ -111,7 +111,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						checkBand = band;
 					}
 					
-					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band, null);
+					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band, null, false);
 					
 					if(circuitQoT){
 						double circuitDeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
@@ -133,7 +133,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						for(int i = 0; i < circuitList.size(); i++){
 							Circuit circuitTemp = circuitList.get(i);
 							
-							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit);
+							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
 							double deltaSNR = circuitTemp.getSNR() - circuitTemp.getModulation().getSNRthreshold();
 							
 							if(deltaSNR < worstDeltaSNR){
