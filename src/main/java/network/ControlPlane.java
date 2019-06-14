@@ -648,7 +648,8 @@ public class ControlPlane implements Serializable {
             
             // Computes the SNR of the circuitTemp considering the circuit
         	//computeQualityOfTransmission(circuitTemp, circuit, true);
-        	//SNRtemp2 = circuitTemp.getSNR();
+        	//double SNRtemp3 = circuitTemp.getSNR();
+
             
             circuitTemp.setSNR(circuitsSNR.get(circuitTemp));
             circuitTemp.setQoT(circuitsQoT.get(circuitTemp));

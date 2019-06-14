@@ -501,7 +501,10 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
                     this.minSNR = snr;
                 }
                 this.meanSNR += snr;
-                this.SNRImpact += cp.computesImpactOnSNROther(circuit);
+                if(msso.oSNRImpactPerCircuit.get(circuit)==null){
+                    msso.oSNRImpactPerCircuit.put(circuit,cp.computesImpactOnSNROther(circuit));
+                }
+                this.SNRImpact += msso.oSNRImpactPerCircuit.get(circuit);
             }
 
             if (sol.needsComplement) {
@@ -559,12 +562,15 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
         public HashMap<String,Double> oSNRImpact;
         public HashMap<String,Double> oSpectrumUtilization;
 
+        public HashMap<Circuit,Double> oSNRImpactPerCircuit; //store the snrImpact per circuit.
+
         public MSSOptimizator(){
             oCanEstabilish = new HashMap<>();
             oPhysicalHops = new HashMap<>();
             oSNR = new HashMap<>();
             oSNRImpact = new HashMap<>();
             oSpectrumUtilization = new HashMap<>();
+            oSNRImpactPerCircuit = new HashMap<>();
         }
     }
 
