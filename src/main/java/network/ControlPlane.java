@@ -287,7 +287,7 @@ public class ControlPlane implements Serializable {
             	
                 // Can allocate spectrum
                 if (tryEstablishNewCircuit(circuit)) {
-                    
+                	
                     // QoT verification
                     if(isAdmissibleQualityOfTransmission(circuit)){
                         updateNetworkPowerConsumption();
@@ -322,7 +322,7 @@ public class ControlPlane implements Serializable {
         circuit.setWasBlocked(true);
         return false; // Rejects the circuit
     }
-    
+
     private boolean shouldTestFragmentation(Circuit circuit) {
         Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
@@ -538,6 +538,7 @@ public class ControlPlane implements Serializable {
      * The circuit in question has already allocated the network resources
      * 
      * @param circuit Circuit
+     * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
      * @param addTestCircuit boolean - To add the test circuit to the circuit list
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
@@ -558,7 +559,7 @@ public class ControlPlane implements Serializable {
      * @param circuit Circuit
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
-    protected boolean computeQoTForOther(Circuit circuit){
+    public boolean computeQoTForOther(Circuit circuit){
     	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
     	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
     	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits
@@ -611,6 +612,8 @@ public class ControlPlane implements Serializable {
      */
     public double computesImpactOnSNROther(Circuit circuit){
     	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
+    	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
+    	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits
     	
     	// Search for all circuits that have links in common with the circuit under evaluation
 		Route route = circuit.getRoute();
@@ -634,14 +637,23 @@ public class ControlPlane implements Serializable {
 		
         for (Circuit circuitTemp : circuits) {
         	
+        	// Stores the SNR and QoT values
+        	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
+            circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
+            SNRtemp2 = circuitTemp.getSNR();
+        	
         	// Computes the SNR of the circuitTemp without considering the circuit
             computeQualityOfTransmission(circuitTemp, circuit, false);
             SNRtemp = circuitTemp.getSNR();
             
             // Computes the SNR of the circuitTemp considering the circuit
-        	computeQualityOfTransmission(circuitTemp, circuit, true);
-        	SNRtemp2 = circuitTemp.getSNR();
-        	
+        	//computeQualityOfTransmission(circuitTemp, circuit, true);
+        	//double SNRtemp3 = circuitTemp.getSNR();
+
+            
+            circuitTemp.setSNR(circuitsSNR.get(circuitTemp));
+            circuitTemp.setQoT(circuitsQoT.get(circuitTemp));
+            
         	SNRdif = SNRtemp - SNRtemp2;
         	if(SNRdif < 0.0) {
         		SNRdif = -1.0 * SNRdif;
