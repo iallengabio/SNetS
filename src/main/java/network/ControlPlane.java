@@ -538,7 +538,6 @@ public class ControlPlane implements Serializable {
      * The circuit in question has already allocated the network resources
      * 
      * @param circuit Circuit
-     * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
      * @param addTestCircuit boolean - To add the test circuit to the circuit list
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
