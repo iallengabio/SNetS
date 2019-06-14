@@ -82,13 +82,24 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
         return res;
     }
 
+    private static boolean makeLoop(ArrayList<Circuit> sol, Circuit newCirc){
+        Iterator<Circuit> it = sol.iterator();
+
+        while(it.hasNext()){
+            Circuit c = it.next();
+            if(c.getSource().getName().equals(newCirc.getSource().getName())) return true;
+            if(c.getSource().getName().equals(newCirc.getDestination().getName())) return true;
+        }
+
+        return false;
+    }
     private static boolean hasVirtualLoop(ArrayList<Circuit> sol) {
         HashSet<String> nAux = new HashSet();
-        nAux.add(((Circuit)sol.get(0)).getPair().getSource().getName());
-        Iterator var2 = sol.iterator();
+        nAux.add(sol.get(0).getPair().getSource().getName());
+        Iterator<Circuit> var2 = sol.iterator();
 
         while(var2.hasNext()) {
-            Circuit c = (Circuit)var2.next();
+            Circuit c = var2.next();
             if (nAux.contains(c.getPair().getDestination().getName())) {
                 return true;
             }
@@ -116,13 +127,14 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
             it2 = ((ArrayList)it.next()).iterator();
 
             while(it2.hasNext()) {
-                MultihopGrooming.MultihopSolution clone = ((MultihopGrooming.MultihopSolution)it2.next()).clone();
+                MultihopSolution ms = (MultihopSolution) it2.next();
+                if(ms.virtualRoute.size()==this.maxVirtualHops) continue;
+                if(makeLoop(ms.virtualRoute,circuit)) continue;
+                MultihopSolution clone = ms.clone();
                 clone.virtualRoute.add(0, circuit);
                 clone.src = circuit.getSource().getName();
-                if (clone.virtualRoute.size() <= this.maxVirtualHops && !hasVirtualLoop(clone.virtualRoute)) {
-                    this.virtualRouting.get(clone.src).get(clone.dst).add(clone);
-                    aalAux.add(clone);
-                }
+                this.virtualRouting.get(clone.src).get(clone.dst).add(clone);
+                aalAux.add(clone);
             }
         }
 
@@ -137,11 +149,13 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
                 Iterator it4 = aalAux.iterator();
 
                 while(it4.hasNext()) {
+                    MultihopSolution ms4 = (MultihopGrooming.MultihopSolution)it4.next();
+                    if(c1.virtualRoute.size()+ms4.virtualRoute.size()>maxVirtualHops) continue;
                     MultihopGrooming.MultihopSolution cAux = c1.clone();
-                    MultihopGrooming.MultihopSolution c2 = ((MultihopGrooming.MultihopSolution)it4.next()).clone();
+                    MultihopGrooming.MultihopSolution c2 = ms4.clone();
                     cAux.virtualRoute.addAll(c2.virtualRoute);
                     cAux.dst = c2.dst;
-                    if (cAux.virtualRoute.size() <= this.maxVirtualHops && !hasVirtualLoop(cAux.virtualRoute)) {
+                    if (!hasVirtualLoop(cAux.virtualRoute)) {
                         this.virtualRouting.get(cAux.src).get(cAux.dst).add(cAux);
                     }
                 }
