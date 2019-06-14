@@ -55,7 +55,7 @@ public class KRoutesExpansiveness implements IntegratedRMLSAAlgorithmInterface {
             circuit.setModulation(mod);
             
             if(mod != null){
-	            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 	
 	            // Calculate how many slots are needed for this route
 	            int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);

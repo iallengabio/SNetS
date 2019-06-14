@@ -330,14 +330,14 @@ public class TranslucentControlPlane extends ControlPlane {
 			Node destinationNode = route.getNode(sourceNodeIndex + 1);
 			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			
-			List<int[]> composition = link.getFreeSpectrumBands(circuit.getGuardBand());
+			List<int[]> composition = link.getFreeSpectrumBands();
 			
 			for(int l = sourceNodeIndex + 1; l < destinationNodeIndex; l++){
 				sourceNode = route.getNode(l);
 				destinationNode = route.getNode(l + 1);
 				link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 				
-				composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands(circuit.getGuardBand()));
+				composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
 			}
 			
 			tryAssignModulationAndSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition);
@@ -552,8 +552,6 @@ public class TranslucentControlPlane extends ControlPlane {
 		int sourceNodeIndex = 0;
 		int mumberTransparentSegments = ((TranslucentCircuit) circuit).getRegeneratorsNodesIndexList().size() + 1;
 		
-		int guardBand = circuit.getGuardBand();
-		
 		for (int i = 0; i < mumberTransparentSegments; i++) {
 
 			int destinationNodeIndex = route.getNodeList().size() - 1;
@@ -565,13 +563,13 @@ public class TranslucentControlPlane extends ControlPlane {
 			Node destinationNode = route.getNode(sourceNodeIndex + 1);
 			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 
-			List<int[]> merge = link.getFreeSpectrumBands(guardBand);
+			List<int[]> merge = link.getFreeSpectrumBands();
 			for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
 				sourceNode = route.getNode(n);
 				destinationNode = route.getNode(n + 1);
 				link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 
-				merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands(guardBand));
+				merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
 			}
 
 			int totalFree = 0;

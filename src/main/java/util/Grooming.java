@@ -17,7 +17,7 @@ public class Grooming {
      */
     public static int[] circuitExpansiveness(Circuit circuit){
         int res[] = new int[2];
-        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
         res[0] = IntersectionFreeSpectrum.freeSlotsDown(circuit.getSpectrumAssigned(),composition);
         res[1] = IntersectionFreeSpectrum.freeSlotsUpper(circuit.getSpectrumAssigned(),composition);
         return res;

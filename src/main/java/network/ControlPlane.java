@@ -747,13 +747,11 @@ public class ControlPlane implements Serializable {
         // For fragmentation verification
         Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         
-        int guardBand = circuit.getGuardBand();
-        
         List<Link> links = circuit.getRoute().getLinkList();
-        List<int[]> merge = links.get(0).getFreeSpectrumBands(guardBand);
+        List<int[]> merge = links.get(0).getFreeSpectrumBands();
         
         for (int i = 1; i < links.size(); i++) {
-            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands(guardBand));
+            merge = IntersectionFreeSpectrum.merge(merge, links.get(i).getFreeSpectrumBands());
         }
         
         int totalFree = 0;
@@ -804,15 +802,16 @@ public class ControlPlane implements Serializable {
         this.mesh.computesPowerConsmption(this);
     }
     
-    public boolean verifySpectrumAssignment(Circuit circuit, int numberOfSlots, int[] band) {
+    public List<int[]> getFreeSpectrumMergeForAllocationWithoutGuardBand(Circuit circuit, int numberOfSlots, int[] freeSpectrumBand) {
+    	Route route = circuit.getRoute();
     	
-    	
-    	if (band[1] - band[0] + 1 >= numberOfSlots) {
-    		
-    		
-    		
-    	}
-    	
-    	return false;
+		List<Link> links = new ArrayList<>(route.getLinkList());
+        List<int[]> composition = links.get(0).getFreeSpectrumForAllocationWithoutGuardBand(freeSpectrumBand, circuit.getGuardBand());
+        
+        for (int i = 1; i < links.size(); i++) {
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumForAllocationWithoutGuardBand(freeSpectrumBand, circuit.getGuardBand()));
+        }
+        
+    	return composition;
     }
 }

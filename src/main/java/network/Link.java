@@ -149,8 +149,12 @@ public class Link implements Serializable {
      *
      * @return List<int[]>
      */
-    public List<int[]> getFreeSpectrumBands(int guardBand) {
-        return spectrum.getFreeSpectrumBands(guardBand);
+    public List<int[]> getFreeSpectrumBands() {
+        return spectrum.getFreeSpectrumBands();
+    }
+    
+    public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(int[] freeSpectrumBand, int guardBand) {
+        return spectrum.getFreeSpectrumForAllocationWithoutGuardBand(freeSpectrumBand, guardBand);
     }
 
     /**

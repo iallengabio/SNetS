@@ -104,7 +104,7 @@ public class ExternalFragmentation extends Measurement {
         for (Link link : mesh.getLinkList()) {
             aux = ExternalFragLinks.get(link.getSource().getName() + SEP + link.getDestination().getName());
             if (aux == null) aux = 0.0;
-            aux2 = cf.externalFragmentation(link.getFreeSpectrumBands(0));
+            aux2 = cf.externalFragmentation(link.getFreeSpectrumBands());
             aux += aux2;
             ExternalFragLinks.put(link.getSource().getName() + SEP + link.getDestination().getName(), aux);
             externalFragAverage += aux2;
@@ -123,11 +123,11 @@ public class ExternalFragmentation extends Measurement {
         List<Link> links = circuit.getRoute().getLinkList();
 
         List<int[]> composition;
-        composition = links.get(0).getFreeSpectrumBands(circuit.getGuardBand());
+        composition = links.get(0).getFreeSpectrumBands();
         int i;
 
         for (i = 1; i < links.size(); i++) {
-            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands(circuit.getGuardBand()));
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
         ComputesFragmentation cf = new ComputesFragmentation();
 

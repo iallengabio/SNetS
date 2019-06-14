@@ -22,38 +22,38 @@ public class IntersectionFreeSpectrum {
      */
     public static List<int[]> merge(List<int[]> l1, List<int[]> l2) {
         List<int[]> res = new ArrayList<>();
-
+        
         int indL1 = 0;
         int indL2 = 0;
-
+        
         int aux1[] = null;
         int aux2[] = null;
         int aux3[];
-
+        
         while (indL1 < l1.size() && indL2 < l2.size()) {
-
+        	
             if (aux1 == null) aux1 = l1.get(indL1).clone();
             if (aux2 == null) aux2 = l2.get(indL2).clone();
             aux3 = new int[2];
-
+            
             if (aux1[0] >= aux2[0]) {
                 aux3[0] = aux1[0];
             } else {
                 aux3[0] = aux2[0];
             }
-
+            
             if (aux1[1] < aux2[0]) { // Intervals does not overlap, pick up the next free intervals in list 1
                 indL1++;
                 aux1 = null;
                 continue;
             }
-
+            
             if (aux2[1] < aux1[0]) { // Intervals does not overlap, pick up the next free intervals in list 2
                 indL2++;
                 aux2 = null;
                 continue;
             }
-
+            
             if (aux1[1] < aux2[1]) {
                 aux3[1] = aux1[1];
                 aux2[0] = aux1[1] + 1;
@@ -71,7 +71,7 @@ public class IntersectionFreeSpectrum {
                 res.add(aux3);
                 continue;
             }
-
+            
             if (aux1[1] == aux2[1]) {
                 aux3[1] = aux2[1];
                 indL1++;
@@ -81,7 +81,7 @@ public class IntersectionFreeSpectrum {
                 res.add(aux3);
             }
         }
-
+        
         return res;
     }
 
@@ -91,12 +91,12 @@ public class IntersectionFreeSpectrum {
      * @param route Route
      * @return List<int[]>
      */
-    public static List<int[]> merge(Route route, int guardBand) {
+    public static List<int[]> merge(Route route) {
         List<Link> links = new ArrayList<>(route.getLinkList());
-        List<int[]> composition = links.get(0).getFreeSpectrumBands(guardBand);
+        List<int[]> composition = links.get(0).getFreeSpectrumBands();
         
         for (int i = 1; i < links.size(); i++) {
-            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands(guardBand));
+            composition = IntersectionFreeSpectrum.merge(composition, links.get(i).getFreeSpectrumBands());
         }
 
         return composition;

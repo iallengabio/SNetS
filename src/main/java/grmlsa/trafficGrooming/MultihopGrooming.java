@@ -303,7 +303,7 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
 
                 int slotsNeeded = c.getModulation().requiredSlots(c.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (c.getSpectrumAssigned()[1] - c.getSpectrumAssigned()[0] + 1);
                 if (slotsNeeded > 0) {
-                    List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute(), c.getGuardBand());
+                    List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute());
                     int bandFreeAdjInferior = IntersectionFreeSpectrum.freeSlotsDown(c.getSpectrumAssigned(), composition);
                     int bandFreeAdjSuperior = IntersectionFreeSpectrum.freeSlotsUpper(c.getSpectrumAssigned(), composition);
                     int[] expansion = decideToExpand(slotsNeeded, bandFreeAdjInferior, bandFreeAdjSuperior);

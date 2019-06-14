@@ -84,7 +84,7 @@ public class DedicatedPartition implements IntegratedRMLSAAlgorithmInterface{
 				List<int[]> primaryZone = new ArrayList<>();
 				primaryZone.add(zone);			
 				
-				List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
+				List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 				merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 				
 				int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);

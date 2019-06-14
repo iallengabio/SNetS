@@ -5,7 +5,6 @@ import java.util.Map;
 
 import network.Circuit;
 import network.ControlPlane;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -29,7 +28,7 @@ public class DispersionAdaptiveFirstLastFit implements SpectrumAssignmentAlgorit
 	
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
 
         int chosen[] = policy(numberOfSlots, composition, circuit, cp);
         circuit.setSpectrumAssigned(chosen);

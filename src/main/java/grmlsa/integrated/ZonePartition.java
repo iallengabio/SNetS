@@ -80,7 +80,7 @@ public class ZonePartition implements IntegratedRMLSAAlgorithmInterface {
 	            List<int[]> primaryZone = new ArrayList<>();
 	            primaryZone.add(zone);
 	
-	            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
 	            merge = IntersectionFreeSpectrum.merge(merge, primaryZone);
 	
 	            int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);
@@ -108,7 +108,7 @@ public class ZonePartition implements IntegratedRMLSAAlgorithmInterface {
 	                int zone[] = this.zones.get(numSlots);
 	                List<int[]> secondaryZone = this.secondaryZone(zone, r.getLinkList().get(0).getNumOfSlots());
 	
-	                List<int[]> merge = IntersectionFreeSpectrum.merge(r, circuit.getGuardBand());
+	                List<int[]> merge = IntersectionFreeSpectrum.merge(r);
 	                merge = IntersectionFreeSpectrum.merge(merge, secondaryZone);
 	
 	                int ff[] = spectrumAssignment.policy(numSlots, merge, circuit, cp);

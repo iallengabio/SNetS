@@ -2,7 +2,6 @@ package grmlsa.spectrumAssignment;
 
 import network.Circuit;
 import network.ControlPlane;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class FirstFitExpansiveness2 implements SpectrumAssignmentAlgorithmInterf
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
         int aux = ffeSigma;
         int chosen[] = null;
 

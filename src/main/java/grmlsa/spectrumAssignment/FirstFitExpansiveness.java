@@ -1,11 +1,10 @@
 package grmlsa.spectrumAssignment;
 
+import java.util.List;
+
 import network.Circuit;
 import network.ControlPlane;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
-
-import java.util.List;
 
 /**
  * This class represents the spectrum allocation technique called First Fit Expansiveness, this algorithm cant be used in sequencial RMLSA.
@@ -19,7 +18,7 @@ public class FirstFitExpansiveness implements SpectrumAssignmentAlgorithmInterfa
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
         int aux = ffeSigma;
         int chosen[] = null;
 
