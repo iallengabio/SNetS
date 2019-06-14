@@ -13,14 +13,15 @@ import java.util.TreeSet;
  */
 public class Spectrum implements Serializable {
 	
+	// To represent the state of a slot
 	public static final char FREE = 'l';
 	public static final char BUSY = 'u';
 	public static final char GB_FOR_ONE = 'b';
 	public static final char GB_FOR_TWO = 'B';
 	
-	private char spectrum[];
+	private char spectrum[]; // Represents all slots
 	
-	private TreeSet<int[]> freeSpectrumBands;
+	private TreeSet<int[]> freeSpectrumBands; // Represents the free slots bands
 	private int numOfSlots;
 	private double slotSpectrumBand;
 	private int usedSlots;
@@ -68,12 +69,15 @@ public class Spectrum implements Serializable {
 	 */
 	public boolean useSpectrum(int spectrumBand[], int guardBand) throws Exception {
 
-		if(spectrumBand[0]>spectrumBand[1]){
+		if(spectrumBand[0] > spectrumBand[1]){
 			throw new Exception("invalid spectrum band");
 		}
 
 		for (int freeSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freeSpecBand)){
+				
+				usedSpectrumUpdate(spectrumBand, guardBand);
+				
 				freeSpectrumBands.remove(freeSpecBand); // Remove free bands
 				
 				// Create new free bands
@@ -93,8 +97,6 @@ public class Spectrum implements Serializable {
 				}
 
 				usedSlots = usedSlots + (spectrumBand[1] - spectrumBand[0] + 1);
-				
-				usedSpectrumUpdate(spectrumBand, guardBand);
 				
 				return true;
 			}			
@@ -138,7 +140,7 @@ public class Spectrum implements Serializable {
 		
 		freeSpectrumUpdate(spectrumBand, guardBand);
 		
-		this.freeSpectrumBands.add(spectrumBand); //liberando spectro
+		this.freeSpectrumBands.add(spectrumBand); // Releasing spectrum
 
 		usedSlots = usedSlots - (spectrumBand[1] - spectrumBand[0] + 1);
 
@@ -174,10 +176,10 @@ public class Spectrum implements Serializable {
 	/**
 	 * Updating the used spectrum
 	 * 
-	 * @param spectrumBand
-	 * @param guardBand
+	 * @param spectrumBand int[]
+	 * @param guardBand int
 	 */
-	private void usedSpectrumUpdate(int spectrumBand[], int guardBand) {
+	private void usedSpectrumUpdate(int spectrumBand[], int guardBand) throws Exception {
 		
 		int leftGuardBand = guardBand;
 		if(spectrumBand[0] == 1) {
@@ -196,7 +198,7 @@ public class Spectrum implements Serializable {
 				spectrum[index] = BUSY;
 				
 			}else{
-				System.out.println("Error 1!!! spectrum = " + spectrum[index]);
+				throw new Exception("Spectrum is not free. Spectrum: " + spectrum[index]);
 			}
 			index++;
 		}
@@ -210,7 +212,7 @@ public class Spectrum implements Serializable {
 				spectrum[index] = GB_FOR_TWO;
 				
 			}else {
-				System.out.println("Error 2!! spectrum = " + spectrum[index]);
+				throw new Exception("Spectrum is not free and is not guard band. Spectrum: " + spectrum[index]);
 			}
 		}
 		
@@ -223,7 +225,7 @@ public class Spectrum implements Serializable {
 				spectrum[index] = GB_FOR_TWO;
 				
 			}else {
-				System.out.println("Error 3!!! spectrum = " + spectrum[index]);
+				throw new Exception("Spectrum is not free and is not guard band. Spectrum: " + spectrum[index]);
 			}
 		}
 	}
@@ -231,10 +233,10 @@ public class Spectrum implements Serializable {
 	/**
 	 * Updating the free spectrum
 	 * 
-	 * @param spectrumBand
-	 * @param guardBand
+	 * @param spectrumBand int[]
+	 * @param guardBand int
 	 */
-	private void freeSpectrumUpdate(int spectrumBand[], int guardBand) {
+	private void freeSpectrumUpdate(int spectrumBand[], int guardBand) throws Exception {
 		
 		int leftGuardBand = guardBand;
 		if(spectrumBand[0] == 1) {
@@ -253,7 +255,7 @@ public class Spectrum implements Serializable {
 				spectrum[index] = FREE;
 				
 			}else{
-				System.out.println("Error 4!!! spectrum = " + spectrum[index]);
+				throw new Exception("Spectrum is not busy. Spectrum: " + spectrum[index]);
 			}
 			index++;
 		}
@@ -267,7 +269,7 @@ public class Spectrum implements Serializable {
 				spectrum[index] = GB_FOR_ONE;
 				
 			}else {
-				System.out.println("Error 5!!! spectrum = " + spectrum[index]);
+				throw new Exception("Spectrum is not guard band. Spectrum: " + spectrum[index]);
 			}
 		}
 		
@@ -280,7 +282,7 @@ public class Spectrum implements Serializable {
 				spectrum[index] = GB_FOR_ONE;
 				
 			}else {
-				System.out.println("Error 6!!! spectrum = " + spectrum[index]);
+				throw new Exception("Spectrum is not guard band. Spectrum: " + spectrum[index]);
 			}
 		}
 	}

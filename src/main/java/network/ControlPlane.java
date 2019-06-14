@@ -802,6 +802,15 @@ public class ControlPlane implements Serializable {
         this.mesh.computesPowerConsmption(this);
     }
     
+    /**
+     * Returns the free spectrum band without considering the guard band for all links of the route
+	 * Uses the guard band required for the circuit to check the free spectrum bands of the links
+     * 
+     * @param circuit Circuit
+     * @param numberOfSlots int
+     * @param freeSpectrumBand int[]
+     * @return List<int[]>
+     */
     public List<int[]> getFreeSpectrumMergeForAllocationWithoutGuardBand(Circuit circuit, int numberOfSlots, int[] freeSpectrumBand) {
     	Route route = circuit.getRoute();
     	
