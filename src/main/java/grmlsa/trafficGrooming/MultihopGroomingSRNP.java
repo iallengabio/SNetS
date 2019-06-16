@@ -277,8 +277,8 @@ public abstract class MultihopGroomingSRNP implements TrafficGroomingAlgorithmIn
         return hasSuficientResitualCapacity;
     }
 
-    private boolean canBeExpanded(Circuit c, RequestForConnection rfc) {
-        int[] exp = Grooming.circuitExpansiveness(c);
+    private boolean canBeExpanded(Circuit c, RequestForConnection rfc, ControlPlane cp) {
+        int[] exp = Grooming.circuitExpansiveness(c, cp);
         int circExCap = exp[0] + exp[1];
         int slotsNeeded = c.getModulation().requiredSlots(c.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (c.getSpectrumAssigned()[1] - c.getSpectrumAssigned()[0] + 1);
         return circExCap >= slotsNeeded;
@@ -320,16 +320,16 @@ public abstract class MultihopGroomingSRNP implements TrafficGroomingAlgorithmIn
             int i;
             for(i = 0; i < ms.virtualRoute.size(); ++i) {
                 Circuit c = (Circuit)ms.virtualRoute.get(i);
-                if (!this.canBeExpanded(c, rfc)) {
+                if (!this.canBeExpanded(c, rfc, cp)) {
                     canBeExpanded = false;
                     break;
                 }
 
                 int slotsNeeded = c.getModulation().requiredSlots(c.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (c.getSpectrumAssigned()[1] - c.getSpectrumAssigned()[0] + 1);
                 if (slotsNeeded > 0) {
-                    List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute());
-                    int bandFreeAdjInferior = IntersectionFreeSpectrum.freeSlotsDown(c.getSpectrumAssigned(), composition);
-                    int bandFreeAdjSuperior = IntersectionFreeSpectrum.freeSlotsUpper(c.getSpectrumAssigned(), composition);
+                    List<int[]> composition = IntersectionFreeSpectrum.merge(c.getRoute(), c.getGuardBand());
+                    int bandFreeAdjInferior = IntersectionFreeSpectrum.freeSlotsDown(c.getSpectrumAssigned(), composition, c.getGuardBand());
+                    int bandFreeAdjSuperior = IntersectionFreeSpectrum.freeSlotsUpper(c.getSpectrumAssigned(), composition, c.getGuardBand());
                     int[] expansion = decideToExpand(slotsNeeded, bandFreeAdjInferior, bandFreeAdjSuperior);
                     downExps.add(expansion[0]);
                     upExps.add(expansion[1]);

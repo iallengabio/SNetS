@@ -59,8 +59,8 @@ public class Link implements Serializable {
      *                           and the second to the last slot to be used
      * @return boolean
      */
-    public boolean useSpectrum(int interval[]) throws Exception {
-        return spectrum.useSpectrum(interval);
+    public boolean useSpectrum(int interval[], int guardBand) throws Exception {
+        return spectrum.useSpectrum(interval, guardBand);
     }
 
     /**
@@ -68,8 +68,8 @@ public class Link implements Serializable {
      *
      * @param spectrumBand int[]
      */
-    public void liberateSpectrum(int spectrumBand[]) throws Exception {
-        spectrum.freeSpectrum(spectrumBand);
+    public void liberateSpectrum(int spectrumBand[], int guardBand) throws Exception {
+        spectrum.freeSpectrum(spectrumBand, guardBand);
     }
 
     /**
@@ -149,10 +149,10 @@ public class Link implements Serializable {
      *
      * @return List<int[]>
      */
-    public List<int[]> getFreeSpectrumBands() {
-        return spectrum.getFreeSpectrumBands();
+    public List<int[]> getFreeSpectrumBands(int guardBand) {
+        return spectrum.getFreeSpectrumBands(guardBand);
     }
-
+    
     /**
      * Returns the bandwidth of a slot
      * 

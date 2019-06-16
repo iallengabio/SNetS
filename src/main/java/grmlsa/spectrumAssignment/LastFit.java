@@ -4,7 +4,6 @@ import java.util.List;
 
 import network.Circuit;
 import network.ControlPlane;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 /**
@@ -17,8 +16,8 @@ public class LastFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
-
+    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
+    	
         int chosen[] = policy(numberOfSlots, composition, circuit, cp);
         circuit.setSpectrumAssigned(chosen);
         
@@ -34,19 +33,17 @@ public class LastFit implements SpectrumAssignmentAlgorithmInterface {
         if(numberOfSlots>maxAmplitude) return null;
     	int chosen[] = null;
         int band[] = null;
-        int i;
         
-        for (i = freeSpectrumBands.size() - 1; i >= 0; i--) {
+        for (int i = freeSpectrumBands.size() - 1; i >= 0; i--) {
             band = freeSpectrumBands.get(i);
+            
             if (band[1] - band[0] + 1 >= numberOfSlots) {
                 chosen = band.clone();
                 chosen[0] = chosen[1] - numberOfSlots + 1;//It is not necessary to allocate the entire band, just the amount of slots required
-
                 break;
             }
         }
 
         return chosen;
     }
-
 }

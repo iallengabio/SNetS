@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import request.RequestForConnection;
 import simulationControl.Util;
 import simulationControl.parsers.PhysicalLayerConfig;
 
@@ -274,7 +275,7 @@ public class PhysicalLayer implements Serializable {
 	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
-		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+		double Bsi = numSlotsRequired * slotBandwidth; // Circuit bandwidth, less the guard band
 		double fi = lowerFrequency + (slotBandwidth * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
 		
 		double circuitPowerLinear = this.powerLinear;
@@ -403,7 +404,7 @@ public class PhysicalLayer implements Serializable {
 			if(fixedPowerSpectralDensity){
 				saj = circuitJ.getSpectrumAssignedByLink(link);;
 				numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
 				
 				circuitPower = I * Bsj;
 			}
@@ -455,7 +456,7 @@ public class PhysicalLayer implements Serializable {
 				saJ = circuitJ.getSpectrumAssignedByLink(link);
 				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
 				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
 				
 				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
@@ -755,11 +756,16 @@ public class PhysicalLayer implements Serializable {
 			Route route = new Route(listNodes);
 			Pair pair = new Pair(n1, n2);
 			
+			RequestForConnection requestTemp = new RequestForConnection();
+			requestTemp.setPair(pair);
+			requestTemp.setRequiredBandwidth(bandwidth);
+			
 			Circuit circuitTemp = new Circuit();
 			circuitTemp.setPair(pair);
 			circuitTemp.setRoute(route);
 			circuitTemp.setModulation(mod);
 			circuitTemp.setSpectrumAssigned(sa);
+			circuitTemp.addRequest(requestTemp);
 			
 			route.getLink(0).addCircuit(circuitTemp);
 			

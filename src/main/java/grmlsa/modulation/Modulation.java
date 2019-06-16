@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 
  * @author Iallen
  */
-public class Modulation implements Serializable {
+public class Modulation implements Serializable, Cloneable {
 
     private String name;
     private double bitsPerSymbol;
@@ -67,9 +67,9 @@ public class Modulation implements Serializable {
         if (slotsNumber - slotsNumberTemp != 0.0) {
         	slotsNumberTemp++;
         }
-
-        slotsNumberTemp = slotsNumberTemp + guardBand; // Adds another slot needed to be used as a guard band
-
+        
+        //slotsNumberTemp = slotsNumberTemp + guardBand; // Adds another slot needed to be used as a guard band
+        
         return slotsNumberTemp;
     }
 
@@ -79,7 +79,7 @@ public class Modulation implements Serializable {
      * @return
      */
     public double potentialBandwidth(int slotsNumber){
-    	slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
+    	//slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
         
         return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
     }
@@ -154,5 +154,19 @@ public class Modulation implements Serializable {
      */
     public int getGuardBand(){
     	return guardBand;
+    }
+    
+    /**
+     * Sets the guard band
+     * 
+     * @param guardBand int
+     */
+    public void setGuardBand(int guardBand) {
+		this.guardBand = guardBand;
+    }
+    
+    @Override
+	public Object clone() throws CloneNotSupportedException{
+		return super.clone();
     }
 }

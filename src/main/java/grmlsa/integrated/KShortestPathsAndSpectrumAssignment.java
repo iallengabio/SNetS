@@ -24,7 +24,7 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
-
+    
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
         if (kShortestsPaths == null){
@@ -56,11 +56,11 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
             	circuit.setModulation(mod);
             	
             	int slotsNumber = mod.requiredSlots(circuit.getRequiredBandwidth());
-	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 	            
 	            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
 	            circuit.setSpectrumAssigned(band);
-	
+	            
 	            if (band != null) {
 	            	if(checkRoute == null){
 	            		checkRoute = route;
@@ -82,10 +82,10 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
         }
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
-            circuit.setRoute(chosenRoute);
+        	circuit.setRoute(chosenRoute);
             circuit.setModulation(chosenMod);
             circuit.setSpectrumAssigned(chosenBand);
-
+            
             return true;
 
         } else {

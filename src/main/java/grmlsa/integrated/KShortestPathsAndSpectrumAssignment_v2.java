@@ -68,7 +68,7 @@ public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAl
         			circuit.setModulation(mod);
 	            	
 	            	int slotsNumber = mod.requiredSlots(circuit.getRequiredBandwidth());
-		            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+		            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 		            
 		            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
 		            circuit.setSpectrumAssigned(band);

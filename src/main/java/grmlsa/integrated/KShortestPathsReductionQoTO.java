@@ -99,7 +99,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 				circuit.setModulation(mod);
 				
 				int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp);
+				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp, circuit.getGuardBand());
 				
 				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
 				circuit.setSpectrumAssigned(band);
@@ -166,8 +166,9 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 			}
 			
 			if(firstModulation != null){
+				circuit.setModulation(firstModulation);
 				int numberOfSlots = firstModulation.requiredSlots(circuit.getRequiredBandwidth());
-				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp);
+				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp, circuit.getGuardBand());
 				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
 				
 				if(band != null){

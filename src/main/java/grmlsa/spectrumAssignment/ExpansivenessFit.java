@@ -2,7 +2,6 @@ package grmlsa.spectrumAssignment;
 
 import network.Circuit;
 import network.ControlPlane;
-import network.Transmitters;
 import util.IntersectionFreeSpectrum;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class ExpansivenessFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
+    	List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
 
 		// now just look for the free range with size farthest from the amount of slots required
 		int chosen[] = policy(numberOfSlots, composition, circuit, cp);

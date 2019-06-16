@@ -48,9 +48,12 @@ public class CompleteSharingSSTG implements IntegratedRMLSAAlgorithmInterface {
             spectrumAssignment.setFfeSigma(sigmaAux);
             for (Route route : candidateRoutes) {
                 circuit.setRoute(route);
+                
                 Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
+                circuit.setModulation(mod);
+                
                 if (mod != null) {
-                    List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+                    List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 
                     // Calculate how many slots are needed for this route
                     int ff[] = spectrumAssignment.policy(mod.requiredSlots(circuit.getRequiredBandwidth()), merge, circuit, cp);

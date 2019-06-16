@@ -53,7 +53,7 @@ public class KShortestPathsComputation implements IntegratedRMLSAAlgorithmInterf
             
             if(mod != null){
             	int requeridSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
-	            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+	            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 	            int band[] = spectrumAssignment.policy(requeridSlots, merge, circuit, cp);
 	
 	            if (band != null) {
