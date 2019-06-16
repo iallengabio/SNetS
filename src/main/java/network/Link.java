@@ -1,6 +1,7 @@
 package network;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -149,12 +150,12 @@ public class Link implements Serializable {
      *
      * @return List<int[]>
      */
-    public List<int[]> getFreeSpectrumBands() {
-        return spectrum.getFreeSpectrumBands();
+    public List<int[]> getFreeSpectrumBands(int guardBand) {
+        return spectrum.getFreeSpectrumBands(guardBand);
     }
     
-    public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(int[] freeSpectrumBand, int guardBand) {
-        return spectrum.getFreeSpectrumForAllocationWithoutGuardBand(freeSpectrumBand, guardBand);
+    public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(List<int[]> freeSpectrumBandList, int guardBand) {
+        return spectrum.getFreeSpectrumForAllocationWithoutGuardBand(freeSpectrumBandList, guardBand);
     }
 
     /**
@@ -231,4 +232,21 @@ public class Link implements Serializable {
 		circuitList.remove(circuit);
 	}
 	
+	/**
+	 * Returns the left guard band list
+	 * 
+	 * @return HashMap<Integer, int[]>
+	 */
+	public HashMap<Integer, int[]> getUpperGuardBandList() {
+		return spectrum.getUpperGuardBandList();
+	}
+
+	/**
+	 * Returns the left guard band list
+	 * 
+	 * @return HashMap<Integer, int[]>
+	 */
+	public HashMap<Integer, int[]> getDownGuardBandList() {
+		return spectrum.getDownGuardBandList();
+	}
 }

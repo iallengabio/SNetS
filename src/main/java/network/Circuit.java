@@ -377,6 +377,5 @@ public class Circuit implements Comparable<Object>, Serializable {
 	public void setGuardBand(int guardBand) {
 		this.guardBand = guardBand;
 	}
-	
-	
+
 }

@@ -16,7 +16,7 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
 
     @Override
     public boolean assignSpectrum(int numberOfSlots, Circuit circuit, ControlPlane cp) {
-        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute());
+        List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
         
         int chosen[] = policy(numberOfSlots, composition, circuit, cp);
         circuit.setSpectrumAssigned(chosen);
@@ -32,13 +32,8 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
         int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
         if(numberOfSlots> maxAmplitude) return null;
     	int chosen[] = null;
+    	
         for (int[] band : freeSpectrumBands) {
-        	
-        	List<int[]> newBandList = cp.getFreeSpectrumMergeForAllocationWithoutGuardBand(circuit, numberOfSlots, band);
-        	if(newBandList.size() == 0) {
-        		continue;
-        	}
-        	band = newBandList.get(0);
         	
             if (band[1] - band[0] + 1 >= numberOfSlots) {
                 chosen = band.clone();
@@ -46,6 +41,7 @@ public class FirstFit implements SpectrumAssignmentAlgorithmInterface {
                 break;
             }
         }
+        
         return chosen;
 	}
 }

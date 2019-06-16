@@ -76,7 +76,7 @@ public class RelativeFragmentation extends Measurement {
         double averageFragLink = 0.0;
         ComputesFragmentation cf = new ComputesFragmentation();
         for (Link link : mesh.getLinkList()) {
-            double fAux = cf.relativeFragmentation(link.getFreeSpectrumBands(), c);
+            double fAux = cf.relativeFragmentation(link.getFreeSpectrumBands(0), c);
             averageFragLink += fAux;
         }
         averageFragLink = averageFragLink / ((double) mesh.getLinkList().size());

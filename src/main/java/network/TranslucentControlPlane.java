@@ -164,9 +164,8 @@ public class TranslucentControlPlane extends ControlPlane {
     public void allocateCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
         List<Link> links = new ArrayList<>(route.getLinkList());
-        int guardBand = 1;
         
-        allocateSpectrum(circuit, links, guardBand);
+        allocateSpectrum(circuit, links, circuit.getGuardBand());
         
         // Allocates transmitter and receiver
         circuit.getSource().getTxs().allocatesTransmitters();
@@ -201,9 +200,8 @@ public class TranslucentControlPlane extends ControlPlane {
 	@Override
     public void releaseCircuit(Circuit circuit) throws Exception {
         Route route = circuit.getRoute();
-        int guardBand = 1;
         
-        releaseSpectrum(circuit, route.getLinkList(), guardBand);
+        releaseSpectrum(circuit, route.getLinkList(), circuit.getGuardBand());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -330,14 +328,14 @@ public class TranslucentControlPlane extends ControlPlane {
 			Node destinationNode = route.getNode(sourceNodeIndex + 1);
 			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			
-			List<int[]> composition = link.getFreeSpectrumBands();
+			List<int[]> composition = link.getFreeSpectrumBands(circuit.getGuardBand());
 			
 			for(int l = sourceNodeIndex + 1; l < destinationNodeIndex; l++){
 				sourceNode = route.getNode(l);
 				destinationNode = route.getNode(l + 1);
 				link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 				
-				composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
+				composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands(circuit.getGuardBand()));
 			}
 			
 			tryAssignModulationAndSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition);
@@ -562,14 +560,14 @@ public class TranslucentControlPlane extends ControlPlane {
 			Node sourceNode = route.getNode(sourceNodeIndex);
 			Node destinationNode = route.getNode(sourceNodeIndex + 1);
 			Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-
-			List<int[]> merge = link.getFreeSpectrumBands();
+			
+			List<int[]> merge = link.getFreeSpectrumBands(circuit.getGuardBand());
 			for (int n = sourceNodeIndex; n < destinationNodeIndex; n++) {
 				sourceNode = route.getNode(n);
 				destinationNode = route.getNode(n + 1);
 				link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 
-				merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands());
+				merge = IntersectionFreeSpectrum.merge(merge, link.getFreeSpectrumBands(circuit.getGuardBand()));
 			}
 
 			int totalFree = 0;

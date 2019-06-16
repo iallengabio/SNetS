@@ -3,6 +3,7 @@ package network;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -26,6 +27,9 @@ public class Spectrum implements Serializable {
 	private double slotSpectrumBand;
 	private int usedSlots;
 	
+	private HashMap<Integer, int[]> upperGuardBandList;
+	private HashMap<Integer, int[]> downGuardBandList;
+	
 	/**
 	 * Creates a new instance of Spectrum
 	 * 
@@ -42,11 +46,14 @@ public class Spectrum implements Serializable {
 			spectrum[i] = FREE;
 		}
 		
-		int fsin[] = new int[2];
-		fsin[0] = 1;
-		fsin[1] = numOfSlots;
+		int fsb[] = new int[2];
+		fsb[0] = 1;
+		fsb[1] = numOfSlots;
 		freeSpectrumBands = new TreeSet<int[]>(new MyComparator());
-		freeSpectrumBands.add(fsin);
+		freeSpectrumBands.add(fsb);
+		
+		upperGuardBandList = new HashMap<Integer, int[]>();
+		downGuardBandList = new HashMap<Integer, int[]>();
 		
 		usedSlots = 0; 
 	}
@@ -68,15 +75,16 @@ public class Spectrum implements Serializable {
 	 * @return boolean
 	 */
 	public boolean useSpectrum(int spectrumBand[], int guardBand) throws Exception {
-
+		
 		if(spectrumBand[0] > spectrumBand[1]){
 			throw new Exception("invalid spectrum band");
 		}
-
+		
 		for (int freeSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freeSpecBand)){
 				
 				usedSpectrumUpdate(spectrumBand, guardBand);
+				addGuardBands(spectrumBand, guardBand);
 				
 				freeSpectrumBands.remove(freeSpecBand); // Remove free bands
 				
@@ -114,8 +122,8 @@ public class Spectrum implements Serializable {
 	 */
 	private boolean isInInterval(int inter1[], int inter2[]){
 		
-		if(inter1[0]>=inter2[0])
-			if(inter1[1]<=inter2[1])
+		if(inter1[0] >= inter2[0])
+			if(inter1[1] <= inter2[1])
 				return true;
 		
 		return false;
@@ -128,7 +136,7 @@ public class Spectrum implements Serializable {
 	 */
 	public void freeSpectrum(int spectrumBand[], int guardBand) throws Exception {
 		
-		if(spectrumBand[0]>spectrumBand[1]){
+		if(spectrumBand[0] > spectrumBand[1]){
 			throw new Exception("invalid spectrum band");
 		}
 
@@ -139,6 +147,7 @@ public class Spectrum implements Serializable {
 		}
 		
 		freeSpectrumUpdate(spectrumBand, guardBand);
+		removeGuardBands(spectrumBand, guardBand);
 		
 		this.freeSpectrumBands.add(spectrumBand); // Releasing spectrum
 
@@ -174,6 +183,74 @@ public class Spectrum implements Serializable {
 	}
 	
 	/**
+	 * Add upper and down guard bands in the guard bands list
+	 * 
+	 * @param spectrumBand int[]
+	 * @param guardBand int
+	 */
+	private void addGuardBands(int spectrumBand[], int guardBand) {
+		
+		int upperGB = guardBand;
+		if(spectrumBand[0] == 1) { // Check if the band starts on the first slot
+			upperGB = 0;
+		}
+		int downGB = guardBand;
+		if(spectrumBand[1] == numOfSlots) { // Check if the band ends on the last slot
+			downGB = 0;
+		}
+		
+		if (upperGB > 0) { // Check if you need to create the upper guard band
+			int upperGuardBand[] = new int[2];
+			upperGuardBand[0] = spectrumBand[0] - upperGB;
+			upperGuardBand[1] = spectrumBand[0] - 1;
+			
+			this.upperGuardBandList.put(upperGuardBand[0], upperGuardBand);
+		}
+		
+		if (downGB > 0) { // Check if you need to create the down guard band
+			int downGuardBand[] = new int[2];
+			downGuardBand[0] = spectrumBand[1] + 1;
+			downGuardBand[1] = spectrumBand[1] + downGB;
+			
+			this.downGuardBandList.put(downGuardBand[1], downGuardBand);
+		}
+	}
+	
+	/**
+	 * Remove upper and down guard bands in the guard bands list
+	 * 
+	 * @param spectrumBand int[]
+	 * @param guardBand int
+	 */
+	private void removeGuardBands(int spectrumBand[], int guardBand) {
+		
+		int upperGB = guardBand;
+		if(spectrumBand[0] == 1) { // Check if the band starts on the first slot
+			upperGB = 0;
+		}
+		int downGB = guardBand;
+		if(spectrumBand[1] == numOfSlots) { // Check if the band ends on the last slot
+			downGB = 0;
+		}
+		
+		if (upperGB > 0) { // Check if you need to remove the upper guard band
+			int upperGuardBand[] = new int[2];
+			upperGuardBand[0] = spectrumBand[0] - upperGB;
+			upperGuardBand[1] = spectrumBand[0] - 1;
+			
+			this.upperGuardBandList.remove(upperGuardBand[0], upperGuardBand);
+		}
+		
+		if (downGB > 0) { // Check if you need to remove the down guard band
+			int downGuardBand[] = new int[2];
+			downGuardBand[0] = spectrumBand[1] + 1;
+			downGuardBand[1] = spectrumBand[1] + downGB;
+			
+			this.downGuardBandList.remove(downGuardBand[1], downGuardBand);
+		}
+	}
+	
+	/**
 	 * Updating the used spectrum
 	 * 
 	 * @param spectrumBand int[]
@@ -194,6 +271,11 @@ public class Spectrum implements Serializable {
 		
 		int index = spectrumBand[0] - 1;
 		for(int i = 0; i < slotsNumber; i++) {
+			
+			if(index < 0 || index >= numOfSlots) {
+				break;
+			}
+			
 			if(spectrum[index] == FREE) {
 				spectrum[index] = BUSY;
 				
@@ -204,7 +286,12 @@ public class Spectrum implements Serializable {
 		}
 		
 		for(int i = 0; i < leftGuardBand; i++) {
-			index = (spectrumBand[0] - 2) + i;
+			index = (spectrumBand[0] - 2) - i;
+			
+			if(index < 0 || index >= numOfSlots) {
+				break;
+			}
+			
 			if(spectrum[index] == FREE) {
 				spectrum[index] = GB_FOR_ONE;
 				
@@ -218,6 +305,11 @@ public class Spectrum implements Serializable {
 		
 		for(int i = 0; i < rightGuardBand; i++) {
 			index = spectrumBand[1] + i;
+			
+			if(index < 0 || index >= numOfSlots) {
+				break;
+			}
+			
 			if(spectrum[index] == FREE) {
 				spectrum[index] = GB_FOR_ONE;
 				
@@ -251,6 +343,11 @@ public class Spectrum implements Serializable {
 		
 		int index = spectrumBand[0] - 1;
 		for(int i = 0; i < slotsNumber; i++) {
+			
+			if(index < 0 || index >= numOfSlots) {
+				break;
+			}
+			
 			if(spectrum[index] == BUSY) {
 				spectrum[index] = FREE;
 				
@@ -261,7 +358,12 @@ public class Spectrum implements Serializable {
 		}
 		
 		for(int i = 0; i < leftGuardBand; i++) {
-			index = (spectrumBand[0] - 2) + i;
+			index = (spectrumBand[0] - 2) - i;
+			
+			if(index < 0 || index >= numOfSlots) {
+				break;
+			}
+			
 			if(spectrum[index] == GB_FOR_ONE) {
 				spectrum[index] = FREE;
 				
@@ -275,6 +377,11 @@ public class Spectrum implements Serializable {
 		
 		for(int i = 0; i < rightGuardBand; i++) {
 			index = spectrumBand[1] + i;
+			
+			if(index < 0 || index >= numOfSlots) {
+				break;
+			}
+			
 			if(spectrum[index] == GB_FOR_ONE) {
 				spectrum[index] = FREE;
 				
@@ -293,11 +400,63 @@ public class Spectrum implements Serializable {
 	 * @return List<int[]>
 	 */
 	public List<int[]> getFreeSpectrumBands(){
-		
 		ArrayList<int[]> res = new ArrayList<>();
 		
-		for (int[] is : this.freeSpectrumBands) {
-			res.add(is.clone());
+		for (int fsb[] : this.freeSpectrumBands) {
+			res.add(fsb.clone());
+		}
+		
+		return res;
+	}
+	
+	public List<int[]> getFreeSpectrumBands(int guardBand){
+		ArrayList<int[]> res = new ArrayList<>();
+		
+		int numUpperGB;
+		int numDownGB;
+		int upperGB[];
+		int downGB[];
+		
+		for (int fsb[] : this.freeSpectrumBands) {
+			
+			numUpperGB = 0;
+			numDownGB = 0;
+			
+			upperGB = upperGuardBandList.get(fsb[0]);
+			if (upperGB != null) {
+				numUpperGB = upperGB[1] - upperGB[0] + 1;
+			}
+			
+			downGB = downGuardBandList.get(fsb[1]);
+			if (downGB != null) {
+				numDownGB = downGB[1] - downGB[0] + 1;
+			}
+			
+			if (guardBand > numUpperGB) {
+				numUpperGB = guardBand;
+			}
+			
+			if (guardBand > numDownGB) {
+				numDownGB = guardBand;
+			}
+			
+			if (fsb[0] == 1) { // Check if the band starts on the first slot
+				numUpperGB = 0;
+			}
+			
+			if (fsb[1] == numOfSlots) { // Check if the band ends on the last slot
+				numDownGB = 0;
+			}
+			
+			// Check that there are still free slots after removing the slots belonging to the guard bands
+			if ((fsb[1] - fsb[0] + 1) - (numUpperGB + numDownGB) > 0) {
+				
+				int newfsb[] = new int[2];
+				newfsb[0] = fsb[0] + numUpperGB;
+				newfsb[1] = fsb[1] - numDownGB;
+				
+				res.add(newfsb);
+			}
 		}
 		
 		return res;
@@ -311,67 +470,83 @@ public class Spectrum implements Serializable {
 	 * @param guardBand
 	 * @return List<int[]>
 	 */
-	public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(int[] freeSpectrumBand, int guardBand){
-		
-		int leftGB = 0;
-		int rightGB = 0;
-		
-		int numSlotsOfFreeBand = freeSpectrumBand[1] - freeSpectrumBand[0] + 1;
-		
-		int index = -1;
-		int contLeftBG = 0;
-		for(int n = 0; n < numSlotsOfFreeBand; n++) {
-			index = (freeSpectrumBand[0] - 1) + n;
-			
-			if (spectrum[index] == GB_FOR_ONE) {
-				contLeftBG++;
-				
-			} else {
-				break;
-			}
-		}
-		
-		index = -1;
-		int contRightBG = 0;
-		for(int n = 0; n < numSlotsOfFreeBand; n++) {
-			index = (freeSpectrumBand[1] - 1) - n;
-			
-			if (spectrum[index] == GB_FOR_ONE) {
-				contRightBG++;
-			
-			} else {
-				break;
-			}
-		}
-		
-		// Selects the largest band guard of left
-		if(contLeftBG > guardBand) {
-			leftGB = contLeftBG;
-		}else {
-			leftGB = guardBand;
-		}
-		
-		// Selects the largest band guard of right
-		if(contRightBG > guardBand) {
-			rightGB = contRightBG;
-		}else {
-			rightGB = guardBand;
-		}
-		
-		if (freeSpectrumBand[0] == 1) {
-			leftGB = 0;
-		}
-		
-		if (freeSpectrumBand[1] == numOfSlots) {
-			rightGB = 0;
-		}
-		
-		int newfsb[] = freeSpectrumBand.clone();
-		newfsb[0] = newfsb[0] + leftGB;
-		newfsb[1] = newfsb[1] - rightGB;
-		
+	public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(List<int[]> freeSpectrumBandList, int guardBand){
 		ArrayList<int[]> res = new ArrayList<>();
-		res.add(newfsb);
+		
+		for (int freeSpectrumBand[] : freeSpectrumBandList) {
+			
+			int leftGB = 0;
+			int rightGB = 0;
+			
+			int numSlotsOfFreeBand = freeSpectrumBand[1] - freeSpectrumBand[0] + 1;
+			
+			int index = -1;
+			int contLeftBG = 0;
+			for(int n = 0; n < numSlotsOfFreeBand; n++) {
+				index = (freeSpectrumBand[0] - 1) + n;
+				
+				if(index < 0 || index >= numOfSlots) {
+					break;
+				}
+				
+				if (spectrum[index] == GB_FOR_ONE) {
+					contLeftBG++;
+					
+				} else {
+					break;
+				}
+			}
+			
+			index = -1;
+			int contRightBG = 0;
+			for(int n = 0; n < numSlotsOfFreeBand; n++) {
+				index = (freeSpectrumBand[1] - 1) - n;
+				
+				if(index < 0 || index >= numOfSlots) {
+					break;
+				}
+				
+				if (spectrum[index] == GB_FOR_ONE) {
+					contRightBG++;
+				
+				} else {
+					break;
+				}
+			}
+			
+			// Selects the largest band guard of left
+			if(contLeftBG > guardBand) {
+				leftGB = contLeftBG;
+				
+			}else {
+				leftGB = guardBand;
+			}
+			
+			// Selects the largest band guard of right
+			if(contRightBG > guardBand) {
+				rightGB = contRightBG;
+				
+			}else {
+				rightGB = guardBand;
+			}
+			
+			if (freeSpectrumBand[0] == 1) {
+				leftGB = 0;
+			}
+			
+			if (freeSpectrumBand[1] == numOfSlots) {
+				rightGB = 0;
+			}
+			
+			if (numSlotsOfFreeBand - (leftGB + rightGB) > 0) {
+				
+				int newfsb[] = freeSpectrumBand.clone();
+				newfsb[0] = newfsb[0] + leftGB;
+				newfsb[1] = newfsb[1] - rightGB;
+				
+				res.add(newfsb);
+			}
+		}
 		
 		return res;
 	}
@@ -410,6 +585,24 @@ public class Spectrum implements Serializable {
 	 */
 	public int getUsedSlots(){
 		return usedSlots;
+	}
+
+	/**
+	 * Returns the upper guard band list
+	 * 
+	 * @return HashMap<Integer, int[]>
+	 */
+	public HashMap<Integer, int[]> getUpperGuardBandList() {
+		return upperGuardBandList;
+	}
+
+	/**
+	 * Returns the down guard band list
+	 * 
+	 * @return HashMap<Integer, int[]>
+	 */
+	public HashMap<Integer, int[]> getDownGuardBandList() {
+		return downGuardBandList;
 	}
 	
 }
