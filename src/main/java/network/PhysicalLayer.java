@@ -2,9 +2,9 @@ package network;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 
 import grmlsa.Route;
@@ -294,7 +294,7 @@ public class PhysicalLayer implements Serializable {
 		Node sourceNode = null;
 		Node destinationNode = null;
 		Link link = null;
-		TreeSet<Circuit> circuitList = null;
+		HashSet<Circuit> circuitList = null;
 		
 		double Ns = 0.0; // Number of line amplifiers
 		double noiseNli = 0.0;
@@ -350,8 +350,8 @@ public class PhysicalLayer implements Serializable {
 	 * @param addTestCircuit boolean
 	 * @return TreeSet<Circuit>
 	 */
-	private TreeSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
-		TreeSet<Circuit> circuitList = new TreeSet<Circuit>();
+	private HashSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
+		HashSet<Circuit> circuitList = new HashSet<Circuit>();
 		
 		for (Circuit circtuiTemp : link.getCircuitList()) {
 			circuitList.add(circtuiTemp);
@@ -378,15 +378,14 @@ public class PhysicalLayer implements Serializable {
 	/**
 	 * Total input power on the link
 	 * 
+	 * @param circuitList HashSet<Circuit>
 	 * @param link Link
 	 * @param powerI double
 	 * @param Bsi double
 	 * @param I double
-	 * @param numSlotsRequired int
-	 * @param checksOnTotalPower boolean
 	 * @return double
 	 */
-	public double getTotalPowerInTheLink(TreeSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
+	public double getTotalPowerInTheLink(HashSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
 		double totalPower = 0.0;
 		double circuitPower = 0.0;
 		int saj[] = null;
@@ -423,11 +422,12 @@ public class PhysicalLayer implements Serializable {
 	 * @param link Link
 	 * @param powerI double
 	 * @param BsI double
-	 * @param I double
+	 * @param Gi double
 	 * @param fI double
+	 * @param circuitList HashSet<Circuit>
 	 * @return double
 	 */
-	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double Gi, double fI, TreeSet<Circuit> circuitList){
+	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double Gi, double fI, HashSet<Circuit> circuitList){
 		double beta21 = beta2;
 		if(beta21 < 0.0){
 			beta21 = -1.0 * beta21;

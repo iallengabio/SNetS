@@ -1,7 +1,7 @@
 package network;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -31,15 +31,15 @@ public class EnergyConsumption {
 	 * @return double - (W) - Power consumed by circuit
 	 */
 	public static double computePowerConsumptionOfCircuit(Circuit circuit, ControlPlane cp) {
-		double pc = EnergyConsumption.computePowerConsumptionBySegment(cp, circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
+		double pc = EnergyConsumption.computePowerConsumptionBySegment(cp, circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
 		return pc;
 	}
 	
 	/**
 	 * This method calculates the power consumption for a segment
 	 * 
+	 * @param cp - ControlPlane
 	 * @param circuit - Circuit
-	 * @param bandwidth - double
 	 * @param route - Route
 	 * @param indexNodeSource - int
 	 * @param indexNodeDestination - int
@@ -47,7 +47,7 @@ public class EnergyConsumption {
 	 * @param spectrumAssigned - int[]
 	 * @return double - (W) - Power consumed by segment
 	 */
-	public static double computePowerConsumptionBySegment(ControlPlane cp, Circuit circuit, double bandwidth, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[]){
+	public static double computePowerConsumptionBySegment(ControlPlane cp, Circuit circuit, Route route, int indexNodeSource, int indexNodeDestination, Modulation modulation, int spectrumAssigned[]){
 		
 		double totalSlots = cp.getMesh().getLinkList().firstElement().getNumOfSlots(); //total number of slots in the links
 		int quantSlotsRequeridos = spectrumAssigned[1] - spectrumAssigned[0] + 1; //number of slots required by the circuit
@@ -89,7 +89,7 @@ public class EnergyConsumption {
 	public static double computeTranspondersPowerConsumption(ControlPlane cp){
 		double sumPCtrans = 0.0;
 		
-		TreeSet<Circuit> circuitList = cp.getConnections();
+		HashSet<Circuit> circuitList = cp.getConnections();
 		for(Circuit circuit : circuitList){
 			sumPCtrans += 2.0 * computeTransponderPowerConsumption(circuit); //power consumption of the transmitter and receiver
 		}

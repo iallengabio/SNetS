@@ -27,12 +27,12 @@ public class Modulation implements Serializable, Cloneable {
 	 * Creates a new instance of Modulation
 	 * 
 	 * @param name String
-	 * @param freqSlot double
 	 * @param maxRange double
-	 * @param guardBand double
-	 * @param level double
 	 * @param M double
-	 * @param FEC double
+	 * @param SNRthreshold double
+	 * @param rateFEC double
+	 * @param freqSlot double
+	 * @param guardBand double
 	 */
     public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand) {
         this.name = name;
@@ -49,19 +49,18 @@ public class Modulation implements Serializable, Cloneable {
     }
 
     /**
-     * Returns the number of slots required according to the bandwidth
-     * Adds guard band
+     * Returns the number of slots required according to the bit rate
      * 
      * Based on articles:
      *  - Efficient Resource Allocation for All-Optical Multicasting Over Spectrum-Sliced Elastic Optical Networks (2013)
 	 *  - Influence of Physical Layer Configuration on Performance of Elastic Optical OFDM Networks (2014)
 	 *  - Analise do Impacto do Ruido ASE em Redes Opticas Elasticas Transparentes Utilizando Multiplos Formatos de Modulacao (2015)
      *
-     * @param bandwidth
-     * @return int - numberOfStos
+     * @param bitRate
+     * @return int - slotsNumberTemp
      */
-    public int requiredSlots(double bandwidth) {
-    	double slotsNumber = (bandwidth * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
+    public int requiredSlots(double bitRate) {
+    	double slotsNumber = (bitRate * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
         
         int slotsNumberTemp = (int) slotsNumber;
         if (slotsNumber - slotsNumberTemp != 0.0) {
@@ -74,11 +73,12 @@ public class Modulation implements Serializable, Cloneable {
     }
 
     /**
-     * compute the potential bandwidth when @slotsNumber slots are utilized
-     * @param slotsNumber
-     * @return
+     * Compute the potential bit rate when @slotsNumber slots are utilized
+     * 
+     * @param slotsNumber int
+     * @return double
      */
-    public double potentialBandwidth(int slotsNumber){
+    public double potentialBitRate(int slotsNumber){
     	//slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
         
         return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
