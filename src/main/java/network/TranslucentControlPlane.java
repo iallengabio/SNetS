@@ -476,7 +476,7 @@ public class TranslucentControlPlane extends ControlPlane {
 			Modulation mod = circuit.getModulationByLink(link);
 			int sa[] = circuit.getSpectrumAssignedByLink(link);
 			
-			double PCsegment = EnergyConsumption.computePowerConsumptionBySegment(this, circuit, circuit.getRequiredBandwidth(), route, sourceNodeIndex, destinationNodeIndex, mod, sa);
+			double PCsegment = EnergyConsumption.computePowerConsumptionBySegment(this, circuit, route, sourceNodeIndex, destinationNodeIndex, mod, sa);
 			PCtotal += PCsegment;
 			
 			sourceNodeIndex = destinationNodeIndex;

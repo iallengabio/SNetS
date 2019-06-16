@@ -3,8 +3,8 @@ package network;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
@@ -44,7 +44,7 @@ public class ControlPlane implements Serializable {
      */
     protected HashMap<String, HashMap<String, List<Circuit>>> activeCircuits;
     
-    private TreeSet<Circuit> connectionList;
+    private HashSet<Circuit> connectionList;
 
     /**
      * Instance the control plane with the list of active circuits in empty
@@ -59,7 +59,7 @@ public class ControlPlane implements Serializable {
      */
     public ControlPlane(Mesh mesh, int rmlsaType, TrafficGroomingAlgorithmInterface trafficGroomingAlgorithm, IntegratedRMLSAAlgorithmInterface integratedRMLSAAlgorithm, RoutingAlgorithmInterface routingAlgorithm, SpectrumAssignmentAlgorithmInterface spectrumAssignmentAlgorithm, ModulationSelectionAlgorithmInterface modulationSelection) {
         this.activeCircuits = new HashMap<>();
-        this.connectionList = new TreeSet<>();
+        this.connectionList = new HashSet<>();
         
         this.rsaType = rmlsaType;
         this.grooming = trafficGroomingAlgorithm;
@@ -562,7 +562,7 @@ public class ControlPlane implements Serializable {
      * @return boolean - True, if it did not affect another circuit, or false otherwise
      */
     public boolean computeQoTForOther(Circuit circuit){
-    	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
+    	HashSet<Circuit> circuits = new HashSet<Circuit>(); // Circuit list for test
     	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
     	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits
 		
@@ -571,7 +571,7 @@ public class ControlPlane implements Serializable {
 		for (Link link : route.getLinkList()) {
 			
 			// Picks up the active circuits that use the link
-			TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+			HashSet<Circuit> circuitsTemp = link.getCircuitList();
             for (Circuit circuitTemp : circuitsTemp) {
             	
             	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
@@ -613,14 +613,14 @@ public class ControlPlane implements Serializable {
      * @return double - SNR impact
      */
     public double computesImpactOnSNROther(Circuit circuit){
-    	TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
+    	HashSet<Circuit> circuits = new HashSet<Circuit>(); // Circuit list for test
     	
     	// Search for all circuits that have links in common with the circuit under evaluation
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
 			
 			// Picks up the active circuits that use the link
-			TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+			HashSet<Circuit> circuitsTemp = link.getCircuitList();
             for (Circuit circuitTemp : circuitsTemp) {
             	
             	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
@@ -662,7 +662,7 @@ public class ControlPlane implements Serializable {
 	 * @return double - power consumption (W)
 	 */
 	public double getPowerConsumption(Circuit circuit){
-		double powerConsumption = EnergyConsumption.computePowerConsumptionBySegment(this, circuit, circuit.getRequiredBandwidth(), circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
+		double powerConsumption = EnergyConsumption.computePowerConsumptionBySegment(this, circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned());
 		circuit.setPowerConsumption(powerConsumption);
 		return powerConsumption;
 	}
@@ -672,7 +672,7 @@ public class ControlPlane implements Serializable {
 	 * 
 	 * @return Circuit
 	 */
-	public TreeSet<Circuit> getConnections(){
+	public HashSet<Circuit> getConnections(){
 		return connectionList;
 	}
 	

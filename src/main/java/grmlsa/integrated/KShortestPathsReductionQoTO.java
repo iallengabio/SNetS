@@ -1,10 +1,9 @@
 package grmlsa.integrated;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
@@ -116,9 +115,9 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 					if(circuitQoT){
 						double circuitDeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
 						
-						List<Circuit> circuitList = new ArrayList<Circuit>();
+						HashSet<Circuit> circuitList = new HashSet<Circuit>();
 						for (Link link : routeTemp.getLinkList()) {
-							TreeSet<Circuit> circuitsAux = link.getCircuitList();
+							HashSet<Circuit> circuitsAux = link.getCircuitList();
 							
 							for(Circuit circuitTemp : circuitsAux){
 								if(!circuit.equals(circuitTemp) && !circuitList.contains(circuitTemp)){
@@ -130,8 +129,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						boolean othersQoT = true;
 						double worstDeltaSNR = Double.MAX_VALUE;
 						
-						for(int i = 0; i < circuitList.size(); i++){
-							Circuit circuitTemp = circuitList.get(i);
+						for(Circuit circuitTemp : circuitList){
 							
 							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
 							double deltaSNR = circuitTemp.getSNR() - circuitTemp.getModulation().getSNRthreshold();

@@ -1,9 +1,9 @@
 package grmlsa.spectrumAssignment;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 import network.Circuit;
 import network.ControlPlane;
@@ -78,9 +78,9 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 				int chosenBand2[] = null;
 				double chosenWorstDeltaSNR2 = 0.0;
 				
-				List<Circuit> circuitList = new ArrayList<Circuit>();
+				HashSet<Circuit> circuitList = new HashSet<Circuit>();
 				for (Link link : circuit.getRoute().getLinkList()) {
-					TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+					HashSet<Circuit> circuitsTemp = link.getCircuitList();
 					
 					for(Circuit circuitTemp : circuitsTemp){
 						if(!circuit.equals(circuitTemp) && !circuitList.contains(circuitTemp)){
@@ -107,8 +107,7 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						double worstDeltaSNR = Double.MAX_VALUE; // minimum delta SNR
 						boolean impactOnOtherRequest = false; // without significant impact on other circuits
 						
-						for(int i = 0; i < circuitList.size(); i++){
-							Circuit circuitTemp = circuitList.get(i);
+						for(Circuit circuitTemp : circuitList){
 							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
 							
 							double SNRthreshold = circuitTemp.getModulation().getSNRthreshold();
@@ -183,9 +182,9 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 				int chosenBand2[] = null;
 				double chosenWorstDeltaSNR2 = 0.0;
 				
-				List<Circuit> circuitList = new ArrayList<Circuit>();
+				HashSet<Circuit> circuitList = new HashSet<Circuit>();
 				for (Link link : circuit.getRoute().getLinkList()) {
-					TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+					HashSet<Circuit> circuitsTemp = link.getCircuitList();
 					
 					for(Circuit circuitTemp : circuitsTemp){
 						if(!circuit.equals(circuitTemp) && !circuitList.contains(circuitTemp)){
@@ -212,8 +211,7 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 						double worstDeltaSNR = Double.MAX_VALUE; // minimum delta SNR
 						boolean impactOnOtherRequest = false; // without significant impact on other circuits
 						
-						for(int i = 0; i < circuitList.size(); i++){
-							Circuit circuitTemp = circuitList.get(i);
+						for(Circuit circuitTemp : circuitList){
 							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
 							
 							double SNRthreshold = circuitTemp.getModulation().getSNRthreshold();
