@@ -24,6 +24,8 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
+    
+    int cont = 0;
 
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
@@ -53,25 +55,44 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
             circuit.setRoute(route);
             
             for(Modulation mod : avaliableModulations){
-            	circuit.setModulation(mod);
             	
-            	int slotsNumber = mod.requiredSlots(circuit.getRequiredBandwidth());
+            	// modifica o valor da banda de guarda e cria uma copia da modulacao para testar
+            	Modulation modTest = null;
+            	try {
+					modTest = (Modulation) mod.clone();
+				} catch (CloneNotSupportedException e) {
+					e.printStackTrace();
+				}
+            	
+            	if (circuit.getRequiredBandwidth() == 100E+9) {
+            		modTest.setGuardBand(1);
+            	}else if (circuit.getRequiredBandwidth() == 150E+9) {
+            		modTest.setGuardBand(2);
+            	}else if (circuit.getRequiredBandwidth() == 200E+9) {
+            		modTest.setGuardBand(3);
+            	}else if (circuit.getRequiredBandwidth() == 250E+9) {
+            		modTest.setGuardBand(4);
+            	}
+            	
+            	circuit.setModulation(modTest);
+            	
+            	int slotsNumber = modTest.requiredSlots(circuit.getRequiredBandwidth());
 	            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 	            
 	            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
 	            circuit.setSpectrumAssigned(band);
-	
+	            
 	            if (band != null) {
 	            	if(checkRoute == null){
 	            		checkRoute = route;
-	            		checkMod = mod;
+	            		checkMod = modTest;
 	            		checkBand = band;
 	            	}
 	            	
-	            	if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, band, null, false)){ //modulation has acceptable QoT
+	            	if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, modTest, band, null, false)){ //modulation has acceptable QoT
 	            		chosenRoute = route;
 	            		chosenBand = band;
-		                chosenMod = mod;
+		                chosenMod = modTest;
 	            	}
 	            }
             }
@@ -82,7 +103,7 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
         }
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
-            circuit.setRoute(chosenRoute);
+        	circuit.setRoute(chosenRoute);
             circuit.setModulation(chosenMod);
             circuit.setSpectrumAssigned(chosenBand);
 

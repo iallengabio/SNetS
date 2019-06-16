@@ -154,10 +154,6 @@ public class Link implements Serializable {
         return spectrum.getFreeSpectrumBands(guardBand);
     }
     
-    public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(List<int[]> freeSpectrumBandList, int guardBand) {
-        return spectrum.getFreeSpectrumForAllocationWithoutGuardBand(freeSpectrumBandList, guardBand);
-    }
-
     /**
      * Returns the bandwidth of a slot
      * 

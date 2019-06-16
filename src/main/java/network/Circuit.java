@@ -148,7 +148,7 @@ public class Circuit implements Comparable<Object>, Serializable {
      * @param sa int[]
      */
     public void setSpectrumAssigned(int sa[]){
-    	if(sa!=null && sa[0]>sa[1]){
+    	if(sa != null && sa[0] > sa[1]){
     		throw new UnsupportedOperationException();
 		}
         spectrumAssigned = sa;

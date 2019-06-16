@@ -110,7 +110,7 @@ public class EnergyConsumption {
 		double PCofdm = 1.683 * tr; //power consumption of a slot using the informed modulation format
 		
 		int numSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1; //number of slots required by the circuit
-		numSlots = numSlots - circuit.getModulation().getGuardBand(); //removing the guard band
+		//numSlots = numSlots - circuit.getModulation().getGuardBand(); //removing the guard band
 		double PCtran = numSlots * PCofdm + 91.333; //power consumption of a transponder using the modulation format reported for a certain number of slots
 		
 		return PCtran;

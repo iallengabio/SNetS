@@ -76,8 +76,12 @@ public class Spectrum implements Serializable {
 	 */
 	public boolean useSpectrum(int spectrumBand[], int guardBand) throws Exception {
 		
-		if(spectrumBand[0] > spectrumBand[1]){
+		if (spectrumBand[0] > spectrumBand[1]){
 			throw new Exception("invalid spectrum band");
+		}
+		
+		if (checksCollisionWithGuardBand(spectrumBand)) {
+			throw new Exception("Trying to use a slot reserved for a guard band");
 		}
 		
 		for (int freeSpecBand[] : this.freeSpectrumBands) {
@@ -204,7 +208,11 @@ public class Spectrum implements Serializable {
 			upperGuardBand[0] = spectrumBand[0] - upperGB;
 			upperGuardBand[1] = spectrumBand[0] - 1;
 			
-			this.upperGuardBandList.put(upperGuardBand[0], upperGuardBand);
+			if (upperGuardBand[0] < 1) { // To prevent the guard band from leaving the spectrum limit
+				upperGuardBand[0] = 1;
+			}
+			
+			this.upperGuardBandList.put(upperGuardBand[1], upperGuardBand);
 		}
 		
 		if (downGB > 0) { // Check if you need to create the down guard band
@@ -212,7 +220,11 @@ public class Spectrum implements Serializable {
 			downGuardBand[0] = spectrumBand[1] + 1;
 			downGuardBand[1] = spectrumBand[1] + downGB;
 			
-			this.downGuardBandList.put(downGuardBand[1], downGuardBand);
+			if (downGuardBand[1] > numOfSlots) { // To prevent the guard band from leaving the spectrum limit
+				downGuardBand[1] = numOfSlots;
+			}
+			
+			this.downGuardBandList.put(downGuardBand[0], downGuardBand);
 		}
 	}
 	
@@ -238,16 +250,52 @@ public class Spectrum implements Serializable {
 			upperGuardBand[0] = spectrumBand[0] - upperGB;
 			upperGuardBand[1] = spectrumBand[0] - 1;
 			
-			this.upperGuardBandList.remove(upperGuardBand[0], upperGuardBand);
+			if (upperGuardBand[0] < 1) { // To prevent the guard band from leaving the spectrum limit
+				upperGuardBand[0] = 1;
+			}
+			
+			this.upperGuardBandList.remove(upperGuardBand[1]);
 		}
 		
 		if (downGB > 0) { // Check if you need to remove the down guard band
 			int downGuardBand[] = new int[2];
 			downGuardBand[0] = spectrumBand[1] + 1;
 			downGuardBand[1] = spectrumBand[1] + downGB;
+
+			if (downGuardBand[1] > numOfSlots) { // To prevent the guard band from leaving the spectrum limit
+				downGuardBand[1] = numOfSlots;
+			}
 			
-			this.downGuardBandList.remove(downGuardBand[1], downGuardBand);
+			this.downGuardBandList.remove(downGuardBand[0]);
 		}
+	}
+	
+	/**
+	 * Check if the band to be used by the circuit is not colliding with some guard band
+	 * 
+	 * @param spectrumBand[]
+	 * @return boolean
+	 */
+	public boolean checksCollisionWithGuardBand(int spectrumBand[]) {
+		int gb[] = null;
+		
+		for(int slotNumber : upperGuardBandList.keySet()) {
+			gb = upperGuardBandList.get(slotNumber);
+			
+			if((gb[0] >= spectrumBand[0] && gb[0] <= spectrumBand[1]) || (gb[1] >= spectrumBand[0] && gb[1] <= spectrumBand[1])){
+				return true;
+			}
+		}
+		
+		for(int slotNumber : downGuardBandList.keySet()) {
+			gb = downGuardBandList.get(slotNumber);
+			
+			if((gb[0] >= spectrumBand[0] && gb[0] <= spectrumBand[1]) || (gb[1] >= spectrumBand[0] && gb[1] <= spectrumBand[1])){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -409,6 +457,12 @@ public class Spectrum implements Serializable {
 		return res;
 	}
 	
+	/**
+	 * Returns the free spectrum bands checking the guard bands and guard band required for the establishment of a given circuit
+	 * 
+	 * @param guardBand
+	 * @return List<int[]>
+	 */
 	public List<int[]> getFreeSpectrumBands(int guardBand){
 		ArrayList<int[]> res = new ArrayList<>();
 		
@@ -422,21 +476,21 @@ public class Spectrum implements Serializable {
 			numUpperGB = 0;
 			numDownGB = 0;
 			
-			upperGB = upperGuardBandList.get(fsb[0]);
+			upperGB = downGuardBandList.get(fsb[0]); // Down guard bands of the circuits are upper guard bands for free spectrum bands
 			if (upperGB != null) {
 				numUpperGB = upperGB[1] - upperGB[0] + 1;
 			}
 			
-			downGB = downGuardBandList.get(fsb[1]);
+			downGB = upperGuardBandList.get(fsb[1]); // Upper guard bands of the circuits are down guard bands for free spectrum bands
 			if (downGB != null) {
 				numDownGB = downGB[1] - downGB[0] + 1;
 			}
 			
-			if (guardBand > numUpperGB) {
+			if (guardBand > numUpperGB) { // Tries to leave enough slots to respect the guard band required by the circuit
 				numUpperGB = guardBand;
 			}
 			
-			if (guardBand > numDownGB) {
+			if (guardBand > numDownGB) { // Tries to leave enough slots to respect the guard band required by the circuit
 				numDownGB = guardBand;
 			}
 			
@@ -451,6 +505,7 @@ public class Spectrum implements Serializable {
 			// Check that there are still free slots after removing the slots belonging to the guard bands
 			if ((fsb[1] - fsb[0] + 1) - (numUpperGB + numDownGB) > 0) {
 				
+				// Creates a new slots band by removing the slots from the guard bands and leaving only the slots free of fact
 				int newfsb[] = new int[2];
 				newfsb[0] = fsb[0] + numUpperGB;
 				newfsb[1] = fsb[1] - numDownGB;

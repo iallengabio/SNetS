@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 
  * @author Iallen
  */
-public class Modulation implements Serializable {
+public class Modulation implements Serializable, Cloneable {
 
     private String name;
     private double bitsPerSymbol;
@@ -154,5 +154,19 @@ public class Modulation implements Serializable {
      */
     public int getGuardBand(){
     	return guardBand;
+    }
+    
+    /**
+     * Sets the guard band
+     * 
+     * @param guardBand int
+     */
+    public void setGuardBand(int guardBand) {
+		this.guardBand = guardBand;
+    }
+    
+    @Override
+	public Object clone() throws CloneNotSupportedException{
+		return super.clone();
     }
 }

@@ -204,7 +204,7 @@ public class ControlPlane implements Serializable {
         Route route = circuit.getRoute();
         
         if(!allocateSpectrum(circuit, circuit.getSpectrumAssigned(), route.getLinkList(), circuit.getGuardBand())){
-            throw new Exception("bad RMLSA choice. Spectrum cant be allocated.");
+            throw new Exception("Bad RMLSA choice. Spectrum cant be allocated.");
         }
 
         // Allocates transmitter and receiver
