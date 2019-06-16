@@ -78,7 +78,7 @@ public class Modulation implements Serializable, Cloneable {
      * @param slotsNumber int
      * @return double
      */
-    public double potentialBandwidth(int slotsNumber){
+    public double potentialBitRate(int slotsNumber){
     	//slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
         
         return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);

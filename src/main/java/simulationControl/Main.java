@@ -183,7 +183,7 @@ public class Main {
     	System.out.println("Path: " + path);
         System.out.println("Reading files");
         List<List<Simulation>> allSimulations = createAllSimulations(makeSR(path));
-
+        
         String separator = System.getProperty("file.separator");
         String simulationFilePath = path + separator + "simulation";
         Scanner scanner = new Scanner(new File(simulationFilePath));
@@ -195,13 +195,17 @@ public class Main {
         SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
         scanner.close();
         System.out.println("Threads running: " + sc.getThreads());
+        
         //Now start the simulations
         System.out.println("Starting simulations");
         SimulationManagement sm = new SimulationManagement(allSimulations, sc.getThreads());
+        
+        long start = System.nanoTime();
+        
         sm.startSimulations(new SimulationManagement.SimulationProgressListener() {
             @Override
             public void onSimulationProgressUpdate(double progress) {
-                System.out.println("progress: "+ progress*100 + "%");
+                System.out.println("progress: "+ (progress * 100) + "%");
             }
 
             @Override
@@ -209,9 +213,15 @@ public class Main {
 
             }
         });
+        
+        long end = System.nanoTime();
+        
         System.out.println("saving results");
         sm.saveResults(path);
         System.out.println("finish!");
+        
+        long time = end - start;
+		System.out.println("Total simulation time (s): " + (time / 1000000000.0));
     }
 
     public static SimulationRequest makeSR(String path) throws FileNotFoundException {
