@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import request.RequestForConnection;
 import simulationControl.Util;
 import simulationControl.parsers.PhysicalLayerConfig;
 
@@ -755,11 +756,16 @@ public class PhysicalLayer implements Serializable {
 			Route route = new Route(listNodes);
 			Pair pair = new Pair(n1, n2);
 			
+			RequestForConnection requestTemp = new RequestForConnection();
+			requestTemp.setPair(pair);
+			requestTemp.setRequiredBandwidth(bandwidth);
+			
 			Circuit circuitTemp = new Circuit();
 			circuitTemp.setPair(pair);
 			circuitTemp.setRoute(route);
 			circuitTemp.setModulation(mod);
 			circuitTemp.setSpectrumAssigned(sa);
+			circuitTemp.addRequest(requestTemp);
 			
 			route.getLink(0).addCircuit(circuitTemp);
 			

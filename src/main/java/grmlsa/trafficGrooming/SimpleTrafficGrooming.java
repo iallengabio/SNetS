@@ -42,14 +42,14 @@ public class SimpleTrafficGrooming implements TrafficGroomingAlgorithmInterface 
 			// Is it possible to expand the channel?
 			List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
 			
-			int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentDown(circuit.getSpectrumAssigned(), composition);
+			int[] bandFreeAdjInferior = IntersectionFreeSpectrum.bandAdjacentDown(circuit.getSpectrumAssigned(), composition, circuit.getGuardBand());
 			int numFreeSlotsDown = 0;
 			
 			if(bandFreeAdjInferior != null){
 				numFreeSlotsDown = bandFreeAdjInferior[1] - bandFreeAdjInferior[0] + 1;
 			}
 			
-			int[] bandFreeAdjSuperior = IntersectionFreeSpectrum.bandAdjacentUpper(circuit.getSpectrumAssigned(), composition);
+			int[] bandFreeAdjSuperior = IntersectionFreeSpectrum.bandAdjacentUpper(circuit.getSpectrumAssigned(), composition, circuit.getGuardBand());
 			int numFreeSlotsUp = 0;
 			
 			if(bandFreeAdjSuperior != null){

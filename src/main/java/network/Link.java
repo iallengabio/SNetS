@@ -228,21 +228,4 @@ public class Link implements Serializable {
 		circuitList.remove(circuit);
 	}
 	
-	/**
-	 * Returns the left guard band list
-	 * 
-	 * @return HashMap<Integer, int[]>
-	 */
-	public HashMap<Integer, int[]> getUpperGuardBandList() {
-		return spectrum.getUpperGuardBandList();
-	}
-
-	/**
-	 * Returns the left guard band list
-	 * 
-	 * @return HashMap<Integer, int[]>
-	 */
-	public HashMap<Integer, int[]> getDownGuardBandList() {
-		return spectrum.getDownGuardBandList();
-	}
 }

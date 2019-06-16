@@ -201,9 +201,8 @@ public class ControlPlane implements Serializable {
      * @param circuit Circuit
      */
     public void allocateCircuit(Circuit circuit) throws Exception {
-        Route route = circuit.getRoute();
         
-        if(!allocateSpectrum(circuit, circuit.getSpectrumAssigned(), route.getLinkList(), circuit.getGuardBand())){
+        if(!allocateSpectrum(circuit, circuit.getSpectrumAssigned(), circuit.getRoute().getLinkList(), circuit.getGuardBand())){
             throw new Exception("Bad RMLSA choice. Spectrum cant be allocated.");
         }
 
@@ -242,9 +241,8 @@ public class ControlPlane implements Serializable {
      * @param circuit
      */
     public void releaseCircuit(Circuit circuit) throws Exception {
-        Route route = circuit.getRoute();
         
-        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), route.getLinkList(), circuit.getGuardBand());
+        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), circuit.getRoute().getLinkList(), circuit.getGuardBand());
 
         // Release transmitter and receiver
         circuit.getSource().getTxs().releasesTransmitters();
@@ -296,7 +294,7 @@ public class ControlPlane implements Serializable {
                 }
                 
                 if(isBlockingByQoTN(circuit)) {
-                    if(shouldTestFragmentation(circuit)){ // check whether it is to test whether the blocking was by fragmentation
+                    if(shouldTestFragmentation(circuit)){ // Check whether it is to test whether the blocking was by fragmentation
  	                    if(isBlockingByFragmentation(circuit)){
  	                        circuit.setBlockCause(Circuit.BY_FRAGMENTATION);
  	                    }else{
@@ -320,7 +318,13 @@ public class ControlPlane implements Serializable {
         circuit.setWasBlocked(true);
         return false; // Rejects the circuit
     }
-
+    
+    /**
+     * This method verify that it is to test whether the blocking was by fragmentation
+     * 
+     * @param circuit Circuit
+     * @return boolean
+     */
     private boolean shouldTestFragmentation(Circuit circuit) {
         Modulation modBD = modSelectByDistForEvaluation.selectModulation(circuit, circuit.getRoute(), spectrumAssignment, this);
         Modulation modCirc = circuit.getModulation();
@@ -364,54 +368,51 @@ public class ControlPlane implements Serializable {
     public boolean expandCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
         int currentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
         int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
-        if(currentSlots+numSlotsDown+numSlotsUp>maxAmplitude) return false;
+        if(currentSlots + numSlotsDown + numSlotsUp > maxAmplitude) return false;
         
-        //calculate the spectrum band at top
+        // Calculates the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[0] = circuit.getSpectrumAssigned()[1] + 1;
         upperBand[1] = upperBand[0] + numSlotsUp - 1;
-
-        //calculate the spectrum band at bottom
+        
+        // Calculates the spectrum band at bottom
         int bottomBand[] = new int[2];
         bottomBand[1] = circuit.getSpectrumAssigned()[0] - 1;
         bottomBand[0] = bottomBand[1] - numSlotsDown + 1;
-
+        
+        // Saves the allocated spectrum band without the expansion
         int specAssigAt[] = circuit.getSpectrumAssigned();
+        
+        // New spectrum band with expansion
         int newSpecAssigAt[] = specAssigAt.clone();
-
-        //try to expand circuit
-        if (numSlotsUp > 0){
-            if(allocateSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()), circuit.getGuardBand())){
-                newSpecAssigAt[1] = upperBand[1];
-            }else{
-                throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
-            }
-        }
-        if(numSlotsDown > 0) {
-            if(allocateSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()), circuit.getGuardBand())) {
-                newSpecAssigAt[0] = bottomBand[0];
-            }else{
-                throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
-            }
-        }
-
+        newSpecAssigAt[0] = bottomBand[0];
+        newSpecAssigAt[1] = upperBand[1];
+        
+        // Releasing the spectrum and guard bands already allocated
+        releaseSpectrum(circuit, specAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand());
+        
+        // Try to expand circuit
         circuit.setSpectrumAssigned(newSpecAssigAt);
-
+        if(!allocateSpectrum(circuit, newSpecAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
+            throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
+        }
+        
         // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
         boolean QoT = isAdmissibleQualityOfTransmission(circuit);
-
+        
         if(!QoT){
-            if (numSlotsUp>0) {
-                releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()), circuit.getGuardBand());
+        	
+        	// QoT was not acceptable after expansion, releasing the spectrum
+        	releaseSpectrum(circuit, newSpecAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand());
+        	
+        	// Reallocating the spectrum and guard bands without the expansion
+        	circuit.setSpectrumAssigned(specAssigAt);
+        	if(!allocateSpectrum(circuit, specAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
+                throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
             }
-
-            if (numSlotsDown>0) {
-                releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()), circuit.getGuardBand());
-            }
-            
-            circuit.setSpectrumAssigned(specAssigAt);
-            //isAdmissibleQualityOfTransmission(circuit); //recompute QoT
-            computeQualityOfTransmission(circuit, null, false); // Recalculates the QoT and SNR of the circuit
+        	
+        	// Recalculates the QoT and OSNR of the circuit
+            computeQualityOfTransmission(circuit, null, false);
             
         }else{
             this.updateNetworkPowerConsumption();
@@ -430,30 +431,32 @@ public class ControlPlane implements Serializable {
      */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
     	
-        //calculate the spectrum band at top
+        // Calculates the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[1] = circuit.getSpectrumAssigned()[1];
         upperBand[0] = upperBand[1] - numSlotsUp + 1;
-
-        //calculate the spectrum band at bottom
+        
+        // Calculates the spectrum band at bottom
         int bottomBand[] = new int[2];
         bottomBand[0] = circuit.getSpectrumAssigned()[0];
         bottomBand[1] = bottomBand[0] + numSlotsDown - 1;
+        
+        // New spectrum band after retraction
         int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
+        newSpecAssign[0] = bottomBand[1] + 1;
+        newSpecAssign[1] = upperBand[0] - 1;
         
-        if (numSlotsUp>0) {
-            releaseSpectrum(circuit, upperBand, new ArrayList<>(circuit.getRoute().getLinkList()), circuit.getGuardBand());
-            newSpecAssign[1] = upperBand[0]-1;
-        }
+        // Releasing the spectrum and guard bands already allocated
+        releaseSpectrum(circuit, circuit.getSpectrumAssigned(), circuit.getRoute().getLinkList(), circuit.getGuardBand());
         
-        if (numSlotsDown>0) {
-            releaseSpectrum(circuit, bottomBand, new ArrayList<>(circuit.getRoute().getLinkList()), circuit.getGuardBand());
-            newSpecAssign[0] = bottomBand[1]+1;
-        }
-        
+        // Reallocates the spectrum and guard bands after retraction
         circuit.setSpectrumAssigned(newSpecAssign);
-        //isAdmissibleQualityOfTransmission(circuit); //compute QoT
-        computeQualityOfTransmission(circuit, null, false); // Recalculates the QoT and SNR of the circuit
+        if(!allocateSpectrum(circuit, newSpecAssign, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
+            throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
+        }
+        
+        // Recalculates the QoT and SNR of the circuit
+        computeQualityOfTransmission(circuit, null, false);
         
         this.updateNetworkPowerConsumption();
     }
@@ -790,66 +793,4 @@ public class ControlPlane implements Serializable {
         this.mesh.computesPowerConsmption(this);
     }
     
-    /**
-     * Returns the free spectrum band considering the guard band required for the circuit
-	 * 
-     * @param circuit Circuit
-     * @param freeSpectrumBand List<int[]>
-     * @return List<int[]>
-     */
-    public List<int[]> getFreeSpectrumForAllocationConsideringGuardBand(Circuit circuit, List<int[]> freeSpectrumBandMerge) {
-    	ArrayList<int[]> composition = new ArrayList<>(); // Merge with free spectrum bands that respect the guard band required for the circuit
-    	
-        List<int[]> mergeWithGuardBands = IntersectionFreeSpectrum.getFreeSpectrumAndUpperDownGuardBands(circuit.getRoute(), freeSpectrumBandMerge);
-        
-        int numSlotsOfFreeBand;
-		int largerUpperGB;
-		int largerDownGB;
-		
-		int upperGB;
-		int downGB;
-		
-		int totalSlotsNumber = mesh.getLinkList().get(0).getNumOfSlots();
-		int circuitGuardBand = circuit.getGuardBand();
-		
-        for(int[] freeSpectrumBand : mergeWithGuardBands) {
-        	
-        	numSlotsOfFreeBand = freeSpectrumBand[1] - freeSpectrumBand[0] + 1;
-        	largerUpperGB = freeSpectrumBand[2];
-        	largerDownGB = freeSpectrumBand[3];
-        	
-        	upperGB = circuitGuardBand;
-    		downGB = circuitGuardBand;
-        	
-        	// Selects the largest upper band guard
-			if(largerUpperGB > circuitGuardBand) {
-				upperGB = largerUpperGB;
-			}
-			
-			// Selects the largest down band guard
-			if(largerDownGB > circuitGuardBand) {
-				downGB = largerDownGB;
-			}
-			
-			if (freeSpectrumBand[0] == 1) { // Check if the band starts on the first slot
-				upperGB = 0;
-			}
-			
-			if (freeSpectrumBand[1] == totalSlotsNumber) { // Check if the band ends on the last slot
-				downGB = 0;
-			}
-			
-			// Check that there are still free slots after removing the slots belonging to the guard bands
-			if (numSlotsOfFreeBand - (upperGB + downGB) > 0) {
-				
-				int newfsb[] = new int[2];
-				newfsb[0] = freeSpectrumBand[0] + upperGB;
-				newfsb[1] = freeSpectrumBand[1] - downGB;
-				
-				composition.add(newfsb);
-			}
-        }
-        
-    	return composition;
-    }
 }

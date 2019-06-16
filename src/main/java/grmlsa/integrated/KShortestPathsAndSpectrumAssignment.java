@@ -106,6 +106,11 @@ public class KShortestPathsAndSpectrumAssignment implements IntegratedRMLSAAlgor
         	circuit.setRoute(chosenRoute);
             circuit.setModulation(chosenMod);
             circuit.setSpectrumAssigned(chosenBand);
+            
+//            cont++;
+//            if(cont > 50) {
+//            	System.out.println("teste");
+//            }
 
             return true;
 
