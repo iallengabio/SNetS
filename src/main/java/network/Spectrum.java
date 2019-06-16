@@ -20,8 +20,6 @@ public class Spectrum implements Serializable {
 	public static final char GB_FOR_ONE = 'b';
 	public static final char GB_FOR_TWO = 'B';
 	
-	private char spectrum[]; // Represents all slots
-	
 	private TreeSet<int[]> freeSpectrumBands; // Represents the free slots bands
 	private int numOfSlots;
 	private double slotSpectrumBand;
@@ -40,11 +38,6 @@ public class Spectrum implements Serializable {
 		
 		this.numOfSlots = numOfSlots;
 		this.slotSpectrumBand = slotSpectrumBand;
-		
-		spectrum = new char[numOfSlots];
-		for(int i = 0; i < numOfSlots; i++) {
-			spectrum[i] = FREE;
-		}
 		
 		int fsb[] = new int[2];
 		fsb[0] = 1;
@@ -80,14 +73,13 @@ public class Spectrum implements Serializable {
 			throw new Exception("Invalid spectrum band");
 		}
 		
-		if (checksCollisionWithGuardBand(spectrumBand)) {
+		if (checksCollisionWithGuardBands(spectrumBand)) {
 			throw new Exception("Trying to use a slot reserved for a guard band. Spectrum band: " + spectrumBand[0] + " - " + spectrumBand[1]);
 		}
 		
 		for (int freeSpecBand[] : this.freeSpectrumBands) {
 			if(isInInterval(spectrumBand, freeSpecBand)){
 				
-				usedSpectrumUpdate(spectrumBand, guardBand);
 				addGuardBands(spectrumBand, guardBand);
 				
 				freeSpectrumBands.remove(freeSpecBand); // Remove free bands
@@ -150,7 +142,6 @@ public class Spectrum implements Serializable {
 			}
 		}
 		
-		freeSpectrumUpdate(spectrumBand, guardBand);
 		removeGuardBands(spectrumBand, guardBand);
 		
 		this.freeSpectrumBands.add(spectrumBand); // Releasing spectrum
@@ -271,19 +262,19 @@ public class Spectrum implements Serializable {
 	}
 	
 	/**
-	 * Check if the band to be used by the circuit is not colliding with some guard band
+	 * Check if the spectrum band to be used by the circuit is not colliding with some guard band
 	 * 
 	 * @param spectrumBand[]
 	 * @return boolean
 	 */
-	public boolean checksCollisionWithGuardBand(int spectrumBand[]) {
+	public boolean checksCollisionWithGuardBands(int spectrumBand[]) {
 		int gb[] = null;
 		
 		for(int slotNumber : downGuardBandList.keySet()) {
 			gb = downGuardBandList.get(slotNumber);
 			
-			if((gb[0] >= spectrumBand[0] && gb[0] <= spectrumBand[1]) || (gb[1] >= spectrumBand[0] && gb[1] <= spectrumBand[1]) ||
-			   (gb[0] <= spectrumBand[0] && gb[1] >= spectrumBand[0]) || (gb[0] <= spectrumBand[1] && gb[1] >= spectrumBand[1])){
+			if ((gb[0] >= spectrumBand[0] && gb[0] <= spectrumBand[1]) || (gb[1] >= spectrumBand[0] && gb[1] <= spectrumBand[1]) ||
+			    (gb[0] <= spectrumBand[0] && gb[1] >= spectrumBand[0]) || (gb[0] <= spectrumBand[1] && gb[1] >= spectrumBand[1])) {
 				return true;
 			}
 		}
@@ -291,157 +282,13 @@ public class Spectrum implements Serializable {
 		for(int slotNumber : upperGuardBandList.keySet()) {
 			gb = upperGuardBandList.get(slotNumber);
 			
-			if((gb[0] >= spectrumBand[0] && gb[0] <= spectrumBand[1]) || (gb[1] >= spectrumBand[0] && gb[1] <= spectrumBand[1]) ||
-			   (gb[0] <= spectrumBand[0] && gb[1] >= spectrumBand[0]) || (gb[0] <= spectrumBand[1] && gb[1] >= spectrumBand[1])){
+			if ((gb[0] >= spectrumBand[0] && gb[0] <= spectrumBand[1]) || (gb[1] >= spectrumBand[0] && gb[1] <= spectrumBand[1]) ||
+			    (gb[0] <= spectrumBand[0] && gb[1] >= spectrumBand[0]) || (gb[0] <= spectrumBand[1] && gb[1] >= spectrumBand[1])) {
 				return true;
 			}
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Updating the used spectrum
-	 * 
-	 * @param spectrumBand int[]
-	 * @param guardBand int
-	 */
-	private void usedSpectrumUpdate(int spectrumBand[], int guardBand) throws Exception {
-		
-		int leftGuardBand = guardBand;
-		if(spectrumBand[0] == 1) {
-			leftGuardBand = 0;
-		}
-		int rightGuardBand = guardBand;
-		if(spectrumBand[1] == numOfSlots) {
-			rightGuardBand = 0;
-		}
-		
-		int slotsNumber = spectrumBand[1] - spectrumBand[0] + 1;
-		
-		int index = spectrumBand[0] - 1;
-		for(int i = 0; i < slotsNumber; i++) {
-			
-			if(index < 0 || index >= numOfSlots) {
-				break;
-			}
-			
-			if(spectrum[index] == FREE) {
-				spectrum[index] = BUSY;
-				
-			}else{
-				throw new Exception("Spectrum is not free. Spectrum: " + spectrum[index]);
-			}
-			index++;
-		}
-		
-		for(int i = 0; i < leftGuardBand; i++) {
-			index = (spectrumBand[0] - 2) - i;
-			
-			if(index < 0 || index >= numOfSlots) {
-				break;
-			}
-			
-			if(spectrum[index] == FREE) {
-				spectrum[index] = GB_FOR_ONE;
-				
-			}else if(spectrum[index] == GB_FOR_ONE) {
-				spectrum[index] = GB_FOR_TWO;
-				
-			}else {
-				throw new Exception("Spectrum is not free and is not guard band. Spectrum: " + spectrum[index]);
-			}
-		}
-		
-		for(int i = 0; i < rightGuardBand; i++) {
-			index = spectrumBand[1] + i;
-			
-			if(index < 0 || index >= numOfSlots) {
-				break;
-			}
-			
-			if(spectrum[index] == FREE) {
-				spectrum[index] = GB_FOR_ONE;
-				
-			}else if(spectrum[index] == GB_FOR_ONE) {
-				spectrum[index] = GB_FOR_TWO;
-				
-			}else {
-				throw new Exception("Spectrum is not free and is not guard band. Spectrum: " + spectrum[index]);
-			}
-		}
-	}
-	
-	/**
-	 * Updating the free spectrum
-	 * 
-	 * @param spectrumBand int[]
-	 * @param guardBand int
-	 */
-	private void freeSpectrumUpdate(int spectrumBand[], int guardBand) throws Exception {
-		
-		int leftGuardBand = guardBand;
-		if(spectrumBand[0] == 1) {
-			leftGuardBand = 0;
-		}
-		int rightGuardBand = guardBand;
-		if(spectrumBand[1] == numOfSlots) {
-			rightGuardBand = 0;
-		}
-		
-		int slotsNumber = spectrumBand[1] - spectrumBand[0] + 1;
-		
-		int index = spectrumBand[0] - 1;
-		for(int i = 0; i < slotsNumber; i++) {
-			
-			if(index < 0 || index >= numOfSlots) {
-				break;
-			}
-			
-			if(spectrum[index] == BUSY) {
-				spectrum[index] = FREE;
-				
-			}else{
-				throw new Exception("Spectrum is not busy. Spectrum: " + spectrum[index]);
-			}
-			index++;
-		}
-		
-		for(int i = 0; i < leftGuardBand; i++) {
-			index = (spectrumBand[0] - 2) - i;
-			
-			if(index < 0 || index >= numOfSlots) {
-				break;
-			}
-			
-			if(spectrum[index] == GB_FOR_ONE) {
-				spectrum[index] = FREE;
-				
-			}else if(spectrum[index] == GB_FOR_TWO) {
-				spectrum[index] = GB_FOR_ONE;
-				
-			}else {
-				throw new Exception("Spectrum is not guard band. Spectrum: " + spectrum[index]);
-			}
-		}
-		
-		for(int i = 0; i < rightGuardBand; i++) {
-			index = spectrumBand[1] + i;
-			
-			if(index < 0 || index >= numOfSlots) {
-				break;
-			}
-			
-			if(spectrum[index] == GB_FOR_ONE) {
-				spectrum[index] = FREE;
-				
-			}else if(spectrum[index] == GB_FOR_TWO) {
-				spectrum[index] = GB_FOR_ONE;
-				
-			}else {
-				throw new Exception("Spectrum is not guard band. Spectrum: " + spectrum[index]);
-			}
-		}
 	}
 	
 	/**
@@ -511,95 +358,6 @@ public class Spectrum implements Serializable {
 				int newfsb[] = new int[2];
 				newfsb[0] = fsb[0] + numDownGB;
 				newfsb[1] = fsb[1] - numUpperGB;
-				
-				res.add(newfsb);
-			}
-		}
-		
-		return res;
-	}
-	
-	/**
-	 * Returns the free spectrum band without considering the guard band 
-	 * Uses the guard band required for the circuit to check the free spectrum bands
-	 * 
-	 * @param freeSpectrumBand
-	 * @param guardBand
-	 * @return List<int[]>
-	 */
-	public List<int[]> getFreeSpectrumForAllocationWithoutGuardBand(List<int[]> freeSpectrumBandList, int guardBand){
-		ArrayList<int[]> res = new ArrayList<>();
-		
-		for (int freeSpectrumBand[] : freeSpectrumBandList) {
-			
-			int leftGB = 0;
-			int rightGB = 0;
-			
-			int numSlotsOfFreeBand = freeSpectrumBand[1] - freeSpectrumBand[0] + 1;
-			
-			int index = -1;
-			int contLeftBG = 0;
-			for(int n = 0; n < numSlotsOfFreeBand; n++) {
-				index = (freeSpectrumBand[0] - 1) + n;
-				
-				if(index < 0 || index >= numOfSlots) {
-					break;
-				}
-				
-				if (spectrum[index] == GB_FOR_ONE) {
-					contLeftBG++;
-					
-				} else {
-					break;
-				}
-			}
-			
-			index = -1;
-			int contRightBG = 0;
-			for(int n = 0; n < numSlotsOfFreeBand; n++) {
-				index = (freeSpectrumBand[1] - 1) - n;
-				
-				if(index < 0 || index >= numOfSlots) {
-					break;
-				}
-				
-				if (spectrum[index] == GB_FOR_ONE) {
-					contRightBG++;
-				
-				} else {
-					break;
-				}
-			}
-			
-			// Selects the largest band guard of left
-			if(contLeftBG > guardBand) {
-				leftGB = contLeftBG;
-				
-			}else {
-				leftGB = guardBand;
-			}
-			
-			// Selects the largest band guard of right
-			if(contRightBG > guardBand) {
-				rightGB = contRightBG;
-				
-			}else {
-				rightGB = guardBand;
-			}
-			
-			if (freeSpectrumBand[0] == 1) {
-				leftGB = 0;
-			}
-			
-			if (freeSpectrumBand[1] == numOfSlots) {
-				rightGB = 0;
-			}
-			
-			if (numSlotsOfFreeBand - (leftGB + rightGB) > 0) {
-				
-				int newfsb[] = freeSpectrumBand.clone();
-				newfsb[0] = newfsb[0] + leftGB;
-				newfsb[1] = newfsb[1] - rightGB;
 				
 				res.add(newfsb);
 			}
