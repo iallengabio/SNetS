@@ -14,12 +14,6 @@ import java.util.TreeSet;
  */
 public class Spectrum implements Serializable {
 	
-	// To represent the state of a slot
-	public static final char FREE = 'l';
-	public static final char BUSY = 'u';
-	public static final char GB_FOR_ONE = 'b';
-	public static final char GB_FOR_TWO = 'B';
-	
 	private TreeSet<int[]> freeSpectrumBands; // Represents the free slots bands
 	private int numOfSlots;
 	private double slotSpectrumBand;
@@ -319,19 +313,31 @@ public class Spectrum implements Serializable {
 		int numUpperGB;
 		int downGB[];
 		int upperGB[];
+		int slotsNumOfFreeSpecBand;
 		
 		for (int fsb[] : this.freeSpectrumBands) {
 			
 			numDownGB = 0;
-			numUpperGB = 0;
+			numUpperGB = 0;;
+			slotsNumOfFreeSpecBand = fsb[1] - fsb[0] + 1;
 			
 			downGB = upperGuardBandList.get(fsb[0]); // Upper guard bands of the circuits are down guard bands for free spectrum bands
 			if (downGB != null) {
+				
+				if (fsb[0] == downGB[0] && fsb[1] == downGB[1]) { // The free spectrum band is a guard band
+					continue;
+				}
+				
 				numDownGB = downGB[1] - downGB[0] + 1;
 			}
 			
 			upperGB = downGuardBandList.get(fsb[1]); // Down guard bands of the circuits are upper guard bands for free spectrum bands
 			if (upperGB != null) {
+				
+				if (fsb[0] == upperGB[0] && fsb[1] == upperGB[1]) { // The free spectrum band is a guard band
+					continue;
+				}
+				
 				numUpperGB = upperGB[1] - upperGB[0] + 1;
 			}
 			
@@ -352,7 +358,7 @@ public class Spectrum implements Serializable {
 			}
 			
 			// Check that there are still free slots after removing the slots belonging to the guard bands
-			if ((fsb[1] - fsb[0] + 1) - (numDownGB + numUpperGB) > 0) {
+			if (slotsNumOfFreeSpecBand - (numDownGB + numUpperGB) > 0) {
 				
 				// Creates a new slots band by removing the slots from the guard bands and leaving only the slots free of fact
 				int newfsb[] = new int[2];
