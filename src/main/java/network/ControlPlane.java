@@ -318,10 +318,10 @@ public class ControlPlane implements Serializable {
         circuit.setWasBlocked(true);
         return false; // Rejects the circuit
     }
-    
+
     /**
      * This method verify that it is to test whether the blocking was by fragmentation
-     * 
+     *
      * @param circuit Circuit
      * @return boolean
      */
@@ -369,48 +369,48 @@ public class ControlPlane implements Serializable {
         int currentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
         int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
         if(currentSlots + numSlotsDown + numSlotsUp > maxAmplitude) return false;
-        
+
         // Calculates the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[0] = circuit.getSpectrumAssigned()[1] + 1;
         upperBand[1] = upperBand[0] + numSlotsUp - 1;
-        
+
         // Calculates the spectrum band at bottom
         int bottomBand[] = new int[2];
         bottomBand[1] = circuit.getSpectrumAssigned()[0] - 1;
         bottomBand[0] = bottomBand[1] - numSlotsDown + 1;
-        
+
         // Saves the allocated spectrum band without the expansion
         int specAssigAt[] = circuit.getSpectrumAssigned();
-        
+
         // New spectrum band with expansion
         int newSpecAssigAt[] = specAssigAt.clone();
         newSpecAssigAt[0] = bottomBand[0];
         newSpecAssigAt[1] = upperBand[1];
-        
+
         // Releasing the spectrum and guard bands already allocated
         releaseSpectrum(circuit, specAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand());
-        
+
         // Try to expand circuit
         circuit.setSpectrumAssigned(newSpecAssigAt);
         if(!allocateSpectrum(circuit, newSpecAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
             throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
         }
-        
+
         // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
         boolean QoT = isAdmissibleQualityOfTransmission(circuit);
-        
+
         if(!QoT){
-        	
+
         	// QoT was not acceptable after expansion, releasing the spectrum
         	releaseSpectrum(circuit, newSpecAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand());
-        	
+
         	// Reallocating the spectrum and guard bands without the expansion
         	circuit.setSpectrumAssigned(specAssigAt);
         	if(!allocateSpectrum(circuit, specAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
                 throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
             }
-        	
+
         	// Recalculates the QoT and OSNR of the circuit
             computeQualityOfTransmission(circuit, null, false);
             
@@ -430,17 +430,17 @@ public class ControlPlane implements Serializable {
      * @throws Exception
      */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
-    	
+
         // Calculates the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[1] = circuit.getSpectrumAssigned()[1];
         upperBand[0] = upperBand[1] - numSlotsUp + 1;
-        
+
         // Calculates the spectrum band at bottom
         int bottomBand[] = new int[2];
         bottomBand[0] = circuit.getSpectrumAssigned()[0];
         bottomBand[1] = bottomBand[0] + numSlotsDown - 1;
-        
+
         // New spectrum band after retraction
         int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
         newSpecAssign[0] = bottomBand[1] + 1;
@@ -448,13 +448,13 @@ public class ControlPlane implements Serializable {
         
         // Releasing the spectrum and guard bands already allocated
         releaseSpectrum(circuit, circuit.getSpectrumAssigned(), circuit.getRoute().getLinkList(), circuit.getGuardBand());
-        
+
         // Reallocates the spectrum and guard bands after retraction
         circuit.setSpectrumAssigned(newSpecAssign);
         if(!allocateSpectrum(circuit, newSpecAssign, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
             throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
         }
-        
+
         // Recalculates the QoT and SNR of the circuit
         computeQualityOfTransmission(circuit, null, false);
         
@@ -540,7 +540,6 @@ public class ControlPlane implements Serializable {
      * The circuit in question has already allocated the network resources
      * 
      * @param circuit Circuit
-     * @param circuitTest Circuit - Circuit used to verify the impact on the other circuit informed
      * @param addTestCircuit boolean - To add the test circuit to the circuit list
      * @return boolean - True, if QoT is acceptable, or false, otherwise
      */
@@ -614,7 +613,10 @@ public class ControlPlane implements Serializable {
      */
     public double computesImpactOnSNROther(Circuit circuit){
     	HashSet<Circuit> circuits = new HashSet<Circuit>(); // Circuit list for test
-    	
+    	//TreeSet<Circuit> circuits = new TreeSet<Circuit>(); // Circuit list for test
+    	HashMap<Circuit, Double> circuitsSNR = new HashMap<Circuit, Double>(); // To guard the SNR of the test list circuits
+    	HashMap<Circuit, Boolean> circuitsQoT = new HashMap<Circuit, Boolean>(); // To guard the QoT of the test list circuits
+
     	// Search for all circuits that have links in common with the circuit under evaluation
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
@@ -637,14 +639,23 @@ public class ControlPlane implements Serializable {
 		
         for (Circuit circuitTemp : circuits) {
         	
+        	// Stores the SNR and QoT values
+        	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
+            circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
+            SNRtemp2 = circuitTemp.getSNR();
+
         	// Computes the SNR of the circuitTemp without considering the circuit
             computeQualityOfTransmission(circuitTemp, circuit, false);
             SNRtemp = circuitTemp.getSNR();
             
             // Computes the SNR of the circuitTemp considering the circuit
-        	computeQualityOfTransmission(circuitTemp, circuit, true);
-        	SNRtemp2 = circuitTemp.getSNR();
-        	
+        	//computeQualityOfTransmission(circuitTemp, circuit, true);
+        	//double SNRtemp3 = circuitTemp.getSNR();
+
+
+            circuitTemp.setSNR(circuitsSNR.get(circuitTemp));
+            circuitTemp.setQoT(circuitsQoT.get(circuitTemp));
+
         	SNRdif = SNRtemp - SNRtemp2;
         	if(SNRdif < 0.0) {
         		SNRdif = -1.0 * SNRdif;
@@ -792,5 +803,5 @@ public class ControlPlane implements Serializable {
     private void updateNetworkPowerConsumption(){
         this.mesh.computesPowerConsmption(this);
     }
-    
+
 }
