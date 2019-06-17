@@ -110,7 +110,7 @@ public class PhysicalLayer implements Serializable {
         this.alphaLinear = computeAlphaLinear(alpha);
         this.beta2 = computeBeta2(D, centerFrequency);
         
-        double spanMeter = L * 1000; // span in meter
+        double spanMeter = L * 1000.0; // span in meter
         this.attenuationBySpanLinear = Math.pow(Math.E, alphaLinear * spanMeter);
         double boosterAmpGainLinear = LsssLinear;
         double lineAmpGainLinear = attenuationBySpanLinear;
@@ -345,7 +345,7 @@ public class PhysicalLayer implements Serializable {
 				
 				lastFiberSegment = link.getDistance() - (Ns * L);
 				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
-				//double spanMeter = lastFiberSegment * 1000; // span in meter
+				//double spanMeter = lastFiberSegment * 1000.0; // span in meter
 				//double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
 				//preAmp.setGain(ratioForDB(preAmpGainLinear));
 				
@@ -845,6 +845,9 @@ public class PhysicalLayer implements Serializable {
 		
 		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
 		double ro =  BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+		if(ro < 0.0) {
+			ro = -1.0 * ro;
+		}
 		double p1 = Gi * Gi * arcsinh(ro);
 		
 		double p2 = 0.0;
@@ -881,8 +884,9 @@ public class PhysicalLayer implements Serializable {
 				}
 				
 				deltaFij = fI - fJ;
-				if(deltaFij < 0.0)
+				if(deltaFij < 0.0) {
 					deltaFij = -1.0 * deltaFij;
+				}
 				
 				d1 = deltaFij + (Bsj / 2.0);
 				d2 = deltaFij - (Bsj / 2.0);
