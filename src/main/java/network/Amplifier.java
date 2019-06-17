@@ -180,11 +180,12 @@ public class Amplifier implements Serializable {
 	 * Based on articles: 
 	 *   - Closed-form expressions for nonlinear transmission performance of densely spaced coherent optical OFDM systems (2010)
 	 *   - A Quality-of-Transmission Aware Dynamic Routing and Spectrum Assignment Scheme for Future Elastic Optical Networks (2013)
+	 *   - Power, routing, modulation level and spectrum assignment in all-optical and elastic networks (2019)
 	 * 
 	 * @return double - ASE linear
 	 */
 	public double getAse(){
-		double ase = 0.5 * h * frequency * noiseFigureLinear * (gainLinear - 1.0);
+		double ase = h * frequency * noiseFigureLinear * (gainLinear - 1.0);
 		return ase;
 	}
 	
