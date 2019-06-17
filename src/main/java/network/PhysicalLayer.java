@@ -435,6 +435,9 @@ public class PhysicalLayer implements Serializable {
 		
 		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
 		double ro =  BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+		if (ro < 0.0) {
+			ro = -1.0 * ro;
+		}
 		double p1 = Gi * Gi * arcsinh(ro);
 		
 		double p2 = 0.0;
