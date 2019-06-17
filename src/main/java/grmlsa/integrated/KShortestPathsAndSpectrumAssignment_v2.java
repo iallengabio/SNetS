@@ -1,7 +1,7 @@
 package grmlsa.integrated;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 import grmlsa.KRoutingAlgorithmInterface;
 import grmlsa.NewKShortestPaths;
@@ -68,7 +68,7 @@ public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAl
         			circuit.setModulation(mod);
 	            	
 	            	int slotsNumber = mod.requiredSlots(circuit.getRequiredBandwidth());
-		            List<int[]> merge = IntersectionFreeSpectrum.merge(route);
+		            List<int[]> merge = IntersectionFreeSpectrum.merge(route, circuit.getGuardBand());
 		            
 		            int band[] = spectrumAssignment.policy(slotsNumber, merge, circuit, cp);
 		            circuit.setSpectrumAssigned(band);
@@ -120,11 +120,11 @@ public class KShortestPathsAndSpectrumAssignment_v2 implements IntegratedRMLSAAl
     }
     
     private int computeNumCircuitsByRoute(Route route){
-    	TreeSet<Circuit> circuits = new TreeSet<Circuit>();
+    	HashSet<Circuit> circuits = new HashSet<Circuit>();
     	
     	for(Link link : route.getLinkList()){
     		
-    		TreeSet<Circuit> circuitsTemp = link.getCircuitList();
+    		HashSet<Circuit> circuitsTemp = link.getCircuitList();
     		for(Circuit circuitTemp : circuitsTemp){
     			
     			if(!circuits.contains(circuitTemp)){

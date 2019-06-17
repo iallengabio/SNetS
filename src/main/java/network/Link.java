@@ -1,8 +1,8 @@
 package network;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 
 /**
@@ -18,7 +18,7 @@ public class Link implements Serializable {
     private Spectrum spectrum;
     private double distance;
     
-    private TreeSet<Circuit> circuitList;
+    private HashSet<Circuit> circuitList;
 
     /**
      * Creates a new instance of Link.
@@ -35,7 +35,7 @@ public class Link implements Serializable {
         this.spectrum = new Spectrum(numberOfSlots, spectrumBand);
         this.distance = distance;
         
-        this.circuitList = new TreeSet<Circuit>();
+        this.circuitList = new HashSet<Circuit>();
     }
 
     /**
@@ -59,8 +59,8 @@ public class Link implements Serializable {
      *                           and the second to the last slot to be used
      * @return boolean
      */
-    public boolean useSpectrum(int interval[]) throws Exception {
-        return spectrum.useSpectrum(interval);
+    public boolean useSpectrum(int interval[], int guardBand) throws Exception {
+        return spectrum.useSpectrum(interval, guardBand);
     }
 
     /**
@@ -68,8 +68,8 @@ public class Link implements Serializable {
      *
      * @param spectrumBand int[]
      */
-    public void liberateSpectrum(int spectrumBand[]) throws Exception {
-        spectrum.freeSpectrum(spectrumBand);
+    public void liberateSpectrum(int spectrumBand[], int guardBand) throws Exception {
+        spectrum.freeSpectrum(spectrumBand, guardBand);
     }
 
     /**
@@ -149,10 +149,10 @@ public class Link implements Serializable {
      *
      * @return List<int[]>
      */
-    public List<int[]> getFreeSpectrumBands() {
-        return spectrum.getFreeSpectrumBands();
+    public List<int[]> getFreeSpectrumBands(int guardBand) {
+        return spectrum.getFreeSpectrumBands(guardBand);
     }
-
+    
     /**
      * Returns the bandwidth of a slot
      * 
@@ -194,7 +194,7 @@ public class Link implements Serializable {
 	 * 
 	 * @return the listRequests
 	 */
-	public TreeSet<Circuit> getCircuitList() {
+	public HashSet<Circuit> getCircuitList() {
 		return circuitList;
 	}
 
@@ -203,7 +203,7 @@ public class Link implements Serializable {
 	 * 
 	 * @param listRequests the listRequests to set
 	 */
-	public void setCircuitList(TreeSet<Circuit> circuitList) {
+	public void setCircuitList(HashSet<Circuit> circuitList) {
 		this.circuitList = circuitList;
 	}
 	

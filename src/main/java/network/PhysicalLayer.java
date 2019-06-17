@@ -2,13 +2,14 @@ package network;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
+import request.RequestForConnection;
 import simulationControl.Util;
 import simulationControl.parsers.PhysicalLayerConfig;
 
@@ -274,7 +275,7 @@ public class PhysicalLayer implements Serializable {
 	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
-		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+		double Bsi = numSlotsRequired * slotBandwidth; // Circuit bandwidth, less the guard band
 		double fi = lowerFrequency + (slotBandwidth * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
 		
 		double circuitPowerLinear = this.powerLinear;
@@ -293,7 +294,7 @@ public class PhysicalLayer implements Serializable {
 		Node sourceNode = null;
 		Node destinationNode = null;
 		Link link = null;
-		TreeSet<Circuit> circuitList = null;
+		HashSet<Circuit> circuitList = null;
 		
 		double Ns = 0.0; // Number of line amplifiers
 		double noiseNli = 0.0;
@@ -349,8 +350,8 @@ public class PhysicalLayer implements Serializable {
 	 * @param addTestCircuit boolean
 	 * @return TreeSet<Circuit>
 	 */
-	private TreeSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
-		TreeSet<Circuit> circuitList = new TreeSet<Circuit>();
+	private HashSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
+		HashSet<Circuit> circuitList = new HashSet<Circuit>();
 		
 		for (Circuit circtuiTemp : link.getCircuitList()) {
 			circuitList.add(circtuiTemp);
@@ -377,15 +378,14 @@ public class PhysicalLayer implements Serializable {
 	/**
 	 * Total input power on the link
 	 * 
+	 * @param circuitList HashSet<Circuit>
 	 * @param link Link
 	 * @param powerI double
 	 * @param Bsi double
 	 * @param I double
-	 * @param numSlotsRequired int
-	 * @param checksOnTotalPower boolean
 	 * @return double
 	 */
-	public double getTotalPowerInTheLink(TreeSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
+	public double getTotalPowerInTheLink(HashSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
 		double totalPower = 0.0;
 		double circuitPower = 0.0;
 		int saj[] = null;
@@ -403,7 +403,7 @@ public class PhysicalLayer implements Serializable {
 			if(fixedPowerSpectralDensity){
 				saj = circuitJ.getSpectrumAssignedByLink(link);;
 				numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
 				
 				circuitPower = I * Bsj;
 			}
@@ -422,11 +422,12 @@ public class PhysicalLayer implements Serializable {
 	 * @param link Link
 	 * @param powerI double
 	 * @param BsI double
-	 * @param I double
+	 * @param Gi double
 	 * @param fI double
+	 * @param circuitList HashSet<Circuit>
 	 * @return double
 	 */
-	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double Gi, double fI, TreeSet<Circuit> circuitList){
+	public double getGnli(Circuit circuitI, Link link, double powerI, double BsI, double Gi, double fI, HashSet<Circuit> circuitList){
 		double beta21 = beta2;
 		if(beta21 < 0.0){
 			beta21 = -1.0 * beta21;
@@ -455,7 +456,7 @@ public class PhysicalLayer implements Serializable {
 				saJ = circuitJ.getSpectrumAssignedByLink(link);
 				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
 				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
 				
 				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
@@ -755,11 +756,16 @@ public class PhysicalLayer implements Serializable {
 			Route route = new Route(listNodes);
 			Pair pair = new Pair(n1, n2);
 			
+			RequestForConnection requestTemp = new RequestForConnection();
+			requestTemp.setPair(pair);
+			requestTemp.setRequiredBandwidth(bandwidth);
+			
 			Circuit circuitTemp = new Circuit();
 			circuitTemp.setPair(pair);
 			circuitTemp.setRoute(route);
 			circuitTemp.setModulation(mod);
 			circuitTemp.setSpectrumAssigned(sa);
+			circuitTemp.addRequest(requestTemp);
 			
 			route.getLink(0).addCircuit(circuitTemp);
 			

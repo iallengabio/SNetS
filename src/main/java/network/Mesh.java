@@ -24,7 +24,9 @@ public class Mesh implements Serializable {
     private Vector<Node> nodeList;
     private Vector<Link> linkList;
     private Vector<Pair> pairList;
+    
     private int guarBand;
+    
     private PhysicalLayer physicalLayer;
     private OthersConfig othersConfig;
 

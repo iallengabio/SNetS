@@ -39,6 +39,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 	protected int blockCause;
 	
 	protected double launchPowerLinear;
+	protected int guardBand;
 
     /**
      * Instantiates a circuit with the list of requests answered by it in empty
@@ -110,8 +111,8 @@ public class Circuit implements Comparable<Object>, Serializable {
 	 */
 	public double getResidualCapacity(){
     	double rb = getRequiredBandwidth();
-    	double cap = getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
-		return cap-rb;
+    	double cap = getModulation().potentialBitRate(spectrumAssigned[1] - spectrumAssigned[0] + 1);
+		return cap - rb;
 	}
 
     /**
@@ -147,7 +148,7 @@ public class Circuit implements Comparable<Object>, Serializable {
      * @param sa int[]
      */
     public void setSpectrumAssigned(int sa[]){
-    	if(sa!=null && sa[0]>sa[1]){
+    	if(sa != null && sa[0] > sa[1]){
     		throw new UnsupportedOperationException();
 		}
         spectrumAssigned = sa;
@@ -169,6 +170,7 @@ public class Circuit implements Comparable<Object>, Serializable {
      */
     public void setModulation(Modulation modulation) {
         this.modulation = modulation;
+        setGuardBand(modulation.getGuardBand());
     }
 
     /**
@@ -199,61 +201,93 @@ public class Circuit implements Comparable<Object>, Serializable {
     }
     
     /**
-	 * @return the sNR
+     * Returns the SNR
+     * 
+	 * @return the SNR double
 	 */
 	public double getSNR() {
 		return SNR;
 	}
 
 	/**
-	 * @param sNR the sNR to set
+	 * Sets the SNR
+	 * 
+	 * @param SNR the SNR to set double
 	 */
-	public void setSNR(double sNR) {
-		SNR = sNR;
+	public void setSNR(double SNR) {
+		this.SNR = SNR;
 	}
 
 	/**
-	 * @return the qoT
+	 * Returns the QoT
+	 * 
+	 * @return the QoT boolean
 	 */
 	public boolean isQoT() {
 		return QoT;
 	}
 
 	/**
-	 * @param qoT the qoT to set
+	 * Sets the QoT
+	 * 
+	 * @param QoT the QoT to set boolean
 	 */
-	public void setQoT(boolean qoT) {
-		QoT = qoT;
+	public void setQoT(boolean QoT) {
+		this.QoT = QoT;
 	}
 
+	/**
+	 * Return if circuit is blocked
+	 * 
+	 * @return boolean
+	 */
 	public boolean isWasBlocked() {
 		return wasBlocked;
 	}
 
+	/**
+	 * Sets if circuit is blocked
+	 * 
+	 * @param wasBlocked
+	 */
 	public void setWasBlocked(boolean wasBlocked) {
 		this.wasBlocked = wasBlocked;
 	}
-
+	
+	/**
+	 * Returns the type of blockage suffered by the circuit
+	 * 
+	 * @return int
+	 */
 	public int getBlockCause() {
 		return blockCause;
 	}
 
+	/**
+	 * Sets the type of blockage suffered by the circuit
+	 * 
+	 * @param blockCause int
+	 */
 	public void setBlockCause(int blockCause) {
 		this.blockCause = blockCause;
 	}
 
 	/**
-	 * @return the qoTForOther
+	 * Returns if the QoTO is acceptable or not
+	 * 
+	 * @return the QoTForOther
 	 */
 	public boolean isQoTForOther() {
 		return QoTForOther;
 	}
 
 	/**
+	 * Sets if the QoTO is acceptable or not
+	 * 
 	 * @param qoTForOther the qoTForOther to set
 	 */
-	public void setQoTForOther(boolean qoTForOther) {
-		QoTForOther = qoTForOther;
+	public void setQoTForOther(boolean QoTForOther) {
+		this.QoTForOther = QoTForOther;
 	}
 	
 	/**
@@ -264,7 +298,6 @@ public class Circuit implements Comparable<Object>, Serializable {
 	 * @return int[]
 	 */
 	public int[] getSpectrumAssignedByLink(Link link){
-
 		int sa[] = getSpectrumAssigned();
 		return sa;
 	}
@@ -334,10 +367,12 @@ public class Circuit implements Comparable<Object>, Serializable {
 	}
 
 	/**
+	 * Returns the total bit rate of the circuit
+	 * 
 	 * @return double
 	 */
 	public double getBandwidth(){
-		return getModulation().potentialBandwidth(spectrumAssigned[1]-spectrumAssigned[0]+1);
+		return getModulation().potentialBitRate(spectrumAssigned[1] - spectrumAssigned[0] + 1);
 	}
 	
 	/**
@@ -358,4 +393,22 @@ public class Circuit implements Comparable<Object>, Serializable {
 		this.launchPowerLinear = launchPowerLinear;
 	}
 	
+	/**
+	 * Returns the guard band
+	 * 
+	 * @return int
+	 */
+	public int getGuardBand() {
+		return guardBand;
+	}
+
+	/**
+	 * Sets the guard band
+	 * 
+	 * @param guardBand int
+	 */
+	public void setGuardBand(int guardBand) {
+		this.guardBand = guardBand;
+	}
+
 }

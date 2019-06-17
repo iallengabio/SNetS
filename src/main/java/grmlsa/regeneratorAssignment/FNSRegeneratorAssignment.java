@@ -148,14 +148,14 @@ public class FNSRegeneratorAssignment implements RegeneratorAssignmentAlgorithmI
 		Node destinationNode = route.getNode(sourceNodeIndex + 1);
 		Link link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 		
-		List<int[]> composition = link.getFreeSpectrumBands();
+		List<int[]> composition = link.getFreeSpectrumBands(circuit.getGuardBand());
 		
 		for(int l = sourceNodeIndex + 1; l < destinationNodeIndex; l++){
 			sourceNode = route.getNode(l);
 			destinationNode = route.getNode(l + 1);
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			
-			composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands());
+			composition = IntersectionFreeSpectrum.merge(composition, link.getFreeSpectrumBands(circuit.getGuardBand()));
 		}
 		
 		return tryAssignSpectrum(circuit, route, sourceNodeIndex, destinationNodeIndex, composition, cp, modulation);
