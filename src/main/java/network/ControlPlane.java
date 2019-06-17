@@ -751,7 +751,7 @@ public class ControlPlane implements Serializable {
         }
         
         int numSlotsRequired = modBD.requiredSlots(circuit.getRequiredBandwidth());
-        if (totalFree > numSlotsRequired) {
+        if (totalFree >= numSlotsRequired) {
             return true;
         }
         
