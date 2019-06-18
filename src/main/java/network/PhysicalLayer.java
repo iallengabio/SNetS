@@ -872,7 +872,7 @@ public class PhysicalLayer implements Serializable {
 				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
 				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
 				
-				//Bsj = circuitJ.getModulation().getBandwidthFromBitRate(circuitJ.getRequiredBandwidth());
+				Bsj = circuitJ.getModulation().getBandwidthFromBitRate(circuitJ.getRequiredBandwidth());
 				
 				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
 					powerJ = circuitJ.getLaunchPowerLinear();
