@@ -35,39 +35,25 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
         this.microRegions = new HashMap<>();
 
         for (Node n : cp.getMesh().getNodeList()) {
-            this.microRegions.put(n.getName(), this.computeMicroRegion(cp, n));
+            this.microRegions.put(n.getName(), computeMicroRegion(cp, n,microRegionsDeep));
         }
 
     }
 
-    private ArrayList<String> computeMicroRegion(ControlPlane cp, Node r) {
-        ArrayList<String> res = new ArrayList<>();
-        ArrayList<Node> F = new ArrayList<>();
-        F.add(r);
+    private ArrayList<String> computeMicroRegion(ControlPlane cp, Node n, int deep){
+        HashSet<String> mr = computeMicroRegionAux(cp, n, deep);
+        mr.remove(n.getName());
+        return new ArrayList<>(mr);
+    }
 
-        label32:
-        for(int i = 0; i < microRegionsDeep; ++i) {
-            ArrayList<Node> aux = new ArrayList<>();
-            Iterator<Node> var7 = F.iterator();
-
-            while(true) {
-                Node n;
-                do {
-                    if (!var7.hasNext()) {
-                        F = aux;
-                        continue label32;
-                    }
-
-                    n = var7.next();
-                } while(res.contains(n.getName()));
-
-                res.add(n.getName());
-
-                aux.addAll(cp.getMesh().getAdjacents(n));
+    private HashSet<String> computeMicroRegionAux(ControlPlane cp, Node n, int deep) {
+        HashSet<String> res = new HashSet<>();
+        res.add(n.getName());
+        if(deep>0){
+            for (Node v : cp.getMesh().getAdjacents(n)){
+                res.addAll(computeMicroRegionAux(cp,v,deep-1));
             }
         }
-
-        res.remove(r.getName());
         return res;
     }
 
