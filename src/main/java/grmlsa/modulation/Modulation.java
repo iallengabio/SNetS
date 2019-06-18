@@ -15,7 +15,6 @@ public class Modulation implements Serializable {
     private double maxRange; // max range in Km
     private double M; // Number of modulation format symbols
     private double bitsPerSymbol;
-    private double p; // Number of polarization modes
     
     private double SNRthreshold; // dB
     private double SNRthresholdLinear;
@@ -28,14 +27,14 @@ public class Modulation implements Serializable {
 	 * Creates a new instance of Modulation
 	 * 
 	 * @param name String
-	 * @param freqSlot double
 	 * @param maxRange double
-	 * @param guardBand double
-	 * @param level double
 	 * @param M double
-	 * @param FEC double
+	 * @param SNRthreshold double
+	 * @param rateFEC double
+	 * @param freqSlot double
+	 * @param guardBand double
 	 */
-    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, double p) {
+    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand) {
         this.name = name;
         this.maxRange = maxRange;
         this.M = M;
@@ -43,7 +42,6 @@ public class Modulation implements Serializable {
         this.rateFEC = rateFEC;
         this.freqSlot = freqSlot;
         this.guardBand = guardBand;
-        this.p = p;
         
         // Calculation based on article: Capacity Limits of Optical Fiber Networks (2010)
         this.bitsPerSymbol = PhysicalLayer.log2(M);
@@ -63,7 +61,7 @@ public class Modulation implements Serializable {
      * @return int - numberOfStos
      */
     public int requiredSlots(double bitRate) {
-    	double slotsNumber = (bitRate * (1.0 + rateFEC)) / (p * bitsPerSymbol * freqSlot);
+    	double slotsNumber = (bitRate * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
         
         int slotsNumberTemp = (int) slotsNumber;
         if (slotsNumber - slotsNumberTemp != 0.0) {
@@ -84,7 +82,7 @@ public class Modulation implements Serializable {
     public double potentialBitRate(int slotsNumber){
     	slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
         
-        return (slotsNumber * p * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
+        return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
     }
     
     /**
@@ -94,7 +92,7 @@ public class Modulation implements Serializable {
      * @return double
      */
     public double getBandwidthFromBitRate(double bitRate) {
-    	double bandwidth = (bitRate * (1.0 + rateFEC)) / (p * bitsPerSymbol);
+    	double bandwidth = (bitRate * (1.0 + rateFEC)) / bitsPerSymbol;
     	
     	return bandwidth;
     }

@@ -90,7 +90,7 @@ public class Mesh implements Serializable {
         // Instance the modulation formats
         this.avaliableModulations = new ArrayList<>();
         for (NetworkConfig.ModulationConfig modConf : nc.getModulations()) {
-        	Modulation mod = new Modulation(modConf.getName(), modConf.getMaxRange(), modConf.getM(), modConf.getSNR(), plc.getRateOfFEC(), linkList.get(0).getSlotSpectrumBand(), guarBand, physicalLayer.getPolarizationModes());
+        	Modulation mod = new Modulation(modConf.getName(), modConf.getMaxRange(), modConf.getM(), modConf.getSNR(), plc.getRateOfFEC(), linkList.get(0).getSlotSpectrumBand(), guarBand);
         	avaliableModulations.add(mod);
         }
         
