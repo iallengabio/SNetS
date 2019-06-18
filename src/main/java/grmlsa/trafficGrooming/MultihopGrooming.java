@@ -63,7 +63,6 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
             if (c.getSource().getName().equals(newCirc.getSource().getName())) return true;
             if (c.getSource().getName().equals(newCirc.getDestination().getName())) return true;
         }
-
         return false;
     }
 
@@ -85,21 +84,21 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
     private void addNewCircuitVirtualRouting(Circuit circuit) {
         String dst = circuit.getPair().getDestination().getName();
         String src = circuit.getPair().getSource().getName();
-        MultihopGrooming.MultihopSolution al = new MultihopGrooming.MultihopSolution();
+        MultihopSolution al = new MultihopSolution();
         al.virtualRoute.add(circuit);
         al.src = src;
         al.dst = dst;
         this.virtualRouting.get(src).get(dst).add(al);
-        ArrayList<MultihopGrooming.MultihopSolution> aalAux = new ArrayList<>();
+
+        //From the destination of the new circuit.
+        ArrayList<MultihopSolution> aalAux = new ArrayList<>();
         aalAux.add(al);
         Iterator<ArrayList<MultihopSolution>> it = this.virtualRouting.get(dst).values().iterator();
-
-        Iterator it2;
         while(it.hasNext()) {
-            it2 = (it.next()).iterator();
+            Iterator<MultihopSolution> it2 = (it.next()).iterator();
 
             while(it2.hasNext()) {
-                MultihopSolution ms = (MultihopSolution) it2.next();
+                MultihopSolution ms = it2.next();
                 if(ms.virtualRoute.size()==this.maxVirtualHops) continue;
                 if(makeLoop(ms.virtualRoute,circuit)) continue;
                 MultihopSolution clone = ms.clone();
@@ -110,13 +109,9 @@ public abstract class MultihopGrooming implements TrafficGroomingAlgorithmInterf
             }
         }
 
-        it2 = this.virtualRouting.keySet().iterator();
-
-        while(it2.hasNext()) {
-            String sA = (String)it2.next();
-
+        //Those who arrive at the origin of the new circuit.
+        for (String sA : this.virtualRouting.keySet()) {
             for (MultihopSolution c1 : this.virtualRouting.get(sA).get(src)) {
-
                 for (MultihopSolution ms4 : aalAux) {
                     if (c1.virtualRoute.size() + ms4.virtualRoute.size() > maxVirtualHops) continue;
                     MultihopSolution cAux = c1.clone();
