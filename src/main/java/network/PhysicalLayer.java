@@ -1217,7 +1217,7 @@ public class PhysicalLayer implements Serializable {
 	public void testCamadaFisica() {
 		
 		int totalSlots = 320;
-		double distance = 600.0;
+		double distance = 1000.0;
 		
 		Node n1 = new Node("1", 1000, 1000, 0, 100);
 		Node n2 = new Node("2", 1000, 1000, 0, 100);
@@ -1231,48 +1231,63 @@ public class PhysicalLayer implements Serializable {
 		Pair pair = new Pair(n1, n2);
 		
 		int guardBand = 1;
-		Modulation mod_BPSK = new Modulation("BPSK", 10000.0, 2.0, 5.5, 0.0, 12.5E+9, guardBand);
-		Modulation mod_QPSK = new Modulation("QPSK", 5000.0, 4.0, 8.5, 0.0, 12.5E+9, guardBand);
-		Modulation mod_8QAM = new Modulation("8QAM", 2500.0, 8.0, 12.5, 0.0, 12.5E+9, guardBand);
+		Modulation mod_BPSK = new Modulation("BPSK", 10000.0, 2.0, 5.5, 0.12, 12.5E+9, guardBand);
+		Modulation mod_QPSK = new Modulation("QPSK", 5000.0, 4.0, 8.5, 0.12, 12.5E+9, guardBand);
+		Modulation mod_8QAM = new Modulation("8QAM", 2500.0, 8.0, 12.5, 0.12, 12.5E+9, guardBand);
 		
 		// circuito 1
-		double tr1 = 40.0E+9; //bps
-		int slotNumber1 = 2 + guardBand; //mod_QPSK.requiredSlots(tr1);
+		double tr1 = 100.0E+9; //bps
+		int slotNumber1 = 5 + guardBand; //mod_QPSK.requiredSlots(tr1);
 		int sa1[] = new int[2];
 		sa1[0] = 1;
 		sa1[1] = sa1[0] + slotNumber1 - 1;
+		
+		RequestForConnection requestTemp1 = new RequestForConnection();
+		requestTemp1.setPair(pair);
+		requestTemp1.setRequiredBandwidth(tr1);
 		
 		Circuit circuit1 = new Circuit();
 		circuit1.setPair(pair);
 		circuit1.setRoute(route);
 		circuit1.setModulation(mod_QPSK);
 		circuit1.setSpectrumAssigned(sa1);
+		circuit1.addRequest(requestTemp1);
 		
 		// circuito 2
 		double tr2 = 100.0E+9; //bps
-		int slotNumber2 = 8 + guardBand; //mod_BPSK.requiredSlots(tr2);
+		int slotNumber2 = 5 + guardBand; //mod_BPSK.requiredSlots(tr2);
 		int sa2[] = new int[2];
 		sa2[0] = sa1[1] + 1;
 		sa2[1] = sa2[0] + slotNumber2 - 1;
 		
+		RequestForConnection requestTemp2 = new RequestForConnection();
+		requestTemp2.setPair(pair);
+		requestTemp2.setRequiredBandwidth(tr2);
+		
 		Circuit circuit2 = new Circuit();
 		circuit2.setPair(pair);
 		circuit2.setRoute(route);
-		circuit2.setModulation(mod_BPSK);
+		circuit2.setModulation(mod_QPSK);
 		circuit2.setSpectrumAssigned(sa2);
+		circuit2.addRequest(requestTemp2);
 		
 		// circuito 3
-		double tr3 = 120.0E+9; //bps
-		int slotNumber3 = 4 + guardBand; //mod_8QAM.requiredSlots(tr3);
+		double tr3 = 100.0E+9; //bps
+		int slotNumber3 = 5 + guardBand; //mod_8QAM.requiredSlots(tr3);
 		int sa3[] = new int[2];
 		sa3[0] = sa2[1] + 1;
 		sa3[1] = sa3[0] + slotNumber3 - 1;
 		
+		RequestForConnection requestTemp3 = new RequestForConnection();
+		requestTemp3.setPair(pair);
+		requestTemp3.setRequiredBandwidth(tr3);
+		
 		Circuit circuit3 = new Circuit();
 		circuit3.setPair(pair);
 		circuit3.setRoute(route);
-		circuit3.setModulation(mod_8QAM);
+		circuit3.setModulation(mod_QPSK);
 		circuit3.setSpectrumAssigned(sa3);
+		circuit3.addRequest(requestTemp3);
 		
 		route.getLink(0).addCircuit(circuit1);
 		route.getLink(0).addCircuit(circuit2);
