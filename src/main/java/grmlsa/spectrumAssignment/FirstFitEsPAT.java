@@ -12,7 +12,7 @@ import util.IntersectionFreeSpectrum;
  *
  * @author Iallen
  */
-public class FirstFitExpansiveness implements SpectrumAssignmentAlgorithmInterface {
+public class FirstFitEsPAT implements SpectrumAssignmentAlgorithmInterface {
 
     private int ffeSigma = 0;
 

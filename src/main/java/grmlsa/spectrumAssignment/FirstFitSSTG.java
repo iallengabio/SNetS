@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class FirstFitExpansiveness2 implements SpectrumAssignmentAlgorithmInterface {
+public class FirstFitSSTG implements SpectrumAssignmentAlgorithmInterface {
 
     private int ffeSigma = 0;
 
