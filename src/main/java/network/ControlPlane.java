@@ -369,55 +369,55 @@ public class ControlPlane implements Serializable {
         int currentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
         int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
         if(currentSlots + numSlotsDown + numSlotsUp > maxAmplitude) return false;
-
+        
         // Calculates the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[0] = circuit.getSpectrumAssigned()[1] + 1;
         upperBand[1] = upperBand[0] + numSlotsUp - 1;
-
+        
         // Calculates the spectrum band at bottom
         int bottomBand[] = new int[2];
         bottomBand[1] = circuit.getSpectrumAssigned()[0] - 1;
         bottomBand[0] = bottomBand[1] - numSlotsDown + 1;
-
+        
         // Saves the allocated spectrum band without the expansion
         int specAssigAt[] = circuit.getSpectrumAssigned();
-
+        
         // New spectrum band with expansion
         int newSpecAssigAt[] = specAssigAt.clone();
         newSpecAssigAt[0] = bottomBand[0];
         newSpecAssigAt[1] = upperBand[1];
-
+        
         // Releasing the spectrum and guard bands already allocated
         releaseSpectrum(circuit, specAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand());
-
+        
         // Try to expand circuit
         circuit.setSpectrumAssigned(newSpecAssigAt);
         if(!allocateSpectrum(circuit, newSpecAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
             throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
         }
-
+        
         // Verifies if the expansion did not affect the QoT of the circuit or other already active circuits
         boolean QoT = isAdmissibleQualityOfTransmission(circuit);
-
+        
         if(!QoT){
-
+        	
         	// QoT was not acceptable after expansion, releasing the spectrum
         	releaseSpectrum(circuit, newSpecAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand());
-
+        	
         	// Reallocating the spectrum and guard bands without the expansion
         	circuit.setSpectrumAssigned(specAssigAt);
         	if(!allocateSpectrum(circuit, specAssigAt, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
                 throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
             }
-
+        	
         	// Recalculates the QoT and OSNR of the circuit
             computeQualityOfTransmission(circuit, null, false);
             
         }else{
             this.updateNetworkPowerConsumption();
         }
-
+        
         return QoT;
     }
 
@@ -430,17 +430,17 @@ public class ControlPlane implements Serializable {
      * @throws Exception
      */
     public void retractCircuit(Circuit circuit, int numSlotsDown, int numSlotsUp) throws Exception {
-
+    	
         // Calculates the spectrum band at top
         int upperBand[] = new int[2];
         upperBand[1] = circuit.getSpectrumAssigned()[1];
         upperBand[0] = upperBand[1] - numSlotsUp + 1;
-
+        
         // Calculates the spectrum band at bottom
         int bottomBand[] = new int[2];
         bottomBand[0] = circuit.getSpectrumAssigned()[0];
         bottomBand[1] = bottomBand[0] + numSlotsDown - 1;
-
+        
         // New spectrum band after retraction
         int newSpecAssign[] = circuit.getSpectrumAssigned().clone();
         newSpecAssign[0] = bottomBand[1] + 1;
@@ -448,14 +448,14 @@ public class ControlPlane implements Serializable {
         
         // Releasing the spectrum and guard bands already allocated
         releaseSpectrum(circuit, circuit.getSpectrumAssigned(), circuit.getRoute().getLinkList(), circuit.getGuardBand());
-
+        
         // Reallocates the spectrum and guard bands after retraction
         circuit.setSpectrumAssigned(newSpecAssign);
         if(!allocateSpectrum(circuit, newSpecAssign, circuit.getRoute().getLinkList(), circuit.getGuardBand())){
             throw new Exception("Bad RMLSA. Spectrum cant be allocated.");
         }
-
-        // Recalculates the QoT and SNR of the circuit
+        
+        // Recalculates the QoT and OSNR of the circuit
         computeQualityOfTransmission(circuit, null, false);
         
         this.updateNetworkPowerConsumption();

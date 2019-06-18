@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import network.Mesh;
 import network.Node;
 import simulationControl.Util;
@@ -40,7 +43,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
     public NewKShortestPaths(Mesh mesh, int k) {
         this.k = k;
         this.computeAllRoutes(mesh);
-        //salveRoutesByPar(mesh.getNodeList());
+        //salvekRoutesByPar(mesh.getNodeList());
     }
 
     /**
@@ -142,6 +145,60 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
      */
     public List<Route> getRoutes(Node n1, Node n2) {
         return this.routesForAllPairs.get(n1.getName() + DIV + n2.getName());
+    }
+    
+    /**
+     * This method saves in files all the routes for all the pairs.
+     * 
+     * @param nodeList Vector<Node>
+     */
+    private void salveKRoutesByPar(Vector<Node> nodeList) {
+    	List<String> routesList = new ArrayList<String>();
+		
+		for(int i = 0; i < nodeList.size(); i++){
+			Node source = nodeList.get(i);
+			
+			for(int j = 0; j < nodeList.size(); j++){
+				Node destination = nodeList.get(j);
+				
+				if(!source.getName().equals(destination.getName())){
+					String pair = source.getName() + DIV + destination.getName();
+					
+					List<Route> routes = routesForAllPairs.get(pair);
+					for(int r = 0; r < routes.size(); r++){
+						Route rAux = routes.get(r);
+					  
+						StringBuilder sb = new StringBuilder();
+						for (int n = 0; n < rAux.getNodeList().size(); n++) {
+							sb.append(rAux.getNodeList().get(n).getName());
+							if(n < rAux.getNodeList().size() - 1){
+								sb.append("-");
+							}
+						}
+						
+						routesList.add(sb.toString());
+					}
+				}
+			}
+		}
+		
+		Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(routesList);
+        
+        try {
+        	String separator = System.getProperty("file.separator");
+        	
+        	FileWriter fw = new FileWriter(Util.projectPath + separator + "kRoutesByPar.txt");
+			BufferedWriter out = new BufferedWriter(fw);
+            
+			out.append(json);
+			
+			out.close();
+			fw.close();
+            
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+        }
     }
     
     /**

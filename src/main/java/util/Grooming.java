@@ -1,9 +1,8 @@
 package util;
 
-import network.Circuit;
-import network.ControlPlane;
-
 import java.util.List;
+
+import network.Circuit;
 
 /**
  * This class provides some useful methods for traffic grooming algorithms
@@ -16,7 +15,7 @@ public class Grooming {
      * @param circuit
      * @return A vector of integers with two positions. The first position is the lower expansion potential of the circuit. The second position is the upper expansion potential of the circuit.
      */
-    public static int[] circuitExpansiveness(Circuit circuit, ControlPlane cp){
+    public static int[] circuitExpansiveness(Circuit circuit){
         int res[] = new int[2];
         List<int[]> composition = IntersectionFreeSpectrum.merge(circuit.getRoute(), circuit.getGuardBand());
         res[0] = IntersectionFreeSpectrum.freeSlotsDown(circuit.getSpectrumAssigned(), composition, circuit.getGuardBand());
