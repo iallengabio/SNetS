@@ -411,4 +411,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 		this.guardBand = guardBand;
 	}
 
+	public String toString(){
+		return "(s:" + pair.getSource().getName() + " d:" + pair.getDestination().getName() + ")";
+	}
 }

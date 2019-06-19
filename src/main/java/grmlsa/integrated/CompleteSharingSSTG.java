@@ -5,8 +5,7 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.spectrumAssignment.FirstFitExpansiveness;
-import grmlsa.spectrumAssignment.FirstFitExpansiveness2;
+import grmlsa.spectrumAssignment.FirstFitSSTG;
 import network.Circuit;
 import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
@@ -26,7 +25,7 @@ public class CompleteSharingSSTG implements IntegratedRMLSAAlgorithmInterface {
     private int sigmaExpansiveness=0;
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
-    private FirstFitExpansiveness2 spectrumAssignment;
+    private FirstFitSSTG spectrumAssignment;
 
 
     @Override
@@ -34,9 +33,9 @@ public class CompleteSharingSSTG implements IntegratedRMLSAAlgorithmInterface {
         if (kShortestsPaths == null){
         	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
             modulationSelection = cp.getModulationSelection();
-            spectrumAssignment = new FirstFitExpansiveness2();
+            spectrumAssignment = new FirstFitSSTG();
             Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
-            this.sigmaExpansiveness = Integer.parseInt((String)uv.get("sigmaExpansiveness"));
+            this.sigmaExpansiveness = Integer.parseInt(uv.get("sigmaExpansiveness"));
         }
 
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
