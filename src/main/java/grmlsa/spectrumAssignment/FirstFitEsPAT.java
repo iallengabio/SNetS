@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Iallen
  */
-public class FirstFitExpansiveness2 implements SpectrumAssignmentAlgorithmInterface {
+public class FirstFitEsPAT implements SpectrumAssignmentAlgorithmInterface {
 
     private int ffeSigma = 0;
 
@@ -46,11 +46,9 @@ public class FirstFitExpansiveness2 implements SpectrumAssignmentAlgorithmInterf
         int maxAmplitude = circuit.getPair().getSource().getTxs().getMaxSpectralAmplitude();
         if(numberOfSlots> maxAmplitude) return null;
     	int chosen[] = null;
-    	int aux = ffeSigma;
-    	if(numberOfSlots>ffeSigma) aux = numberOfSlots;
         for (int[] band : freeSpectrumBands) {
             int bandSize = band[1] - band[0] + 1;
-            if (bandSize >= aux) {
+            if (bandSize >= numberOfSlots + ffeSigma) {
                 chosen = band.clone();
                 chosen[0] = chosen[0] + ((bandSize - numberOfSlots)/2);
                 chosen[1] = chosen[0] + numberOfSlots - 1;//It is not necessary to allocate the entire band, just the amount of slots required

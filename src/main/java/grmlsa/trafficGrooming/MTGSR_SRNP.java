@@ -26,7 +26,6 @@ public class MTGSR_SRNP extends MultihopGroomingSRNP {
         }
 
         MultihopSolutionStatistics mss = sol.statistics;
-        double res = this.alfa * mss.physicalHops + this.beta * mss.virtualHops + this.gama * mss.spectrumUtilization + this.delta * (double)mss.transceivers - this.epsilon * mss.meanSNR;
-        return res;
+        return this.alfa * mss.physicalHops + this.beta * mss.virtualHops + this.gama * mss.spectrumUtilization + this.delta * (double)mss.transceivers - this.epsilon * mss.meanSNR;
     }
 }

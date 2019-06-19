@@ -5,9 +5,7 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.FirstFitExpansiveness;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
+import grmlsa.spectrumAssignment.FirstFitEsPAT;
 import network.Circuit;
 import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
@@ -27,7 +25,7 @@ public class CompleteSharingEsPAT implements IntegratedRMLSAAlgorithmInterface {
     private int sigmaExpansiveness=0;
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
-    private FirstFitExpansiveness spectrumAssignment;
+    private FirstFitEsPAT spectrumAssignment;
 
 
     @Override
@@ -35,7 +33,7 @@ public class CompleteSharingEsPAT implements IntegratedRMLSAAlgorithmInterface {
         if (kShortestsPaths == null){
         	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
             modulationSelection = cp.getModulationSelection();
-            spectrumAssignment = new FirstFitExpansiveness();
+            spectrumAssignment = new FirstFitEsPAT();
             Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
             this.sigmaExpansiveness = Integer.parseInt((String)uv.get("sigmaExpansiveness"));
         }

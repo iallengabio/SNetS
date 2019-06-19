@@ -335,4 +335,7 @@ public class Circuit implements Comparable<Object>, Serializable {
 
 
 
+	public String toString(){
+		return "(s:" + pair.getSource().getName() + " d:" + pair.getDestination().getName() + ")";
+	}
 }
