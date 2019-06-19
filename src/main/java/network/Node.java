@@ -12,12 +12,9 @@ public class Node implements Serializable {
 
     private String name;
     private Oxc oxc;
-    private int trafficWeigth;
     private Vector<Pair> pairs;
     private Transmitters txs;
     private Receivers rxs;
-    private double numberReqGenerated;
-    private double distanceToCentralNodeControlPlane = -9999999;
     
     private Regenerators regenerators;
     
@@ -30,10 +27,8 @@ public class Node implements Serializable {
     public Node(String name) {
         this.name = name;
         this.oxc = new Oxc(name);
-        this.trafficWeigth = 1;
         this.txs = new Transmitters();
         this.rxs = new Receivers();
-        this.numberReqGenerated = 0;
     }
 
     /**
@@ -46,11 +41,9 @@ public class Node implements Serializable {
     public Node(String name, int numTx, int numRx, int numRegenerators, int maxAmplitudeBVT) {
         this.name = name;
         this.oxc = new Oxc(name);
-        this.trafficWeigth = 1;
         this.txs = new Transmitters(numTx,maxAmplitudeBVT);
         this.rxs = new Receivers(numRx);
         this.regenerators = new Regenerators(numRegenerators);
-        this.numberReqGenerated = 0;
     }
 
     /**
@@ -84,16 +77,6 @@ public class Node implements Serializable {
     public String getName() {
         return name;
     }
-
-    /**
-     * Returns the weight of the node
-     *
-     * @return int
-     */
-    public int getWeigth() {
-        return this.trafficWeigth;
-    }
-
     /**
      * Returns the pairs whose origin is this node.
      *
@@ -121,32 +104,6 @@ public class Node implements Serializable {
         return rxs;
     }
 
-    /**
-     * Returns the number of requests generated with this node
-     *
-     * @return double
-     */
-    public double getNumberReqGenerated() {
-        return numberReqGenerated;
-    }
-
-    /**
-     * Returns the distance from this node to the Central Node of the Control Plane
-     *
-     * @return double
-     */
-    public double getDistanceToCentralNodeControlPlane() {
-        return distanceToCentralNodeControlPlane;
-    }
-
-    /**
-     * Sets the weight of the node
-     *
-     * @param weigth int
-     */
-    public void setTrafficWeigth(int weigth) {
-        this.trafficWeigth = weigth;
-    }
 
     /**
      * Configures the pairs whose origin and this node
@@ -157,38 +114,6 @@ public class Node implements Serializable {
         this.pairs = pairs;
     }
 
-    /**
-     * Configures the distance from this node to the Central Node of the Control Plane
-     *
-     * @param distanceToCentralNodeControlPlane double
-     */
-    public void setDistanceToCentralNodeControlPlane(double distanceToCentralNodeControlPlane) {
-        this.distanceToCentralNodeControlPlane = distanceToCentralNodeControlPlane;
-    }
-
-    /**
-     * Increases the number of requests generated with this node
-     */
-    public void incNumberReqGenerated() {
-        this.numberReqGenerated++;
-    }
-
-    /**
-     * finish
-     *
-     * @param timeHours double
-     */
-    public void finish(double timeHours) {
-        // this.reqQueue.finish(timeHours);
-    }
-
-    /**
-     * restart
-     */
-    public void reStart() {
-        this.txs.reStart();
-        this.rxs.reStart();
-    }
     
     /**
      * Returns the bank of regenerators
@@ -197,6 +122,10 @@ public class Node implements Serializable {
      */
     public Regenerators getRegenerators(){
     	return regenerators;
+    }
+
+    public String toString(){
+        return "node: " + name;
     }
 
 }
