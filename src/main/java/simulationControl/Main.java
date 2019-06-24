@@ -180,20 +180,20 @@ public class Main {
      * @throws Exception
      */
     private static void localSimulation(String path) throws Exception {
-    	System.out.println("Path: " + path);
+
+        File f = new File(path);
+        String name = f.getName();
+        path = f.getAbsoluteFile().getParentFile().getPath();
+
+        System.out.println("Path: " + path);
+        System.out.println("Simulation: " + name);
         System.out.println("Reading files");
-        List<List<Simulation>> allSimulations = createAllSimulations(makeSR(path));
-        
-        String separator = System.getProperty("file.separator");
-        String simulationFilePath = path + separator + "simulation";
-        Scanner scanner = new Scanner(new File(simulationFilePath));
-        String simulationConfigJSON = "";
-        while (scanner.hasNext()) {
-            simulationConfigJSON += scanner.next();
-        }
-        Gson gson = new GsonBuilder().create();
-        SimulationConfig sc = gson.fromJson(simulationConfigJSON, SimulationConfig.class);
-        scanner.close();
+
+        SimulationFileManager sfm = new SimulationFileManager();
+        SimulationRequest simulationRequest = sfm.readSimulation(path, name);
+
+        List<List<Simulation>> allSimulations = createAllSimulations(simulationRequest);
+        SimulationConfig sc = simulationRequest.getSimulationConfig();
         System.out.println("Threads running: " + sc.getThreads());
         
         //Now start the simulations
@@ -217,7 +217,9 @@ public class Main {
         long end = System.nanoTime();
         
         System.out.println("saving results");
-        sm.saveResults(path);
+        simulationRequest.setResult(sm.getResults());
+        sfm.writeSimulation(path,simulationRequest);
+        //sm.saveResults(path);
         System.out.println("finish!");
         
         long time = end - start;

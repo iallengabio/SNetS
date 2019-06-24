@@ -9,6 +9,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.Link;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.SpectrumSizeStatisticsResultManager;
 
 /**
@@ -41,8 +42,7 @@ public class SpectrumSizeStatistics extends Measurement{
 		numberReqPerSlotReq = new HashMap<>();
 		numberRequestsPerLink = new HashMap<>();
 		numberReqPerSlotReqPerLink = new HashMap<>();
-		
-		fileName = "_SpectrumSizeStatistics.csv";
+
 		resultManager = new SpectrumSizeStatisticsResultManager();
 	}
 	
@@ -61,7 +61,12 @@ public class SpectrumSizeStatistics extends Measurement{
 			this.newObservationRequestSizeBandwidthPerLink(circuit);
 		}
 	}
-	
+
+	@Override
+	public String getFileName() {
+		return SimulationRequest.Result.FILE_SPECTRUM_STATISTICS;
+	}
+
 	/**
 	 * Observation of the Requisition metric according to the size of the band requested in general
 	 * 

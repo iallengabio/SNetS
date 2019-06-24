@@ -58,12 +58,6 @@ public class ConsumedEnergyResultManager implements ResultManagerInterface {
 		res.append(ressultTotalPowerConsumption());
 		res.append("\n\n");
 		
-		res.append(ressultEnergyEfficiency());
-		res.append("\n\n");
-		
-		res.append(resultTotalDataTransmitted());
-		res.append("\n\n");
-		
 		res.append(resultTotalConsumedEnergyTransponders());
 		res.append("\n\n");
 		
@@ -109,40 +103,7 @@ public class ConsumedEnergyResultManager implements ResultManagerInterface {
 		}
 		return res.toString();
 	}
-	
-	/**
-	 * Returns the energy efficiency
-	 * 
-	 * @return String
-	 */
-	private String ressultEnergyEfficiency(){
-		StringBuilder res = new StringBuilder();
-		for (Integer loadPoint : loadPoints) {
-			res.append("Energy efficiency (bits/Joule)" + sep + loadPoint + sep + " ");
-			for (Integer replic : replications) {
-				res.append(sep + ces.get(loadPoint).get(replic).getEnergyEfficiency());
-			}
-			res.append("\n");
-		}
-		return res.toString();
-	}
-	
-	/**
-	 * Returns the total data transmitted
-	 * 
-	 * @return String
-	 */
-	private String resultTotalDataTransmitted(){
-		StringBuilder res = new StringBuilder();
-		for (Integer loadPoint : loadPoints) {
-			res.append("Total data transmitted (bits)" + sep + loadPoint + sep + " ");
-			for (Integer replic : replications) {
-				res.append(sep + ces.get(loadPoint).get(replic).getTotalDataTransmitted());
-			}
-			res.append("\n");
-		}
-		return res.toString();
-	}
+
 	
 	/**
 	 * Returns the energy consumption of the transponders 

@@ -4,6 +4,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.EnergyConsumption;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.MetricsOfEnergyConsumptionResultManager;
 
 
@@ -43,8 +44,7 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 		totalEnergyTransponders = 0.0;
 		totalEnergyOXCs = 0.0;
 		totalEnergyAmplifiers = 0.0;
-		
-		fileName = "_EnergyConsumption.csv";
+
 		resultManager = new MetricsOfEnergyConsumptionResultManager();
 	}
 
@@ -76,7 +76,12 @@ public class MetricsOfEnergyConsumption  extends Measurement {
 		
 		computeGeneralPowerConsumption(cp); // Calculates the total power consumption of the network
 	}
-	
+
+	@Override
+	public String getFileName() {
+		return SimulationRequest.Result.FILE_ENERGY_CONSUMPTION;
+	}
+
 	/**
 	 * Computes the power consumption of the network
 	 * 
