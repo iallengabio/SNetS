@@ -5,7 +5,7 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>br.ufpe.cin</groupId>
-    <artifactId>snets-oph</artifactId>
+    <artifactId>snets</artifactId>
     <packaging>jar</packaging>
     <version>1.0-OPH</version>
     <name>SNetS Slice Network Simulator</name>
