@@ -3,6 +3,7 @@ package measurement;
 import network.Circuit;
 import network.ControlPlane;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.GroomingStatisticsResultManager;
 
 import java.util.HashSet;
@@ -29,7 +30,6 @@ public class GroomingStatistics extends Measurement {
     public GroomingStatistics(int loadPoint, int replication) {
         super(loadPoint, replication);
         this.resultManager = new GroomingStatisticsResultManager();
-        fileName = "_GroomingStatistics.csv";
         observations = 0;
         sumReqByCirc = 0;
         maxVirtualHops = 0;
@@ -48,6 +48,11 @@ public class GroomingStatistics extends Measurement {
                 maxVirtualHops = request.getCircuits().size();
             }
         }
+    }
+
+    @Override
+    public String getFileName() {
+        return SimulationRequest.Result.FILE_GROOMING_STATISTICS;
     }
 
     public double getReqByCirc(){

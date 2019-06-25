@@ -8,6 +8,7 @@ import grmlsa.modulation.Modulation;
 import network.Circuit;
 import network.ControlPlane;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.ModulationUtilizationResultManager;
 
 /**
@@ -31,8 +32,7 @@ public class ModulationUtilization extends Measurement {
 		
 		this.numCircuitsPerMod = new HashMap<>();
 		this.numCircuitsPerModPerBw = new HashMap<>();
-		
-		fileName = "_ModulationUtilization.csv";
+
 		resultManager = new ModulationUtilizationResultManager();
 	}
 	
@@ -81,8 +81,13 @@ public class ModulationUtilization extends Measurement {
 		}
 		}
 	}
-	
-   /**
+
+	@Override
+	public String getFileName() {
+		return SimulationRequest.Result.FILE_MODULATION_UTILIZATION;
+	}
+
+	/**
     * Returns the percentage of circuits per modulation
     *
     * @return double

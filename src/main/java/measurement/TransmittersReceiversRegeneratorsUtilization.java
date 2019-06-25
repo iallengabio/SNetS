@@ -7,6 +7,7 @@ import java.util.Set;
 import network.ControlPlane;
 import network.Node;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.TransmittersReceiversRegeneratorsUtilizationResultManager;
 
 /**
@@ -53,8 +54,7 @@ public class TransmittersReceiversRegeneratorsUtilization extends Measurement {
         maxTxUtilizationPerNode = new HashMap<>();
         maxRxUtilizationPerNode = new HashMap<>();
         maxRegenUtilizationPerNode = new HashMap<>();
-        
-        fileName = "_TransmittersReceiversRegeneratorsUtilization.csv";
+
 		resultManager = new TransmittersReceiversRegeneratorsUtilizationResultManager();
     }
 
@@ -108,6 +108,11 @@ public class TransmittersReceiversRegeneratorsUtilization extends Measurement {
         }
         
         numberObservations++;
+    }
+
+    @Override
+    public String getFileName() {
+        return SimulationRequest.Result.FILE_TRANSMITTERS_RECEIVERS_REGENERATORS_UTILIZATION;
     }
 
     /**
