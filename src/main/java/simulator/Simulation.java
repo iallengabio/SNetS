@@ -33,7 +33,7 @@ public class Simulation implements Serializable {
      * @param replication int
      * @throws Exception
      */
-    public Simulation(SimulationConfig sc, Mesh mesh, int loadPoint, int replication) throws Exception {
+    public Simulation(SimulationConfig sc, Mesh mesh, int loadPoint, int replication){
         this.loadPoint = loadPoint;
         this.replication = replication;
         this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getActiveMetrics());

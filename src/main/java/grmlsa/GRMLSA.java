@@ -147,7 +147,7 @@ public class GRMLSA implements Serializable {
      * @throws Exception
      * @return TrafficGroomingAlgorithm
      */
-    public TrafficGroomingAlgorithmInterface instantiateGrooming() throws Exception {
+    public TrafficGroomingAlgorithmInterface instantiateGrooming(){
         switch (this.grooming) {
             case GROOMING_OPT_NOTRAFFICGROOMING:
                 return new NoTrafficGrooming();
@@ -170,7 +170,7 @@ public class GRMLSA implements Serializable {
      * @throws Exception
      * @return RoutingInterface
      */
-    public RoutingAlgorithmInterface instantiateRouting() throws Exception {
+    public RoutingAlgorithmInterface instantiateRouting(){
         switch (this.routing) {
             case ROUTING_DJK:
                 return new DJK();
@@ -189,7 +189,7 @@ public class GRMLSA implements Serializable {
      * @throws Exception
      * @return SpectrumAssignmentInterface
      */
-    public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment() throws Exception {
+    public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment(){
         switch (this.spectrumAssignmentType) {
             case SPECTRUM_ASSIGNMENT_FISTFIT:
                 return new FirstFit();
@@ -224,7 +224,7 @@ public class GRMLSA implements Serializable {
      * @throws Exception
      * @return IntegratedRSAAlgoritm
      */
-    public IntegratedRMLSAAlgorithmInterface instantiateIntegratedRSA() throws Exception {
+    public IntegratedRMLSAAlgorithmInterface instantiateIntegratedRSA(){
         switch (this.integrated) {
             case INTEGRATED_COMPLETESHARING:
                 return new CompleteSharing();
@@ -267,7 +267,7 @@ public class GRMLSA implements Serializable {
      * @throws Exception
      * @return RegeneratorAssignmentAlgorithmInterface
      */
-    public RegeneratorAssignmentAlgorithmInterface instantiateRegeneratorAssignment() throws Exception {
+    public RegeneratorAssignmentAlgorithmInterface instantiateRegeneratorAssignment(){
     	switch (this.regeneratorAssignment) {
     		case ALL_ASSIGNMENT_OF_REGENERATOR:
     			return new AllAssignmentOfRegenerator();
@@ -286,7 +286,7 @@ public class GRMLSA implements Serializable {
      * @return ModulationSelectionAlgorithmInterface
      * @throws Exception
      */
-    public ModulationSelectionAlgorithmInterface instantiateModulationSelection() throws Exception {
+    public ModulationSelectionAlgorithmInterface instantiateModulationSelection(){
     	switch (this.modulationSelection) {
 	    	case MODULATION_BY_DISTANCE:
 	    		return new ModulationSelectionByDistance();

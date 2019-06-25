@@ -8,6 +8,7 @@ import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.RelativeFragmentationResultManager;
 import util.ComputesFragmentation;
 
@@ -41,8 +42,7 @@ public class RelativeFragmentation extends Measurement {
         relativeFrag.put(2, 0.0);
         relativeFrag.put(3, 0.0);
         relativeFrag.put(5, 0.0);
-        
-        fileName = "_RelativeFragmentation.csv";
+
 		resultManager = new RelativeFragmentationResultManager();
     }
 
@@ -56,6 +56,11 @@ public class RelativeFragmentation extends Measurement {
     public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
         this.observationLinks(cp.getMesh());
         numberObservations++;
+    }
+
+    @Override
+    public String getFileName() {
+        return SimulationRequest.Result.FILE_RELATIVE_FRAGMENTATION;
     }
 
     /**

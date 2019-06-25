@@ -9,6 +9,7 @@ import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.ExternalFragmentationResultManager;
 import util.ComputesFragmentation;
 import util.IntersectionFreeSpectrum;
@@ -42,8 +43,7 @@ public class ExternalFragmentation extends Measurement {
         this.replication = rep;
         this.numberObservations = 0;
         this.ExternalFragLinks = new HashMap<>();
-        
-        fileName = "_ExternalFragmentation.csv";
+
 		resultManager = new ExternalFragmentationResultManager();
     }
 
@@ -60,6 +60,11 @@ public class ExternalFragmentation extends Measurement {
             this.observationExternalFragHorizontal(circuit);
         }
         numberObservations++;
+    }
+
+    @Override
+    public String getFileName() {
+        return SimulationRequest.Result.FILE_EXTERNAL_FRAGMENTATION;
     }
 
     /**

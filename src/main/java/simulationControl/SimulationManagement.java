@@ -1,18 +1,19 @@
 package simulationControl;
 
-import measurement.*;
-import simulationControl.resultManagers.*;
+import measurement.Measurements;
+import network.Mesh;
+import network.Pair;
+import network.RequestGenerator;
+import simulationControl.parsers.*;
+import simulationControl.resultManagers.ResultManager;
 import simulator.Simulation;
 import simulator.Simulator;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
 
 /**
  * This class is responsible for managing the executions of the simulations
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
  */
 public class SimulationManagement {
 
-    private int numberOfThreads = 1;
+    private SimulationRequest simulationRequest;
 
     private List<List<Simulation>> simulations;
     private int done;
@@ -33,12 +34,12 @@ public class SimulationManagement {
 
     /**
      * Creates a new instance of SimulationManagement
-     * 
-     * @param simulations List<List<Simulation>>
+     *
      */
-    public SimulationManagement(List<List<Simulation>> simulations, int threads) {
-        numberOfThreads = threads;
-        this.simulations = simulations;
+    public SimulationManagement(SimulationRequest simulationRequest) {
+        this.simulationRequest = simulationRequest;
+        //numberOfThreads = simulationRequest.getSimulationConfig().getThreads();
+        this.simulations = createAllSimulations(simulationRequest);
         done = 0;
         numOfSimulations = 0;
         mainMeasuremens = new ArrayList<>();
@@ -54,11 +55,49 @@ public class SimulationManagement {
     }
 
     /**
-     * This constructor is used to reuse the methods that converts results into csv files.
-     * @param mainMeasuremens
+     * This method creates all simulations of an experiment
+     *
      */
-    public SimulationManagement(List<List<Simulation>> simulations, List<List<Measurements>> mainMeasuremens) {
-        this.mainMeasuremens = mainMeasuremens;
+    public static List<List<Simulation>> createAllSimulations(SimulationRequest sr){
+
+        NetworkConfig nc = sr.getNetworkConfig();
+        SimulationConfig sc = sr.getSimulationConfig();
+        TrafficConfig tc = sr.getTrafficConfig();
+        PhysicalLayerConfig plc = sr.getPhysicalLayerConfig();
+        OthersConfig oc = sr.getOthersConfig();
+
+        System.out.println("Calculating the modulations transmission ranges");
+        Mesh meshTemp = new Mesh(nc, tc, plc, oc, null);
+
+        // Create list of simulations
+        List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
+        int i, j;
+        for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
+            List<Simulation> reps = new ArrayList<>();
+            for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
+                Mesh m = new Mesh(nc, tc, plc, oc, meshTemp.getModTrDistance());
+                incArrivedRate(m.getPairList(), i);
+                Simulation s = new Simulation(sc, m, i, j);
+                reps.add(s);
+            }
+            allSimulations.add(reps);
+        }
+
+        return allSimulations;
+    }
+
+    /**
+     * This method sets the loading point of the simulation in each request generator
+     *
+     * @param pairs Vector<Pair>
+     * @param mult int
+     */
+    private static void incArrivedRate(Vector<Pair> pairs, int mult) {
+        for (Pair pair : pairs) {
+            for (RequestGenerator rg : pair.getRequestGenerators()) {
+                rg.incArrivedRate(mult);
+            }
+        }
     }
 
     /**
@@ -68,7 +107,7 @@ public class SimulationManagement {
 
         Util.pairs.addAll(simulations.get(0).get(0).getMesh().getPairList());
 
-        ExecutorService executor = Executors.newScheduledThreadPool(numberOfThreads);
+        ExecutorService executor = Executors.newScheduledThreadPool(simulationRequest.getSimulationConfig().getThreads());
         done = 0;
         for(List<Simulation> loadPoint : simulations){
             for(Simulation replication : loadPoint){
@@ -98,244 +137,10 @@ public class SimulationManagement {
 
         executor.shutdown();
 
+        ResultManager rm = new ResultManager(mainMeasuremens);
+        simulationRequest.setResult(rm.getResults());
         simulationProgressListener.onSimulationFinished();
     }
-
-
-    /**
-     * This method is responsible for calling the method of the class responsible for saving 
-     * the results associated with each metric
-     * 
-     * @param pathResultFiles String
-     */
-    public void saveResults(String pathResultFiles){
-    	// Pick folder name
-    	String separador = System.getProperty("file.separator");
-    	String aux[] = pathResultFiles.split(Pattern.quote(separador));
-    	String nomePasta = aux[aux.length - 1];
-    	
-    	try {
-    		int numMetrics = this.mainMeasuremens.get(0).get(0).getMetrics().size();
-
-    		Measurement metric = this.mainMeasuremens.get(0).get(0).getConsumedEnergyMetric();
-            List<List<Measurement>> llms = new ArrayList<List<Measurement>>();
-            for (List<Measurements> listMeasurements : this.mainMeasuremens) {
-                List<Measurement> lms = new ArrayList<Measurement>();
-                llms.add(lms);
-                for (Measurements measurements : listMeasurements) {
-                    lms.add(measurements.getConsumedEnergyMetric());
-                }
-            }
-            String path = pathResultFiles + separador + nomePasta + metric.getFileName();
-            FileWriter fw = new FileWriter(new File(path));
-            fw.write(metric.result(llms));
-            fw.close();
-
-    		for(int m = 0; m < numMetrics; m++){
-    			metric = this.mainMeasuremens.get(0).get(0).getMetrics().get(m);
-    			
-				llms = new ArrayList<List<Measurement>>();
-				for (List<Measurements> listMeasurements : this.mainMeasuremens) {
-					List<Measurement> lms = new ArrayList<Measurement>();
-					llms.add(lms);
-					for (Measurements measurements : listMeasurements) {
-						lms.add(measurements.getMetrics().get(m));
-					}
-				}
-				
-				path = pathResultFiles + separador + nomePasta + metric.getFileName();
-				
-				fw = new FileWriter(new File(path));
-				fw.write(metric.result(llms));
-	            fw.close();
-    		}
-
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-    }
-
-    /**
-     * Returns a string with the results file of the metric of circuit blocking probability
-     * 
-     * @return String
-     */
-    public String getBlockingProbabilityCsv(){
-        List<List<Measurement>> pbs = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lpb = new ArrayList<>();
-            pbs.add(lpb);
-            for (Measurements measurements : listMeas) {
-                lpb.add(measurements.getProbabilidadeDeBloqueioMeasurement());
-            }
-        }
-
-        BlockingProbResultManager bprm = new BlockingProbResultManager();
-        return bprm.result(pbs);
-    }
-
-    /**
-     * Returns a string with the results file of the metric of bandwidth blocking probability
-     * 
-     * @return String
-     */
-    public String getBandwidthBlockingProbabilityCsv(){
-        List<List<Measurement>> pbbs = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lpbb = new ArrayList<>();
-            pbbs.add(lpbb);
-            for (Measurements measurements : listMeas) {
-                lpbb.add(measurements.getProbabilidadeDeBloqueioDeBandaMeasurement());
-            }
-        }
-
-        BandwidthBlockingProbResultManager bbprm = new BandwidthBlockingProbResultManager();
-        return bbprm.result(pbbs);
-    }
-
-    /**
-     * Returns a string with the results file of the metric of external fragmentation
-     * 
-     * @return String
-     */
-    public String getExternalFragmentationCsv(){
-        List<List<Measurement>> llfe = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lfe = new ArrayList<>();
-            llfe.add(lfe);
-            for (Measurements measurements : listMeas) {
-                lfe.add(measurements.getFragmentacaoExterna());
-            }
-        }
-        ExternalFragmentationResultManager efm = new ExternalFragmentationResultManager();
-        return efm.result(llfe);
-    }
-
-    /**
-     * Returns a string with the results file of the metric of relative fragmentation
-     * 
-     * @return String
-     */
-    public String getRelativeFragmentationCsv(){
-        List<List<Measurement>> llfr = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lfr = new ArrayList<>();
-            llfr.add(lfr);
-            for (Measurements measurements : listMeas) {
-                lfr.add(measurements.getFragmentacaoRelativa());
-            }
-        }
-
-        RelativeFragmentationResultManager rfm = new RelativeFragmentationResultManager();
-        return rfm.result(llfr);
-    }
-
-    /**
-     * Returns a string with the results file of the metric of spectrum utilization
-     * 
-     * @return String
-     */
-    public String getSpectrumUtilizationCsv(){
-        List<List<Measurement>> llus = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lus = new ArrayList<>();
-            llus.add(lus);
-            for (Measurements measurements : listMeas) {
-                lus.add(measurements.getUtilizacaoSpectro());
-            }
-        }
-
-        SpectrumUtilizationResultManager surm = new SpectrumUtilizationResultManager();
-        return surm.result(llus);
-    }
-
-    /**
-     * Returns a string with the results file of the metric of spectrum size statistics
-     * 
-     * @return String
-     */
-    public String getSpectrumStatisticsCsv(){
-        List<List<Measurement>> llsss = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lsss = new ArrayList<>();
-            llsss.add(lsss);
-            for (Measurements measurements : listMeas) {
-                lsss.add(measurements.getSpectrumSizeStatistics());
-            }
-        }
-        SpectrumSizeStatisticsResultManager sssrm = new SpectrumSizeStatisticsResultManager();
-        return sssrm.result(llsss);
-    }
-
-    /**
-     * Returns a string with the results file of the metric of transmitters, receivers, and regenerators utilization
-     * 
-     * @return String
-     */
-    public String getTransceiversUtilizationCsv(){
-        List<List<Measurement>> lltru = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> ltru = new ArrayList<>();
-            lltru.add(ltru);
-            for (Measurements measurements : listMeas) {
-                ltru.add(measurements.getTransmitersReceiversUtilization());
-            }
-        }
-        TransmittersReceiversRegeneratorsUtilizationResultManager trurm = new TransmittersReceiversRegeneratorsUtilizationResultManager();
-        return trurm.result(lltru);
-    }
-    
-    /**
-     * Returns a string with the results file of the metric of energy consumption
-     * 
-     * @return String
-     */
-    public String getEnergyConsumptionCsv(){
-        List<List<Measurement>> llec = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lec = new ArrayList<>();
-            llec.add(lec);
-            for (Measurements measurements : listMeas) {
-                lec.add(measurements.getMetricsOfEnergyConsumption());
-            }
-        }
-        MetricsOfEnergyConsumptionResultManager mecm = new MetricsOfEnergyConsumptionResultManager();
-        return mecm.result(llec);
-    }
-    
-    /**
-     * Returns a string with the results file of the metric of modulation utilization
-     * 
-     * @return String
-     */
-    public String getModulationUtilizationCsv(){
-        List<List<Measurement>> llmu = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lmu = new ArrayList<>();
-            llmu.add(lmu);
-            for (Measurements measurements : listMeas) {
-                lmu.add(measurements.getModulationUtilization());
-            }
-        }
-        ModulationUtilizationResultManager murm = new ModulationUtilizationResultManager();
-        return murm.result(llmu);
-    }
-
-    public String getConsumedEnergyCsv(){
-        List<List<Measurement>> llmu = new ArrayList<>();
-        for (List<Measurements> listMeas : this.mainMeasuremens) {
-            List<Measurement> lmu = new ArrayList<>();
-            llmu.add(lmu);
-            for (Measurements measurements : listMeas) {
-                lmu.add(measurements.getConsumedEnergyMetric());
-            }
-        }
-        ConsumedEnergyResultManager murm = new ConsumedEnergyResultManager();
-        return murm.result(llmu);
-    }
-
 
     public static interface SimulationProgressListener {
 

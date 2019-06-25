@@ -7,6 +7,7 @@ import network.ControlPlane;
 import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.SpectrumUtilizationResultManager;
 
 /**
@@ -41,8 +42,7 @@ public class SpectrumUtilization extends Measurement {
 
         maxSlotsByLinks = mesh.maximumSlotsByLinks();
         desUtilizationPerSlot = new int[maxSlotsByLinks];
-        
-        fileName = "_SpectrumUtilization.csv";
+
 		resultManager = new SpectrumUtilizationResultManager();
     }
 
@@ -55,6 +55,11 @@ public class SpectrumUtilization extends Measurement {
      */
     public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request) {
         this.newObsUtilization();
+    }
+
+    @Override
+    public String getFileName() {
+        return SimulationRequest.Result.FILE_SPECTRUM_UTILIZATION;
     }
 
     /**

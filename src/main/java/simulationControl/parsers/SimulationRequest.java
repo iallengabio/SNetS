@@ -6,7 +6,9 @@ package simulationControl.parsers;
  * Created by Iallen on 23/05/2017.
  */
 public class SimulationRequest {
-	
+
+    private String name;
+
     private NetworkConfig networkConfig;
     private TrafficConfig trafficConfig;
     private SimulationConfig simulationConfig;
@@ -23,6 +25,19 @@ public class SimulationRequest {
      * @author Iallen
      */
     public static class Result {
+        public final static String FILE_BLOCKING_PROBABILITY = "BlockingProbability.csv";
+        public final static String FILE_BANDWIDTH_BLOCKING_PROBABILITY = "BandwidthBlockingProbability.csv";
+        public final static String FILE_EXTERNAL_FRAGMENTATION = "ExternalFragmentation.csv";
+        public final static String FILE_RELATIVE_FRAGMENTATION = "RelativeFragmentation.csv";
+        public final static String FILE_SPECTRUM_UTILIZATION = "SpectrumUtilization.csv";
+        public final static String FILE_TRANSMITTERS_RECEIVERS_REGENERATORS_UTILIZATION = "TransmittersReceiversRegeneratorsUtilization.csv";
+        public final static String FILE_GROOMING_STATISTICS = "GroomingStatistics.csv";
+        public final static String FILE_SPECTRUM_STATISTICS = "SpectrumStatistics.csv";
+        public final static String FILE_ENERGY_CONSUMPTION = "EnergyConsumption.csv";
+        public final static String FILE_MODULATION_UTILIZATION = "ModulationUtilization.csv";
+        public final static String FILE_CONSUMEDEN_ERGY = "ConsumedEnergy.csv";
+
+
         public String blockingProbability;
         public String bandwidthBlockingProbability;
         public String externalFragmentation;
@@ -33,6 +48,8 @@ public class SimulationRequest {
         public String energyConsumption;
         public String modulationUtilization;
         public String consumedEnergy;
+        public String transmittersReceiversRegeneratorsUtilization;
+        public String groomingStatistics;
     }
 
     /**
@@ -142,6 +159,16 @@ public class SimulationRequest {
     public void setStatus(String status) {
         this.status = status;
     }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     /**
      * Returns the progress

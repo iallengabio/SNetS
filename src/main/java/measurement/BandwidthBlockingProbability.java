@@ -7,6 +7,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.Pair;
 import request.RequestForConnection;
+import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.BandwidthBlockingProbResultManager;
 
 /**
@@ -61,8 +62,6 @@ public class BandwidthBlockingProbability extends Measurement{
 		this.bandwidthBlockedPerPair = new HashMap<>();
 		this.requestedBandwidthPairBW = new HashMap<>();
 		this.bandwidthBlockedPairBW = new HashMap<>();
-		
-		fileName = "_BandwidthBlockingProbability.csv";
 		resultManager = new BandwidthBlockingProbResultManager();
 	}
 	
@@ -158,6 +157,11 @@ public class BandwidthBlockingProbability extends Measurement{
 			if(i==null) i=0.0;
 			bplb.put(request.getRequiredBandwidth(), i+bandwidth);
 		}
+	}
+
+	@Override
+	public String getFileName() {
+		return SimulationRequest.Result.FILE_BANDWIDTH_BLOCKING_PROBABILITY;
 	}
 
 	/**

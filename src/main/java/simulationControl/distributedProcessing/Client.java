@@ -6,6 +6,7 @@ import grmlsa.modulation.Modulation;
 import measurement.*;
 import network.Mesh;
 import simulationControl.Main;
+import simulationControl.SimulationFileManager;
 import simulationControl.parsers.SimulationRequest;
 import simulator.Simulation;
 
@@ -26,14 +27,23 @@ public class Client {
         try {
             ServerMInterface server = (ServerMInterface) Naming.lookup("//"+serverMLocation+"/ServerM");
 
+            File f = new File(path);
+            String name = f.getName();
+            path = f.getAbsoluteFile().getParentFile().getPath();
+
+            System.out.println("Path: " + path);
+            System.out.println("Simulation: " + name);
             System.out.println("Reading files");
-            SimulationRequest sr = Main.makeSR(path);
+
+            SimulationFileManager sfm = new SimulationFileManager();
+            SimulationRequest sr = sfm.readSimulation(path, name);
+
             Gson gson = new GsonBuilder().create();
             String simReqJSON = gson.toJson(sr);
             simReqJSON = server.simulationBundleRequest(simReqJSON, new ClientProgressCallback());
             sr = gson.fromJson(simReqJSON,SimulationRequest.class);
             System.out.println("Saving results.");
-            saveResults(sr,path);
+            sfm.writeSimulation(path,sr);
             System.out.println("Simulation ends.");
 
 
@@ -48,63 +58,6 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void saveResults(SimulationRequest sr, String path){
-
-        if(sr.getSimulationConfig().getActiveMetrics().BlockingProbability){
-            BlockingProbability bp = new BlockingProbability(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().blockingProbability);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().BandwidthBlockingProbability){
-            BandwidthBlockingProbability bp = new BandwidthBlockingProbability(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().bandwidthBlockingProbability);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().ExternalFragmentation){
-            ExternalFragmentation bp = new ExternalFragmentation(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().externalFragmentation);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().RelativeFragmentation){
-            RelativeFragmentation bp = new RelativeFragmentation(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().relativeFragmentation);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().SpectrumUtilization){
-            SpectrumUtilization bp = new SpectrumUtilization(0,0,new Mesh(sr.getNetworkConfig(),sr.getTrafficConfig(),sr.getPhysicalLayerConfig(),sr.getOthersConfig(), null));
-            saveResult(path,bp.getFileName(),sr.getResult().spectrumUtilization);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics){
-            SpectrumSizeStatistics bp = new SpectrumSizeStatistics(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().spectrumStatistics);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption){
-            MetricsOfEnergyConsumption bp = new MetricsOfEnergyConsumption(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().energyConsumption);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization){
-            ModulationUtilization bp = new ModulationUtilization(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().modulationUtilization);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().ConsumedEnergy){
-            ConsumedEnergy bp = new ConsumedEnergy(0,0);
-            saveResult(path,bp.getFileName(),sr.getResult().consumedEnergy);
-        }
-    }
-
-    public static void saveResult(String path, String metric, String resultCsv)  {
-        String separador = System.getProperty("file.separator");
-        String aux[] = path.split(Pattern.quote(separador));
-        String nomePasta = aux[aux.length - 1];
-        FileWriter fw;
-        String p = path + separador + nomePasta + metric;
-
-        try {
-            fw = new FileWriter(new File(p));
-            fw.write(resultCsv);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     public static class ClientProgressCallback extends UnicastRemoteObject implements ClientProgressCallbackInterface {

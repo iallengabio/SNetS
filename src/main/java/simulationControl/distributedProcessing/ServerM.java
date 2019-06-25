@@ -2,11 +2,10 @@ package simulationControl.distributedProcessing;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import measurement.Measurement;
 import measurement.Measurements;
-import simulationControl.Main;
 import simulationControl.SimulationManagement;
 import simulationControl.parsers.SimulationRequest;
+import simulationControl.resultManagers.ResultManager;
 import simulator.Simulation;
 
 import java.rmi.Naming;
@@ -48,7 +47,7 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
     public String simulationBundleRequest(String simReqJSON, ClientProgressCallbackInterface cpci) throws Exception {
         Gson gson = new GsonBuilder().create();
         SimulationRequest sr = gson.fromJson(simReqJSON,SimulationRequest.class);
-        List<List<Simulation>> simulations = Main.createAllSimulations(sr);
+        List<List<Simulation>> simulations = SimulationManagement.createAllSimulations(sr);
         Queue<Simulation> simulationQueue = new LinkedList<>();
         List<List<Measurements>> mainMeasuremens;
         mainMeasuremens = new ArrayList<>();
@@ -75,18 +74,8 @@ public class ServerM extends UnicastRemoteObject implements ServerMInterface {
             cpci.updateProgress(progress);
         }
 
-        SimulationManagement sm = new SimulationManagement(simulations, mainMeasuremens);
-
-        if(sr.getSimulationConfig().getActiveMetrics().BlockingProbability)sr.getResult().blockingProbability = sm.getBlockingProbabilityCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().BandwidthBlockingProbability)sr.getResult().bandwidthBlockingProbability = sm.getBandwidthBlockingProbabilityCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().ExternalFragmentation)sr.getResult().externalFragmentation = sm.getExternalFragmentationCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().RelativeFragmentation)sr.getResult().relativeFragmentation = sm.getRelativeFragmentationCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().SpectrumUtilization)sr.getResult().spectrumUtilization = sm.getSpectrumUtilizationCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().TransmittersReceiversRegeneratorsUtilization)sr.getResult().transceiversUtilization = sm.getTransceiversUtilizationCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics)sr.getResult().spectrumStatistics = sm.getSpectrumStatisticsCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption)sr.getResult().energyConsumption = sm.getEnergyConsumptionCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization)sr.getResult().modulationUtilization = sm.getModulationUtilizationCsv();
-        if(sr.getSimulationConfig().getActiveMetrics().ConsumedEnergy)sr.getResult().consumedEnergy = sm.getConsumedEnergyCsv();
+        ResultManager sm = new ResultManager(mainMeasuremens);
+        sr.setResult(sm.getResults());
 
         return gson.toJson(sr);
     }
