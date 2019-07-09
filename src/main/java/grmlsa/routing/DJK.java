@@ -28,12 +28,14 @@ public class DJK implements RoutingAlgorithmInterface {
 
     private HashMap<String, Route> routesForAllPairs;
 
+    private Util util;
 
     @Override
     public boolean findRoute(Circuit circuit, Mesh mesh) {
         if (routesForAllPairs == null) {
         	computeAllRoutes(mesh);
         	//salveRoutesByPar(mesh.getNodeList());
+            util = mesh.getUtil();
         }
 
         Node source = circuit.getSource();
@@ -174,7 +176,7 @@ public class DJK implements RoutingAlgorithmInterface {
         try {
         	String separator = System.getProperty("file.separator");
         	
-        	FileWriter fw = new FileWriter(Util.projectPath + separator + "routesByPar.txt");
+        	FileWriter fw = new FileWriter(util.projectPath + separator + "routesByPar.txt");
 			BufferedWriter out = new BufferedWriter(fw);
             
 			out.append(json);

@@ -32,11 +32,14 @@ public class MMRDS implements RoutingAlgorithmInterface {
     private HashMap<String, Route> routesForAllPairs;
     private Double alpha = 1.0;
 
+    private Util util;
+
     @Override
     public boolean findRoute(Circuit request, Mesh mesh) {
         if (routesForAllPairs == null) {
             computeAllRoutes(mesh);
             salveRoutesByPar(mesh.getNodeList());
+            this.util = mesh.getUtil();
         }
 
         Node source = request.getSource();
@@ -339,7 +342,7 @@ public class MMRDS implements RoutingAlgorithmInterface {
         try {
         	String separator = System.getProperty("file.separator");
         	
-        	FileWriter fw = new FileWriter(Util.projectPath + separator + "routesByPar.txt");
+        	FileWriter fw = new FileWriter(util.projectPath + separator + "routesByPar.txt");
 			BufferedWriter out = new BufferedWriter(fw);
             
 			out.append(json);

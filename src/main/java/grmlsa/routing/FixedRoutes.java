@@ -31,34 +31,6 @@ public class FixedRoutes implements RoutingAlgorithmInterface {
 
     private HashMap<String, Route> routesForAllPairs;
 
-    /**
-     * Creates a new instance of FixedRoutes
-     */
-    public FixedRoutes() {
-        try {
-        	String separator = System.getProperty("file.separator");
-        	String filePath = Util.projectPath + separator + "routesByPar.txt";
-        	String routesListGson = "";
-        	
-        	Scanner scanner = new Scanner(new File(filePath));
-        	while (scanner.hasNext()) {
-        		routesListGson += scanner.next();
-            }
-        	
-        	Gson gson = new GsonBuilder().create();
-        	Type typeTemp = new TypeToken<ArrayList<String>>(){}.getType();
-        	
-        	List<String> routeListTemp = gson.fromJson(routesListGson, typeTemp);
-        	routeList = (ArrayList<String>)routeListTemp;
-        	
-        	scanner.close();
-        	
-        } catch (Exception e) {
-            System.err.println("The file routesByPar.txt was not found!");
-
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public boolean findRoute(Circuit request, Mesh mesh) {
@@ -85,6 +57,30 @@ public class FixedRoutes implements RoutingAlgorithmInterface {
      * @param mesh Mesh
      */
     private void computeAllRoutes(Mesh mesh) {
+        try {
+            String separator = System.getProperty("file.separator");
+            String filePath = mesh.getUtil().projectPath + separator + "routesByPar.txt";
+            String routesListGson = "";
+
+            Scanner scanner = new Scanner(new File(filePath));
+            while (scanner.hasNext()) {
+                routesListGson += scanner.next();
+            }
+
+            Gson gson = new GsonBuilder().create();
+            Type typeTemp = new TypeToken<ArrayList<String>>(){}.getType();
+
+            List<String> routeListTemp = gson.fromJson(routesListGson, typeTemp);
+            routeList = (ArrayList<String>)routeListTemp;
+
+            scanner.close();
+
+        } catch (Exception e) {
+            System.err.println("The file routesByPar.txt was not found!");
+
+            e.printStackTrace();
+        }
+
         routesForAllPairs = new HashMap<String, Route>();
         
         for (int i = 0; i < routeList.size(); i++) {

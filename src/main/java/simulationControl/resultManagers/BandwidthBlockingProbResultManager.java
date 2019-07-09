@@ -39,9 +39,10 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 				reps.put(bbp.getReplication(), (BandwidthBlockingProbability)bbp);
 			}			
 		}
+		BandwidthBlockingProbability bbp = (BandwidthBlockingProbability) llms.get(0).get(0);
 		loadPoints = new ArrayList<>(bbps.keySet());
 		replications = new ArrayList<>(bbps.values().iterator().next().keySet());
-		this.pairs = new ArrayList<>(Util.pairs);
+		this.pairs = new ArrayList<>(bbp.getUtil().pairs);
 	}
 	
 	/**
@@ -256,7 +257,7 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		for (Integer loadPoint : loadPoints) {
 			String aux = "Bandwidth blocking probabilities per bandwidth" + sep + loadPoint;
 			
-			for (Double bandwidth : Util.bandwidths) {
+			for (Double bandwidth : bbps.get(0).get(0).getUtil().bandwidths) {
 				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps" + sep + "all" + sep + "all" + sep + " ";
 				for (Integer rep : replications) {
 					aux2 = aux2 + sep + bbps.get(loadPoint).get(rep).getProbBlockBandwidth(bandwidth);
@@ -277,9 +278,9 @@ public class BandwidthBlockingProbResultManager implements ResultManagerInterfac
 		for (Integer loadPoint : loadPoints) {
 			String aux = "Bandwidth blocking probabilities per pair and bandwidth" + sep + loadPoint;
 			
-			for (Double bandwidth : Util.bandwidths) {
+			for (Double bandwidth : bbps.get(0).get(0).getUtil().bandwidths) {
 				String aux2 = aux + sep + (bandwidth/1000000000.0) + "Gbps";
-				for (Pair pair :  Util.pairs) {
+				for (Pair pair :  bbps.get(0).get(0).getUtil().pairs) {
 					String aux3 = aux2 + sep + pair.getSource().getName() + sep + pair.getDestination().getName() + sep + " ";
 					for(Integer rep :  replications){
 						aux3 = aux3 + sep + bbps.get(loadPoint).get(rep).getProbBlockPairBandwidth(pair, bandwidth);

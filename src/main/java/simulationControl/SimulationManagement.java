@@ -59,6 +59,7 @@ public class SimulationManagement {
      *
      */
     public static List<List<Simulation>> createAllSimulations(SimulationRequest sr){
+        Util util = new Util();
 
         NetworkConfig nc = sr.getNetworkConfig();
         SimulationConfig sc = sr.getSimulationConfig();
@@ -67,7 +68,7 @@ public class SimulationManagement {
         OthersConfig oc = sr.getOthersConfig();
 
         System.out.println("Calculating the modulations transmission ranges");
-        Mesh meshTemp = new Mesh(nc, tc, plc, oc, null);
+        Mesh meshTemp = new Mesh(nc, tc, plc, oc, null,util);
 
         // Create list of simulations
         List<List<Simulation>> allSimulations = new ArrayList<>(); // Each element of this set is a list with 10 replications from the same load point
@@ -75,13 +76,15 @@ public class SimulationManagement {
         for (i = 0; i < sc.getLoadPoints(); i++) { // Create the simulations for each load point
             List<Simulation> reps = new ArrayList<>();
             for (j = 0; j < sc.getReplications(); j++) { // Create the simulations for each replication
-                Mesh m = new Mesh(nc, tc, plc, oc, meshTemp.getModTrDistance());
+                Mesh m = new Mesh(nc, tc, plc, oc, meshTemp.getModTrDistance(),util);
                 incArrivedRate(m.getPairList(), i);
-                Simulation s = new Simulation(sc, m, i, j);
+                Simulation s = new Simulation(sc, m, i, j, util);
                 reps.add(s);
             }
             allSimulations.add(reps);
         }
+
+        util.pairs.addAll(allSimulations.get(0).get(0).getMesh().getPairList());
 
         return allSimulations;
     }
@@ -105,7 +108,6 @@ public class SimulationManagement {
      */
     public void startSimulations(SimulationProgressListener simulationProgressListener) {
 
-        Util.pairs.addAll(simulations.get(0).get(0).getMesh().getPairList());
 
         ExecutorService executor = Executors.newScheduledThreadPool(simulationRequest.getSimulationConfig().getThreads());
         done = 0;

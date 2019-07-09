@@ -13,14 +13,14 @@ import network.Pair;
  */
 public class Util {
 	
-	public static Set<Double> bandwidths = new HashSet<>();
+	public Set<Double> bandwidths = new HashSet<>();
 	
-	public static Set<Pair> pairs = new HashSet<>();
+	public Set<Pair> pairs = new HashSet<>();
 	
-	public static String projectPath = "";
+	public String projectPath = "";
 	
 	
-	public static void reset(){
+	public void reset(){
 		bandwidths = new HashSet<>();
 		pairs = new HashSet<Pair>();
 	}
