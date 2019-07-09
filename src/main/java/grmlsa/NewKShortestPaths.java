@@ -34,6 +34,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
     // List with the k shortest routes for all pairs (s, d)
     private HashMap<String, List<Route>> routesForAllPairs;
 
+    private Util util;
     /**
      * Constructor
      * 
@@ -43,6 +44,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
     public NewKShortestPaths(Mesh mesh, int k) {
         this.k = k;
         this.computeAllRoutes(mesh);
+        util = mesh.getUtil();
         //salvekRoutesByPar(mesh.getNodeList());
     }
 
@@ -188,7 +190,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
         try {
         	String separator = System.getProperty("file.separator");
         	
-        	FileWriter fw = new FileWriter(Util.projectPath + separator + "kRoutesByPar.txt");
+        	FileWriter fw = new FileWriter(util.projectPath + separator + "kRoutesByPar.txt");
 			BufferedWriter out = new BufferedWriter(fw);
             
 			out.append(json);
@@ -209,7 +211,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
     private void salveRoutesByPar(Vector<Node> nodeList) {
         try {
         	
-        	FileWriter fw = new FileWriter(Util.projectPath + "/routesByPar.txt");
+        	FileWriter fw = new FileWriter(util.projectPath + "/routesByPar.txt");
 			BufferedWriter out = new BufferedWriter(fw);
         	
 			for(int i = 0; i < nodeList.size(); i++){

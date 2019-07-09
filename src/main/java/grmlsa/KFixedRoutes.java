@@ -34,7 +34,7 @@ public class KFixedRoutes implements KRoutingAlgorithmInterface {
     public KFixedRoutes(Mesh mesh) {
         try {
         	String separator = System.getProperty("file.separator");
-        	String filePath = Util.projectPath + separator + "kRoutesByPar.txt";
+        	String filePath = mesh.getUtil().projectPath + separator + "kRoutesByPar.txt";
         	String routesListGson = "";
         	
         	Scanner scanner = new Scanner(new File(filePath));

@@ -5,6 +5,7 @@ import measurement.Measurements;
 import network.ControlPlane;
 import network.Mesh;
 import network.TranslucentControlPlane;
+import simulationControl.Util;
 import simulationControl.parsers.SimulationConfig;
 
 import java.io.Serializable;
@@ -20,6 +21,7 @@ public class Simulation implements Serializable {
     private Mesh mesh;
     private ControlPlane controlPlane;
     private Measurements measurements;
+    private Util util;
 
     private int loadPoint;
     private int replication;
@@ -33,11 +35,12 @@ public class Simulation implements Serializable {
      * @param replication int
      * @throws Exception
      */
-    public Simulation(SimulationConfig sc, Mesh mesh, int loadPoint, int replication){
+    public Simulation(SimulationConfig sc, Mesh mesh, int loadPoint, int replication, Util util){
         this.loadPoint = loadPoint;
         this.replication = replication;
         this.measurements = new Measurements(sc.getRequests(), loadPoint, replication, mesh, sc.getActiveMetrics());
         this.mesh = mesh;
+        this.util = util;
         GRMLSA grmlsa = new GRMLSA(sc.getGrooming(),sc.getIntegratedRmlsa(),sc.getRouting(),sc.getModulationSelection(),sc.getSpectrumAssignment(), sc.getRegeneratorAssignment());
         
         if(sc.getNetworkType() == GRMLSA.TRANSPARENT){
