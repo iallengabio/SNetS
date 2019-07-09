@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelector;
+import simulationControl.Util;
 import simulationControl.parsers.NetworkConfig;
 import simulationControl.parsers.OthersConfig;
 import simulationControl.parsers.PhysicalLayerConfig;
@@ -24,7 +25,9 @@ public class Mesh implements Serializable {
     private Vector<Node> nodeList;
     private Vector<Link> linkList;
     private Vector<Pair> pairList;
+    
     private int guarBand;
+    
     private PhysicalLayer physicalLayer;
     private OthersConfig othersConfig;
 
@@ -36,13 +39,16 @@ public class Mesh implements Serializable {
     private List<Modulation> avaliableModulations;
     private HashMap<String, HashMap<Double, Double>> modTrDistance;
 
+    private Util util;
+
     /**
      * Creates a new instance of Mesh.
      * 
      * @param nc NetworkConfig
      * @param tc TrafficConfig
      */
-    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc, HashMap<String, HashMap<Double, Double>> modTrDistance) {
+    public Mesh(NetworkConfig nc, TrafficConfig tc, PhysicalLayerConfig plc, OthersConfig oc, HashMap<String, HashMap<Double, Double>> modTrDistance, Util util) {
+        this.util = util;
         this.guarBand = nc.getGuardBand();
         this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
@@ -82,10 +88,11 @@ public class Mesh implements Serializable {
         for (TrafficConfig.RequestGeneratorConfig rgc : tc.getRequestGenerators()) {
             Pair p = pairsAux.get(rgc.getSource()).get(rgc.getDestination());
             p.addRequestGenerator(new RequestGenerator(p, rgc.getBandwidth(), rgc.getHoldRate(), rgc.getArrivalRate(), rgc.getArrivalRateIncrease(), randGenerator));
+            util.bandwidths.add(rgc.getBandwidth()); //Used to write to the archive the results of the simulation
         }
         
         // Information related to the physical layer of the network
-        this.physicalLayer = new PhysicalLayer(plc, this);
+        this.physicalLayer = new PhysicalLayer(plc, this, util);
         
         // Instance the modulation formats
         this.avaliableModulations = new ArrayList<>();
@@ -107,7 +114,7 @@ public class Mesh implements Serializable {
         	}
         }
     }
-
+    
     /**
      * Returns the modulation transmission range by transmission rate
      * 
@@ -132,7 +139,7 @@ public class Mesh implements Serializable {
     	
     	return distance;
     }
-    
+
     /**
      * Returns a link to a given pair of source and destination nodes
      * 
@@ -316,7 +323,7 @@ public class Mesh implements Serializable {
 	public void setAvaliableModulations(List<Modulation> avaliableModulations) {
 		this.avaliableModulations = avaliableModulations;
 	}
-	
+
 	/**
 	 * Return the modTrDistance
 	 * 
@@ -325,5 +332,8 @@ public class Mesh implements Serializable {
 	public HashMap<String, HashMap<Double, Double>> getModTrDistance() {
 		return modTrDistance;
 	}
-	
+
+    public Util getUtil() {
+        return util;
+    }
 }

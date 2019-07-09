@@ -59,13 +59,16 @@ public class PhysicalLayer implements Serializable {
 	
 	private double slotBandwidth; // Hz
 	private double lowerFrequency; // Hz
+
+	private Util util;
 	
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
 	 * 
 	 * @param plc PhysicalLayerConfig
 	 */
-    public PhysicalLayer(PhysicalLayerConfig plc, Mesh mesh){
+    public PhysicalLayer(PhysicalLayerConfig plc, Mesh mesh, Util util){
+    	this.util = util;
         this.activeQoT = plc.isActiveQoT();
         this.activeQoTForOther = plc.isActiveQoTForOther();
     	
@@ -600,7 +603,7 @@ public class PhysicalLayer implements Serializable {
 	public HashMap<String, HashMap<Double, Double>> computesModulationsDistances(Mesh mesh, List<Modulation> avaliableModulations) {
 		//System.out.println("Computing of the distances of the modulation formats");
 		
-		Set<Double> transmissionRateList = Util.bandwidths;
+		Set<Double> transmissionRateList = util.bandwidths;
 		HashMap<String, HashMap<Double, Double>> modsTrsDistances = new HashMap<>();
 		
 		for(int m = 0; m < avaliableModulations.size(); m++) {

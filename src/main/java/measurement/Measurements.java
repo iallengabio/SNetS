@@ -93,11 +93,11 @@ public class Measurements implements Serializable {
         
         // Activates the metrics set up in the SimulationConfig file
 		if(measuringMetrics.BlockingProbability){
-			BlockingProbability probabilidadeDeBloqueio = new BlockingProbability(loadPoint, replication);
+			BlockingProbability probabilidadeDeBloqueio = new BlockingProbability(loadPoint, replication, mesh.getUtil());
 			this.metricsList.add(probabilidadeDeBloqueio);
 		}
 		if(measuringMetrics.BandwidthBlockingProbability){
-			BandwidthBlockingProbability probabilidadeDeBloqueioDeBanda = new BandwidthBlockingProbability(loadPoint, replication);
+			BandwidthBlockingProbability probabilidadeDeBloqueioDeBanda = new BandwidthBlockingProbability(loadPoint, replication, mesh.getUtil());
 			this.metricsList.add(probabilidadeDeBloqueioDeBanda);
 		}
 		if(measuringMetrics.ExternalFragmentation){
@@ -125,7 +125,7 @@ public class Measurements implements Serializable {
 			this.metricsList.add(energyConsumption);
 		}
 		if(measuringMetrics.ModulationUtilization){
-			ModulationUtilization modulationUtilization = new ModulationUtilization(loadPoint, replication);
+			ModulationUtilization modulationUtilization = new ModulationUtilization(loadPoint, replication, mesh.getUtil());
 			this.metricsList.add(modulationUtilization);
 		}
 		if(measuringMetrics.ConsumedEnergy){
