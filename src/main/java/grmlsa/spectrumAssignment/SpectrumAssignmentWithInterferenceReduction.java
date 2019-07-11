@@ -70,7 +70,7 @@ public class SpectrumAssignmentWithInterferenceReduction implements SpectrumAssi
 				chosen[1] = chosen[0] + numberOfSlots - 1;
 				
 			} else {
-				// first opticon
+				// first option
 				int chosenBand[] = null;
 				double chosenWorstDeltaSNR = 0.0; // band interference
 				

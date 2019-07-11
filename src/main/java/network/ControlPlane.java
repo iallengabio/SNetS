@@ -643,7 +643,7 @@ public class ControlPlane implements Serializable {
         	circuitsSNR.put(circuitTemp, circuitTemp.getSNR());
             circuitsQoT.put(circuitTemp, circuitTemp.isQoT());
             SNRtemp2 = circuitTemp.getSNR();
-
+            
         	// Computes the SNR of the circuitTemp without considering the circuit
             computeQualityOfTransmission(circuitTemp, circuit, false);
             SNRtemp = circuitTemp.getSNR();
@@ -651,11 +651,10 @@ public class ControlPlane implements Serializable {
             // Computes the SNR of the circuitTemp considering the circuit
         	//computeQualityOfTransmission(circuitTemp, circuit, true);
         	//double SNRtemp3 = circuitTemp.getSNR();
-
-
+            
             circuitTemp.setSNR(circuitsSNR.get(circuitTemp));
             circuitTemp.setQoT(circuitsQoT.get(circuitTemp));
-
+            
         	SNRdif = SNRtemp - SNRtemp2;
         	if(SNRdif < 0.0) {
         		SNRdif = -1.0 * SNRdif;
