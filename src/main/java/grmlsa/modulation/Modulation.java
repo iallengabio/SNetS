@@ -23,6 +23,8 @@ public class Modulation implements Serializable {
 	private double freqSlot;
 	private int guardBand;
 	
+	private double p; // number of polarization modes
+	
 	/**
 	 * Creates a new instance of Modulation
 	 * 
@@ -34,7 +36,7 @@ public class Modulation implements Serializable {
 	 * @param freqSlot double
 	 * @param guardBand double
 	 */
-    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand) {
+    public Modulation(String name, double maxRange, double M, double SNRthreshold, double rateFEC, double freqSlot, int guardBand, double p) {
         this.name = name;
         this.maxRange = maxRange;
         this.M = M;
@@ -42,6 +44,7 @@ public class Modulation implements Serializable {
         this.rateFEC = rateFEC;
         this.freqSlot = freqSlot;
         this.guardBand = guardBand;
+        this.p = p;
         
         // Calculation based on article: Capacity Limits of Optical Fiber Networks (2010)
         this.bitsPerSymbol = PhysicalLayer.log2(M);
@@ -61,7 +64,7 @@ public class Modulation implements Serializable {
      * @return int - numberOfStos
      */
     public int requiredSlots(double bitRate) {
-    	double slotsNumber = (bitRate * (1.0 + rateFEC)) / (bitsPerSymbol * freqSlot);
+    	double slotsNumber = (bitRate * (1.0 + rateFEC)) / (p * bitsPerSymbol * freqSlot);
         
         int slotsNumberTemp = (int) slotsNumber;
         if (slotsNumber - slotsNumberTemp != 0.0) {
@@ -82,7 +85,7 @@ public class Modulation implements Serializable {
     public double potentialBitRate(int slotsNumber){
     	slotsNumber = slotsNumber - guardBand; // Remove the slot required to be used as a guard band
         
-        return (slotsNumber * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
+        return (slotsNumber * p * bitsPerSymbol * freqSlot) / (1.0 + rateFEC);
     }
     
     /**
@@ -92,7 +95,7 @@ public class Modulation implements Serializable {
      * @return double
      */
     public double getBandwidthFromBitRate(double bitRate) {
-    	double bandwidth = (bitRate * (1.0 + rateFEC)) / bitsPerSymbol;
+    	double bandwidth = (bitRate * (1.0 + rateFEC)) / (p * bitsPerSymbol);
     	
     	return bandwidth;
     }

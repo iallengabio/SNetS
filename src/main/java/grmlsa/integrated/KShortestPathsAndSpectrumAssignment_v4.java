@@ -112,7 +112,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
 	    			double lauchPower = Double.POSITIVE_INFINITY;
 	    			
 	    			if(algo.equals("EPA")) { // EPA
-		    		    lauchPower = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, band);
+		    		    lauchPower = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, mod, band);
 	            		
 	    			}else if(algo.equals("APAb")) { // APA binary search
 	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch(circuit, route, mod, band, factorMult);
@@ -263,7 +263,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
     	double Pmin = 1.0E-11; //W, -80 dBm
     	double SNRth = mod.getSNRthreshold();
     	
-    	double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
+    	double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, mod, sa);
 		circuit.setLaunchPowerLinear(Pmax);
 		cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, mod, sa, null, false);
 		double SNRmax = circuit.getSNR();
@@ -380,7 +380,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
     	}
     	
     	if(!isPowerDB) {
-    		Pcurrent = cp.getMesh().getPhysicalLayer().computeMaximumPower2(route, 0, route.getNodeList().size() - 1, mod, sa);
+    		Pcurrent = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, mod, sa);
     	}
 		
     	return Pcurrent;
