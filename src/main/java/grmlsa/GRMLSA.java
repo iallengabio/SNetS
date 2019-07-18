@@ -1,5 +1,6 @@
 package grmlsa;
 
+import grmlsa.guardBand.*;
 import grmlsa.integrated.*;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.modulation.ModulationSelectionByDistance;
@@ -93,6 +94,9 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPC = "kspc";
     private static final String INTEGRATED_MDPC= "mdpc";
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
+    private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY = "guardbandadaptivefuzzy";
+    private static final String INTEGRATED_GBUN = "gbun";
+    private static final String INTEGRATED_AGBATAKESHITA = "agbatakeshita";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -256,6 +260,12 @@ public class GRMLSA implements Serializable {
                 return new ModifiedDijkstraPathsComputation();
             case INTEGRATED_KSPRQOTO:
             	return new KShortestPathsReductionQoTO();
+            case INTEGRATED_GUARDBANDADAPTIVEFUZZY:
+            	return new GuardBandAdaptiveFuzzy();
+            case INTEGRATED_GBUN:
+            	return new Gbun();
+            case INTEGRATED_AGBATAKESHITA:
+            	return new AgbaTakeshita();
             default:
                 return null;
         }
