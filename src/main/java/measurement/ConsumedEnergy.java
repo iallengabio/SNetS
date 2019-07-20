@@ -40,7 +40,6 @@ public class ConsumedEnergy extends Measurement {
         totalConsumedEnergyOXCs = 0.0;
         totalConsumedEnergyAmplifiers = 0.0;
 
-
         resultManager = new ConsumedEnergyResultManager();
     }
 
@@ -60,9 +59,7 @@ public class ConsumedEnergy extends Measurement {
         totalConsumedEnergyAmplifiers += timeDiffer * cp.getMesh().getTotalPowerConsumptionAmplifiers();
 
         lastInstantTime = instantTime;
-
     }
-
 
     @Override
     public String getFileName() {
@@ -104,7 +101,6 @@ public class ConsumedEnergy extends Measurement {
     public double getTotalConsumedEnergyAmplifiers(){
     	return totalConsumedEnergyAmplifiers;
     }
-
     
 	/**
      * Returns the total power consumption
