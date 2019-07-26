@@ -211,6 +211,8 @@ public class ControlPlane implements Serializable {
         circuit.getDestination().getRxs().allocatesReceivers();
         
         addConnection(circuit);
+        
+        updateNetworkPowerConsumption();
     }
 
     /**
@@ -286,7 +288,6 @@ public class ControlPlane implements Serializable {
                 	
                     // QoT verification
                     if(isAdmissibleQualityOfTransmission(circuit)){
-                        updateNetworkPowerConsumption();
                         allocateCircuit(circuit);
                         
                         return true; // Admits the circuit
@@ -803,4 +804,19 @@ public class ControlPlane implements Serializable {
         this.mesh.computesPowerConsmption(this);
     }
 
+    /**
+     * Returns the data transmitted
+     * 
+     * @return double
+     */
+    public double getDataTransmitted() {
+    	double dataTransmitted = 0.0;
+    	
+    	HashSet<Circuit> circuitList = this.getConnections();
+		for(Circuit circuit : circuitList){
+			dataTransmitted += circuit.getRequiredBandwidth();
+		}
+		
+		return dataTransmitted;
+    }
 }

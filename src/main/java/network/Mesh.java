@@ -35,6 +35,7 @@ public class Mesh implements Serializable {
     private double totalPowerConsumptionTransponders;
     private double totalPowerConsumptionOXCs;
     private double totalPowerConsumptionAmplifiers;
+    private double totalDataTransmitted;
     
     private List<Modulation> avaliableModulations;
     private HashMap<String, HashMap<Double, Double>> modTrDistance;
@@ -251,7 +252,7 @@ public class Mesh implements Serializable {
     /**
      * Returns the others configuration
      * 
-     * @return
+     * @return OthersConfig
      */
     public OthersConfig getOthersConfig() {
         return othersConfig;
@@ -260,7 +261,7 @@ public class Mesh implements Serializable {
     /**
      * Returns the total power consumption
      * 
-     * @return
+     * @return double
      */
     public double getTotalPowerConsumption() {
         return totalPowerConsumption;
@@ -269,7 +270,7 @@ public class Mesh implements Serializable {
     /**
      * Returns the total power consumption by transponders
      * 
-     * @return
+     * @return double
      */
     public double getTotalPowerConsumptionTransponders() {
         return totalPowerConsumptionTransponders;
@@ -278,7 +279,7 @@ public class Mesh implements Serializable {
     /**
      * Returns the total power consumption by OXCs
      * 
-     * @return
+     * @return double
      */
     public double getTotalPowerConsumptionOXCs() {
         return totalPowerConsumptionOXCs;
@@ -287,7 +288,7 @@ public class Mesh implements Serializable {
     /**
      * Returns the total power consumption by amplifiers
      * 
-     * @return
+     * @return double
      */
     public double getTotalPowerConsumptionAmplifiers() {
         return totalPowerConsumptionAmplifiers;
@@ -298,12 +299,23 @@ public class Mesh implements Serializable {
      * 
      * @param cp ControlPlane
      */
-    public void computesPowerConsmption(ControlPlane cp){
+    public void computesPowerConsmption(ControlPlane cp) {
     	totalPowerConsumptionTransponders = EnergyConsumption.computeTranspondersPowerConsumption(cp);
     	totalPowerConsumptionOXCs = EnergyConsumption.computeOxcsPowerConsumption(nodeList);
     	totalPowerConsumptionAmplifiers = EnergyConsumption.computeLinksPowerConsumption(linkList, cp);
     	
     	totalPowerConsumption = totalPowerConsumptionTransponders + totalPowerConsumptionOXCs + totalPowerConsumptionAmplifiers;
+    	
+    	totalDataTransmitted = cp.getDataTransmitted();
+    }
+    
+    /**
+     * Returns the total data transmitted
+     * 
+     * @return double
+     */
+    public double getTotalDataTransmitted() {
+    	return totalDataTransmitted;
     }
     
     /**

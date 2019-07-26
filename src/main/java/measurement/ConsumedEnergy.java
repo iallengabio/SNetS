@@ -21,7 +21,8 @@ public class ConsumedEnergy extends Measurement {
     private double totalConsumedEnergyTransponders;
     private double totalConsumedEnergyOXCs;
     private double totalConsumedEnergyAmplifiers;
-
+    
+    private double totalDataTransmitted;
 
     /**
      * Creates a new instance of ConsumedEnergy
@@ -39,25 +40,29 @@ public class ConsumedEnergy extends Measurement {
         totalConsumedEnergyTransponders = 0.0;
         totalConsumedEnergyOXCs = 0.0;
         totalConsumedEnergyAmplifiers = 0.0;
+        
+        totalDataTransmitted = 0.0;
 
         resultManager = new ConsumedEnergyResultManager();
     }
 
     public void addNewObservation(ControlPlane cp, boolean success, RequestForConnection request){
-    	double instantTime;
-        instantTime = request.getTimeOfRequestHours();
+    	double instantTime = request.getTimeOfRequestHours();
         instantTime *= 3600.0; // Converting to seconds
+        
         if(instantTime > totalNetworkOperationTime){
             totalNetworkOperationTime = instantTime;
         }
-
+        
         double timeDiffer = instantTime - lastInstantTime;
-
+        
         totalConsumedEnergy += timeDiffer * cp.getMesh().getTotalPowerConsumption();
         totalConsumedEnergyTransponders += timeDiffer * cp.getMesh().getTotalPowerConsumptionTransponders();
         totalConsumedEnergyOXCs += timeDiffer * cp.getMesh().getTotalPowerConsumptionOXCs();
         totalConsumedEnergyAmplifiers += timeDiffer * cp.getMesh().getTotalPowerConsumptionAmplifiers();
-
+        
+        totalDataTransmitted += timeDiffer * cp.getMesh().getTotalDataTransmitted();
+        
         lastInstantTime = instantTime;
     }
 
@@ -102,6 +107,15 @@ public class ConsumedEnergy extends Measurement {
     	return totalConsumedEnergyAmplifiers;
     }
     
+    /**
+	 * Returns the total data transmitted
+	 * 
+	 * @return double bits
+	 */
+	public double getTotalDataTransmitted(){
+		return totalDataTransmitted;
+	}
+    
 	/**
      * Returns the total power consumption
      * 
@@ -110,5 +124,13 @@ public class ConsumedEnergy extends Measurement {
     public double getTotalPowerConsumption(){
     	return (totalConsumedEnergy / totalNetworkOperationTime);
     }
-
+    
+    /**
+     * Returns the energy efficiency
+     * 
+     * @return double
+     */
+    public double getEnergyEfficiency(){
+    	return (totalDataTransmitted / totalConsumedEnergy);
+    }
 }
