@@ -89,7 +89,6 @@ public class ArriveRequestForConexionListener implements EventListener {
      */
     private void afterReq(RequestForConnection request, boolean success) {
         Measurements m = simulation.getMeasurements();
-
         
         // Adds a new note for all enabled performance metrics
         m.addNewObservation(simulation.getControlPlane(), success, request);
