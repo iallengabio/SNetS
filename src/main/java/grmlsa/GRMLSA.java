@@ -98,7 +98,10 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY = "guardbandadaptivefuzzy";
     private static final String INTEGRATED_GBUN = "gbun";
     private static final String INTEGRATED_AGBATAKESHITA = "agbatakeshita";
+<<<<<<< HEAD
     private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY_V2 = "guardbandadaptivefuzzyv2";
+=======
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -269,8 +272,11 @@ public class GRMLSA implements Serializable {
             	return new Gbun();
             case INTEGRATED_AGBATAKESHITA:
             	return new AgbaTakeshita();
+<<<<<<< HEAD
             case INTEGRATED_GUARDBANDADAPTIVEFUZZY_V2:
             	return new GuardBandAdaptiveFuzzy2();
+=======
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
             default:
                 return null;
         }

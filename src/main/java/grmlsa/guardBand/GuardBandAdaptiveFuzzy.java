@@ -19,6 +19,10 @@ import network.Mesh;
 import util.IntersectionFreeSpectrum;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
+<<<<<<< HEAD
+=======
+import net.sourceforge.jFuzzyLogic.rule.Rule;
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
 
 /**
  * This class represents the implementation of an adaptive guard band algorithm
@@ -40,11 +44,20 @@ public class GuardBandAdaptiveFuzzy implements IntegratedRMLSAAlgorithmInterface
     public static int maiorM = 0;
     public static double maxUtilizacaoRede = 0;
     public static double maxUtilizacaoRota = 0;
+<<<<<<< HEAD
     public static double maxUtilizacaoEnlaceRota = 0;
     public static long tempoInicio = System.currentTimeMillis();
     private static final String DIV = "-";
     static String filename = "simulations/SPAN80/FUZZY/Cost239_v3_FUZZY_UTIENLACE2/tipper.fcl";
 
+=======
+    public static long tempoInicio = System.currentTimeMillis();
+    private static final String DIV = "-";
+    static String filename = "simulations/SPAN80/FUZZY/NSFNet_v3_FUZZY/tipper.fcl";
+    private TreeSet<Circuit> connectionList = new TreeSet<>();
+    private Iterator<Circuit> iterator = null;
+    private Circuit circuito = null;
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
     
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
@@ -78,22 +91,48 @@ public class GuardBandAdaptiveFuzzy implements IntegratedRMLSAAlgorithmInterface
         double GuardBand = 0;
 
         FunctionBlock fb = fis.getFunctionBlock(null);
+<<<<<<< HEAD
+=======
+        
+        //connectionList = cp.getConnections();
+        //iterator = connectionList.iterator();
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
 
         for (Route route : candidateRoutes) {
             circuit.setRoute(route);
             
+<<<<<<< HEAD
+=======
+            /*select guard band before select the modulation*/
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
             
             for (int m = avaliableModulations.size()-1; m >= 0; m--) {
                 Modulation mod = avaliableModulations.get(m);
                 
+<<<<<<< HEAD
                 fb.setVariable("utilizacaoEnlace", maxUtilizationRouteLink(route));
+=======
+                fb.setVariable("utilizacaoRota", utilizacaoRota(route));
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
                 fb.setVariable("eficienciaEspectral", mod.getM());
                 
                 fb.evaluate();
                 fb.getVariable("bandaGuarda").defuzzify();
+<<<<<<< HEAD
                 
                 GuardBand = fb.getVariable("bandaGuarda").getValue();
                 
+=======
+                GuardBand = fb.getVariable("bandaGuarda").getValue();
+                
+                /*if(utilizacaoRota(route) > 0.51) {
+                	System.out.println("#################################");
+                	System.out.println("Route Utilization: " + utilizacaoRota(route));
+                	System.out.println("Modulation: " + mod.getM());
+                	System.out.println("Guard Band chosen: " + (int)GuardBand);
+                }*/
+                
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
                 Modulation modClone = null;
                 
                 try {
@@ -123,9 +162,23 @@ public class GuardBandAdaptiveFuzzy implements IntegratedRMLSAAlgorithmInterface
                 }
             }
             
+<<<<<<< HEAD
 
         }
         
+=======
+            /*if(utilizacaoRota(route) > maxUtilizacaoRota) {
+            	maxUtilizacaoRota = utilizacaoRota(route);
+            	System.out.println("Utilizacao Maxima Rota: " + maxUtilizacaoRota);
+            }*/
+
+        }
+        
+        /*if(UtilizacaoGeral(cp.getMesh()) > maxUtilizacaoRede) {
+        	maxUtilizacaoRede = UtilizacaoGeral(cp.getMesh());
+        	System.out.println("Utilizacao Maxima Rede: " + maxUtilizacaoRede);
+        }*/
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
             circuit.setRoute(chosenRoute);
@@ -144,6 +197,21 @@ public class GuardBandAdaptiveFuzzy implements IntegratedRMLSAAlgorithmInterface
             circuit.setModulation(checkMod);
             circuit.setSpectrumAssigned(checkBand);
             
+<<<<<<< HEAD
+=======
+            /*System.out.println("Lista de Conexões ativas: ");
+            while(iterator.hasNext()) {
+            	circuito = null;
+            	circuito = iterator.next();
+            	System.out.print("Rota: ");
+            	circuito.getRoute().printRoute();
+            	System.out.print(" - Qot: " + circuito.isQoT());
+            	System.out.println(" - QoTN: " + circuito.isQoTForOther());
+            }
+            
+            System.out.println("Causa do bloqueio: " + circuit.getBlockCause());*/
+            
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
             return false;
         }
 
@@ -158,6 +226,7 @@ public class GuardBandAdaptiveFuzzy implements IntegratedRMLSAAlgorithmInterface
     	return kShortestsPaths;
     }
 
+<<<<<<< HEAD
     
     /**
      * Returns the maximum utilization found on the links of a route.
@@ -176,6 +245,58 @@ public class GuardBandAdaptiveFuzzy implements IntegratedRMLSAAlgorithmInterface
     	}
     	
     	return maxUtilizationRouteLink;
+=======
+    /**
+     * Returns the number of busy slots in the current route
+     * 
+     * @param rotaAtual 
+     */
+    private int quantidadeSlotsOcupadosNaRota(Route rotaAtual, int guardBand){
+        int totalLivre = 0, intervaloAtual = 0;
+        List<int[]> composicao;
+        int totalSlots = rotaAtual.getLink(0).getNumOfSlots();
+
+        composicao = IntersectionFreeSpectrum.merge(rotaAtual, guardBand);
+
+        for(int[] intervalo : composicao){
+            intervaloAtual = intervalo[1] - intervalo[0] + 1;
+            totalLivre += intervaloAtual;    
+        }
+
+        return totalSlots - totalLivre;
+
+    }
+    
+    /**
+     * Returns the total usage of the topology 
+     * 
+     * @param mesh
+     */
+    private double UtilizacaoGeral(Mesh mesh) {
+        Double utGeral = 0.0;
+        for (Link link : mesh.getLinkList()) {
+            utGeral += link.getUtilization();
+        }
+
+        utGeral = utGeral / (double) mesh.getLinkList().size();
+
+        return utGeral;
+    }
+    
+    /**
+     * Returns the total usage of the route
+     * 
+     * @param rota
+     * @return
+     */
+    private double utilizacaoRota (Route rota) {
+    	double utGeral = 0.0;
+    	for(Link link: rota.getLinkList()) {
+    		utGeral += link.getUtilization();
+    	}
+    	utGeral = utGeral / rota.getLinkList().size();
+    	return utGeral;
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
     }
 
 }

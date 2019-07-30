@@ -67,7 +67,11 @@ public class AgbaTakeshita implements IntegratedRMLSAAlgorithmInterface {
             
             //AGBA
             for (int m = 0; m < modulacoes.size(); m++) {
+<<<<<<< HEAD
             	if(route.getHops() <= 7){
+=======
+            	if(route.getHops() <= 4){
+>>>>>>> 27bd50e22c61d61b1e27e91c299b111bfdefdde6
             		modulacoes.get(m).setGuardBand(1);
                 }else{
                     modulacoes.get(m).setGuardBand(2);
