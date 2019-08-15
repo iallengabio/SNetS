@@ -1,8 +1,10 @@
-package grmlsa.modulation;
+package grmlsa.guardBand;
 
 import java.util.List;
 
 import grmlsa.Route;
+import grmlsa.modulation.Modulation;
+import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
@@ -15,13 +17,15 @@ import util.IntersectionFreeSpectrum;
 /**
  * This class implements the choice of modulation and guard band using fuzzy logic.
  * 
+ * Under Construction.
+ * 
  * @author Alexandre, Neclyeux
  *
  */
-public class ModulationSelectionByQotAndFuzzy implements ModulationSelectionAlgorithmInterface {
+public class ModulationAndGuardBandSelectionByFuzzy implements ModulationSelectionAlgorithmInterface {
 
 	private List<Modulation> avaliableModulations;
-	static String filename = "simulations/SPAN80/ADAPTATIVOS/Cost239_v3_MOD_ADAPTATIVA/tipper.fcl";
+	static String filename = "simulations/<Path to the tipper>/tipper.fcl";
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {

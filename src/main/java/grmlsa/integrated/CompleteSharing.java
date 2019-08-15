@@ -68,11 +68,6 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 	            }
             }
         }
-        
-        if(UtilizacaoGeral(cp.getMesh()) > maxUtilizacao) {
-        	maxUtilizacao = UtilizacaoGeral(cp.getMesh());
-        	System.out.println("Utilizacao Maxima: " + maxUtilizacao);
-        }
 
         if (chosenRoute != null) { //If there is no route chosen is why no available resource was found on any of the candidate routes
             circuit.setRoute(chosenRoute);
@@ -99,19 +94,4 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
     	return kShortestsPaths;
     }
     
-    /**
-     * Returns the total usage of the topology 
-     * 
-     * @param mesh
-     */
-    private double UtilizacaoGeral(Mesh mesh) {
-        Double utGeral = 0.0;
-        for (Link link : mesh.getLinkList()) {
-            utGeral += link.getUtilization();
-        }
-
-        utGeral = utGeral / (double) mesh.getLinkList().size();
-
-        return utGeral;
-    }
 }

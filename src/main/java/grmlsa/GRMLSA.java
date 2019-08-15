@@ -9,7 +9,6 @@ import grmlsa.modulation.ModulationSelectionByDistanceAndBandwidth;
 import grmlsa.modulation.ModulationSelectionByQoT;
 import grmlsa.modulation.ModulationSelectionByQoTAndSigma;
 import grmlsa.modulation.ModulationSelectionByQoTv2;
-import grmlsa.modulation.ModulationSelectionByQotAndFuzzy;
 import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
 import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
 import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
@@ -97,7 +96,9 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
     private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY = "guardbandadaptivefuzzy";
     private static final String INTEGRATED_GBUN = "gbun";
+    private static final String INTEGRATED_GBUN_V2 = "gbunv2";
     private static final String INTEGRATED_AGBATAKESHITA = "agbatakeshita";
+    private static final String INTEGRATED_AGBATAKESHITA_V2 = "agbatakeshitav2";
     private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY_V2 = "guardbandadaptivefuzzyv2";
     
     // Regenerator assignment
@@ -112,7 +113,11 @@ public class GRMLSA implements Serializable {
 	private static final String MODULATION_BY_QOT_SIGMA = "modulationbyqotsigma";
 	private static final String MODULATION_BY_QOT_V2 = "modulationbyqotv2";
 	private static final String MODULATION_BY_DISTANCE_BANDWIDTH = "modulationbydistancebandwidth";
+	
+	//Modulation and Guard Band Selection
 	private static final String MODULATION_BY_QOT_FUZZY = "modulationbyqotandfuzzy";
+	private static final String MODULATION_BY_QOT_GBUN = "modulationbyqotandgbun";
+	private static final String MODULATION_BY_QOT_AGBA = "modulationbyqotandagba";
 	
     // End of constants
 
@@ -263,14 +268,6 @@ public class GRMLSA implements Serializable {
                 return new ModifiedDijkstraPathsComputation();
             case INTEGRATED_KSPRQOTO:
             	return new KShortestPathsReductionQoTO();
-            case INTEGRATED_GUARDBANDADAPTIVEFUZZY:
-            	return new GuardBandAdaptiveFuzzy();
-            case INTEGRATED_GBUN:
-            	return new Gbun();
-            case INTEGRATED_AGBATAKESHITA:
-            	return new AgbaTakeshita();
-            case INTEGRATED_GUARDBANDADAPTIVEFUZZY_V2:
-            	return new GuardBandAdaptiveFuzzy2();
             default:
                 return null;
         }
@@ -316,7 +313,11 @@ public class GRMLSA implements Serializable {
 	    	case MODULATION_BY_DISTANCE_BANDWIDTH:
 	    		return new ModulationSelectionByDistanceAndBandwidth();
 	    	case MODULATION_BY_QOT_FUZZY:
-	    		return new ModulationSelectionByQotAndFuzzy();
+	    		return new ModulationAndGuardBandSelectionByFuzzy();
+	    	case MODULATION_BY_QOT_GBUN:
+	    		return new ModulationAndGuardBandSelectionByGbun();
+	    	case MODULATION_BY_QOT_AGBA:
+	    		return new ModulationAndGuardBandSelectionByAGBA();
 	    	default:
 	    		return null;
     	}
