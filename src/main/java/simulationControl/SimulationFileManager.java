@@ -58,9 +58,6 @@ public class SimulationFileManager {
                             case SimulationRequest.Result.FILE_CONSUMEDEN_ERGY:
                                 sr.getResult().consumedEnergy = readFile(listOfFiles[i],true);
                                 break;
-                            case SimulationRequest.Result.FILE_ENERGY_CONSUMPTION:
-                                sr.getResult().energyConsumption = readFile(listOfFiles[i],true);
-                                break;
                             case SimulationRequest.Result.FILE_EXTERNAL_FRAGMENTATION:
                                 sr.getResult().externalFragmentation = readFile(listOfFiles[i],true);
                                 break;
@@ -143,9 +140,6 @@ public class SimulationFileManager {
         }
         if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics){
             saveResult(path, SimulationRequest.Result.FILE_SPECTRUM_STATISTICS,sr.getResult().spectrumStatistics);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption){
-            saveResult(path, SimulationRequest.Result.FILE_ENERGY_CONSUMPTION,sr.getResult().energyConsumption);
         }
         if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization){
             saveResult(path, SimulationRequest.Result.FILE_MODULATION_UTILIZATION,sr.getResult().modulationUtilization);

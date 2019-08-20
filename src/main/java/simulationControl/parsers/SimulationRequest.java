@@ -33,19 +33,15 @@ public class SimulationRequest {
         public final static String FILE_TRANSMITTERS_RECEIVERS_REGENERATORS_UTILIZATION = "TransmittersReceiversRegeneratorsUtilization.csv";
         public final static String FILE_GROOMING_STATISTICS = "GroomingStatistics.csv";
         public final static String FILE_SPECTRUM_STATISTICS = "SpectrumStatistics.csv";
-        public final static String FILE_ENERGY_CONSUMPTION = "EnergyConsumption.csv";
         public final static String FILE_MODULATION_UTILIZATION = "ModulationUtilization.csv";
         public final static String FILE_CONSUMEDEN_ERGY = "ConsumedEnergy.csv";
-
 
         public String blockingProbability;
         public String bandwidthBlockingProbability;
         public String externalFragmentation;
         public String relativeFragmentation;
         public String spectrumUtilization;
-        public String transceiversUtilization;
         public String spectrumStatistics;
-        public String energyConsumption;
         public String modulationUtilization;
         public String consumedEnergy;
         public String transmittersReceiversRegeneratorsUtilization;
@@ -160,7 +156,11 @@ public class SimulationRequest {
         this.status = status;
     }
 
-
+    /**
+     * Returns the name
+     * 
+     * @return String name
+     */
     public String getName() {
         return name;
     }
@@ -168,7 +168,6 @@ public class SimulationRequest {
     public void setName(String name) {
         this.name = name;
     }
-
 
     /**
      * Returns the progress
@@ -188,10 +187,20 @@ public class SimulationRequest {
         this.progress = progress;
     }
 
+    /**
+     * Returns the OthersConfig
+     * 
+     * @return OthersConfig
+     */
     public OthersConfig getOthersConfig() {
         return othersConfig;
     }
 
+    /**
+     * Sets the OthersConfig
+     * 
+     * @param othersConfig OthersConfig
+     */
     public void setOthersConfig(OthersConfig othersConfig) {
         this.othersConfig = othersConfig;
     }

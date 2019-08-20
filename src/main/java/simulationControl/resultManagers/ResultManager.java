@@ -46,9 +46,6 @@ public class ResultManager {
                 case SimulationRequest.Result.FILE_CONSUMEDEN_ERGY:
                     r.consumedEnergy = metric.result(llms);
                     break;
-                case SimulationRequest.Result.FILE_ENERGY_CONSUMPTION:
-                    r.energyConsumption = metric.result(llms);
-                    break;
                 case SimulationRequest.Result.FILE_EXTERNAL_FRAGMENTATION:
                     r.externalFragmentation = metric.result(llms);
                     break;
