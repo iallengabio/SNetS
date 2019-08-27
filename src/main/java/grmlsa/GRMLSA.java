@@ -94,12 +94,6 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPC = "kspc";
     private static final String INTEGRATED_MDPC= "mdpc";
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
-    private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY = "guardbandadaptivefuzzy";
-    private static final String INTEGRATED_GBUN = "gbun";
-    private static final String INTEGRATED_GBUN_V2 = "gbunv2";
-    private static final String INTEGRATED_AGBATAKESHITA = "agbatakeshita";
-    private static final String INTEGRATED_AGBATAKESHITA_V2 = "agbatakeshitav2";
-    private static final String INTEGRATED_GUARDBANDADAPTIVEFUZZY_V2 = "guardbandadaptivefuzzyv2";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";

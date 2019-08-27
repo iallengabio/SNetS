@@ -1,6 +1,8 @@
 package grmlsa.guardBand;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -21,17 +23,39 @@ import network.Mesh;
  * In the GBUN the size of guard band is selected based on the level
  * of the network utilization.
  * 
- * @authors Neclyeux, Alexandre, Iallen, Antonio costa, Divanilson Campelo, André Soares
+ * The utilizations values must be entered in the configuration file "others" as shown below according to the network.
+ * {"variables":{
+ *               "1":"0.266",
+                 "2":"0.228",
+                 "3":"0.19",
+                 "4":"0.152",
+                 "5":"0.114",
+                 "6":"0.076",
+                 "7":"0.038"
+ *               }
+ * }
+ * 
+ * @author Neclyeux
  */
 public class ModulationAndGuardBandSelectionByGbun implements ModulationSelectionAlgorithmInterface {
 	
 	private List<Modulation> avaliableModulations;
+	private List<Double> utilizations;
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
 		
 		if(avaliableModulations == null) {
 			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
+		
+		if(utilizations == null) {
+			utilizations = new ArrayList<Double>();
+			Map<String, String> utilizations  = cp.getMesh().getOthersConfig().getVariables();
+			for (int i = 1; i <= utilizations.size(); i++) {
+				double n = Double.parseDouble((String)utilizations.get(Integer.toString(i)));
+				this.utilizations.add(n);
+			}
 		}
 		
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
@@ -48,41 +72,24 @@ public class ModulationAndGuardBandSelectionByGbun implements ModulationSelectio
 		for (int m = avaliableModulations.size()-1; m >= 0; m--) {
 			Modulation mod = avaliableModulations.get(m);
 			
-			//NSFNet
-			if(UtilizacaoGeral(cp.getMesh()) >= 0.266)
+			//Choose the guard band according to the utilization of the topology
+			if(UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(0))
         		mod.setGuardBand(1);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.266 && UtilizacaoGeral(cp.getMesh()) >= 0.228)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(0) && UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(1))
             	mod.setGuardBand(2);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.228 && UtilizacaoGeral(cp.getMesh()) >= 0.19)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(1) && UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(2))
             	mod.setGuardBand(3);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.19 && UtilizacaoGeral(cp.getMesh()) >= 0.152)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(2) && UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(3))
             	mod.setGuardBand(4);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.152 && UtilizacaoGeral(cp.getMesh()) >= 0.114)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(3) && UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(4))
             	mod.setGuardBand(5);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.114 && UtilizacaoGeral(cp.getMesh()) >= 0.076)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(4) && UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(5))
             	mod.setGuardBand(6);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.076 && UtilizacaoGeral(cp.getMesh()) >= 0.038)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(5) && UtilizationGeneral(cp.getMesh()) >= this.utilizations.get(6))
             	mod.setGuardBand(7);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.038)
+            if(UtilizationGeneral(cp.getMesh()) < this.utilizations.get(6))
             	mod.setGuardBand(8);
 
-            /*//Cost239
-            if(UtilizacaoGeral(cp.getMesh()) >= 0.245)
-        		mod.setGuardBand(1);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.245 && UtilizacaoGeral(cp.getMesh()) >= 0.21)
-            	mod.setGuardBand(2);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.21 && UtilizacaoGeral(cp.getMesh()) >= 0.175)
-            	mod.setGuardBand(3);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.175 && UtilizacaoGeral(cp.getMesh()) >= 0.14)
-            	mod.setGuardBand(4);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.14 && UtilizacaoGeral(cp.getMesh()) >= 0.105)
-            	mod.setGuardBand(5);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.105 && UtilizacaoGeral(cp.getMesh()) >= 0.07)
-            	mod.setGuardBand(6);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.07 && UtilizacaoGeral(cp.getMesh()) >= 0.035)
-            	mod.setGuardBand(7);
-            if(UtilizacaoGeral(cp.getMesh()) < 0.035)
-            	mod.setGuardBand(8);*/
 			
             Modulation modClone = null;
             try {
@@ -137,15 +144,15 @@ public class ModulationAndGuardBandSelectionByGbun implements ModulationSelectio
      * 
      * @param mesh
      */
-    private double UtilizacaoGeral(Mesh mesh) {
-        Double utGeral = 0.0;
+    private double UtilizationGeneral(Mesh mesh) {
+        Double utGeneral = 0.0;
         for (Link link : mesh.getLinkList()) {
-            utGeral += link.getUtilization();
+        	utGeneral += link.getUtilization();
         }
 
-        utGeral = utGeral / (double) mesh.getLinkList().size();
+        utGeneral = utGeneral / (double) mesh.getLinkList().size();
 
-        return utGeral;
+        return utGeneral;
     }
 
 }

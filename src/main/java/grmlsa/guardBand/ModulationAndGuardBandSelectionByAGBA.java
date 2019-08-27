@@ -1,6 +1,7 @@
 package grmlsa.guardBand;
 
 import java.util.List;
+import java.util.Map;
 
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
@@ -21,17 +22,29 @@ import network.Mesh;
  * In the AGBA the size of guard band is selected based on the hop count
  * of the chosen route.
  * 
- * @authors Takeshita Et al.
+ * The value of hops must be entered in the configuration file "others" as shown below according to the network.
+ * {"variables":{
+ *               "hops":"1"
+ *               }
+ * }
+ * 
+ * @author Neclyeux.
  */
 public class ModulationAndGuardBandSelectionByAGBA implements ModulationSelectionAlgorithmInterface {
 	
 	private List<Modulation> avaliableModulations;
+	private int numberHops;
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
 		
 		if(avaliableModulations == null) {
 			avaliableModulations = cp.getMesh().getAvaliableModulations();
+		}
+		
+		if(numberHops == 0) {
+			Map<String, String> hops = cp.getMesh().getOthersConfig().getVariables();
+			numberHops = Integer.parseInt((String)hops.get("hops"));
 		}
 		
 		boolean flagQoT = false; // Assuming that the circuit QoT starts as not acceptable
@@ -43,12 +56,13 @@ public class ModulationAndGuardBandSelectionByAGBA implements ModulationSelectio
 		// Modulation which at least allocates spectrum, used to avoid error in metrics
 		Modulation alternativeMod = null;
 		int alternativeBand[] = null;
+				
 		
 		// Begins with the most spectrally efficient modulation format
 		for (int m = avaliableModulations.size()-1; m >= 0; m--) {
 			Modulation mod = avaliableModulations.get(m);
 			
-			if(route.getHops() <= 1){
+			if(route.getHops() <= numberHops){
 				mod.setGuardBand(1);
             }else{
             	mod.setGuardBand(2);

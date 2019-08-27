@@ -30,7 +30,6 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
-    public static double maxUtilizacao = 0;
 
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
@@ -50,6 +49,7 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
         int chosenBand[] = {999999, 999999}; // Value never reached
 
         for (Route route : candidateRoutes) {
+        	
             circuit.setRoute(route);
             
             Modulation mod = modulationSelection.selectModulation(circuit, route, spectrumAssignment, cp);
@@ -93,5 +93,6 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
     public KRoutingAlgorithmInterface getRoutingAlgorithm(){
     	return kShortestsPaths;
     }
+   
     
 }

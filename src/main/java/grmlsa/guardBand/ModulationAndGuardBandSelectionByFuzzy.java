@@ -16,16 +16,18 @@ import util.IntersectionFreeSpectrum;
 
 /**
  * This class implements the choice of modulation and guard band using fuzzy logic.
+ * The algorithm use two parameters: maximum utilization found on the links of a route and 
+ * spectral efficiency.
  * 
  * Under Construction.
  * 
- * @author Alexandre, Neclyeux
+ * @author Neclyeux
  *
  */
 public class ModulationAndGuardBandSelectionByFuzzy implements ModulationSelectionAlgorithmInterface {
 
 	private List<Modulation> avaliableModulations;
-	static String filename = "simulations/<Path to the tipper>/tipper.fcl";
+	static String filename = "simulations/<Path to tipper>/tipper.fcl";
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
