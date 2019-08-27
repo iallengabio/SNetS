@@ -325,5 +325,32 @@ public class Mesh implements Serializable {
 	public HashMap<String, HashMap<Double, Double>> getModTrDistance() {
 		return modTrDistance;
 	}
+	
+	public void info() {
+		
+		System.out.println("quant nodes: " + nodeList.size());
+		System.out.println("quant links: " + linkList.size());
+		
+		double sum = 0.0;
+		for(int i = 0; i < nodeList.size(); i++) {
+			Node no = nodeList.get(i);
+			
+			sum += no.getOxc().getLinksList().size();
+		}
+		double media = sum / nodeList.size();
+		
+		System.out.println("media conect: " + media);
+		
+		sum = 0.0;
+		for(int i = 0; i < linkList.size(); i++) {
+			Link link = linkList.get(i);
+			
+			sum += link.getDistance();
+		}
+		media = sum / linkList.size();
+		
+		System.out.println("meida length: " + media);
+		
+	}
     
 }
