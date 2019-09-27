@@ -227,6 +227,29 @@ public class PhysicalLayer implements Serializable {
 		return false;
 	}
 	
+	public boolean isAdmissible2(double bitRate, Modulation modulation, double OSNRdB, double OSNRlinear){
+		if(typeOfTestQoT == 0){ //Check by SNR threshold (dB)
+			double SNRdBthreshold = modulation.getSNRthreshold();
+			double SNRdBthresholdLinear = modulation.getSNRthresholdLinear();
+			
+			double B0 = 12.5E+9;
+			double OverallBitRate = bitRate * (1.0 + rateOfFEC);
+			double OSNRdBthreshold = ratioForDB((OverallBitRate / (2.0 * B0)) * SNRdBthresholdLinear);
+			
+			if(OSNRdB >= OSNRdBthreshold){
+				return true;
+			}
+		} else { //Check by BER threshold
+			double BERthreshold = getBERthreshold(modulation);
+			double BER = getBER(OSNRlinear, modulation.getM());
+			
+			if(BER <= BERthreshold){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Verifies that the QoT of the circuit is acceptable with the modulation format
 	 * The circuit in question must not have allocated the network resources
@@ -245,6 +268,7 @@ public class PhysicalLayer implements Serializable {
 		circuit.setSNR(SNRdB);
 		
 		boolean QoT = isAdmissible(modulation, SNRdB, SNR);
+		//boolean QoT2 = isAdmissible2(circuit.getRequiredBandwidth(), modulation, SNRdB, SNR);
 		
 		return QoT;
 	}
@@ -269,6 +293,7 @@ public class PhysicalLayer implements Serializable {
 		circuit.setSNR(SNRdB);
 		
 		boolean QoT = isAdmissible(modulation, SNRdB, SNR);
+		//boolean QoT2 = isAdmissible2(circuit.getRequiredBandwidth(), modulation, SNRdB, SNR);
 		
 		return QoT;
 	}
@@ -545,7 +570,7 @@ public class PhysicalLayer implements Serializable {
 	 * @return double
 	 */
 	public static double getBER(double SNR, double M){
-		double SNRb = SNR / log2(M); // SNR per bit
+		double SNRb = SNR / log2(M); // SNR per bit -> provavelmente está errada, isso seria SNR por simbolo
 		
 		double p1 = (3.0 * SNRb * log2(M)) / (2.0 * (M - 1.0));
 		double p2 = erfc(Math.sqrt(p1));
