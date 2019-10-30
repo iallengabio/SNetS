@@ -63,12 +63,17 @@ public class PhysicalLayer implements Serializable {
 	private double slotBandwidth; // Hz
 	private double lowerFrequency; // Hz
 	
+	private double polarizationModes; // Number of polarization modes
+
+	private Util util;
+	
 	/**
 	 * Creates a new instance of PhysicalLayerConfig
 	 * 
 	 * @param plc PhysicalLayerConfig
 	 */
-    public PhysicalLayer(PhysicalLayerConfig plc, Mesh mesh){
+    public PhysicalLayer(PhysicalLayerConfig plc, Mesh mesh, Util util){
+    	this.util = util;
         this.activeQoT = plc.isActiveQoT();
         this.activeQoTForOther = plc.isActiveQoTForOther();
     	
@@ -99,15 +104,20 @@ public class PhysicalLayer implements Serializable {
         this.fixedPowerSpectralDensity = plc.isFixedPowerSpectralDensity();
         this.referenceBandwidth = plc.getReferenceBandwidthForPowerSpectralDensity();
         
+        this.polarizationModes = plc.getPolarizationModes();
+        if(this.polarizationModes == 0.0) {
+        	this.polarizationModes = 2.0;
+        }
+        
         this.powerLinear = ratioOfDB(power) * 1.0E-3; // converting to Watt
         this.alphaLinear = computeAlphaLinear(alpha);
         this.beta2 = computeBeta2(D, centerFrequency);
         
-        double spanMeter = L * 1000; // span in meter
+        double spanMeter = L * 1000.0; // span in meter
         this.attenuationBySpanLinear = Math.pow(Math.E, alphaLinear * spanMeter);
-        double boosterAmpGainLinear = LsssLinear;
+        double boosterAmpGainLinear = LsssLinear * LsssLinear;
         double lineAmpGainLinear = attenuationBySpanLinear;
-        double preAmpGainLinear = attenuationBySpanLinear * ratioOfDB(Lsss);
+        double preAmpGainLinear = attenuationBySpanLinear;
         
         this.boosterAmp = new Amplifier(ratioForDB(boosterAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
         this.lineAmp = new Amplifier(ratioForDB(lineAmpGainLinear), pSat, NF, h, amplificationFrequency, 0.0, A1, A2);
@@ -152,6 +162,15 @@ public class PhysicalLayer implements Serializable {
 	 */
 	public double getRateOfFEC(){
 		return rateOfFEC;
+	}
+	
+	/**
+	 * Return the number of polarization modes
+	 * 
+	 * @return double
+	 */
+	public double getPolarizationModes() {
+		return this.polarizationModes;
 	}
 	
 	/**
@@ -275,13 +294,17 @@ public class PhysicalLayer implements Serializable {
 	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
-		double Bsi = numSlotsRequired * slotBandwidth; // Circuit bandwidth, less the guard band
+		double Bsi = numSlotsRequired * slotBandwidth; // Circuit bandwidth
 		double fi = lowerFrequency + (slotBandwidth * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
+		
+		Bsi = modulation.getBandwidthFromBitRate(circuit.getRequiredBandwidth());
 		
 		double circuitPowerLinear = this.powerLinear;
 		if(circuit.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
 			circuitPowerLinear = circuit.getLaunchPowerLinear();
 		}
+		
+		circuitPowerLinear = circuitPowerLinear / polarizationModes; // Determining the power for each polarization mode
 		
 		double I = circuitPowerLinear / referenceBandwidth; // Signal power density for the reference bandwidth
 		if(!fixedPowerSpectralDensity){
@@ -296,7 +319,7 @@ public class PhysicalLayer implements Serializable {
 		Link link = null;
 		HashSet<Circuit> circuitList = null;
 		
-		double Ns = 0.0; // Number of line amplifiers
+		double Nl = 0.0; // Number of line amplifiers
 		double noiseNli = 0.0;
 		double totalPower = 0.0;
 		double boosterAmpNoiseAse = 0.0;
@@ -308,29 +331,36 @@ public class PhysicalLayer implements Serializable {
 			sourceNode = route.getNode(i);
 			destinationNode = route.getNode(i + 1);
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
-			Ns = getNumberOfLineAmplifiers(link.getDistance());
+			Nl = getNumberOfLineAmplifiers(link.getDistance());
 			
 			circuitList = getCircuitList(link, circuit, testCircuit, addTestCircuit);
 			
 			if(activeNLI){
-				noiseNli = (Ns + 1.0) * getGnli(circuit, link, circuitPowerLinear, Bsi, I, fi, circuitList); // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
+				noiseNli = getGnli(circuit, link, circuitPowerLinear, Bsi, I, fi, circuitList); // Computing the NLI for each polarization mode
+				noiseNli = (Nl + 1.0) * noiseNli; // Nl + 1 corresponds to the line amplifiers span more the preamplifier span
 				Inli = Inli + noiseNli;
 			}
 			
 			if(activeASE){
 				if(typeOfAmplifierGain == 1){
-					totalPower = getTotalPowerInTheLink(circuitList, link, circuitPowerLinear, Bsi, I);
+					totalPower = getTotalPowerInTheLink(circuitList, link, circuitPowerLinear, I);
 				}
 				
-				lastFiberSegment = link.getDistance() - (Ns * L);
-				preAmp.setGain((alpha * lastFiberSegment) + Lsss);
-				//double spanMeter = lastFiberSegment * 1000; // span in meter
-				//double preAmpGainLinear = Math.pow(Math.E, alphaLinear * spanMeter) * ratioOfDB(Lsss);
-				//preAmp.setGain(ratioForDB(preAmpGainLinear));
+				// Computing the last span amplifier gain
+				lastFiberSegment = link.getDistance() - (Nl * L);
+				preAmp.setGain(alpha * lastFiberSegment);
 				
+				// Computing the ASE for each amplifier type
 				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
-				lineAmpNoiseAse = Ns * lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				lineAmpNoiseAse = lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
 				preAmpNoiseAse = preAmp.getAseByGain(totalPower, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				
+				// Determining the ASE for each polarization mode
+				boosterAmpNoiseAse = boosterAmpNoiseAse / polarizationModes; 
+				lineAmpNoiseAse = lineAmpNoiseAse / polarizationModes;
+				preAmpNoiseAse = preAmpNoiseAse / polarizationModes;
+				
+				lineAmpNoiseAse = Nl * lineAmpNoiseAse; // Computing ASE for all line amplifier spans
 				
 				Iase = Iase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
 			}
@@ -385,11 +415,11 @@ public class PhysicalLayer implements Serializable {
 	 * @param I double
 	 * @return double
 	 */
-	public double getTotalPowerInTheLink(HashSet<Circuit> circuitList, Link link, double powerI, double Bsi, double I){
+	public double getTotalPowerInTheLink(HashSet<Circuit> circuitList, Link link, double powerI, double I){
 		double totalPower = 0.0;
 		double circuitPower = 0.0;
-		int saj[] = null;
-		double numOfSlots = 0.0;
+		//int saj[] = null;
+		//double numOfSlots = 0.0;
 		double Bsj = 0.0;
 		double powerJ = powerI;
 		
@@ -401,9 +431,10 @@ public class PhysicalLayer implements Serializable {
 			}
 			
 			if(fixedPowerSpectralDensity){
-				saj = circuitJ.getSpectrumAssignedByLink(link);;
-				numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
-				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
+				//saj = circuitJ.getSpectrumAssignedByLink(link);;
+				//numOfSlots = saj[1] - saj[0] + 1.0; // Number of slots
+				//Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = circuitJ.getModulationByLink(link).getBandwidthFromBitRate(circuitJ.getRequiredBandwidth());
 				
 				circuitPower = I * Bsj;
 			}
@@ -459,11 +490,14 @@ public class PhysicalLayer implements Serializable {
 				saJ = circuitJ.getSpectrumAssignedByLink(link);
 				numOfSlots = saJ[1] - saJ[0] + 1.0;
 				
-				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth, less the guard band
+				Bsj = numOfSlots * slotBandwidth; // Circuit bandwidth
 				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				
+				Bsj = circuitJ.getModulation().getBandwidthFromBitRate(circuitJ.getRequiredBandwidth());
 				
 				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
 					powerJ = circuitJ.getLaunchPowerLinear();
+					powerJ = powerJ / polarizationModes; // Determining the power for each polarization mode
 				}
 				
 				if(!fixedPowerSpectralDensity){
@@ -657,13 +691,13 @@ public class PhysicalLayer implements Serializable {
 	public HashMap<String, HashMap<Double, Double>> computesModulationsDistances(Mesh mesh, List<Modulation> avaliableModulations) {
 		//System.out.println("Computing of the distances of the modulation formats");
 		
-		Set<Double> transmissionRateList = Util.bandwidths;
+		Set<Double> bitRateList = util.bandwidths;
 		HashMap<String, HashMap<Double, Double>> modsTrsDistances = new HashMap<>();
 		
 		for(int m = 0; m < avaliableModulations.size(); m++) {
 			Modulation mod = avaliableModulations.get(m);
 			
-			for(double transmissionRate : transmissionRateList) {
+			for(double bitRate : bitRateList) {
 				
 				HashMap<Double, Double> slotsDist = modsTrsDistances.get(mod.getName());
 				if(slotsDist == null) {
@@ -671,21 +705,21 @@ public class PhysicalLayer implements Serializable {
 					modsTrsDistances.put(mod.getName(), slotsDist);
 				}
 				
-				Double dist = slotsDist.get(transmissionRate);
+				Double dist = slotsDist.get(bitRate);
 				if(dist == null) {
 					dist = 0.0;
 				}
-				slotsDist.put(transmissionRate, dist);
+				slotsDist.put(bitRate, dist);
 			}
 		}
 		
 		for(int m = 0; m < avaliableModulations.size(); m++) {
 			Modulation mod = avaliableModulations.get(m);
 			
-			for(double transmissionRate : transmissionRateList) {
+			for(double bitRate : bitRateList) {
 				
-				double distance = computeModulationDistanceByBandwidth(mod, transmissionRate, mesh);
-				modsTrsDistances.get(mod.getName()).put(transmissionRate, distance);
+				double distance = computeModulationDistanceByBandwidth(mod, bitRate, mesh);
+				modsTrsDistances.get(mod.getName()).put(bitRate, distance);
 			}
 		}
 
@@ -718,11 +752,11 @@ public class PhysicalLayer implements Serializable {
 	 * Calculates the distance to a modulation format considering the bandwidth
 	 * 
 	 * @param mod
-	 * @param bandwidth
+	 * @param bitRate
 	 * @param mesh
 	 * @return double
 	 */
-	public double computeModulationDistanceByBandwidth(Modulation mod, double bandwidth, Mesh mesh) {
+	public double computeModulationDistanceByBandwidth(Modulation mod, double bitRate, Mesh mesh) {
 		
 		int totalSlots = mesh.getLinkList().firstElement().getNumOfSlots();
 		
@@ -736,16 +770,16 @@ public class PhysicalLayer implements Serializable {
 		double averageLastFiberSegment = sumLastFiberSegment / linkList.size();
 		
 		double totalDistance = 50000.0; //km
-		int quantSpansPorEnlace = (int)(totalDistance / L); // number of spans per link
+		int numSpansPerLink = (int)(totalDistance / L); // number of spans per link
 		
-		int slotNumber = mod.requiredSlots(bandwidth);
+		int slotNumber = mod.requiredSlots(bitRate);
 		int sa[] = new int[2];
 		sa[0] = 1;
 		sa[1] = sa[0] + slotNumber - 1;
 		
 		double modTrDistance = 0.0;
 		
-		for(int ns = 0; ns <= quantSpansPorEnlace; ns++){
+		for(int ns = 0; ns <= numSpansPerLink; ns++){
 			double distance = (ns * L) + averageLastFiberSegment;
 			
 			Node n1 = new Node("1", 1000, 1000, 0, 100);
@@ -761,7 +795,7 @@ public class PhysicalLayer implements Serializable {
 			
 			RequestForConnection requestTemp = new RequestForConnection();
 			requestTemp.setPair(pair);
-			requestTemp.setRequiredBandwidth(bandwidth);
+			requestTemp.setRequiredBandwidth(bitRate);
 			
 			Circuit circuitTemp = new Circuit();
 			circuitTemp.setPair(pair);
@@ -782,4 +816,5 @@ public class PhysicalLayer implements Serializable {
 		
 		return modTrDistance;
 	}
+	
 }

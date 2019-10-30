@@ -49,40 +49,34 @@ public class SimulationFileManager {
                         //metric = metric.split("" +"[.]")[0];
 
                         switch(metric){
-                            case SimulationRequest.Result
-                                    .FILE_BANDWIDTH_BLOCKING_PROBABILITY:
+                            case SimulationRequest.Result.FILE_BANDWIDTH_BLOCKING_PROBABILITY:
                                 sr.getResult().bandwidthBlockingProbability = readFile(listOfFiles[i],true);
                                 break;
-                            case SimulationRequest.Result
-                                    .FILE_BLOCKING_PROBABILITY:
+                            case SimulationRequest.Result.FILE_BLOCKING_PROBABILITY:
                                 sr.getResult().blockingProbability = readFile(listOfFiles[i],true);
                                 break;
-                            case SimulationRequest.Result
-                                    .FILE_CONSUMEDEN_ERGY:
+                            case SimulationRequest.Result.FILE_CONSUMEDEN_ERGY:
                                 sr.getResult().consumedEnergy = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_ENERGY_CONSUMPTION:
-                                sr.getResult().energyConsumption = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_EXTERNAL_FRAGMENTATION:
+                                break;
+                            case SimulationRequest.Result.FILE_EXTERNAL_FRAGMENTATION:
                                 sr.getResult().externalFragmentation = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_GROOMING_STATISTICS:
+                                break;
+                            case SimulationRequest.Result.FILE_GROOMING_STATISTICS:
                                 sr.getResult().groomingStatistics = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_MODULATION_UTILIZATION:
+                                break;
+                            case SimulationRequest.Result.FILE_MODULATION_UTILIZATION:
                                 sr.getResult().modulationUtilization = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_RELATIVE_FRAGMENTATION:
+                                break;
+                            case SimulationRequest.Result.FILE_RELATIVE_FRAGMENTATION:
                                 sr.getResult().relativeFragmentation = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_SPECTRUM_STATISTICS:
+                                break;
+                            case SimulationRequest.Result.FILE_SPECTRUM_STATISTICS:
                                 sr.getResult().spectrumStatistics = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_SPECTRUM_UTILIZATION:
+                                break;
+                            case SimulationRequest.Result.FILE_SPECTRUM_UTILIZATION:
                                 sr.getResult().spectrumUtilization = readFile(listOfFiles[i],true);
-                            case SimulationRequest.Result
-                                    .FILE_TRANSMITTERS_RECEIVERS_REGENERATORS_UTILIZATION:
+                                break;
+                            case SimulationRequest.Result.FILE_TRANSMITTERS_RECEIVERS_REGENERATORS_UTILIZATION:
                                 sr.getResult().transmittersReceiversRegeneratorsUtilization = readFile(listOfFiles[i],true);
                         }
                 }
@@ -146,9 +140,6 @@ public class SimulationFileManager {
         }
         if(sr.getSimulationConfig().getActiveMetrics().SpectrumSizeStatistics){
             saveResult(path, SimulationRequest.Result.FILE_SPECTRUM_STATISTICS,sr.getResult().spectrumStatistics);
-        }
-        if(sr.getSimulationConfig().getActiveMetrics().EnergyConsumption){
-            saveResult(path, SimulationRequest.Result.FILE_ENERGY_CONSUMPTION,sr.getResult().energyConsumption);
         }
         if(sr.getSimulationConfig().getActiveMetrics().ModulationUtilization){
             saveResult(path, SimulationRequest.Result.FILE_MODULATION_UTILIZATION,sr.getResult().modulationUtilization);

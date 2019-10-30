@@ -38,6 +38,8 @@ public class PhysicalLayerConfig {
 	private boolean fixedPowerSpectralDensity; // To enable or disable fixed power spectral density
 	private double referenceBandwidthForPowerSpectralDensity; // Reference bandwidth for power spectral density
 	
+	private double polarizationModes; // Number of polarization modes
+	
 	/**
 	 * @return the activeQoT
 	 */
@@ -304,5 +306,16 @@ public class PhysicalLayerConfig {
 	public void setReferenceBandwidthForPowerSpectralDensity(double referenceBandwidthForPowerSpectralDensity) {
 		this.referenceBandwidthForPowerSpectralDensity = referenceBandwidthForPowerSpectralDensity;
 	}
-	
+	/**
+	 * @return the polarizationModes
+	 */
+	public double getPolarizationModes() {
+		return polarizationModes;
+	}
+	/**
+	 * @param polarizationModes the polarizationModes to set
+	 */
+	public void setPolarizationModes(double polarizationModes) {
+		this.polarizationModes = polarizationModes;
+	}
 }

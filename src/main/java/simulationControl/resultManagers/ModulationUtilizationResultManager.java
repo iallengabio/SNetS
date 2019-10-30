@@ -106,7 +106,7 @@ public class ModulationUtilizationResultManager implements ResultManagerInterfac
 			for(String modName : modulationList){
 				String aux2 = aux + sep + modName;
 				
-				for (Double bandwidth : Util.bandwidths) {
+				for (Double bandwidth : mus.get(0).get(0).getUtil().bandwidths) {
 					String aux3 = aux2 + sep + (bandwidth/1000000000.0) + sep + " ";
 					
 					for (Integer replic : replications) {

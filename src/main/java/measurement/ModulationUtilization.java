@@ -8,6 +8,7 @@ import grmlsa.modulation.Modulation;
 import network.Circuit;
 import network.ControlPlane;
 import request.RequestForConnection;
+import simulationControl.Util;
 import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.ModulationUtilizationResultManager;
 
@@ -24,10 +25,11 @@ public class ModulationUtilization extends Measurement {
 	private HashMap<String, HashMap<Double, Integer>> numCircuitsPerModPerBw;
 	
 	private List<String> modulationList;
+	private Util util;
 	
-	public ModulationUtilization(int loadPoint, int replication) {
+	public ModulationUtilization(int loadPoint, int replication, Util util) {
 		super(loadPoint, replication);
-		
+		this.util = util;
 		this.numObservations = 0;
 		
 		this.numCircuitsPerMod = new HashMap<>();
@@ -121,5 +123,9 @@ public class ModulationUtilization extends Measurement {
 	 */
 	public List<String> getModulationList(){
 		return modulationList;
+	}
+
+	public Util getUtil() {
+		return util;
 	}
 }

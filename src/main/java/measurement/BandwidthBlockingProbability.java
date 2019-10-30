@@ -7,6 +7,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.Pair;
 import request.RequestForConnection;
+import simulationControl.Util;
 import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.BandwidthBlockingProbResultManager;
 
@@ -42,16 +43,17 @@ public class BandwidthBlockingProbability extends Measurement{
 	// Blocking probability per pair / BandWidth
 	private HashMap<String, HashMap<Double,Double>> requestedBandwidthPairBW;
 	private HashMap<String, HashMap<Double,Double>> bandwidthBlockedPairBW;
-	
+	private Util util;
+
 	/**
 	 * Creates a new instance of BandwidthBlockingProbability
 	 * 
 	 * @param loadPoint int
 	 * @param rep int
 	 */
-	public BandwidthBlockingProbability(int loadPoint, int rep){
+	public BandwidthBlockingProbability(int loadPoint, int rep, Util util){
 		super(loadPoint, rep);
-		
+		this.util = util;
 		// bandwidth blocking probability general
 		this.generalRequestedBandwidth = 0.0;
 		this.generalBandwidthBlockingProbability = 0.0;
@@ -307,4 +309,9 @@ public class BandwidthBlockingProbability extends Measurement{
 		
 		return res;
 	}
+
+	public Util getUtil() {
+		return this.util;
+	}
+
 }

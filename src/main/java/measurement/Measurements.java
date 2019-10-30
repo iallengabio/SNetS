@@ -93,11 +93,11 @@ public class Measurements implements Serializable {
         
         // Activates the metrics set up in the SimulationConfig file
 		if(measuringMetrics.BlockingProbability){
-			BlockingProbability probabilidadeDeBloqueio = new BlockingProbability(loadPoint, replication);
+			BlockingProbability probabilidadeDeBloqueio = new BlockingProbability(loadPoint, replication, mesh.getUtil());
 			this.metricsList.add(probabilidadeDeBloqueio);
 		}
 		if(measuringMetrics.BandwidthBlockingProbability){
-			BandwidthBlockingProbability probabilidadeDeBloqueioDeBanda = new BandwidthBlockingProbability(loadPoint, replication);
+			BandwidthBlockingProbability probabilidadeDeBloqueioDeBanda = new BandwidthBlockingProbability(loadPoint, replication, mesh.getUtil());
 			this.metricsList.add(probabilidadeDeBloqueioDeBanda);
 		}
 		if(measuringMetrics.ExternalFragmentation){
@@ -120,12 +120,8 @@ public class Measurements implements Serializable {
 			TransmittersReceiversRegeneratorsUtilization transmittersReceiversUtilization = new TransmittersReceiversRegeneratorsUtilization(loadPoint, replication);
 			this.metricsList.add(transmittersReceiversUtilization);
 		}
-		if(measuringMetrics.EnergyConsumption){
-			MetricsOfEnergyConsumption energyConsumption = new MetricsOfEnergyConsumption(loadPoint, replication);
-			this.metricsList.add(energyConsumption);
-		}
 		if(measuringMetrics.ModulationUtilization){
-			ModulationUtilization modulationUtilization = new ModulationUtilization(loadPoint, replication);
+			ModulationUtilization modulationUtilization = new ModulationUtilization(loadPoint, replication, mesh.getUtil());
 			this.metricsList.add(modulationUtilization);
 		}
 		if(measuringMetrics.ConsumedEnergy){
@@ -209,88 +205,7 @@ public class Measurements implements Serializable {
 	public SimulationConfig.Metrics getMeasuringMetrics() {
 		return measuringMetrics;
 	}
-
-	public BlockingProbability getProbabilidadeDeBloqueioMeasurement(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof BlockingProbability){
-				return (BlockingProbability)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public BandwidthBlockingProbability getProbabilidadeDeBloqueioDeBandaMeasurement(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof BandwidthBlockingProbability){
-				return (BandwidthBlockingProbability)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public ExternalFragmentation getFragmentacaoExterna(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof ExternalFragmentation){
-				return (ExternalFragmentation)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public RelativeFragmentation getFragmentacaoRelativa(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof RelativeFragmentation){
-				return (RelativeFragmentation)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public SpectrumUtilization getUtilizacaoSpectro(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof SpectrumUtilization){
-				return (SpectrumUtilization)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public SpectrumSizeStatistics getSpectrumSizeStatistics(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof SpectrumSizeStatistics){
-				return (SpectrumSizeStatistics)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public TransmittersReceiversRegeneratorsUtilization getTransmitersReceiversUtilization(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof TransmittersReceiversRegeneratorsUtilization){
-				return (TransmittersReceiversRegeneratorsUtilization)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public MetricsOfEnergyConsumption getMetricsOfEnergyConsumption(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof MetricsOfEnergyConsumption){
-				return (MetricsOfEnergyConsumption)metric;
-			}
-		}
-		return null;
-	}
- 	
- 	public ModulationUtilization getModulationUtilization(){
-		for(Measurement metric : metricsList){
-			if(metric instanceof ModulationUtilization){
-				return (ModulationUtilization)metric;
-			}
-		}
-		return null;
-	}
-
+	
 	public ConsumedEnergy getConsumedEnergyMetric() {
 		return consumedEnergyMetric;
 	}

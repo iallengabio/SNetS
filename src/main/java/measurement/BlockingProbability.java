@@ -6,6 +6,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.Pair;
 import request.RequestForConnection;
+import simulationControl.Util;
 import simulationControl.parsers.SimulationRequest;
 import simulationControl.resultManagers.BlockingProbResultManager;
 
@@ -42,15 +43,16 @@ public class BlockingProbability extends Measurement {
     private HashMap<String, HashMap<Double, Integer>> numReqGenPairBW;
     private HashMap<String, HashMap<Double, Integer>> numReqBlockPairBW;
 
+    private Util util;
     /**
      * Creates a new instance of BlockingProbability
-     * 
-     * @param loadPoint int
+     *  @param loadPoint int
      * @param rep int
+     * @param util
      */
-    public BlockingProbability(int loadPoint, int rep) {
+    public BlockingProbability(int loadPoint, int rep, Util util) {
         super(loadPoint, rep);
-
+        this.util = util;
         this.numGeneralGeneratedReq = 0;
         this.numGeneralRegBlockProb = 0;
         this.numReqBlockByFragmentation = 0;
@@ -305,4 +307,7 @@ public class BlockingProbability extends Measurement {
         return res;
     }
 
+    public Util getUtil() {
+        return util;
+    }
 }
