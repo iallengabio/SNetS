@@ -84,6 +84,7 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_ZONEPARTITION = "zonepartition";
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
+    private static final String INTEGRATED_KSPFIRSTFITSSTG = "kspfirstfit_sstg";
     private static final String INTEGRATED_COMPLETESHARINGEX = "completesharingex";
     private static final String INTEGRATED_COMPLETESHARINGESPAT = "completesharing_espat";
     private static final String INTEGRATED_COMPLETESHARINGEX2 = "completesharingex2";
@@ -255,7 +256,9 @@ public class GRMLSA implements Serializable {
             case INTEGRATED_MDPC:
                 return new ModifiedDijkstraPathsComputation();
             case INTEGRATED_KSPRQOTO:
-            	return new KShortestPathsReductionQoTO();
+                return new KShortestPathsReductionQoTO();
+            case INTEGRATED_KSPFIRSTFITSSTG:
+                return new KSPFirstFitSSTG();
             default:
                 return null;
         }
