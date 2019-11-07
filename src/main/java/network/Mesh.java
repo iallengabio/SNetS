@@ -54,6 +54,7 @@ public class Mesh implements Serializable {
         this.othersConfig = oc;
         RandGenerator randGenerator = new RandGenerator();
         HashMap<String, Node> nodesAux = new HashMap<>();
+        randGenerator.setSeed(1l);
         
         // Create nodes
         this.nodeList = new Vector<>();
