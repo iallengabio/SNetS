@@ -276,7 +276,7 @@ def plotLines(path,loads=[],sol=[], al=0.05):
     n = path.split('/')
     n = n[len(n)-1]
     n = n + '_Line_'
-    lDfs = [extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,alpha), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
+    lDfs = [extractDFS(path,ABP,MBP,al),extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,al), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
     lYl = YLegends
     lAn = ArqNames
     xl = XLegend
@@ -319,11 +319,11 @@ def plotBars(path,loads=[],sol=[], al=0.05):
     n = path.split('/')
     n = n[len(n)-1]
     n = n + '_Bar_'
-    lDfs = [extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,alpha), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
+    lDfs = [extractDFS(path,ABP,MBP,al),extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,al), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
     lYl = YLegends
     lAn = ArqNames
     xl = XLegend
-    lLp = ['upper left','upper right','lower right','upper left','upper left','upper left','upper left','upper left']
+    lLp = ['upper left','upper right','lower right','upper left','upper left','upper left','upper left','upper left','upper left','upper left','upper left']
 
     if loads==[]:
         loads = lDfs[0][0]['loads'].tolist()
@@ -365,21 +365,21 @@ def computeGains(path, ims, save = ""):
 def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
     fs = 30
     width = 0.7
-    indmult = 1
+    indmult = 2
     ind = np.arange(len(dfs[0]['loads']))
     plt.figure(figsize=(12,6))
     for i in range(len(dfs)):
-        plt.bar(ind+width*2, dfs[i]['mean'], width*1, yerr=dfs[i]['errors'], label=sol[i])
+        plt.bar(ind+width*i, dfs[i]['mean'], width*1, yerr=dfs[i]['errors'], label=sol[i])        
 
     plt.ylabel(yl, fontsize=fs)
     plt.xlabel(xl, fontsize=fs)
     plt.xticks(ind*indmult+width*2, loads, fontsize=fs)
     plt.yticks(fontsize=fs)
     plt.grid(axis='y')
-    #if len(sol) < nc:
-    #    nc = len(sol)
-    #plt.legend(loc=lp, ncol = nc, fontsize=fs)
-    #plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(0,-0.18))
+    if len(sol) < nc:
+        nc = len(sol)
+    plt.legend(loc=lp, ncol = nc, fontsize=fs)
+    plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(0,-0.18))
     if arq != "":
         plt.savefig(arq, dpi=150,bbox_inches='tight')
     if show:
