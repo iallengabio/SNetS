@@ -25,6 +25,7 @@ public class ExternalFragmentation extends Measurement {
     public final static String SEP = "-";
 
     private int numberObservations;
+    private int numberObservationsHorizontalFragmentation;
     private double ExternalFragVertical;
     private double ExternalFragHorizontal;
 
@@ -35,13 +36,13 @@ public class ExternalFragmentation extends Measurement {
      * 
      * @param loadPoint int
      * @param rep int
-     * @param mesh Mesh
      */
     public ExternalFragmentation(int loadPoint, int rep) {
         super(loadPoint, rep);
         this.loadPoint = loadPoint;
         this.replication = rep;
         this.numberObservations = 0;
+        this.numberObservationsHorizontalFragmentation = 0;
         this.ExternalFragLinks = new HashMap<>();
 
 		resultManager = new ExternalFragmentationResultManager();
@@ -83,9 +84,8 @@ public class ExternalFragmentation extends Measurement {
      * @return double
      */
     public double getExternalFragHorizontal() {
-        return ExternalFragHorizontal / (double) numberObservations;
+        return ExternalFragHorizontal / (double) numberObservationsHorizontalFragmentation;
     }
-
     /**
      * Returns the average external fragmentation calculated for each link individually
      *
@@ -136,6 +136,7 @@ public class ExternalFragmentation extends Measurement {
         ComputesFragmentation cf = new ComputesFragmentation();
         
         ExternalFragHorizontal += cf.externalFragmentation(composition);
+        numberObservationsHorizontalFragmentation++;
     }
 
     /**
