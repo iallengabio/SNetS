@@ -924,6 +924,8 @@ public class PhysicalLayer implements Serializable {
 	public double computeMaximumPower2(double bitRate, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[]){
 		
 		//double I = PowerLinear / referenceBandwidth; // Signal power density for the reference bandwidth
+		//I = I / polarizationModes;
+		
 		double Iase = 0.0;
 		double Inli = 0.0;
 		
@@ -944,6 +946,7 @@ public class PhysicalLayer implements Serializable {
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			Nl = getNumberOfLineAmplifiers(link.getDistance());
 			
+			// MUX insertion loss
 			Inli = Inli / LsssLinear;
 			Iase = Iase / LsssLinear;
 			
@@ -955,6 +958,7 @@ public class PhysicalLayer implements Serializable {
 			
 			if(activeASE){
 				double Sase = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				Sase = Sase / polarizationModes;
 				Iase = Iase + Sase;
 			}
 			
@@ -988,6 +992,7 @@ public class PhysicalLayer implements Serializable {
 				
 				if(activeASE){
 					double Sase = lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
+					Sase = Sase / polarizationModes;
 					Iase = Iase + Sase;
 				}
 			}
@@ -1024,9 +1029,11 @@ public class PhysicalLayer implements Serializable {
 			
 			if(activeASE){
 				double Sase = preAmp.getAseByGain(totalPower, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				Sase = Sase / polarizationModes;
 				Iase = Iase + Sase;
 			}
 			
+			// DEMUX insertion loss
 			Inli = Inli / LsssLinear;
 			Iase = Iase / LsssLinear;
 			
