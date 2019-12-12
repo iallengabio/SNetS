@@ -114,6 +114,9 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 	            		
 	    			}else if(algo.equals("APAb2")) { // APA binary search 2
 		            	lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch2(circuit, route, mod, band, factorMult);
+		            	
+	    			}else if(algo.equals("APAb3")) { // APA binary search 3
+		            	lauchPower = computePowerByBinarySearch3(circuit, route, mod, band, factorMult, cp);
 	    			}
             		
             		checkBand = band;
@@ -601,4 +604,102 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     		}
     	}
     }
+    
+    public double computePowerByBinarySearch3(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult, ControlPlane cp){
+    	
+    	if(powerDatabase == null) {
+    		powerDatabase = new HashMap<Route, HashMap<Double, HashMap<Modulation, Double>>>();
+    	}
+    	
+    	double Pmin = 1.0E-11; //W, -80 dBm
+		double Pcurrent = Pmin;
+		double error = 0.01;
+		double SNRdif = 0.0;
+		double SNRcurrent = 0.0;
+		
+		boolean toSaveDB = false;
+    	boolean isPowerDB = false;
+		HashMap<Double, HashMap<Modulation, Double>> trsModsPower = powerDatabase.get(route);
+    	if(trsModsPower != null) {
+    		HashMap<Modulation, Double> modsPower = trsModsPower.get(circuit.getRequiredBandwidth());
+    		if(modsPower != null) {
+    			Double power = modsPower.get(modulation);
+    			if(power != null) {
+    				Pcurrent = power;
+    				isPowerDB = true;
+    			}
+    		}
+    	}
+    	
+		double SNRth = modulation.getSNRthresholdLinear();
+		double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
+		
+		//SNRth = SNRth * (1.0 + factorMult);
+		SNRth = SNRth + factorMult;
+		
+		circuit.setLaunchPowerLinear(Pmax);
+		SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+		
+		if (SNRcurrent - SNRth < 0.0) {
+			return Pmax;
+		}
+		
+		circuit.setLaunchPowerLinear(Pmin);
+		SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+		
+		if(SNRcurrent - SNRth > 0.0) {
+			return Pmin;
+		}
+		
+		while (true) {
+			
+			if (!isPowerDB) {
+				Pcurrent = (Pmin + Pmax) / 2.0;
+				
+				toSaveDB = true;
+				
+			} else {
+				isPowerDB = false;
+			}
+			
+			circuit.setLaunchPowerLinear(Pcurrent);
+			SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+			
+			SNRdif = SNRcurrent - SNRth;
+			
+			if (SNRdif < error && SNRdif > 0.0) {
+				break;
+				
+			} else {
+				if(SNRdif > 0.0) {
+					Pmax = Pcurrent;
+					
+				}else {
+					Pmin = Pcurrent;
+				}
+			}
+		}
+		
+		if (toSaveDB) {
+			// saves the power in the database
+			
+			trsModsPower = powerDatabase.get(route);
+	    	if(trsModsPower == null) {
+	    		trsModsPower = new HashMap<Double, HashMap<Modulation,Double>>();
+	    		powerDatabase.put(route, trsModsPower);
+	    	}
+	    	
+	    	HashMap<Modulation, Double> modsPower = trsModsPower.get(circuit.getRequiredBandwidth());
+    		if(modsPower == null) {
+    			modsPower = new HashMap<Modulation, Double>();
+    			trsModsPower.put(circuit.getRequiredBandwidth(), modsPower);
+    		}
+	    	
+    		modsPower.put(modulation, Pcurrent);
+		}
+		
+		return Pcurrent;
+	}
+
+
 }
