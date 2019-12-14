@@ -57,12 +57,11 @@ public class ModulationAndGuardBandSelectionByAGBA implements ModulationSelectio
 		Modulation alternativeMod = null;
 		int alternativeBand[] = null;
 				
-		
 		// Begins with the most spectrally efficient modulation format
 		for (int m = avaliableModulations.size()-1; m >= 0; m--) {
 			Modulation mod = avaliableModulations.get(m);
 			
-			if(route.getHops() <= numberHops){
+			if(route.getDistanceAllLinks() <= numberHops){
 				mod.setGuardBand(1);
             }else{
             	mod.setGuardBand(2);

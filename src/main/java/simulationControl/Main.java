@@ -6,6 +6,9 @@ import com.google.firebase.auth.FirebaseCredentials;
 import com.google.firebase.database.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import grmlsa.integrated.CompleteSharing;
+import network.ControlPlane;
 import simulationControl.distributedProcessing.Client;
 import simulationControl.distributedProcessing.ServerM;
 import simulationControl.distributedProcessing.ServerS;
@@ -199,6 +202,9 @@ public class Main {
         });
         
         long end = System.nanoTime();
+        
+        //Salvando os resultados para a base de dados
+        //ControlPlane.SalvarCSV();
         
         System.out.println("saving results");
         sfm.writeSimulation(path,simulationRequest);

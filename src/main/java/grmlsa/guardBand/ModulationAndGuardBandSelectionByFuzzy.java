@@ -27,7 +27,7 @@ import util.IntersectionFreeSpectrum;
 public class ModulationAndGuardBandSelectionByFuzzy implements ModulationSelectionAlgorithmInterface {
 
 	private List<Modulation> avaliableModulations;
-	static String filename = "simulations/<Path to tipper>/tipper.fcl";
+	static String filename = "simulations/Cost239Fuzzy/tipper.fcl";
 
 	@Override
 	public Modulation selectModulation(Circuit circuit, Route route, SpectrumAssignmentAlgorithmInterface spectrumAssignment, ControlPlane cp) {
@@ -56,8 +56,12 @@ public class ModulationAndGuardBandSelectionByFuzzy implements ModulationSelecti
 		FunctionBlock fb = fis.getFunctionBlock(null);
 
 		circuit.setRoute(route);
-
+		
+		//System.out.println("-------");
+		//for (int m = 0; m < avaliableModulations.size(); m++) {
+		//for (int m = avaliableModulations.size() - 1; m >= 0; m--) {
 		for (int m = avaliableModulations.size() - 1; m >= 0; m--) {
+			//System.out.println("Modulação: " + avaliableModulations.get(m).getM());
 			Modulation mod = avaliableModulations.get(m);
 
 			fb.setVariable("utilizacaoEnlace", maxUtilizationRouteLink(route));
@@ -105,7 +109,7 @@ public class ModulationAndGuardBandSelectionByFuzzy implements ModulationSelecti
 		// Configures the circuit information. They can be used by the method that requested the modulation selection
 		circuit.setModulation(chosenMod);
 		circuit.setSpectrumAssigned(chosenBand);
-		
+		//System.out.println("GB:" + chosenMod.getGuardBand());
 		return chosenMod;
 
 	}

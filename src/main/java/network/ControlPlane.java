@@ -1,10 +1,16 @@
 package network;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import com.opencsv.CSVWriter;
 
 import grmlsa.GRMLSA;
 import grmlsa.Route;
@@ -26,6 +32,14 @@ import util.IntersectionFreeSpectrum;
  * @author Iallen
  */
 public class ControlPlane implements Serializable {
+	
+	/*para base MLP*/
+	//public static String[] cabecalho = {"slotsUsadosEnlace", "slotsTotalEnlace", "utilizacaoEnlace", "circuitosAtivosNoEnlace", "quantidadeSaltosRota", "quantidadeSlotsLivresRota", "utilizacaoRede", "modulacao", "circuitoSNR", "tipoBloqueio", "bandaDeGuarda"};
+	/*para base CONV*/
+	//public static String[] cabecalho = {"slotsUsados", "slotsTotal", "circuitosAtivosNoEnlace", "quantidadeSaltosRota", "utilizacaoRede", "modulacao", "circuitoSNR", "tipoBloqueio", "bandaDeGuarda"};
+									
+    //public static List<String[]> linhas = new ArrayList<>();
+    //public static Link link = null;
 
     protected int rsaType;
     protected RoutingAlgorithmInterface routing;
@@ -289,6 +303,12 @@ public class ControlPlane implements Serializable {
                         updateNetworkPowerConsumption();
                         allocateCircuit(circuit);
                         
+                        //link = linkMostUsed(circuit.getRoute());
+                        /*pra base MLP*/
+                        //linhas.add(new String[]{Integer.toString(link.getUsedSlots()), Integer.toString(link.getNumOfSlots()), Double.toString(link.getUtilization()), Integer.toString(link.getCircuitList().size()), Integer.toString(circuit.getRoute().getHops()), Integer.toString(numberOfFreeSlots(circuit.getRoute())),Double.toString(UtilizacaoGeral(mesh)), Double.toString(circuit.getModulation().getM()), Double.toString(circuit.getSNR()),Integer.toString(circuit.getBlockCause()),Integer.toString(circuit.getModulation().getGuardBand())});
+                        /*pra base CONV*/                                                                      
+                        //linhas.add(new String[]{Integer.toString(link.getUsedSlots()), Integer.toString(link.getNumOfSlots()), Integer.toString(link.getCircuitList().size()), Integer.toString(circuit.getRoute().getHops()), Double.toString(UtilizacaoGeral(mesh)), Double.toString(circuit.getModulation().getM()), Double.toString(circuit.getSNR()),Integer.toString(circuit.getBlockCause()),Integer.toString(circuit.getModulation().getGuardBand())});
+                        
                         return true; // Admits the circuit
                     }
                 }
@@ -316,7 +336,43 @@ public class ControlPlane implements Serializable {
             circuit.setBlockCause(Circuit.BY_LACK_TX);
         }
         circuit.setWasBlocked(true);
+        
+        //link = linkMostUsed(circuit.getRoute());
+        //linhas.add(new String[]{Integer.toString(link.getUsedSlots()), Integer.toString(link.getNumOfSlots()), Double.toString(link.getUtilization()), Integer.toString(link.getCircuitList().size()), Integer.toString(circuit.getRoute().getHops()), Integer.toString(numberOfFreeSlots(circuit.getRoute())),Double.toString(UtilizacaoGeral(mesh)), Double.toString(circuit.getModulation().getM()), Double.toString(circuit.getSNR()),Integer.toString(circuit.getBlockCause()),Integer.toString(circuit.getModulation().getGuardBand())});
+        
         return false; // Rejects the circuit
+    }
+    
+    /**
+     * Returns the most used link of a route.
+     * 
+     * @param rota
+     * @return maxUtilizationRouteLink
+     */
+    private Link linkMostUsed (Route route) {
+    	
+    	Link maxLink = null;
+    	double maxUtilizationRouteLink = 0.0;
+    	
+    	for(Link link: route.getLinkList()) {
+    		if(link.getUtilization() >= maxUtilizationRouteLink) {
+    			maxUtilizationRouteLink = link.getUtilization();
+    			maxLink = link;
+    		}
+    	}
+    	
+    	return maxLink;
+    }
+    
+    private int numberOfFreeSlots (Route route) {
+    	
+    	int numberOfFreeSlots = 0;
+    	
+    	for(Link link: route.getLinkList()) {
+    		numberOfFreeSlots += link.getNumOfSlots() - link.getUsedSlots();
+    	}
+    	
+    	return numberOfFreeSlots;
     }
 
     /**
@@ -801,6 +857,46 @@ public class ControlPlane implements Serializable {
 	 */
     private void updateNetworkPowerConsumption(){
         this.mesh.computesPowerConsmption(this);
+    }
+    
+    /*public static void SalvarCSV() {
+    	
+    	Writer writer = null;
+        try {
+        	writer = Files.newBufferedWriter(Paths.get("baseSBRCNSFNetSemBloqueioMLP.csv"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        CSVWriter csvWriter = new CSVWriter(writer);            
+
+        csvWriter.writeNext(cabecalho);
+        csvWriter.writeAll(linhas);
+
+        try {
+			csvWriter.flush();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+    }*/
+    
+    /**
+     * Returns the total usage of the topology 
+     * 
+     * @param mesh
+     */
+    private double UtilizacaoGeral(Mesh mesh) {
+        Double utGeral = 0.0;
+        for (Link link : mesh.getLinkList()) {
+            utGeral += link.getUtilization();
+        }
+
+        utGeral = utGeral / (double) mesh.getLinkList().size();
+
+        return utGeral;
     }
 
 }

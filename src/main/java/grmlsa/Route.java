@@ -21,7 +21,7 @@ public class Route implements Serializable, Comparable<Route> {
     private Vector<Link> linkList;
     
     // Route distance
-    private double distanceAllLinks;
+    private double distanceAllLinks;    
 
     /**
      * Creates a new instance of Route with a given list of nodes
