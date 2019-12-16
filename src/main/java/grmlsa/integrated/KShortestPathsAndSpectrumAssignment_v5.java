@@ -1,5 +1,6 @@
 package grmlsa.integrated;
 
+import java.awt.print.Printable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,8 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     private String algo;
     
     private HashMap<Route, HashMap<Double, HashMap<Modulation, Double>>> powerDatabase; // route, transmission rate e modulation
+    
+    private boolean flagQoTO;
     
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
@@ -88,6 +91,8 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 	    			//CPSD
 	    			double lauchPower = Double.POSITIVE_INFINITY;
 	    			
+	    			flagQoTO = false;
+	    			
 	    			if(algo.equals("EPA")) { // EPA
 		    		    lauchPower = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, mod, band);
 	            		
@@ -132,9 +137,18 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 		                chosenMod = mod;
 		                chosenPower = lauchPower;
 		                
-		                QoTO = cp.computeQoTForOther(circuit);
-		                if(QoTO) {
-			                break; // Stop when reaches admissible QoTO
+		                if (algo.equals("APAb3")) {
+		                	if (flagQoTO) {
+		                		QoTO = flagQoTO;
+		                		break;
+		                	}
+		                	
+		                } else {
+		                
+			                QoTO = cp.computeQoTForOther(circuit);
+			                if (QoTO) {
+				                break; // Stop when reaches admissible QoTO
+			                }
 		                }
 	            	}
 	            }
@@ -605,7 +619,7 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     	}
     }
     
-    public double computePowerByBinarySearch3(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double factorMult, ControlPlane cp){
+    public double computePowerByBinarySearch3(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double margin, ControlPlane cp){
     	
     	if(powerDatabase == null) {
     		powerDatabase = new HashMap<Route, HashMap<Double, HashMap<Modulation, Double>>>();
@@ -613,9 +627,11 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     	
     	double Pmin = 1.0E-11; //W, -80 dBm
 		double Pcurrent = Pmin;
-		double error = 0.01;
 		double SNRdif = 0.0;
 		double SNRcurrent = 0.0;
+		double powerDB = 0.0;
+		
+		int attemptsCounter = 0; // Count attempts to reach acceptable QoTO
 		
 		boolean toSaveDB = false;
     	boolean isPowerDB = false;
@@ -625,7 +641,7 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     		if(modsPower != null) {
     			Double power = modsPower.get(modulation);
     			if(power != null) {
-    				Pcurrent = power;
+    				powerDB = power;
     				isPowerDB = true;
     			}
     		}
@@ -634,8 +650,7 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 		double SNRth = modulation.getSNRthresholdLinear();
 		double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
 		
-		//SNRth = SNRth * (1.0 + factorMult);
-		SNRth = SNRth + factorMult;
+		SNRth = SNRth + margin;
 		
 		circuit.setLaunchPowerLinear(Pmax);
 		SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
@@ -656,9 +671,8 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 			if (!isPowerDB) {
 				Pcurrent = (Pmin + Pmax) / 2.0;
 				
-				toSaveDB = true;
-				
 			} else {
+				Pcurrent = powerDB;
 				isPowerDB = false;
 			}
 			
@@ -667,20 +681,33 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 			
 			SNRdif = SNRcurrent - SNRth;
 			
-			if (SNRdif < error && SNRdif > 0.0) {
-				break;
+			if (SNRdif >= 0.0) {
+				
+				attemptsCounter++;
+				if (attemptsCounter > 3) {
+					break;
+				}
+				
+				boolean QoTO = cp.computeQoTForOther(circuit);
+				
+				flagQoTO = QoTO; // To not have to compute QoTO twice
+				
+				if (QoTO) {
+					toSaveDB = true;
+					break;
+				}
+				
+			}
+			
+			if(SNRdif > 0.0) {
+				Pmax = Pcurrent;
 				
 			} else {
-				if(SNRdif > 0.0) {
-					Pmax = Pcurrent;
-					
-				}else {
-					Pmin = Pcurrent;
-				}
+				Pmin = Pcurrent;
 			}
 		}
 		
-		if (toSaveDB) {
+		if (toSaveDB && (Pcurrent != powerDB)) {
 			// saves the power in the database
 			
 			trsModsPower = powerDatabase.get(route);
