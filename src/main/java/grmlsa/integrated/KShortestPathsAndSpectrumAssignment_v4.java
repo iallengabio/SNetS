@@ -118,7 +118,7 @@ public class KShortestPathsAndSpectrumAssignment_v4 implements IntegratedRMLSAAl
 	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch(circuit, route, mod, band, factorMult);
 	            		
 	    			}else if(algo.equals("EnPA")) { // EnPA with linear interpolation
-	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, band);
+	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, band, factorMult);
 	            		
 	    			}else if(algo.equals("CPA")) { // CPA
 	    				lauchPower = cp.getMesh().getPhysicalLayer().getPowerLinear();

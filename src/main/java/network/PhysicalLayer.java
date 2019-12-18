@@ -1241,30 +1241,57 @@ public class PhysicalLayer implements Serializable {
 		return Pcurrent;
 	}
 	
-	public double computePowerByLinearInterpolation(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[]){
+	public double computePowerByLinearInterpolation(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double margin){
+		
+		double SNRdif = 0.0;
+		double SNRcurrent = 0.0;
+		double error = 0.01;
+		double Pcurrent = 0.0;
 		
 		double SNRth = modulation.getSNRthresholdLinear();
+		SNRth = SNRth + margin;
 		
 		double Pmin = 1.0E-11; //W, -80 dBm
-		circuit.setLaunchPowerLinear(Pmin);
-		double SNRmin = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
-		
-		if(SNRmin - SNRth > 0.0) {
-			return Pmin;
-		}
-		
 		double Pmax = computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
-		circuit.setLaunchPowerLinear(Pmax);
-		double SNRmax = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
 		
-		if (SNRmax - SNRth < 0.0) {
-			return Pmax;
+		while (true) {
+			
+			circuit.setLaunchPowerLinear(Pmin);
+			double SNRmin = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+			
+			if(SNRmin - SNRth > 0.0) {
+				return Pmin;
+			}
+			
+			circuit.setLaunchPowerLinear(Pmax);
+			double SNRmax = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+			
+			if (SNRmax - SNRth < 0.0) {
+				return Pmax;
+			}
+			
+			// linear interpolation
+			Pcurrent = Pmin + (Pmax - Pmin) * ((SNRth - SNRmin) / (SNRmax - SNRmin));
+			
+			circuit.setLaunchPowerLinear(Pcurrent);
+			SNRcurrent = computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
+			
+			SNRdif = SNRcurrent - SNRth;
+			
+			if (SNRdif < error && SNRdif > 0.0) {
+				break;
+				
+			} else {
+				if(SNRdif > 0.0) {
+					Pmax = Pcurrent;
+					
+				}else {
+					Pmin = Pcurrent;
+				}
+			}
 		}
 		
-		// linear interpolation
-		double Pchosen = Pmin + (Pmax - Pmin) * ((SNRth - SNRmin) / (SNRmax - SNRmin));
-		
-		return Pchosen;
+		return Pcurrent;
 	}
 	
 	

@@ -97,7 +97,7 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 		    		    lauchPower = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, mod, band);
 	            		
 	    			}else if(algo.equals("EnPA")) { // EnPA with linear interpolation
-	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, band);
+	            		lauchPower = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, band, factorMult);
 	            		
 	    			}else if(algo.equals("CPA")) { // CPA
 	    				lauchPower = cp.getMesh().getPhysicalLayer().getPowerLinear();
@@ -216,6 +216,9 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     	
     	double Pcurrent = 0.0;
     	double Pmin = 1.0E-11; //W, -80 dBm
+    	
+    	Pmin = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, sa, 0.0);
+    	
     	double SNRth = mod.getSNRthreshold();
     	
     	double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, mod, sa);
