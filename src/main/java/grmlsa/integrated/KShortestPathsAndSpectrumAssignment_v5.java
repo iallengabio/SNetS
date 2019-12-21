@@ -18,6 +18,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.Link;
 import network.Pair;
+import network.PhysicalLayer;
 import request.RequestForConnection;
 import simulationControl.Util;
 import util.IntersectionFreeSpectrum;
@@ -121,7 +122,7 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 		            	lauchPower = cp.getMesh().getPhysicalLayer().computePowerByBinarySearch2(circuit, route, mod, band, factorMult);
 		            	
 	    			}else if(algo.equals("APAb3")) { // APA binary search 3
-		            	lauchPower = computePowerByBinarySearch3(circuit, route, mod, band, factorMult, cp);
+		            	lauchPower = PowerAssignmentByBinarySearch(circuit, route, mod, band, factorMult, cp);
 	    			}
             		
             		checkBand = band;
@@ -217,7 +218,8 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     	double Pcurrent = 0.0;
     	double Pmin = 1.0E-11; //W, -80 dBm
     	
-    	Pmin = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, sa, 0.0);
+    	// To apply the authors suggestion to initialize the minimum power to the value of the power generating the threshold OSNR
+    	//Pmin = cp.getMesh().getPhysicalLayer().computePowerByLinearInterpolation(circuit, route, mod, sa, 0.0);
     	
     	double SNRth = mod.getSNRthreshold();
     	
@@ -622,7 +624,7 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     	}
     }
     
-    public double computePowerByBinarySearch3(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double margin, ControlPlane cp){
+    public double PowerAssignmentByBinarySearch(Circuit circuit, Route route, Modulation modulation, int spectrumAssigned[], double margin, ControlPlane cp){
     	
     	if(powerDatabase == null) {
     		powerDatabase = new HashMap<Route, HashMap<Double, HashMap<Modulation, Double>>>();
@@ -651,10 +653,12 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     	}
     	
 		double SNRth = modulation.getSNRthresholdLinear();
-		double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
-		
 		SNRth = SNRth + margin;
 		
+		//double marginLinear = PhysicalLayer.ratioOfDB(margin);
+		//SNRth = SNRth + marginLinear;
+		
+		double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
 		circuit.setLaunchPowerLinear(Pmax);
 		SNRcurrent = cp.getMesh().getPhysicalLayer().computeSNRSegment(circuit, route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned, null, false);
 		
