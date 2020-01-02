@@ -638,6 +638,12 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
 		
 		int attemptsCounter = 0; // Count attempts to reach acceptable QoTO
 		
+		double SNRth = modulation.getSNRthresholdLinear();
+		SNRth = SNRth + margin;
+		
+		//double marginLinear = PhysicalLayer.ratioOfDB(margin);
+		//SNRth = SNRth + marginLinear;
+		
 		boolean toSaveDB = false;
     	boolean isPowerDB = false;
 		HashMap<Double, HashMap<Modulation, Double>> trsModsPower = powerDatabase.get(route);
@@ -651,12 +657,6 @@ public class KShortestPathsAndSpectrumAssignment_v5 implements IntegratedRMLSAAl
     			}
     		}
     	}
-    	
-		double SNRth = modulation.getSNRthresholdLinear();
-		SNRth = SNRth + margin;
-		
-		//double marginLinear = PhysicalLayer.ratioOfDB(margin);
-		//SNRth = SNRth + marginLinear;
 		
 		double Pmax = cp.getMesh().getPhysicalLayer().computeMaximumPower2(circuit.getRequiredBandwidth(), route, 0, route.getNodeList().size() - 1, modulation, spectrumAssigned);
 		circuit.setLaunchPowerLinear(Pmax);
