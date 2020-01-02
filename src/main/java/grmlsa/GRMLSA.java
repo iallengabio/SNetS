@@ -113,6 +113,7 @@ public class GRMLSA implements Serializable {
 	private static final String MODULATION_BY_QOT_GBUN = "modulationbyqotandgbun";
 	private static final String MODULATION_BY_QOT_AGBA = "modulationbyqotandagba";
 	private static final String MODULATION_BY_QOT_DEEP_LEARNING = "modulationbyqotanddeeplearning";
+	private static final String MODULATION_BY_QOT_DEEP_LEARNING_V2 = "modulationbyqotanddeeplearningv2";
 	
     // End of constants
 
@@ -315,6 +316,8 @@ public class GRMLSA implements Serializable {
 	    		return new ModulationAndGuardBandSelectionByAGBA();
 	    	case MODULATION_BY_QOT_DEEP_LEARNING:
 	    		return new ModulationAndGuardBandSelectionByDeepLearning();
+	    	case MODULATION_BY_QOT_DEEP_LEARNING_V2:
+	    		return new ModulationAndGuardBandSelectionByDeepLearning_v2();
 	    	default:
 	    		return null;
     	}
