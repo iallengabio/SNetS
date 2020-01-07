@@ -15,6 +15,7 @@ import network.Circuit;
 import network.ControlPlane;
 import network.Link;
 import network.Mesh;
+import util.IntersectionFreeSpectrum;
 
 public class ModulationAndGuardBandSelectionByDeepLearning_v2 implements ModulationSelectionAlgorithmInterface {
 	
@@ -31,7 +32,7 @@ public class ModulationAndGuardBandSelectionByDeepLearning_v2 implements Modulat
 		
 		// Modulation and spectrum selected
 		Modulation chosenMod = null;
-		int chosenBand[] = null;
+		int chosenBand[] = {999999, 999999}; // Value never reached
 		
 		// Modulation which at least allocates spectrum, used to avoid error in metrics
 		Modulation alternativeMod = null;
@@ -99,17 +100,17 @@ public class ModulationAndGuardBandSelectionByDeepLearning_v2 implements Modulat
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
 			}
-            
 			circuit.setModulation(modClone);
-			int numberOfSlots = modClone.requiredSlots(circuit.getRequiredBandwidth());
 			
-			if(spectrumAssignment.assignSpectrum(numberOfSlots, circuit, cp)){
-				int band[] = circuit.getSpectrumAssigned();
-				
-				if(band != null){
-					alternativeMod = modClone; // The last modulation that was able to allocate spectrum
-					alternativeBand = band;
-				}
+			int numberOfSlots = modClone.requiredSlots(circuit.getRequiredBandwidth());
+			List<int[]> merge = IntersectionFreeSpectrum.merge(route, modClone.getGuardBand());
+			
+			int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
+			circuit.setSpectrumAssigned(band);
+			
+			if (band != null && band[0] < chosenBand[0]) {
+				alternativeMod = modClone; // The last modulation that was able to allocate spectrum
+				alternativeBand = band;
 				
 				if(cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, route, modClone, band, null, false)){
 					chosenMod = modClone; // Save the modulation that has admissible QoT

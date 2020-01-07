@@ -61,7 +61,7 @@ public class CompleteSharing implements IntegratedRMLSAAlgorithmInterface {
 		}
         
         requisicoes_total++;
-        System.out.println("Requisicoes total: " + requisicoes_total);
+        //System.out.println("Requisicoes total: " + requisicoes_total);
 
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
         Route chosenRoute = null;
