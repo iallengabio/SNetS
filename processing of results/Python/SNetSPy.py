@@ -3,7 +3,9 @@
 import pandas as pd #for csv manipulation
 import glob #for filtering
 import scipy.stats as st #for statistics
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import numpy as np
 
 #arquivos
@@ -21,7 +23,6 @@ MRRC = 'Rate of requests by circuit'
 MTCE = 'Total consumed energy (Joule)'
 MAPC = 'Average power consumption (Watt)'
 MTXU = 'Tx Utilization'
-MRRC = 'Rate of requests by circuit'
 
 #aux
 markers = ["o","v","^","s","x","P","D","_","*","1","2","3","4"]
@@ -31,6 +32,7 @@ linestyles = ['--', '-.', ':','-', '-', '-.', ':','-','--','-.', ':','-', '--']
 
 
 def minGains(dfs,ims,inv=False):
+    dfs = [d.filter(like='mean',axis=1) for d in dfs]
     mySol = dfs[ims]
     del dfs[ims]
     if inv:
@@ -265,78 +267,6 @@ def extractDFSProfitR(path,alpha,loadP,cws,vbtMult, n):
         dfs[i]['errors'] = errors[i]
     return dfs
 
-#------------------------------------------------------------------------------//-------------------------------------------------------------------------------
-
-
-YLegends = ['Circuit Blocking','Bandwidth Blocking','Consumed Energy (J)','Power Consumption (W)','Energy efficiency (b/J)','Weighted Energy efficiency (b/J)','Simplified Profit ($)','Average Transponder Utilization','Request-Circuit Ratio','Deployed BVTs']
-ArqNames = ['CB.png','BB.png','CE.png','PCE.png','EE.png','WEE.png','PROFIT.png','TXU.png','RRC.png','MBVTU.png']
-XLegend = 'Network load (Erlangs)'
-
-def plotLines(path,loads=[],sol=[], al=0.05):
-    n = path.split('/')
-    n = n[len(n)-1]
-    n = n + '_Line_'
-    lDfs = [extractDFS(path,ABP,MBP,al),extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,al), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
-    lYl = YLegends
-    lAn = ArqNames
-    xl = XLegend
-    if loads==[]:
-        loads = lDfs[0][0]['loads'].tolist()
-    if sol==[]:
-        sol = range(len(lDfs[0]))
-
-    for i in range(len(lDfs)):
-        dfs = lDfs[i]
-        yl = lYl[i]
-        a = path + '/' + n + lAn[i]
-        auxPlotLine(dfs,loads,sol,xl,yl,show=True,arq=a)
-
-def plotLines2(path1,path2,loads1=[],loads2=[],sol=[],t1="",t2="", al=0.05):
-    n = path1.split('/')
-    n = n[len(n)-1]
-    n = n + '_Line_'
-    lDfs1 = [extractDFS(path1,ABP,MBP,al),extractDFS(path1,ABBP,MBBP,al), extractDFS(path1,ACE,MTCE,al), extractDFS(path1,ACE,MAPC,al), extractDFSBCR(path1,al), extractDFSWEE(path1,al), extractDFSProfit(path1,al), extractDFS(path1,ATRRU,MTXU,al), extractDFS(path1,AGS,MRRC,al), extractDFSMBVTU(path1,al)]
-    lDfs2 = [extractDFS(path2,ABP,MBP,al),extractDFS(path2,ABBP,MBBP,al), extractDFS(path2,ACE,MTCE,al), extractDFS(path2,ACE,MAPC,al), extractDFSBCR(path2,al), extractDFSWEE(path2,al), extractDFSProfit(path2,al), extractDFS(path2,ATRRU,MTXU,al), extractDFS(path2,AGS,MRRC,al), extractDFSMBVTU(path2,al)]
-    lYl = YLegends
-    lAn = ArqNames
-    xl = XLegend
-    if loads1==[]:
-        loads1 = lDfs1[0][0]['loads'].tolist()
-    if loads2==[]:
-        loads2 = lDfs2[0][0]['loads'].tolist()
-    if sol==[]:
-        sol = range(len(lDfs1[0]))
-
-    for i in range(len(lDfs1)):
-        dfs1 = lDfs1[i]
-        dfs2 = lDfs2[i]
-        yl = lYl[i]
-        a = path1 + '/' + n + lAn[i]
-        SPlotLine2(dfs1,dfs2,loads1,loads2,sol,xl,xl,yl,yl,t1,t2,show=False,arq=a)
-
-
-def plotBars(path,loads=[],sol=[], al=0.05):
-    n = path.split('/')
-    n = n[len(n)-1]
-    n = n + '_Bar_'
-    lDfs = [extractDFS(path,ABP,MBP,al),extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,al), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
-    lYl = YLegends
-    lAn = ArqNames
-    xl = XLegend
-    lLp = ['upper left','upper right','lower right','upper left','upper left','upper left','upper left','upper left','upper left','upper left','upper left']
-
-    if loads==[]:
-        loads = lDfs[0][0]['loads'].tolist()
-    if sol==[]:
-        sol = range(len(lDfs[0]))
-
-    for i in range(len(lDfs)):
-        dfs = lDfs[i]
-        yl = lYl[i]
-        lp = lLp[i]
-        a = path + '/' + n + lAn[i]
-        auxPlotBars(dfs,loads,sol,xl,yl,True,a,lp)
-
 def computeGains(path, ims, save = ""):
     #metricas comuns negativas
     arqs = [ABBP,ACE,ACE,ATRRU]
@@ -359,150 +289,307 @@ def computeGains(path, ims, save = ""):
     df['Max BVT Utilization'] = minGains(extractDFSMBVTU(path,0.05),ims)
     if save!="":
         df.to_csv(path+'/'+save+'.csv')
-    return df;
-#------------------------------------------ // -----------------------------------------------------------------------------------
+    return df
 
-def auxPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
-    fs = 30
-    width = 0.7
-    indmult = 2
-    ind = np.arange(len(dfs[0]['loads']))
-    plt.figure(figsize=(12,6))
+def computeMaxBVTs(path):
+    bbp = glob.glob(path + '/*_TransmittersReceiversRegeneratorsUtilization.csv')
+    bbp = pd.read_csv(bbp[0])
+    mtx = bbp[bbp.Metrics=='Max Tx Utilization Per Node']
+    mrx = bbp[bbp.Metrics=='Max Rx Utilization Per Node']
+    nodes = mtx['Node'].tolist()
+    mtx = mtx.filter(like='rep',axis=1)
+    mrx = mrx.filter(like='rep',axis=1)
+    mtx = mtx.max(axis=1) + 2
+    mrx = mrx.max(axis=1) + 2
+    mtx = mtx.tolist()
+    mrx = mrx.tolist()
+    mtx = [str(int(d)) for d in mtx]
+    mrx = [str(int(d)) for d in mrx]    
+    for i in range(len(nodes)):
+        print('{"name":"'+nodes[i]+'","transmitters":'+mtx[i]+',"receivers":'+mrx[i]+',"regenerators":0},')
+
+#------------------------------------------------------------------------------//-------------------------------------------------------------------------------
+
+YLegends = ['Circuit Blocking','Bandwidth Blocking','Consumed Energy (J)','Power Consumption (W)','Energy efficiency (b/J)','Weighted Energy efficiency (b/J)','Simplified Profit ($)','Average Transponder Utilization','Request-Circuit Ratio','Deployed BVTs']
+ArqNames = ['CB.png','BB.png','CE.png','PCE.png','EE.png','WEE.png','PROFIT.png','TXU.png','RRC.png','MBVTU.png']
+XLegend = 'Network load (Erlangs)'
+
+def plotLineAx(ax,dfs, sol):
     for i in range(len(dfs)):
-        plt.bar(ind+width*i, dfs[i]['mean'], width*1, yerr=dfs[i]['errors'], label=sol[i])        
-
-    plt.ylabel(yl, fontsize=fs)
-    plt.xlabel(xl, fontsize=fs)
-    plt.xticks(ind*indmult+width*2, loads, fontsize=fs)
-    plt.yticks(fontsize=fs)
-    plt.grid(axis='y')
-    if len(sol) < nc:
-        nc = len(sol)
-    plt.legend(loc=lp, ncol = nc, fontsize=fs)
-    plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(0,-0.18))
-    if arq != "":
-        plt.savefig(arq, dpi=150,bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.close()
-
-def auxPlotLine(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
-    fs = 27
-    plt.figure(figsize=(10,7))
-    for i in range(len(dfs)):
-        x = dfs[i]['loads'];
+        x = np.arange(len(dfs[i]['loads']))
         y = dfs[i]['mean']
         e = dfs[i]['errors']
-        plt.errorbar(x, y, xerr=0, yerr=e, linestyle=linestyles[i], marker=markers[i], label=sol[i])
-        plt.xticks(x, loads)
+        ax.errorbar(x, y, xerr=0, yerr=e, linestyle=linestyles[i], marker=markers[i], label=sol[i])
 
-    plt.xlabel(xl,fontsize=fs)
-    plt.ylabel(yl,fontsize=fs)
-    plt.xticks(fontsize=fs)
-    plt.yticks(fontsize=fs)
-    plt.grid(axis='y')
+def decorateLineAx(ax,dfs,loads,xLegend,yLegend,title):
+    x = np.arange(len(dfs[0]['loads']))
+    ax.set_xticks(x, minor=False)
+    ax.set_xticklabels(loads, fontdict=None, minor=False)
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(-10, 10))
+    ax.set_xlabel(xLegend)
+    ax.set_ylabel(yLegend)
+    ax.grid(axis='y')
+    ax.set_title(title)
+    
+    
+def plotBarAx(ax, dfs, sol, barWidth):
+    qs = len(dfs)
+    qsaux = (qs-1)/2
+    for i in range(len(dfs)):
+        x = np.arange(len(dfs[i]['loads']))
+        y = dfs[i]['mean']
+        e = dfs[i]['errors']
+        ax.bar(x+(i-qsaux)*barWidth, y, barWidth, yerr=e, label=sol[i])
+        
+def decorateBarAx(ax, dfs, loads, xLegend, yLegend, title):
+    x = np.arange(len(dfs[0]['loads']))
+    ax.set_xticks(x, minor=False)
+    ax.set_xticklabels(loads, fontdict=None, minor=False)    
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(-10, 10))
+    ax.set_xlabel(xLegend)
+    ax.set_ylabel(yLegend)
+    ax.grid(axis='y')
+    ax.set_title(title)
+    
+def SPlotLine2h(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=True,arq="",nc = 5):
+    fs = 14
+    font = {'family':'serif','size':fs}    
+    matplotlib.rc('font', **font)
+    matplotlib.rcParams['figure.figsize'] = (12, 6.5)
+    
+    fig, axs = plt.subplots(nrows=1, ncols=2)
+    
+    ax = axs.flat[0]    
+    plotLineAx(ax, dfs1,sol)
+    decorateLineAx(ax, dfs1, loads1, xl1, yl1, t1)
+    
+    ax = axs.flat[1]
+    plotLineAx(ax, dfs2,sol)
+    decorateLineAx(ax, dfs2, loads2, xl2, yl2, t2)
+    
+
     if len(sol) < nc:
         nc = len(sol)
-    #plt.yscale('log')
-    plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(0.5,-0.43))
+        
+    fig.subplots_adjust(bottom=0.16)
+    fig.legend(sol, loc='lower center', ncol = nc, fontsize=fs)
+    
     if arq != "":
-        plt.savefig(arq, dpi=150,bbox_inches='tight')
+        fig.savefig(arq, dpi=150)
+    if show:
+        fig.show()
+    plt.close()
+
+def SPlotLine2v(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=True,arq="",nc = 5):
+    fs = 14
+    font = {'family':'serif','size':fs}    
+    matplotlib.rc('font', **font)
+    matplotlib.rcParams['figure.figsize'] = (6.5, 8)
+    
+    fig, axs = plt.subplots(nrows=2, ncols=1, constrained_layout=True)    
+       
+    ax = axs.flat[0]    
+    plotLineAx(ax, dfs1,sol)
+    decorateLineAx(ax, dfs1, loads1, xl1, yl1, t1)
+    
+    ax = axs.flat[1]
+    plotLineAx(ax, dfs2,sol)
+    decorateLineAx(ax, dfs2, loads2, xl2, yl2, t2)
+    
+    if len(sol) < nc:
+        nc = len(sol)
+        
+    ax.legend(loc='lower center', ncol = nc, fontsize=fs,bbox_to_anchor=(0.45,-0.38))    
+    
+    if arq != "":
+        fig.savefig(arq, dpi=150,bbox_inches='tight')
+    if show:
+        fig.show()
+    plt.close()
+    
+def SPlotBar2v(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=True,arq="",nc = 5):
+    fs = 14
+    font = {'family':'serif',
+            'size':fs}
+    
+    matplotlib.rc('font', **font)
+    matplotlib.rcParams['figure.figsize'] = (6.5, 8)
+    
+    fig, axs = plt.subplots(nrows=2, ncols=1, constrained_layout=True)    
+    
+    barWidth = 0.3
+    
+    ax = axs.flat[0]    
+    plotBarAx(ax, dfs1, sol,barWidth)
+    decorateBarAx(ax, dfs1, loads1, xl1, yl1, t1)
+    
+    ax = axs.flat[1]
+    plotBarAx(ax, dfs2,sol, barWidth)
+    decorateBarAx(ax, dfs2, loads2, xl2, yl2, t2)
+    
+    if len(sol) < nc:
+        nc = len(sol)
+        
+    ax.legend(loc='lower center', ncol = nc, fontsize=fs,bbox_to_anchor=(0.45,-0.38))    
+    
+    if arq != "":
+        fig.savefig(arq, dpi=150,bbox_inches='tight')
+    if show:
+        fig.show()
+    plt.close()
+
+def SPlotBar2h(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=True,arq="",nc = 5):
+    fs = 14
+    font = {'family':'serif','size':fs}
+    matplotlib.rc('font', **font)
+    matplotlib.rcParams['figure.figsize'] = (12, 6.5)
+    barWidth = 0.3
+    
+    fig, axs = plt.subplots(nrows=1, ncols=2)
+    
+    ax = axs.flat[0]    
+    plotBarAx(ax, dfs1,sol, barWidth)
+    decorateBarAx(ax, dfs1, loads1, xl1, yl1, t1)
+    
+    ax = axs.flat[1]
+    plotBarAx(ax, dfs2,sol, barWidth)
+    decorateBarAx(ax, dfs2, loads2, xl2, yl2, t2)
+    
+    if len(sol) < nc:
+        nc = len(sol)
+        
+    fig.subplots_adjust(bottom=0.16)
+    fig.legend(sol, loc='lower center', ncol = nc, fontsize=fs)
+    
+    if arq != "":
+        fig.savefig(arq, dpi=150)
+    if show:
+        fig.show()
+    plt.close()
+
+def SPlotBars(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
+    fs = 14
+    font = {'family':'serif','size':fs}    
+    matplotlib.rc('font', **font)
+    matplotlib.rcParams['figure.figsize'] = (7, 6.5)
+    barWidth = 0.3
+    
+    fig, axs = plt.subplots(nrows=1, ncols=1)
+    
+    ax = axs.flat[0]    
+    plotBarAx(ax, dfs,sol,barWidth)
+    decorateBarAx(ax, dfs, loads, xl, yl, '')
+    
+    if len(sol) < nc:
+        nc = len(sol)
+    fig.subplots_adjust(bottom=0.16)
+    fig.legend(sol, loc='lower center', ncol = nc, fontsize=fs)
+    
+    if arq != "":
+        fig.savefig(arq, dpi=150,bbox_inches='tight')
     if show:
         plt.show()
     plt.close()
 
-def SPlotLine2(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=True,arq="",nc = 5):
-    fs = 27
-    plt.figure(figsize=(20,7))
-    lp = 'lower center'
-
-    plt.subplot(1,2,1)
-    for i in range(len(dfs1)):
-        x = dfs1[i]['loads'];
-        y = dfs1[i]['mean']
-        e = dfs1[i]['errors']
-        plt.errorbar(x, y, xerr=0, yerr=e, linestyle=linestyles[i], marker=markers[i], label=sol[i])
-        plt.xticks(x, loads1)
-
-    plt.ticklabel_format(axis='y', style='sci', scilimits=(-2, 3))
-    plt.xlabel(xl1,fontsize=fs)
-    plt.ylabel(yl1,fontsize=fs)
-    plt.xticks(fontsize=fs)
-    plt.yticks(fontsize=fs)
-    plt.grid(axis='y')
-    plt.title(t1, fontsize=fs)
-
-    plt.subplot(1,2,2)
-    for i in range(len(dfs2)):
-        x = dfs2[i]['loads'];
-        y = dfs2[i]['mean']
-        e = dfs2[i]['errors']
-        plt.errorbar(x, y, xerr=0, yerr=e, linestyle=linestyles[i], marker=markers[i], label=sol[i])
-        plt.xticks(x, loads2)
-
-    plt.ticklabel_format(axis='y', style='sci', scilimits=(-2, 3),fontsize=fs)
-    plt.xlabel(xl2,fontsize=fs)
-    plt.ylabel(yl2,fontsize=fs)
-    plt.xticks(fontsize=fs)
-    plt.yticks(fontsize=fs)
-    plt.grid(axis='y')
-    plt.title(t2, fontsize=fs)
-
-
+def SPlotLine(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center', nc = 5):
+    fs = 14
+    font = {'family':'serif','size':fs}    
+    matplotlib.rc('font', **font)
+    matplotlib.rcParams['figure.figsize'] = (7, 6.5)
+    
+    fig, axs = plt.subplots(nrows=1, ncols=1)
+    
+    ax = axs.flat[0]    
+    plotLineAx(ax, dfs,sol)
+    decorateLineAx(ax, dfs, loads, xl, yl, '')
+    
     if len(sol) < nc:
         nc = len(sol)
-    #plt.yscale('log')
-    plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(-0.19,-0.40))
+    fig.subplots_adjust(bottom=0.16)
+    fig.legend(sol, loc='lower center', ncol = nc, fontsize=fs)
+    
     if arq != "":
-        plt.savefig(arq, dpi=150,bbox_inches='tight')
+        fig.savefig(arq, dpi=150,bbox_inches='tight')
     if show:
         plt.show()
     plt.close()
 
-def SPlotBar2(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=True,arq="",nc = 5):
-    fs = 27
-    plt.figure(figsize=(20,7))
-    lp = 'lower center'
+def plotLines(path,loads=[],sol=[], al=0.05):
+    n = path.split('/')
+    n = n[len(n)-1]
+    n = n + '_Line_'
+    lDfs = [extractDFS(path,ABP,MBP,al),extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,al), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
+    lYl = YLegends
+    lAn = ArqNames
+    xl = XLegend
+    if loads==[]:
+        loads = lDfs[0][0]['loads'].tolist()
+    if sol==[]:
+        sol = range(len(lDfs[0]))
 
-    plt.subplot(1,2,1)
-    for i in range(len(dfs1)):
-        x = dfs1[i]['loads'];
-        y = dfs1[i]['mean']
-        e = dfs1[i]['errors']
-        plt.bar(x, y, 0.7, yerr=e, label=sol[i])
+    for i in range(len(lDfs)):
+        dfs = lDfs[i]
+        yl = lYl[i]
+        a = path + '/' + n + lAn[i]
+        SPlotLine(dfs,loads,sol,xl,yl,show=True,arq=a)
 
-    plt.ticklabel_format(axis='y', style='sci', scilimits=(-2, 3),fontsize=fs)
-    plt.ylabel(yl1, fontsize=fs)
-    plt.xlabel(xl1, fontsize=fs)
-    plt.xticks(dfs1[0]['loads'], loads1, fontsize=fs)
-    plt.yticks(fontsize=fs)
-    plt.grid(axis='y')
-    plt.title(t1, fontsize=fs)
+def plotLines2(path1,path2,loads1=[],loads2=[],sol=[],t1="",t2="", al=0.05):
+    n = path1.split('/')
+    n = n[len(n)-1]
+    n = n + '_Line_'
+    lDfs1 = [extractDFS(path1,ABP,MBP,al),extractDFS(path1,ABBP,MBBP,al), extractDFS(path1,ACE,MTCE,al), extractDFS(path1,ACE,MAPC,al), extractDFSBCR(path1,al), extractDFSWEE(path1,al), extractDFSProfit(path1,al), extractDFS(path1,ATRRU,MTXU,al), extractDFS(path1,AGS,MRRC,al), extractDFSMBVTU(path1,al)]
+    lDfs2 = [extractDFS(path2,ABP,MBP,al),extractDFS(path2,ABBP,MBBP,al), extractDFS(path2,ACE,MTCE,al), extractDFS(path2,ACE,MAPC,al), extractDFSBCR(path2,al), extractDFSWEE(path2,al), extractDFSProfit(path2,al), extractDFS(path2,ATRRU,MTXU,al), extractDFS(path2,AGS,MRRC,al), extractDFSMBVTU(path2,al)]
+    lYl = YLegends
+    lAn = ArqNames
+    xl = XLegend
+    if loads1==[]:
+        loads1 = lDfs1[0][0]['loads'].tolist()
+    if loads2==[]:
+        loads2 = lDfs2[0][0]['loads'].tolist()
+    if sol==[]:
+        sol = range(len(lDfs1[0]))
 
-    plt.subplot(1,2,2)
-    for i in range(len(dfs2)):
-        x = dfs2[i]['loads'];
-        y = dfs2[i]['mean']
-        e = dfs2[i]['errors']
-        plt.bar(x, y, 0.7, yerr=e, label=sol[i])
-
-    plt.ticklabel_format(axis='y', style='sci', scilimits=(-2, 3),fontsize=fs)
-    plt.ylabel(yl2, fontsize=fs)
-    plt.xlabel(xl2, fontsize=fs)
-    plt.xticks(dfs2[0]['loads'], loads2, fontsize=fs)
-    plt.yticks(fontsize=fs)
-    plt.grid(axis='y')
-    plt.title(t2, fontsize=fs)
+    for i in range(len(lDfs1)):
+        dfs1 = lDfs1[i]
+        dfs2 = lDfs2[i]
+        yl = lYl[i]
+        a = path1 + '/' + n + lAn[i]
+        if(i==1):
+            show = True
+        else:
+            show = False
+        SPlotLine2v(dfs1,dfs2,loads1,loads2,sol,xl,xl,yl,yl,t1,t2,show,arq=a)
 
 
-    if len(sol) < nc:
-        nc = len(sol)
-    #plt.yscale('log')
-    #plt.legend(loc=lp, ncol = nc, fontsize=fs,bbox_to_anchor=(-0.19,-0.40))
-    if arq != "":
-        plt.savefig(arq, dpi=150,bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.close()
+def plotBars(path,loads=[],sol=[], al=0.05):
+    n = path.split('/')
+    n = n[len(n)-1]
+    n = n + '_Bar_'
+    lDfs = [extractDFS(path,ABP,MBP,al),extractDFS(path,ABBP,MBBP,al), extractDFS(path,ACE,MTCE,al), extractDFS(path,ACE,MAPC,al), extractDFSBCR(path,al), extractDFSWEE(path,al), extractDFSProfit(path,al), extractDFS(path,ATRRU,MTXU,al), extractDFS(path,AGS,MRRC,al), extractDFSMBVTU(path,al)]
+    lYl = YLegends
+    lAn = ArqNames
+    xl = XLegend
+    lLp = ['upper left','upper right','lower right','upper left','upper left','upper left','upper left','upper left','upper left','upper left','upper left']
+
+    if loads==[]:
+        loads = lDfs[0][0]['loads'].tolist()
+    if sol==[]:
+        sol = range(len(lDfs[0]))
+
+    for i in range(len(lDfs)):
+        dfs = lDfs[i]
+        yl = lYl[i]
+        lp = lLp[i]
+        a = path + '/' + n + lAn[i]
+        SPlotBars(dfs,loads,sol,xl,yl,True,a,lp)
+
+
+#------------------------------------------ // -----------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------------------------------------------
+   
+
+
+
+
+
