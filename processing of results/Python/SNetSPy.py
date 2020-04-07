@@ -25,8 +25,10 @@ MAPC = 'Average power consumption (Watt)'
 MTXU = 'Tx Utilization'
 
 #aux
-markers = ["o","v","^","s","x","P","D","_","*","1","2","3","4"]
-linestyles = ['--', '-.', ':','-', '-', '-.', ':','-','--','-.', ':','-', '--']
+#markers = ["o","v","^","s","x","P","D","_","*","1","2","3","4"]
+markers = ["o","s","x","o","s","x","o","s","x"]
+linestyles = ['--', ':', '-','--', ':', '-','--', ':', '-']
+#linestyles = ['--', '-.', ':','-', '-', '-.', ':','-','--','-.', ':','-', '--']
 #markers = ["2","3","4","s","P","x","D","_","*","1","o","s","x"]
 #linestyles = ['--', ':', '--', ':','--', ':', '--', ':','--',':','-', '-','-']
 
@@ -371,7 +373,7 @@ def SPlotLine2h(dfs1,dfs2,loads1,loads2,sol,xl1,xl2,yl1,yl2,t1="",t2="",show=Tru
     if len(sol) < nc:
         nc = len(sol)
         
-    fig.subplots_adjust(bottom=0.16)
+    fig.subplots_adjust(bottom=0.3)
     fig.legend(sol, loc='lower center', ncol = nc, fontsize=fs)
     
     if arq != "":
@@ -497,7 +499,7 @@ def SPlotLine(dfs, loads, sol, xl="", yl="",show=True,arq="", lp = 'lower center
     matplotlib.rc('font', **font)
     matplotlib.rcParams['figure.figsize'] = (7, 6.5)
     
-    fig, axs = plt.subplots(nrows=1, ncols=1)
+    fig, axs = plt.subplots(nrows=1, ncols=1, constrained_layout=True)
     
     ax = axs.flat[0]    
     plotLineAx(ax, dfs,sol)
@@ -539,6 +541,7 @@ def plotLines2(path1,path2,loads1=[],loads2=[],sol=[],t1="",t2="", al=0.05):
     n = n + '_Line_'
     lDfs1 = [extractDFS(path1,ABP,MBP,al),extractDFS(path1,ABBP,MBBP,al), extractDFS(path1,ACE,MTCE,al), extractDFS(path1,ACE,MAPC,al), extractDFSBCR(path1,al), extractDFSWEE(path1,al), extractDFSProfit(path1,al), extractDFS(path1,ATRRU,MTXU,al), extractDFS(path1,AGS,MRRC,al), extractDFSMBVTU(path1,al)]
     lDfs2 = [extractDFS(path2,ABP,MBP,al),extractDFS(path2,ABBP,MBBP,al), extractDFS(path2,ACE,MTCE,al), extractDFS(path2,ACE,MAPC,al), extractDFSBCR(path2,al), extractDFSWEE(path2,al), extractDFSProfit(path2,al), extractDFS(path2,ATRRU,MTXU,al), extractDFS(path2,AGS,MRRC,al), extractDFSMBVTU(path2,al)]
+    #print(extractDFS(path1,ABP,MBP,al))
     lYl = YLegends
     lAn = ArqNames
     xl = XLegend
@@ -558,7 +561,7 @@ def plotLines2(path1,path2,loads1=[],loads2=[],sol=[],t1="",t2="", al=0.05):
             show = True
         else:
             show = False
-        SPlotLine2v(dfs1,dfs2,loads1,loads2,sol,xl,xl,yl,yl,t1,t2,show,arq=a)
+        SPlotLine2h(dfs1,dfs2,loads1,loads2,sol,xl,xl,yl,yl,t1,t2,show,arq=a,nc=3)
 
 
 def plotBars(path,loads=[],sol=[], al=0.05):
