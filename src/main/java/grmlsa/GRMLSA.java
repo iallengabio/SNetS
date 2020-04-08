@@ -50,13 +50,14 @@ public class GRMLSA implements Serializable {
     public static final int RSA_INTEGRATED = 1;
 
     // Constants for indication of RMLSA algorithms
-    // Optical traffic aggregation
-    private static final String GROOMING_OPT_NOTRAFFICGROOMING = "notrafficgrooming";
-    private static final String GROOMING_OPT_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
-    private static final String GROOMING_OPT_MGFCCF = "mgfccf";//equivalent to mtgsr
-    private static final String GROOMING_OPT_MTGSR = "mtgsr";
-    private static final String GROOMING_OPT_MGFCCFSRNP = "mgfccfsrnp";//equivalent to mtgsr_srnp
-    private static final String GROOMING_OPT_MTGSRSRNP = "mtgsr_srnp";
+    // traffic grooming
+    private static final String GROOMING_NOTRAFFICGROOMING = "notrafficgrooming";
+    private static final String GROOMING_SIMPLETRAFFICGROOMING = "simpletrafficgrooming";
+    private static final String GROOMING_MGFCCF = "mgfccf";//equivalent to mtgsr
+    private static final String GROOMING_MTGSR = "mtgsr";
+    private static final String GROOMING_MGFCCFSRNP = "mgfccfsrnp";//equivalent to mtgsr_srnp
+    private static final String GROOMING_MTGSRSRNP = "mtgsr_srnp";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMING = "auxiliary_graph";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -150,18 +151,20 @@ public class GRMLSA implements Serializable {
      */
     public TrafficGroomingAlgorithmInterface instantiateGrooming(){
         switch (this.grooming) {
-            case GROOMING_OPT_NOTRAFFICGROOMING:
+            case GROOMING_NOTRAFFICGROOMING:
                 return new NoTrafficGrooming();
-            case GROOMING_OPT_SIMPLETRAFFICGROOMING:
+            case GROOMING_SIMPLETRAFFICGROOMING:
                 return new SimpleTrafficGrooming();
-            case GROOMING_OPT_MGFCCF:
-            case GROOMING_OPT_MTGSR: //equivalent
+            case GROOMING_MGFCCF:
+            case GROOMING_MTGSR: //equivalent
                 return new MTGSR();
-            case GROOMING_OPT_MGFCCFSRNP:
-            case GROOMING_OPT_MTGSRSRNP: //equivalent
+            case GROOMING_MGFCCFSRNP:
+            case GROOMING_MTGSRSRNP: //equivalent
                 return new MTGSR_SRNP();
+            case GROOMING_AUXILIARYGRAPHGROOMING:
+                return new AuxiliaryGraphGrooming();
             default:
-                return null;
+                return new NoTrafficGrooming();
         }
     }
 
