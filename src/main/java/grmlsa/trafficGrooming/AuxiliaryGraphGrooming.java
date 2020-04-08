@@ -1,11 +1,13 @@
 package grmlsa.trafficGrooming;
 
+import grmlsa.trafficGrooming.util.AuxiliaryGraph;
+import grmlsa.trafficGrooming.util.MicroRegion;
 import network.Circuit;
 import network.ControlPlane;
 import network.Node;
 import network.Pair;
 import request.RequestForConnection;
-import util.Grooming;
+import grmlsa.trafficGrooming.util.Grooming;
 import util.IntersectionFreeSpectrum;
 
 import java.util.*;
@@ -17,9 +19,10 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
     private Double delta;
     private Double epsilon;
     private Double fi;
+    private MicroRegion microRegions;
+    private boolean restrict = false;
     private boolean flagInit = true;
-    private HashMap<String, HashSet<Node>> microRegions;
-    private static int microRegionsDeep = 2;
+
 
     @Override
     public boolean searchCircuitsForGrooming(RequestForConnection rfc, ControlPlane cp) throws Exception {
@@ -87,7 +90,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
 
         for(AuxiliaryGraph.Edge e: solution){
             MyEdge me = (MyEdge) e;
-            if(!me.canBeExpanded()){
+            if(!Grooming.canBeExpanded(me.getCircuit(),rfc)){
                 retractCircuits(expandedCircuits,upExps,downExps,cp);
                 return false;
             }
@@ -213,64 +216,42 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         }
 
         //add pontential new circuits
-        /*for (Node n1:cp.getMesh().getNodeList()) {
-            for (Node n2:cp.getMesh().getNodeList()) {
-                if(!n1.equals(n2)){
-                    AG.addEdge(new MyEdge(n1,n2,rfc,cp));
+        if(restrict){
+            AG.addEdge(new MyEdge(rfc.getPair().getSource(),rfc.getPair().getDestination(),rfc,cp));
+            for(Node n : microRegions.get(rfc.getPair().getDestination().getName())){
+                AG.addEdge(new MyEdge(n,rfc.getPair().getDestination(),rfc,cp));
+            }
+        }else{
+            for (Node n1:cp.getMesh().getNodeList()) {
+                for (Node n2:cp.getMesh().getNodeList()) {
+                    if(!n1.equals(n2)){
+                        AG.addEdge(new MyEdge(n1,n2,rfc,cp));
+                    }
                 }
             }
-        }*/
-
-        AG.addEdge(new MyEdge(rfc.getPair().getSource(),rfc.getPair().getDestination(),rfc,cp));
-        if(microRegions==null)initMicroRegions(cp);
-        for(Node n : microRegions.get(rfc.getPair().getDestination().getName())){
-            AG.addEdge(new MyEdge(n,rfc.getPair().getDestination(),rfc,cp));
         }
-
 
         return AG;
     }
 
-    private void initMicroRegions(ControlPlane cp) {
-        this.microRegions = new HashMap<>();
-
-        for (Node n : cp.getMesh().getNodeList()) {
-            this.microRegions.put(n.getName(), computeMicroRegion(cp, n,microRegionsDeep));
-        }
-
-    }
-
-    private HashSet<Node> computeMicroRegion(ControlPlane cp, Node n, int deep){
-        HashSet<Node> mr = computeMicroRegionAux(cp, n, deep);
-        mr.remove(n);
-        return mr;
-    }
-
-    private HashSet<Node> computeMicroRegionAux(ControlPlane cp, Node n, int deep) {
-        HashSet<Node> res = new HashSet<>();
-        res.add(n);
-        if(deep>0){
-            for (Node v : cp.getMesh().getAdjacents(n)){
-                res.addAll(computeMicroRegionAux(cp,v,deep-1));
-            }
-        }
-        return res;
-    }
 
     private void init(ControlPlane cp){
         Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
-        if(uv.get("alfa")!=null) this.alfa = Double.parseDouble((String)uv.get("alfa"));
+        if(uv.get("alfa")!=null) this.alfa = Double.parseDouble(uv.get("alfa"));
         else this.alfa = 0.0;
-        if(uv.get("beta")!=null) this.beta = Double.parseDouble((String)uv.get("beta"));
+        if(uv.get("beta")!=null) this.beta = Double.parseDouble(uv.get("beta"));
         else this.beta = 0.0;
-        if(uv.get("gama")!=null) this.gama = Double.parseDouble((String)uv.get("gama"));
+        if(uv.get("gama")!=null) this.gama = Double.parseDouble(uv.get("gama"));
         else this.gama = 0.0;
-        if(uv.get("delta")!=null) this.delta = Double.parseDouble((String)uv.get("delta"));
+        if(uv.get("delta")!=null) this.delta = Double.parseDouble(uv.get("delta"));
         else this.delta = 0.0;
-        if(uv.get("epsilon")!=null) this.epsilon = Double.parseDouble((String)uv.get("epsilon"));
+        if(uv.get("epsilon")!=null) this.epsilon = Double.parseDouble(uv.get("epsilon"));
         else this.epsilon = 0.0;
-        if(uv.get("fi")!=null) this.fi = Double.parseDouble((String)uv.get("fi"));
+        if(uv.get("fi")!=null) this.fi = Double.parseDouble(uv.get("fi"));
         else this.fi = 0.0;
+        if(uv.get("auxiliary_graph_grooming_restrict")!=null) this.restrict = Boolean.parseBoolean(uv.get("auxiliary_graph_grooming_restrict"));
+
+        microRegions = new MicroRegion(cp);
     }
 
     public class MyEdge implements AuxiliaryGraph.Edge{
@@ -289,7 +270,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         private Double cost=null;
 
 
-        public MyEdge(Circuit circuit, RequestForConnection rfc) {
+        private MyEdge(Circuit circuit, RequestForConnection rfc) {
             this.circuit = circuit;
             source = circuit.getSource();
             destination = circuit.getDestination();
@@ -297,7 +278,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
             this.rfc = rfc;
         }
 
-        public MyEdge(Node s, Node d,RequestForConnection rfc, ControlPlane cp){
+        private MyEdge(Node s, Node d,RequestForConnection rfc, ControlPlane cp){
             source = s;
             destination = d;
             circuit = null;
@@ -310,7 +291,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         public double getCost() {
             if(cost!=null) return cost;
             if(active){
-                if(canBeExpanded()){
+                if(Grooming.canBeExpanded(circuit,rfc)){
                     analise();
                 }else{
                     cost = Double.MAX_VALUE;
@@ -344,15 +325,8 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
                 }
 
             }
-            cost = alfa*virtualHop+beta*physicallHop+gama*spectrumUtilization+delta*newBVTs;
+            cost = alfa*physicallHop+beta*virtualHop+gama*spectrumUtilization+delta*newBVTs;
             return cost;
-        }
-
-        public boolean canBeExpanded() {
-            int[] exp = Grooming.circuitExpansiveness(circuit);
-            int circExCap = exp[0] + exp[1];
-            int slotsNeeded = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1);
-            return circExCap >= slotsNeeded;
         }
 
         private void analise(){
@@ -367,7 +341,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
             return source.toString();
         }
 
-        public Node getSourceNode() {
+        private Node getSourceNode() {
             return source;
         }
 
@@ -377,11 +351,11 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         }
 
 
-        public Node getDestinationNode() {
+        private Node getDestinationNode() {
             return destination;
         }
 
-        public boolean isActive() {
+        private boolean isActive() {
             return active;
         }
 
@@ -393,7 +367,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
             this.circuit = circuit;
         }
 
-        public void setActive(boolean active) {
+        private void setActive(boolean active) {
             this.active = active;
         }
     }
