@@ -1,8 +1,10 @@
-package util;
+package grmlsa.trafficGrooming.util;
 
 import java.util.List;
 
 import network.Circuit;
+import request.RequestForConnection;
+import util.IntersectionFreeSpectrum;
 
 /**
  * This class provides some useful methods for traffic grooming algorithms
@@ -21,5 +23,12 @@ public class Grooming {
         res[0] = IntersectionFreeSpectrum.freeSlotsDown(circuit.getSpectrumAssigned(), composition, circuit.getGuardBand());
         res[1] = IntersectionFreeSpectrum.freeSlotsUpper(circuit.getSpectrumAssigned(), composition, circuit.getGuardBand());
         return res;
+    }
+
+    public static boolean canBeExpanded(Circuit circuit, RequestForConnection rfc) {
+        int[] exp = Grooming.circuitExpansiveness(circuit);
+        int circExCap = exp[0] + exp[1];
+        int slotsNeeded = circuit.getModulation().requiredSlots(circuit.getRequiredBandwidth() + rfc.getRequiredBandwidth()) - (circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1);
+        return circExCap >= slotsNeeded;
     }
 }

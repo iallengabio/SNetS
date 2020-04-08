@@ -3,7 +3,7 @@ package grmlsa.trafficGrooming;
 import grmlsa.Route;
 import network.*;
 import request.RequestForConnection;
-import util.Grooming;
+import grmlsa.trafficGrooming.util.Grooming;
 import util.IntersectionFreeSpectrum;
 
 import java.util.*;
