@@ -1,4 +1,4 @@
-package grmlsa;
+package grmlsa.trafficGrooming.util;
 
 import network.Circuit;
 import network.ControlPlane;
@@ -40,8 +40,6 @@ public class SRNP {
         }
     }
 
-
-
     public boolean establishCircuit(Circuit circuit) throws Exception{
         computeResidualCapacity();
         RequestForConnection tempReq = new RequestForConnection();
@@ -73,4 +71,32 @@ public class SRNP {
     public HashMap<String, Double> getReservesByNode() {
         return reservesByNode;
     }
+
+    public void retractCircuit(Circuit circuit, RequestForConnection rfc) throws Exception {
+        this.computeResidualCapacity();
+        Double actualReserve = this.getReservesByNode().get(circuit.getPair().getName());
+        Double retract = actualReserve - this.getReservationTarget();
+        Double retractInThisCirc;
+        if (circuit.getResidualCapacity() > retract) {
+            retractInThisCirc = retract;
+        } else {
+            retractInThisCirc = circuit.getResidualCapacity();
+        }
+        if (retractInThisCirc > 0) {//retract the circuit
+
+            int numFinalSlots = circuit.getModulation().requiredSlots(circuit.getBandwidth() - retractInThisCirc);
+            int numCurrentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
+            int release = numCurrentSlots - numFinalSlots;
+            int[] releaseBand = new int[2];
+            if (release != 0) {
+                releaseBand[1] = circuit.getSpectrumAssigned()[1];
+                releaseBand[0] = releaseBand[1] - release + 1;
+                cp.retractCircuit(circuit, 0, release);
+            }
+
+        }
+        circuit.removeRequest(rfc);
+    }
+
+
 }

@@ -153,12 +153,9 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
             if(me.isActive())continue;
             Circuit newCircuit = cp.createNewCircuit(rfc,new Pair(me.getSourceNode(),me.getDestinationNode()));
             boolean canStabilish;
-            try {
-                canStabilish = cp.establishCircuit(newCircuit);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                throw new UnsupportedOperationException();
-            }
+
+            canStabilish = establishCircuit(newCircuit,cp);
+
             if (!canStabilish) {
                 //rollback
                 releaseCircuits(newCircuitEdges,cp);
@@ -173,6 +170,15 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
 
         }
         return newCircuitEdges;
+    }
+
+    protected boolean establishCircuit(Circuit c, ControlPlane cp){
+        try {
+            return cp.establishCircuit(c);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UnsupportedOperationException();
+        }
     }
 
     private void releaseCircuits(List<MyEdge> newCircuitEdges, ControlPlane cp){
@@ -235,7 +241,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
     }
 
 
-    private void init(ControlPlane cp){
+    protected void init(ControlPlane cp){
         Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
         if(uv.get("alfa")!=null) this.alfa = Double.parseDouble(uv.get("alfa"));
         else this.alfa = 0.0;

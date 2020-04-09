@@ -1,6 +1,6 @@
 package grmlsa.trafficGrooming;
 
-import grmlsa.SRNP;
+import grmlsa.trafficGrooming.util.SRNP;
 import network.Circuit;
 import network.ControlPlane;
 import network.Node;
@@ -45,30 +45,7 @@ public abstract class MultihopGroomingSRNP extends MultihopGrooming {
                 cp.releaseCircuit(circuit);
                 this.removeCircuitVirtualRouting(circuit);
             } else {
-                srnp.computeResidualCapacity();
-                Double actualReserve = srnp.getReservesByNode().get(circuit.getPair().getName());
-                Double retract = actualReserve - srnp.getReservationTarget();
-                Double retractInThisCirc;
-                if (circuit.getResidualCapacity() > retract) {
-                    retractInThisCirc = retract;
-                } else {
-                    retractInThisCirc = circuit.getResidualCapacity();
-                }
-                if (retractInThisCirc > 0) {//retract the circuit
-
-                    int numFinalSlots = circuit.getModulation().requiredSlots(circuit.getBandwidth() - retractInThisCirc);
-                    int numCurrentSlots = circuit.getSpectrumAssigned()[1] - circuit.getSpectrumAssigned()[0] + 1;
-                    int release = numCurrentSlots - numFinalSlots;
-                    int[] releaseBand = new int[2];
-                    if (release != 0) {
-                        releaseBand[1] = circuit.getSpectrumAssigned()[1];
-                        releaseBand[0] = releaseBand[1] - release + 1;
-                        cp.retractCircuit(circuit, 0, release);
-                    }
-
-                }
-
-                circuit.removeRequest(rfc);
+                srnp.retractCircuit(circuit,rfc);
             }
         }
 
