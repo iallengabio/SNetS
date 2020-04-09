@@ -57,7 +57,10 @@ public class GRMLSA implements Serializable {
     private static final String GROOMING_MTGSR = "mtgsr";
     private static final String GROOMING_MGFCCFSRNP = "mgfccfsrnp";//equivalent to mtgsr_srnp
     private static final String GROOMING_MTGSRSRNP = "mtgsr_srnp";
-    private static final String GROOMING_AUXILIARYGRAPHGROOMING = "auxiliary_graph";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMING = "auxiliarygraphgrooming";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGALT = "agg";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNP = "auxiliarygraphgrooming_srnp";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT = "agg_srnp";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -151,6 +154,7 @@ public class GRMLSA implements Serializable {
      */
     public TrafficGroomingAlgorithmInterface instantiateGrooming(){
         switch (this.grooming) {
+            case "":
             case GROOMING_NOTRAFFICGROOMING:
                 return new NoTrafficGrooming();
             case GROOMING_SIMPLETRAFFICGROOMING:
@@ -162,9 +166,13 @@ public class GRMLSA implements Serializable {
             case GROOMING_MTGSRSRNP: //equivalent
                 return new MTGSR_SRNP();
             case GROOMING_AUXILIARYGRAPHGROOMING:
+            case GROOMING_AUXILIARYGRAPHGROOMINGALT:
                 return new AuxiliaryGraphGrooming();
+            case GROOMING_AUXILIARYGRAPHGROOMINGSRNP:
+            case GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT:
+                return new AuxiliaryGraphGrooming_SRNP();
             default:
-                return new NoTrafficGrooming();
+                return null;
         }
     }
 

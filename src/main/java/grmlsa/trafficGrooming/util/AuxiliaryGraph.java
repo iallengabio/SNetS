@@ -1,7 +1,5 @@
 package grmlsa.trafficGrooming.util;
 
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.Union;
-
 import java.util.*;
 
 public class AuxiliaryGraph {
