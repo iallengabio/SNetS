@@ -31,8 +31,8 @@ public class ModulationAndGuardBandSelectionTest implements ModulationSelectionA
 		int alternativeBand[] = null;
 		
 		// Minimum and maximum values for guard band
-		int minGB = 0;
-		int maxGB = 10;
+		int minGB = 1;
+		int maxGB = 8;
 		
 		//double maxDeltaSNR;
 		double circuitDeltaSNR;
