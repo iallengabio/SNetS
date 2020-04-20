@@ -61,6 +61,7 @@ public class GRMLSA implements Serializable {
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGALT = "agg";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNP = "auxiliarygraphgrooming_srnp";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT = "agg_srnp";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG = "agg_sstg";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -171,6 +172,8 @@ public class GRMLSA implements Serializable {
             case GROOMING_AUXILIARYGRAPHGROOMINGSRNP:
             case GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT:
                 return new AuxiliaryGraphGrooming_SRNP();
+            case GROOMING_AUXILIARYGRAPHGROOMINGSSTG:
+                return new AuxiliaryGraphGrooming_SSTG();
             default:
                 return null;
         }
