@@ -210,22 +210,22 @@ def computeGainsMod(path, ims, save = ""):
 #------------------------------------------------------------------------------------------------------------------------------------
     
     
-#path = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\Pacific Bell\\Comp\\MVH\\SSTG'
-#sp.computeMaxBVTs(path)
+path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Mecanismos/EON/ajuste de BVTs/SRNP/MVH'
+sp.computeMaxBVTs(path)
     
-path1 = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\NSFNet\\Comp'
-path2 = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\Pacific Bell\\Comp'
-alpha = 0.05
-sol = ['Traditional GRMLSA','SRNP', 'SSTG']
-loads = ['MPH', 'MS', 'MVH']
-arq = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\NSFNet'
+#path1 = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\NSFNet\\Comp'
+#path2 = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\Pacific Bell\\Comp'
+#alpha = 0.05
+#sol = ['Traditional GRMLSA','SRNP', 'SSTG']
+#loads = ['MPH', 'MS', 'MVH']
+#arq = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\NSFNet'
 #auxPlotMod(path1,path2,loads,loads,sol,'NSFNet','Pacific Bell',arq,alpha)
 #computeGainsMod(path1,2,'nsfnet-sstg-best')
 #computeGainsMod(path2,2,'pacific-sstg-best')
 
-path1 = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/NSFNet/CompVC'
-path2 = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/Pacific Bell/CompVC'
-loadsLN = ['1092','1274','1456','1638','1820']
-loadsLP = ['218','435','653','870','1088']
-solLN = ['MPH_Sem_mecanismo', 'MPH_SRNP', 'MPH_SSTG', 'MSU_Sem_mecanismo', 'MSU_SRNP', 'MSU_SSTG', 'MVH_Sem_mecanismo', 'MVH_SRNP', 'MVH_SSTG']
-sp.plotLines2(path1,path2,loadsLN,loadsLP,solLN,"NSFNet","Pacific Bell")
+#path1 = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/NSFNet/CompVC'
+#path2 = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/Pacific Bell/CompVC'
+#loadsLN = ['1092','1274','1456','1638','1820']
+#loadsLP = ['218','435','653','870','1088']
+#solLN = ['MPH_Sem_mecanismo', 'MPH_SRNP', 'MPH_SSTG', 'MSU_Sem_mecanismo', 'MSU_SRNP', 'MSU_SSTG', 'MVH_Sem_mecanismo', 'MVH_SRNP', 'MVH_SSTG']
+#sp.plotLines2(path1,path2,loadsLN,loadsLP,solLN,"NSFNet","Pacific Bell")
