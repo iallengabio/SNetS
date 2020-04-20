@@ -53,11 +53,6 @@ public class AuxiliaryGraphGrooming_SSTG extends AuxiliaryGraphGrooming{
             fu = release-fd;
         }
 
-        if(fu+fd>release){
-            System.out.println("erro");
-        }
-
-
         if (release > 0) {
             try {
                 cp.retractCircuit(circuit, fd, fu);
