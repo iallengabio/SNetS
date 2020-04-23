@@ -61,7 +61,7 @@ public class GRMLSA implements Serializable {
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGALT = "agg";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNP = "auxiliarygraphgrooming_srnp";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT = "agg_srnp";
-    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG = "agg_sstg";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG1 = "agg_sstg1";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -90,10 +90,8 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_ZONEPARTITIONTOPINVASION = "zonepartitiontopinvasion";
     private static final String INTEGRATED_KSPFIRSTFIT = "kspfirstfit";
     private static final String INTEGRATED_KSPFIRSTFITSSTG = "kspfirstfit_sstg";
-    private static final String INTEGRATED_COMPLETESHARINGEX = "completesharingex";
-    private static final String INTEGRATED_COMPLETESHARINGESPAT = "completesharing_espat";
-    private static final String INTEGRATED_COMPLETESHARINGEX2 = "completesharingex2";
-    private static final String INTEGRATED_COMPLETESHARINGSSTG = "completesharing_sstg";
+    private static final String INTEGRATED_COMPLETESHARINSSTG1 = "completesharing_sstg1";
+    private static final String INTEGRATED_COMPLETESHARINGSSTG2 = "completesharing_sstg2";
     private static final String INTEGRATED_KSPSA = "kspsa";
     private static final String INTEGRATED_KSPSA_v2 = "kspsav2";
     private static final String INTEGRATED_KSPC = "kspc";
@@ -172,8 +170,8 @@ public class GRMLSA implements Serializable {
             case GROOMING_AUXILIARYGRAPHGROOMINGSRNP:
             case GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT:
                 return new AuxiliaryGraphGrooming_SRNP();
-            case GROOMING_AUXILIARYGRAPHGROOMINGSSTG:
-                return new AuxiliaryGraphGrooming_SSTG();
+            case GROOMING_AUXILIARYGRAPHGROOMINGSSTG1:
+                return new AuxiliaryGraphGrooming_SSTG1();
             default:
                 return null;
         }
@@ -255,12 +253,10 @@ public class GRMLSA implements Serializable {
                 return new ZonePartitionTopInvasion();
             case INTEGRATED_KSPFIRSTFIT:
                 return new KSPFirstFit();
-            case INTEGRATED_COMPLETESHARINGEX:
-            case INTEGRATED_COMPLETESHARINGESPAT:
-                return new CompleteSharingEsPAT();
-            case INTEGRATED_COMPLETESHARINGEX2:
-            case INTEGRATED_COMPLETESHARINGSSTG:
-                return new CompleteSharingSSTG();
+            case INTEGRATED_COMPLETESHARINSSTG1:
+                return new CompleteSharingSSTG1();
+            case INTEGRATED_COMPLETESHARINGSSTG2:
+                return new CompleteSharingSSTG2();
             case INTEGRATED_KSPSA:
                 return new KShortestPathsAndSpectrumAssignment();
             case INTEGRATED_KSPSA_v2:

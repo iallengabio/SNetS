@@ -8,7 +8,7 @@ import request.RequestForConnection;
 
 import java.util.Map;
 
-public class AuxiliaryGraphGrooming_SSTG extends AuxiliaryGraphGrooming{
+public class AuxiliaryGraphGrooming_SSTG1 extends AuxiliaryGraphGrooming{
     private int sigmaExpansiveness=0;
 
     @Override

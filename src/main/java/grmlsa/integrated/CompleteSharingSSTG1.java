@@ -19,7 +19,7 @@ import java.util.Map;
  * 
  * @author Iallen
  */
-public class CompleteSharingEsPAT implements IntegratedRMLSAAlgorithmInterface {
+public class CompleteSharingSSTG1 implements IntegratedRMLSAAlgorithmInterface {
 
 	private int k = 3; //This algorithm uses 3 alternative paths
     private int sigmaExpansiveness=0;
