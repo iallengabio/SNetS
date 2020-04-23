@@ -210,8 +210,8 @@ def computeGainsMod(path, ims, save = ""):
 #------------------------------------------------------------------------------------------------------------------------------------
     
     
-path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Mecanismos/EON/ajuste de BVTs/SRNP/MVH'
-sp.computeMaxBVTs(path)
+#path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Mecanismos/Pacific Bell/ajuste de BVTs/EsPAT/MVH'
+#sp.computeMaxBVTs(path)
     
 #path1 = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\NSFNet\\Comp'
 #path2 = 'C:\\Users\\ialle\\Google Drive\\Doutorado\\Simulacoes\\New EsPAT OPH\\Pacific Bell\\Comp'

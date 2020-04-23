@@ -45,9 +45,11 @@ def auxPlotAllPolicies(path, loads):
 #path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/SSTG/NSFNet/CompVC2'
 #path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/NSFNet/CompVC'
 #path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/Pacific Bell/CompVC'
+path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Mecanismos/Pacific Bell/CompVC2'
 #loadsN = ['1092','1274','1456','1638','1820']
 #loadsP = ['218','435','653','870','1088']
-#auxPlotAllPolicies(path,loadsP)
+loadsE = ['1210','1814','2419','3024','3629']
+#auxPlotAllPolicies(path,loadsE)
 
 
 
@@ -69,7 +71,7 @@ def auxExtractBBRComp(path,alpha):
     other, tsol = sdff.transposeDFs(dfs,sol)
     return frag+pli+other, ['BBR due to fragmentation','BBR due to physicall layer impairments','BBR due to other reasons'], sol
     
-path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Mecanismos/EON/SRNPTuning/MVH/evaluations'
+path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Novos/Pacific Bell/SSTGTuning/MS/evaluations'
 #loads = range(0,33)
 #auxPlotBBRComp(path,loads,0.05)
 fig,ax = plt.subplots(1, 1)
