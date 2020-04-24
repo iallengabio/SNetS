@@ -8,7 +8,7 @@ import request.RequestForConnection;
 
 import java.util.Map;
 
-public class AuxiliaryGraphGrooming_SSTG1 extends AuxiliaryGraphGrooming{
+public class AuxiliaryGraphGrooming_SSTG2 extends AuxiliaryGraphGrooming{
     private int sigmaExpansiveness=0;
 
     @Override
@@ -35,38 +35,14 @@ public class AuxiliaryGraphGrooming_SSTG1 extends AuxiliaryGraphGrooming{
     protected int[] decideToExpand(int numMoreSlots, int numLowerFreeSlots, int numUpperFreeSlots) {
         int eu=0, ed=0;
 
-        int dfsd = numLowerFreeSlots - sigmaExpansiveness;
-        int dfsu = numUpperFreeSlots - sigmaExpansiveness;
-
-        int fsd = numLowerFreeSlots;
-        int fsu = numUpperFreeSlots;
-
-        if(dfsd>0){//mais slots livres abaixo do que sigma
-            int aux = Math.min(numMoreSlots,dfsd);
+        if(numLowerFreeSlots>numUpperFreeSlots){
+            int aux = Math.min(numMoreSlots,numLowerFreeSlots-numUpperFreeSlots);
             ed+=aux;
             numMoreSlots-=aux;
-            fsd-=aux;
-        }
-
-        if(numMoreSlots>0 && dfsu>0){//mais slots livres acima do que sigma
-            int aux = Math.min(numMoreSlots,dfsu);
+        }else{
+            int aux = Math.min(numMoreSlots,numUpperFreeSlots-numLowerFreeSlots);
             eu+=aux;
             numMoreSlots-=aux;
-            fsu-=aux;
-        }
-
-        if(numMoreSlots>0){
-            if(fsd>fsu){
-                int aux = Math.min(fsd-fsu,numMoreSlots);
-                ed+=aux;
-                numMoreSlots-=aux;
-                fsd-=aux;
-            }else{
-                int aux = Math.min(fsu-fsd,numMoreSlots);
-                eu+=aux;
-                numMoreSlots-=aux;
-                fsu-=aux;
-            }
         }
 
         if(numMoreSlots>0){
@@ -86,28 +62,30 @@ public class AuxiliaryGraphGrooming_SSTG1 extends AuxiliaryGraphGrooming{
         int release = numCurrentSlots - numFinalSlots;
 
         int[] freeSlots = Grooming.circuitExpansiveness(circuit);
-        int freeSlotsDown = freeSlots[0];
-        int freeSlotsUp = freeSlots[1];
-        int dd = freeSlotsDown - sigmaExpansiveness;
-        int du = freeSlotsUp - sigmaExpansiveness;
+        int fsd = freeSlots[0];
+        int fsu = freeSlots[1];
         int rd = 0, ru = 0;
 
-        if(dd>=0){
-            ru=release;
-            rd=0;
+        int ofsx = (sigmaExpansiveness - numFinalSlots)/2;
+
+        if(fsd>=ofsx){
+            ru = release;
+            rd = 0;
         }else{
-            if(freeSlotsDown<freeSlotsUp){
-                int aux = Math.min(Math.min(dd*-1,freeSlotsUp-freeSlotsDown),release);
+            if(fsd<fsu){
+                int aux = Math.min(ofsx-fsd,release);
+                aux = Math.min(aux,fsu-fsd);
                 rd+=aux;
                 release-=aux;
             }else{
-                int aux = Math.min(Math.min(du*-1,freeSlotsDown-freeSlotsUp),release);
+                int aux = Math.min(ofsx-fsu,release);
+                aux = Math.min(aux,fsd-fsu);
                 ru+=aux;
                 release-=aux;
             }
 
             if(release>0){//ainda há slots para liberar
-                int aux = -1*(dd+rd);
+                int aux = ofsx - (fsd + rd);//quanto falta pra completar o objetivo em baixo
                 aux = Math.min(aux,release-release/2);
                 rd+=aux;
                 release-=aux;
@@ -121,9 +99,5 @@ public class AuxiliaryGraphGrooming_SSTG1 extends AuxiliaryGraphGrooming{
             e.printStackTrace();
             throw new UnsupportedOperationException();
         }
-
-
-
-
     }
 }

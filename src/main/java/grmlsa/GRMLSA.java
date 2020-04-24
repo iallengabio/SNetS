@@ -57,11 +57,10 @@ public class GRMLSA implements Serializable {
     private static final String GROOMING_MTGSR = "mtgsr";
     private static final String GROOMING_MGFCCFSRNP = "mgfccfsrnp";//equivalent to mtgsr_srnp
     private static final String GROOMING_MTGSRSRNP = "mtgsr_srnp";
-    private static final String GROOMING_AUXILIARYGRAPHGROOMING = "auxiliarygraphgrooming";
-    private static final String GROOMING_AUXILIARYGRAPHGROOMINGALT = "agg";
-    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNP = "auxiliarygraphgrooming_srnp";
-    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT = "agg_srnp";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMING = "agg";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNP = "agg_srnp";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG1 = "agg_sstg1";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG2 = "agg_sstg2";
 
     // Routing
     private static final String ROUTING_DJK = "djk";
@@ -165,13 +164,13 @@ public class GRMLSA implements Serializable {
             case GROOMING_MTGSRSRNP: //equivalent
                 return new MTGSR_SRNP();
             case GROOMING_AUXILIARYGRAPHGROOMING:
-            case GROOMING_AUXILIARYGRAPHGROOMINGALT:
                 return new AuxiliaryGraphGrooming();
             case GROOMING_AUXILIARYGRAPHGROOMINGSRNP:
-            case GROOMING_AUXILIARYGRAPHGROOMINGSRNPALT:
                 return new AuxiliaryGraphGrooming_SRNP();
             case GROOMING_AUXILIARYGRAPHGROOMINGSSTG1:
                 return new AuxiliaryGraphGrooming_SSTG1();
+            case GROOMING_AUXILIARYGRAPHGROOMINGSSTG2:
+                return new AuxiliaryGraphGrooming_SSTG2();
             default:
                 return null;
         }
