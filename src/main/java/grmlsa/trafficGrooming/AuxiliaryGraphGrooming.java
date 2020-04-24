@@ -132,7 +132,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         }
     }
 
-    private static int[] decideToExpand(int numMoreSlots, int numLowerFreeSlots, int numUpperFreeSlots) {
+    protected int[] decideToExpand(int numMoreSlots, int numLowerFreeSlots, int numUpperFreeSlots) {
         int[] res = new int[2];
         if (numLowerFreeSlots >= numMoreSlots) {
             res[0] = numMoreSlots;

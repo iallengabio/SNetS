@@ -5,7 +5,7 @@ import grmlsa.NewKShortestPaths;
 import grmlsa.Route;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.spectrumAssignment.FirstFitEsPAT;
+import grmlsa.spectrumAssignment.FirstFitSSTG;
 import network.Circuit;
 import network.ControlPlane;
 import util.IntersectionFreeSpectrum;
@@ -14,18 +14,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class implements the mechanism EsPAT over algorithm CompleteSharing.
- * EsPAT is presented at: "Um Mecanismo para Potencialização da Agregação de Tráfego em Redes Ópticas Elásticas" SBRC2019
+ * This class implements the mechanism SSTG over algorithm CompleteSharing.
+ *  * SSTG is presented at:
  * 
  * @author Iallen
  */
-public class CompleteSharingEsPAT implements IntegratedRMLSAAlgorithmInterface {
+public class CompleteSharingSSTG2 implements IntegratedRMLSAAlgorithmInterface {
 
 	private int k = 3; //This algorithm uses 3 alternative paths
     private int sigmaExpansiveness=0;
     private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
-    private FirstFitEsPAT spectrumAssignment;
+    private FirstFitSSTG spectrumAssignment;
 
 
     @Override
@@ -33,9 +33,9 @@ public class CompleteSharingEsPAT implements IntegratedRMLSAAlgorithmInterface {
         if (kShortestsPaths == null){
         	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
             modulationSelection = cp.getModulationSelection();
-            spectrumAssignment = new FirstFitEsPAT();
+            spectrumAssignment = new FirstFitSSTG();
             Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
-            this.sigmaExpansiveness = Integer.parseInt((String)uv.get("sigmaExpansiveness"));
+            this.sigmaExpansiveness = Integer.parseInt(uv.get("sigmaExpansiveness"));
         }
 
         List<Route> candidateRoutes = kShortestsPaths.getRoutes(circuit.getSource(), circuit.getDestination());
