@@ -16,6 +16,13 @@ import SNetSPlot as snp
 font = {'family':'serif','size':14}
 matplotlib.rc('font', **font)
 
+def auxPlotAllMetrics(path, loads):
+    ADFs, labels = sdff.getAllDFs(path,0.05)
+    _, sol = sdff.readFiles(path,sdff.RF_BBP)
+    arqNames = ['bb','rb','rlr','tce','apc','bu','ef','ee','db']
+    for i in range(len(ADFs)):
+        fig, _ = snp.single_plot_lines(ADFs[i],sol,loads,'network load',labels[i])
+        fig.savefig(path+'/'+arqNames[i]+'.png',dpi=150,bbox_inches='tight')
 
 def auxPlotAllPolicies(path, loads):
     pathMPH = path + '/MPH'
@@ -45,11 +52,15 @@ def auxPlotAllPolicies(path, loads):
 #path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/SSTG/NSFNet/CompVC2'
 #path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/NSFNet/CompVC'
 #path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/New EsPAT OPH/Pacific Bell/CompVC'
-path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Mecanismos/Pacific Bell/CompVC2'
-#loadsN = ['1092','1274','1456','1638','1820']
+path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Novos 2/USA/Comp/MPH'
+loadsN = ['1092','1274','1456','1638','1820']
 #loadsP = ['218','435','653','870','1088']
+loadsP = ['163','326','490','653','816']
 loadsE = ['1210','1814','2419','3024','3629']
+loadsU = ['1766','2208','2650','3091','3533']
 #auxPlotAllPolicies(path,loadsE)
+
+auxPlotAllMetrics(path,loadsU)
 
 
 
@@ -62,6 +73,16 @@ def auxPlotBBRComp(path,loads,alpha):
     fig,_ = snp.single_plot_lines(frag+other,['BBR due to fragmentation','BBR due to other reasons'],loads,sizeMultX=3,xLabel="σ",yLabel="Bandwidth blocking ratio",correctX=0,correctY=0.15)
     fig.savefig(path+'/bbr_frag.png',dpi=150,bbox_inches='tight')
     
+def auxPlotBBRComp2(path,loads,alpha):
+    fig,ax = plt.subplots(1, 1)
+    snp.fig_resize(fig,3,1)
+    dfs,sol,_ = auxExtractBBRComp(path,0.05)
+    snp.stacked_bars_plotter_ax(ax,dfs,0.5)
+    snp.decorate_ax(ax,loads,'σ','Bandwidth blocking ratio')
+    fig.tight_layout()
+    snp.fig_legend(fig,sol,0.2,3)
+    fig.savefig(path+'/bbr_frag_comp.png',dpi=150,bbox_inches='tight')
+    
 def auxExtractBBRComp(path,alpha):
     dfs, sol = sdff.extractDFs(path,sdff.M_BBP_F,0.05)   
     frag, tsol = sdff.transposeDFs(dfs,sol)
@@ -71,21 +92,17 @@ def auxExtractBBRComp(path,alpha):
     other, tsol = sdff.transposeDFs(dfs,sol)
     return frag+pli+other, ['BBR due to fragmentation','BBR due to physicall layer impairments','BBR due to other reasons'], sol
     
-path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Novos/Pacific Bell/SSTGTuning/MS/evaluations'
-#loads = range(0,33)
+path = 'C:/Users/ialle/Google Drive/Doutorado/Simulacoes/AGG/Novos 2/USA/SSTGTuning/MPH/evaluations'
+loads = range(0,40)
 #auxPlotBBRComp(path,loads,0.05)
-fig,ax = plt.subplots(1, 1)
-snp.fig_resize(fig,3,1)
-dfs,sol,loads = auxExtractBBRComp(path,0.05)
-snp.stacked_bars_plotter_ax(ax,dfs,0.5)
-snp.decorate_ax(ax,loads,'σ','Bandwidth blocking ratio')
-fig.tight_layout()
-snp.fig_legend(fig,sol,0.2,3)
-fig.savefig(path+'/bbr_frag_comp.png',dpi=150,bbox_inches='tight')
+#auxPlotBBRComp2(path,loads,0.05)
 
 #fig, ax = plt.subplots(1, 1)
 #snp.stacked_bars_plotter_ax(ax,frag+other,0.35) 
 
+#allDFs, mLabels = sdff.getAllDFs(path,0.05)
+#allDFsT = [sdff.transposeDFs(d,loads)[0] for d in allDFs]
+#snp.single_plot_lines(allDFsT[6],['1'],loads)
     
 
 
