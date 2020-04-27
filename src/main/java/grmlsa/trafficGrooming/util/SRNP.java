@@ -37,6 +37,7 @@ public class SRNP {
         while(iterator2.hasNext()){
             Circuit c = iterator2.next();
             reservesByNode.put(c.getPair().getName(),reservesByNode.get(c.getPair().getName())+c.getResidualCapacity());
+
         }
     }
 
@@ -46,13 +47,15 @@ public class SRNP {
         tempReq.setPair(circuit.getPair());
         String pair = circuit.getPair().getPairName();
         double newReserve = reservationTarget - reservesByNode.get(pair);
+
         if(newReserve>0) {
+            //System.out.println("está reservando - " + reservationTarget + "  -  " + reservesByNode.get(pair));
             tempReq.setRequiredBandwidth(newReserve);
             circuit.addRequest(tempReq);
         }
         if(cp.establishCircuit(circuit)){//try stabilish with reserve
             circuit.removeRequest(tempReq);
-            reservesByNode.put(pair,reservationTarget);
+            //reservesByNode.put(pair,reservationTarget);
             return true;
         }
 
@@ -73,6 +76,7 @@ public class SRNP {
     }
 
     public void retractCircuit(Circuit circuit, RequestForConnection rfc) throws Exception {
+        circuit.removeRequest(rfc);
         this.computeResidualCapacity();
         Double actualReserve = this.getReservesByNode().get(circuit.getPair().getName());
         Double retract = actualReserve - this.getReservationTarget();
@@ -93,9 +97,8 @@ public class SRNP {
                 releaseBand[0] = releaseBand[1] - release + 1;
                 cp.retractCircuit(circuit, 0, release);
             }
-
         }
-        circuit.removeRequest(rfc);
+
     }
 
 
