@@ -97,6 +97,7 @@ public class SRNP {
                 releaseBand[0] = releaseBand[1] - release + 1;
                 cp.retractCircuit(circuit, 0, release);
             }
+
         }
 
     }
