@@ -240,7 +240,6 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         return AG;
     }
 
-
     protected void init(ControlPlane cp){
         Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
         if(uv.get("alfa")!=null) this.alfa = Double.parseDouble(uv.get("alfa"));
@@ -273,6 +272,8 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         private double physicallHop=0;
         private double spectrumUtilization=0;
         private double newBVTs=0;
+        private double deltaSNR =0;
+        private double sNRImpact=0;
         private Double cost=null;
 
 
@@ -331,7 +332,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
                 }
 
             }
-            cost = alfa*physicallHop+beta*virtualHop+gama*spectrumUtilization+delta*newBVTs;
+            cost = alfa*physicallHop + beta*virtualHop + gama*spectrumUtilization + delta*newBVTs + epsilon*-1*deltaSNR + fi*sNRImpact;
             return cost;
         }
 
@@ -339,7 +340,8 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
             this.virtualHop = 1;
             this.physicallHop = circuit.getRoute().getHops();
             this.spectrumUtilization = circuit.getModulation().requiredSlots(rfc.getRequiredBandwidth()) * circuit.getRoute().getHops();
-
+            this.deltaSNR = circuit.getSNR() - circuit.getModulation().getSNRthreshold();
+            this.sNRImpact = cp.computesImpactOnSNROther(circuit);
         }
 
         @Override
