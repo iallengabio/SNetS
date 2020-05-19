@@ -1318,7 +1318,7 @@ public class PhysicalLayer implements Serializable {
 		
 		// circuito 1
 		double tr1 = 100.0E+9; //bps
-		int slotNumber1 = 5 + guardBand; //mod_QPSK.requiredSlots(tr1);
+		int slotNumber1 = 3 + guardBand; //mod_QPSK.requiredSlots(tr1);
 		int sa1[] = new int[2];
 		sa1[0] = 1;
 		sa1[1] = sa1[0] + slotNumber1 - 1;
@@ -1336,7 +1336,7 @@ public class PhysicalLayer implements Serializable {
 		
 		// circuito 2
 		double tr2 = 100.0E+9; //bps
-		int slotNumber2 = 5 + guardBand; //mod_BPSK.requiredSlots(tr2);
+		int slotNumber2 = 3 + guardBand; //mod_BPSK.requiredSlots(tr2);
 		int sa2[] = new int[2];
 		sa2[0] = sa1[1] + 1;
 		sa2[1] = sa2[0] + slotNumber2 - 1;
@@ -1354,7 +1354,7 @@ public class PhysicalLayer implements Serializable {
 		
 		// circuito 3
 		double tr3 = 100.0E+9; //bps
-		int slotNumber3 = 5 + guardBand; //mod_8QAM.requiredSlots(tr3);
+		int slotNumber3 = 3 + guardBand; //mod_8QAM.requiredSlots(tr3);
 		int sa3[] = new int[2];
 		sa3[0] = sa2[1] + 1;
 		sa3[1] = sa3[0] + slotNumber3 - 1;
