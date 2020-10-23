@@ -59,6 +59,7 @@ public class GRMLSA implements Serializable {
     private static final String GROOMING_MTGSRSRNP = "mtgsr_srnp";
     private static final String GROOMING_AUXILIARYGRAPHGROOMING = "agg";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRNP = "agg_srnp";
+    private static final String GROOMING_AUXILIARYGRAPHGROOMINGSRLP = "agg_srlp";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG1 = "agg_sstg1";
     private static final String GROOMING_AUXILIARYGRAPHGROOMINGSSTG2 = "agg_sstg2";
 
@@ -146,8 +147,7 @@ public class GRMLSA implements Serializable {
 
     /**
      * Instance the optical traffic aggregation algorithm
-     * 
-     * @throws Exception
+     *
      * @return TrafficGroomingAlgorithm
      */
     public TrafficGroomingAlgorithmInterface instantiateGrooming(){
@@ -167,6 +167,8 @@ public class GRMLSA implements Serializable {
                 return new AuxiliaryGraphGrooming();
             case GROOMING_AUXILIARYGRAPHGROOMINGSRNP:
                 return new AuxiliaryGraphGrooming_SRNP();
+            case GROOMING_AUXILIARYGRAPHGROOMINGSRLP:
+                return new AuxiliaryGraphGrooming_SRLP();
             case GROOMING_AUXILIARYGRAPHGROOMINGSSTG1:
                 return new AuxiliaryGraphGrooming_SSTG1();
             case GROOMING_AUXILIARYGRAPHGROOMINGSSTG2:
@@ -179,7 +181,6 @@ public class GRMLSA implements Serializable {
     /**
      * Instance the routing algorithm
      *
-     * @throws Exception
      * @return RoutingInterface
      */
     public RoutingAlgorithmInterface instantiateRouting(){
@@ -198,7 +199,6 @@ public class GRMLSA implements Serializable {
     /**
      * Instance the spectrum assignment algorithm
      *
-     * @throws Exception
      * @return SpectrumAssignmentInterface
      */
     public SpectrumAssignmentAlgorithmInterface instantiateSpectrumAssignment(){
@@ -233,7 +233,6 @@ public class GRMLSA implements Serializable {
     /**
      * Instance the integrated RMLSA algorithm
      *
-     * @throws Exception
      * @return IntegratedRSAAlgoritm
      */
     public IntegratedRMLSAAlgorithmInterface instantiateIntegratedRSA(){
@@ -275,8 +274,7 @@ public class GRMLSA implements Serializable {
     
     /**
      * Instance the regenerators assignment algorithm
-     * 
-     * @throws Exception
+     *
      * @return RegeneratorAssignmentAlgorithmInterface
      */
     public RegeneratorAssignmentAlgorithmInterface instantiateRegeneratorAssignment(){
@@ -296,7 +294,6 @@ public class GRMLSA implements Serializable {
      * Instance the modulation selection algorithm
      * 
      * @return ModulationSelectionAlgorithmInterface
-     * @throws Exception
      */
     public ModulationSelectionAlgorithmInterface instantiateModulationSelection(){
     	switch (this.modulationSelection) {
