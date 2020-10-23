@@ -218,7 +218,7 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
 
         //add active circuits
         for (Circuit c:cp.getConnections()) {
-            AG.addEdge(new MyEdge(c,rfc));
+            AG.addEdge(new MyEdge(c,rfc,cp));
         }
 
         //add pontential new circuits
@@ -277,12 +277,13 @@ public class AuxiliaryGraphGrooming implements TrafficGroomingAlgorithmInterface
         private Double cost=null;
 
 
-        private MyEdge(Circuit circuit, RequestForConnection rfc) {
+        private MyEdge(Circuit circuit, RequestForConnection rfc, ControlPlane cp) {
             this.circuit = circuit;
             source = circuit.getSource();
             destination = circuit.getDestination();
             active=true;
             this.rfc = rfc;
+            this.cp = cp;
         }
 
         private MyEdge(Node s, Node d,RequestForConnection rfc, ControlPlane cp){
