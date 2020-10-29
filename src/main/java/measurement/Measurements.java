@@ -55,13 +55,15 @@ public class Measurements implements Serializable {
 	 * Ajust this!
 	 */
 	private ConsumedEnergy consumedEnergyMetric;
-    
+	private SpectrumUtilizationNew spectrumUtilizationMetric;
+
     /**
      * List of metrics to be considered during the simulation
      */
     private SimulationConfig.Metrics measuringMetrics;
-    
-    /**
+
+
+	/**
      * Creates a new instance of Measurements
      * 
      * @param numMinRequest int
@@ -105,7 +107,8 @@ public class Measurements implements Serializable {
 			this.metricsList.add(fragmentacaoExterna);
 		}
 		if(measuringMetrics.SpectrumUtilization){
-			SpectrumUtilization utilizacaoSpectro = new SpectrumUtilization(loadPoint, replication, mesh);
+			SpectrumUtilizationNew utilizacaoSpectro = new SpectrumUtilizationNew(loadPoint, replication, mesh);
+			this.spectrumUtilizationMetric = utilizacaoSpectro; //because this metric needs to be updated when requests holds
 			this.metricsList.add(utilizacaoSpectro);
 		}
 		if(measuringMetrics.RelativeFragmentation){
@@ -209,6 +212,10 @@ public class Measurements implements Serializable {
 	
 	public ConsumedEnergy getConsumedEnergyMetric() {
 		return consumedEnergyMetric;
+	}
+
+	public SpectrumUtilizationNew getSpectrumUtilization(){
+		return spectrumUtilizationMetric;
 	}
 
 	public void setConsumedEnergyMetric(ConsumedEnergy consumedEnergyMetric) {
