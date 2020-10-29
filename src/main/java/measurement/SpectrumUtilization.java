@@ -15,6 +15,7 @@ import simulationControl.resultManagers.SpectrumUtilizationResultManager;
  * 
  * @author Iallen
  */
+@Deprecated
 public class SpectrumUtilization extends Measurement {
     public final static String SEP = "-";
 
