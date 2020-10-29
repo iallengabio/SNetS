@@ -6,6 +6,7 @@ import java.util.List;
 
 import measurement.Measurement;
 import measurement.SpectrumUtilization;
+import measurement.SpectrumUtilizationNew;
 
 /**
  * This class is responsible for formatting the file with results of spectrum utilization
@@ -14,7 +15,7 @@ import measurement.SpectrumUtilization;
  */
 public class SpectrumUtilizationResultManager implements ResultManagerInterface {
 	
-	private HashMap<Integer, HashMap<Integer, SpectrumUtilization>> sus; // Contains the spectrum utilization metric for all load points and replications
+	private HashMap<Integer, HashMap<Integer, SpectrumUtilizationNew>> sus; // Contains the spectrum utilization metric for all load points and replications
 	private List<Integer> loadPoints;
 	private List<Integer> replications;
 	private final static String sep = ",";
@@ -30,14 +31,14 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 		
 		for (List<Measurement> loadPoint : llms) {
 			int load = loadPoint.get(0).getLoadPoint();
-			HashMap<Integer, SpectrumUtilization>  reps = new HashMap<>();
+			HashMap<Integer, SpectrumUtilizationNew>  reps = new HashMap<>();
 			sus.put(load, reps);
 			
 			for (Measurement su : loadPoint) {
-				reps.put(su.getReplication(), (SpectrumUtilization)su);
+				reps.put(su.getReplication(), (SpectrumUtilizationNew)su);
 				
 				if(slotsNumber == null){
-					slotsNumber = ((SpectrumUtilization)su).getMaxSlotsByLinks();
+					slotsNumber = ((SpectrumUtilizationNew)su).getMaxSlotsByLinks();
 				}
 			}			
 		}
@@ -63,6 +64,8 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 		
 		res.append(resultUtilizationGeneral());
 		res.append("\n\n");
+		res.append(resultSlotUsageTime());
+		res.append("\n\n");
 		res.append(resultUtilizationPerLink());
 		res.append("\n\n");
 		
@@ -87,6 +90,22 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 		}
 		return res.toString();
 	}
+
+	/**
+	 * Can be used to calculate the spectrum efficiency. SE=DT/SUT where DT is data transmited.
+	 * @return SUT
+	 */
+	private String resultSlotUsageTime(){
+		StringBuilder res = new StringBuilder();
+		for (Integer loadPoint : loadPoints) {
+			String aux = "Slot usage time" + sep + loadPoint + sep + "all" + sep + " - " + sep + " - " + sep + " "; // "all"+sep+" ";
+			for (Integer replic : replications) {
+				aux = aux + sep + sus.get(loadPoint).get(replic).getSlotUsageTime();
+			}
+			res.append(aux + "\n");
+		}
+		return res.toString();
+	}
 	
 	/**
 	 * Returns the spectrum utilization per link
@@ -101,7 +120,7 @@ public class SpectrumUtilizationResultManager implements ResultManagerInterface 
 			String aux = "Utilization Per Link" + sep + loadPoint + sep; // "all"+sep+" ";
 			
 			for (String link : sus.get(0).get(0).getLinkSet()) {
-				String aux2 = aux + "<"+link+">" + sep + " - " + sep + " - " + sep + " ";
+				String aux2 = aux + link.replace(',','-') + sep + " - " + sep + " - " + sep + " ";
 				
 				for (Integer replic : replications) {
 					aux2 = aux2 + sep + sus.get(loadPoint).get(replic).getUtilizationPerLink(link);
