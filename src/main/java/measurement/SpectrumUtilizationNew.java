@@ -83,7 +83,7 @@ public class SpectrumUtilizationNew extends Measurement {
             Double luAt = utilizationPerLink.get(l.getName());
             utilizationPerLink.put(l.getName(),luAt+(us*deltaTime));//utilization per link
 
-            for(int[] fsb : l.getFreeSpectrumBands(0)){//parameter guardband=0 because we dont want to stablish a new circuit. ps: this don't interfer with the guard bands of stablished circuits.
+            for(int[] fsb : l.getFreeSpectrumBands()){//parameter guardband=0 because we dont want to stablish a new circuit. ps: this don't interfer with the guard bands of stablished circuits.
                 int i;
                 for (i = fsb[0] - 1; i < fsb[1]; i++) {
                     unusePerSlot[i]+=deltaTime;
