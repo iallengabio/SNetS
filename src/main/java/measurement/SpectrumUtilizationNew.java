@@ -5,6 +5,7 @@ import network.Link;
 import network.Mesh;
 import request.RequestForConnection;
 import simulationControl.parsers.SimulationRequest;
+import simulationControl.resultManagers.SpectrumUtilizationResultManager;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,6 +55,8 @@ public class SpectrumUtilizationNew extends Measurement {
         totalSpectrumUsage = 0.0;
         lastInstantTime = 0.0;
         totalNetworkOperationTime = 0.0;
+
+        resultManager = new SpectrumUtilizationResultManager();
     }
 
 
