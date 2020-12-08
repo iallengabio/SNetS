@@ -89,32 +89,41 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 				sigmaPair = sigmaForAllPairs.get(pair).get(routeTemp);
 			}
 			
-	    	double highestLevel = 0.0;
 	    	Modulation firstModulation = null; // First modulation format option
 	    	Modulation secondModulation = null; // Second modulation format option
+	    	
+	    	double firstHighestLevel = 0.0; // Level for the first modulation option
+	    	double secondHighestLevel = 0.0; // Level for the second modulation option
+	    	
+	    	int firstBand[] = null; // Band of available slots found with the first modulation option
+	    	int secondBand[] = null; // Band of available slots found with the second modulation option
 	    	
 			for(int m = 0; m < avaliableModulations.size(); m++){
 				Modulation mod = avaliableModulations.get(m);
 				circuit.setModulation(mod);
 				
+				// Number of slots required
 				int numberOfSlots = mod.requiredSlots(circuit.getRequiredBandwidth());
 				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp, circuit.getGuardBand());
 				
+				// Applies the spectrum assignment algorithm that returns the band of available slots
 				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
 				circuit.setSpectrumAssigned(band);
 				
-				if(band != null){
+				if(band != null){ // A band of available slots was found
 					if(checkRoute == null){
 						checkRoute = routeTemp;
 						checkMod = mod;
 						checkBand = band;
 					}
 					
+					// Computes QoT for the new circuit
 					boolean circuitQoT = cp.getMesh().getPhysicalLayer().isAdmissibleModultion(circuit, routeTemp, mod, band, null, false);
 					
-					if(circuitQoT){
+					if(circuitQoT){ // If QoT is acceptable
 						double circuitDeltaSNR = circuit.getSNR() - mod.getSNRthreshold();
 						
+						// Get all circuits with links in common with the new circuit
 						HashSet<Circuit> circuitList = new HashSet<Circuit>();
 						for (Link link : routeTemp.getLinkList()) {
 							HashSet<Circuit> circuitsAux = link.getCircuitList();
@@ -129,6 +138,7 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						boolean othersQoT = true;
 						double worstDeltaSNR = Double.MAX_VALUE;
 						
+						// Search for the circuit with the worst SNR delta among the circuits with links in common with the new circuit
 						for(Circuit circuitTemp : circuitList){
 							
 							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
@@ -144,40 +154,45 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 							}
 						}
 						
+						// Saves modulation and the worst SNR delta
 						routeModWorstDeltaSNR.put(mod, worstDeltaSNR);
 						
 						if(othersQoT){ // if you have not made QoT inadmissible from any of the other already active circuits
-							if(circuitDeltaSNR >= sigmaPair){ // Tries to choose the modulation format that respects the sigma value
+							if((circuitDeltaSNR >= sigmaPair) && (mod.getBitsPerSymbol() > firstHighestLevel)){ // Tries to choose the modulation format that respects the sigma value
 								firstModulation = mod;
+								firstBand = band;
+								firstHighestLevel = mod.getBitsPerSymbol();
 							}
-							if(mod.getBitsPerSymbol() > highestLevel){ // Save the modulation format with the highest level as the second choice option
+							if(mod.getBitsPerSymbol() > secondHighestLevel){ // Save the modulation format with the highest level as the second choice option
 								secondModulation = mod;
-								highestLevel = mod.getBitsPerSymbol();
+								secondBand = band;
+								secondHighestLevel = mod.getBitsPerSymbol();
 							}
 						}
 					}
 				}
 			}
 			
-			if((firstModulation == null) && (secondModulation != null)){ // Check the modulation format options
+			// Check the modulation format options
+			// If you don't have the first option, but you have the second
+			// Use the second instead of the first option
+			if((firstModulation == null) && (secondModulation != null)){
 				firstModulation = secondModulation;
+				firstBand = secondBand;
 			}
 			
 			if(firstModulation != null){
 				circuit.setModulation(firstModulation);
-				int numberOfSlots = firstModulation.requiredSlots(circuit.getRequiredBandwidth());
-				List<int[]> merge = IntersectionFreeSpectrum.merge(routeTemp, circuit.getGuardBand());
-				int band[] = spectrumAssignment.policy(numberOfSlots, merge, circuit, cp);
 				
-				if(band != null){
-					double worstDeltaSNR = routeModWorstDeltaSNR.get(firstModulation);
-					
-					if((band[0] < chosenBand[0]) && (worstDeltaSNR >= chosenWorstDeltaSNR)){
-						chosenBand = band;
-						chosenRoute = routeTemp;
-						chosenMod = firstModulation;
-						chosenWorstDeltaSNR = worstDeltaSNR;
-					}
+				double worstDeltaSNR = routeModWorstDeltaSNR.get(firstModulation);
+				
+				// It seeks to choose the route in which it was possible to select the band of the available spectrum closest to the beginning of the spectrum.
+				// It also tries to choose the biggest worst SNR delta, so it avoids choosing routes with very fragile circuits
+				if((firstBand[0] < chosenBand[0]) && (worstDeltaSNR >= chosenWorstDeltaSNR)){
+					chosenRoute = routeTemp;
+					chosenBand = firstBand;
+					chosenMod = firstModulation;
+					chosenWorstDeltaSNR = worstDeltaSNR;
 				}
 			}
 		}
@@ -190,6 +205,8 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 			return true;
 			
 		}else{
+			// The request will be blocked
+			// This step is to help identify what caused the request to be blocked
 			if(checkRoute == null){
 				checkRoute = candidateRoutes.get(0);
 				checkMod = avaliableModulations.get(0);
