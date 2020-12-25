@@ -99,6 +99,7 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
     private static final String INTEGRATED_KSPRQOTOV2 = "ksprqotov2";
     private static final String INTEGRATED_FFDIS = "ffdis";
+    private static final String INTEGRATED_FFDISV2 = "ffdisv2";
     private static final String INTEGRATED_LMCI = "lmci";
     
     // Regenerator assignment
@@ -274,6 +275,8 @@ public class GRMLSA implements Serializable {
                 return new KShortestPathsReductionQoTO_v2();
             case INTEGRATED_FFDIS:
                 return new FFDis();
+            case INTEGRATED_FFDISV2:
+                return new FFDis_v2();
             case INTEGRATED_LMCI:
                 return new LMCI();
             default:

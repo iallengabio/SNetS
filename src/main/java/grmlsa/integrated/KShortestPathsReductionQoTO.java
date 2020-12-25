@@ -34,7 +34,7 @@ import util.IntersectionFreeSpectrum;
  */
 public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInterface {
 	
-    private static int k = 4; // Number of candidate routes
+    private static int k = 3; // Number of candidate routes
 	private NewKShortestPaths kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
@@ -141,9 +141,10 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 						// Search for the circuit with the worst SNR delta among the circuits with links in common with the new circuit
 						for(Circuit circuitTemp : circuitList){
 							
+							// Recalculates the QoT of the circuit already established considering the new circuit
 							boolean QoT = cp.computeQualityOfTransmission(circuitTemp, circuit, true);
-							double deltaSNR = circuitTemp.getSNR() - circuitTemp.getModulation().getSNRthreshold();
 							
+							double deltaSNR = circuitTemp.getSNR() - circuitTemp.getModulation().getSNRthreshold();
 							if(deltaSNR < worstDeltaSNR){
 								worstDeltaSNR = deltaSNR;
 							}
