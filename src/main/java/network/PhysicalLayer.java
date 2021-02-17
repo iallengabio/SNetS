@@ -382,6 +382,94 @@ public class PhysicalLayer implements Serializable {
 				lineAmpNoiseAse = lineAmpNoiseAse / polarizationModes;
 				preAmpNoiseAse = preAmpNoiseAse / polarizationModes;
 				
+				
+				//para teste
+				boosterAmpNoiseAse = 0.0;
+				
+				lineAmpNoiseAse = Nl * lineAmpNoiseAse; // Computing ASE for all line amplifier spans
+				
+				Iase = Iase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
+			}
+		}
+		
+		double SNR = I / (Iase + Inli);
+		
+		return SNR;
+	}
+	
+	public double computeSNRSegment2(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
+		
+		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
+		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+		double fi = lowerFrequency + (slotBandwidth * (spectrumAssigned[0] - 1.0)) + (Bsi / 2.0); // Central frequency of circuit
+		
+		Bsi = modulation.getBandwidthFromBitRate(circuit.getRequiredBandwidth());
+		
+		double circuitPowerLinear = this.PowerLinear;
+		if(circuit.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+			circuitPowerLinear = circuit.getLaunchPowerLinear();
+		}
+		
+		//circuitPowerLinear = circuitPowerLinear / polarizationModes; // Determining the power for each polarization mode
+		
+		double I = circuitPowerLinear / referenceBandwidth; // Signal power density for the reference bandwidth
+		if(!fixedPowerSpectralDensity){
+			I = circuitPowerLinear / Bsi; // Signal power spectral density calculated according to the requested bandwidth
+		}
+		
+		double Iase = 0.0;
+		double Inli = 0.0;
+		
+		Node sourceNode = null;
+		Node destinationNode = null;
+		Link link = null;
+		TreeSet<Circuit> circuitList = null;
+		
+		double Nl = 0.0; // Number of line amplifiers
+		double noiseNli = 0.0;
+		double totalPower = 0.0;
+		double boosterAmpNoiseAse = 0.0;
+		double preAmpNoiseAse = 0.0;
+		double lineAmpNoiseAse = 0.0;
+		double lastFiberSegment = 0.0;
+		
+		for(int i = sourceNodeIndex; i < destinationNodeIndex; i++){
+			sourceNode = route.getNode(i);
+			destinationNode = route.getNode(i + 1);
+			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
+			Nl = getNumberOfLineAmplifiers(link.getDistance());
+			
+			circuitList = getCircuitList(link, circuit, testCircuit, addTestCircuit);
+			
+			if(activeNLI){
+				noiseNli = getGnli2(circuit, link, circuitPowerLinear, Bsi, I, fi, circuitList, modulation); // Computing the NLI for each polarization mode
+				noiseNli = (Nl + 1.0) * noiseNli; // Ns + 1 corresponds to the line amplifiers span more the preamplifier span
+				Inli = Inli + noiseNli;
+			}
+			
+			if(activeASE){
+				if(typeOfAmplifierGain == 1){
+					totalPower = getTotalPowerInTheLink(circuitList, link, circuitPowerLinear, I);
+				}
+				
+				// Computing the last span amplifier gain
+				lastFiberSegment = link.getDistance() - (Nl * L);
+				preAmp.setGain(alpha * lastFiberSegment);
+				
+				// Computing the ASE for each amplifier type
+				boosterAmpNoiseAse = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				lineAmpNoiseAse = lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				preAmpNoiseAse = preAmp.getAseByGain(totalPower, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
+				
+				// Determining the ASE for each polarization mode
+				//boosterAmpNoiseAse = boosterAmpNoiseAse / polarizationModes; 
+				//lineAmpNoiseAse = lineAmpNoiseAse / polarizationModes;
+				//preAmpNoiseAse = preAmpNoiseAse / polarizationModes;
+				
+				
+				//para teste
+				boosterAmpNoiseAse = 0.0;
+				
 				lineAmpNoiseAse = Nl * lineAmpNoiseAse; // Computing ASE for all line amplifier spans
 				
 				Iase = Iase + (boosterAmpNoiseAse + lineAmpNoiseAse + preAmpNoiseAse);
@@ -486,12 +574,15 @@ public class PhysicalLayer implements Serializable {
 			beta21 = -1.0 * beta21;
 		}
 		
-		double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
-		double ro =  BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+		//double mi = Gi * (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21);
+		double mi = Gi * (3.0 * 64 * gamma * gamma) / (2.0 * 81 * Math.PI * alphaLinear * beta21);
+		//double ro =  BsI * BsI * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
+		double ro =  BsI * BsI * (Math.PI * Math.PI * beta21) / (alphaLinear);
 		if(ro < 0.0) {
 			ro = -1.0 * ro;
 		}
-		double p1 = Gi * Gi * arcsinh(ro);
+		//double p1 = Gi * Gi * arcsinh(ro);
+		double p1 = Gi * Gi * Math.log(ro);
 		
 		double p2 = 0.0;
 		int saJ[] = null;
@@ -545,6 +636,121 @@ public class PhysicalLayer implements Serializable {
 		}
 		
 		double gnli = mi * (p1 + p2); 
+		return gnli;
+	}
+	
+	/**
+	 * Based on article:
+	 *  - 2019 - Habibi - Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks
+	 * 
+	 * @param circuitI Circuit
+	 * @param link Link
+	 * @param powerI double
+	 * @param BsI double
+	 * @param I double
+	 * @param fI double
+	 * @return double
+	 */
+	public double getGnli2(Circuit circuitI, Link link, double powerI, double BsI, double Gi, double fI, TreeSet<Circuit> circuitList, Modulation modulation){
+		double beta21 = beta2;
+		if(beta21 < 0.0){
+			beta21 = -1.0 * beta21;
+		}
+		
+		double o = 0.0;
+		if (modulation.getM() == 2) { //BPSK
+			o = 1.0;
+		} else if (modulation.getM() == 4) { //QPSK
+			o = 1.0;
+		} else if (modulation.getM() == 8) { //8QAM
+			o = 2.0 / 3.0;
+		} else if (modulation.getM() == 16) { //16QAM
+			o = 17.0 / 25.0;
+		} else if (modulation.getM() == 32) { //32QAM
+			o = 69.0 / 100.0;
+		} else if (modulation.getM() == 64) { //64QAM
+			o = 13.0 / 21.0;
+		} else if (modulation.getM() == 64) { //x-QAM
+			o = 3.0 / 5.0;
+		}
+		
+		double alfaCampo = alphaLinear / 2.0;
+		double Ls = L * 1000.0; // span in meter
+		double Leff = (1.0 - Math.pow(Math.E, -2.0 * alfaCampo * Ls)) / (2.0 * alfaCampo);
+		double E = (8.0 * gamma * gamma * Leff * Leff * 2.0 * alfaCampo) / (27.0 * Math.PI * beta21);
+		
+		//para teste
+		E = (8.0 * gamma * gamma) / (27.0 * Math.PI * beta21 * 2.0 * alfaCampo);
+		
+		//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
+		double ro = (((Math.PI * Math.PI) / 2.0) * beta21 * BsI * BsI) / (2.0 * alfaCampo);
+		double ro2 = E * arcsinh(ro);
+		double gsci = Gi * Gi * Gi * ro2;
+		double gxci = 0.0;
+		
+		// Do termo de corecao relacionado com a modulacao de sinal
+		double Wnn = 0;
+		double Wnm = 0;
+		
+		//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
+		Wnn = Gi * Gi * Gi * (E * (5.0 * o) / (3.0 * alfaCampo * Ls));
+		Wnm = 0.0;
+		
+		int saJ[] = null;
+		double numOfSlots = 0.0;
+		double Bsj = 0.0;
+		double fJ = 0.0;
+		double deltaFij = 0.0;
+		double d1 = 0.0;
+		double d2 = 0.0;
+		double powerJ = powerI; // Power of the circuit j
+		double Gj = Gi; // Power spectral density of the circuit j
+		
+		for(Circuit circuitJ : circuitList){
+			
+			if(!circuitI.equals(circuitJ)){
+				saJ = circuitJ.getSpectrumAssignedByLink(link);
+				numOfSlots = saJ[1] - saJ[0] + 1.0;
+				
+				Bsj = (numOfSlots - circuitJ.getModulation().getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
+				fJ = lowerFrequency + (slotBandwidth * (saJ[0] - 1.0)) + (Bsj / 2.0); // Central frequency of circuit
+				
+				Bsj = circuitJ.getModulation().getBandwidthFromBitRate(circuitJ.getRequiredBandwidth());
+				
+				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
+					powerJ = circuitJ.getLaunchPowerLinear();
+					powerJ = powerJ / polarizationModes; // Determining the power for each polarization mode
+				}
+				
+				if(!fixedPowerSpectralDensity){
+					Gj = powerJ / Bsj; // Power spectral density of the circuit j calculated according to the required bandwidth
+				}
+				
+				deltaFij = fI - fJ;
+				if(deltaFij < 0.0) {
+					deltaFij = -1.0 * deltaFij;
+				}
+				
+				d1 = deltaFij + (Bsj / 2.0);
+				d2 = deltaFij - (Bsj / 2.0);
+				
+				double nm1 = (Math.PI * Math.PI * beta21 * BsI * d1) / (2.0 * alfaCampo);
+				double nm2 = (Math.PI * Math.PI * beta21 * BsI * d2) / (2.0 * alfaCampo);
+				double pnm =  E * (arcsinh(nm1) - arcsinh(nm2));
+				gxci += Gi * Gj * Gj * pnm;
+				
+				//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
+				Wnm += Gi * Gj * Gj * (E * (5.0 * o * Bsj) / (6.0 * alfaCampo * Ls * deltaFij));
+			}
+		}
+		
+		//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
+		double gnli = gsci + gxci;
+		double gcorr = Wnn + Wnm;
+		
+		//Applying the correction term for the GN model
+		//gnli = gnli - gcorr;
+		
 		return gnli;
 	}
 	
@@ -1311,10 +1517,10 @@ public class PhysicalLayer implements Serializable {
 		Route route = new Route(listNodes);
 		Pair pair = new Pair(n1, n2);
 		
-		int guardBand = 1;
-		Modulation mod_BPSK = new Modulation("BPSK", 10000.0, 2.0, 5.5, 0.12, 12.5E+9, guardBand, 2.0);
-		Modulation mod_QPSK = new Modulation("QPSK", 5000.0, 4.0, 8.5, 0.12, 12.5E+9, guardBand, 2.0);
-		Modulation mod_8QAM = new Modulation("8QAM", 2500.0, 8.0, 12.5, 0.12, 12.5E+9, guardBand, 2.0);
+		int guardBand = 0;
+		Modulation mod_BPSK = new Modulation("BPSK", 10000.0, 2.0, 5.5, 0.28, 12.5E+9, guardBand, 2.0);
+		Modulation mod_QPSK = new Modulation("QPSK", 5000.0, 4.0, 8.5, 0.28, 12.5E+9, guardBand, 2.0);
+		Modulation mod_8QAM = new Modulation("8QAM", 2500.0, 8.0, 12.5, 0.28, 12.5E+9, guardBand, 2.0);
 		
 		// circuito 1
 		double tr1 = 100.0E+9; //bps

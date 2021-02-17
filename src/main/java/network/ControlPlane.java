@@ -544,7 +544,7 @@ public class ControlPlane implements Serializable {
      */
     public boolean computeQualityOfTransmission(Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
     	
-    	mesh.getPhysicalLayer().testCamadaFisica();
+    	//mesh.getPhysicalLayer().testCamadaFisica();
     	
     	double SNR = mesh.getPhysicalLayer().computeSNRSegment(circuit, circuit.getRoute(), 0, circuit.getRoute().getNodeList().size() - 1, circuit.getModulation(), circuit.getSpectrumAssigned(), testCircuit, addTestCircuit);
 		double SNRdB = PhysicalLayer.ratioForDB(SNR);
