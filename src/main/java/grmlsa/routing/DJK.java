@@ -35,17 +35,17 @@ public class DJK implements RoutingAlgorithmInterface {
         	computeAllRoutes(mesh);
         	//salveRoutesByPar(mesh.getNodeList());
         }
-
+        
         Node source = circuit.getSource();
         Node destination = circuit.getDestination();
-
+        
         Route route = routesForAllPairs.get(source.getName() + DIV + destination.getName());
-
+        
         if (route != null) {
             circuit.setRoute(route);
             return true;
         }
-
+        
         return false;
     }
 

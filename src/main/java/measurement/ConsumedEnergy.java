@@ -47,27 +47,29 @@ public class ConsumedEnergy extends Measurement {
     }
 
     public void addNewObservation(ControlPlane cp, double instantTime, boolean success, RequestForConnection request, boolean computesDataTransmitted){
-    	if(computesDataTransmitted && success){
-			Double duration = request.getTimeOfFinalizeHours() - request.getTimeOfRequestHours();
-			duration *= 3600.0; // Converting to seconds
-			
-			totalDataTransmitted += duration * request.getRequiredBandwidth(); // Total data transmitted by the flow (bits)
-			
-		}else{
-	    	instantTime *= 3600.0; // Converting to seconds
-	    	if(instantTime > totalNetworkOperationTime){
-				totalNetworkOperationTime = instantTime;
-			}
-	    	
-	    	double timeDiffer = instantTime - lastInstantTime;
-	    	
-	        totalConsumedEnergy += timeDiffer * cp.getMesh().getTotalPowerConsumption();
-	        totalConsumedEnergyTransponders += timeDiffer * cp.getMesh().getTotalPowerConsumptionTransponders();
-	        totalConsumedEnergyOXCs += timeDiffer * cp.getMesh().getTotalPowerConsumptionOXCs();
-	        totalConsumedEnergyAmplifiers += timeDiffer * cp.getMesh().getTotalPowerConsumptionAmplifiers();
-	        
-	        lastInstantTime = instantTime;   
-    	}
+    	
+    	//comentado para teste
+//    	if(computesDataTransmitted && success){
+//			Double duration = request.getTimeOfFinalizeHours() - request.getTimeOfRequestHours();
+//			duration *= 3600.0; // Converting to seconds
+//			
+//			totalDataTransmitted += duration * request.getRequiredBandwidth(); // Total data transmitted by the flow (bits)
+//			
+//		}else{
+//	    	instantTime *= 3600.0; // Converting to seconds
+//	    	if(instantTime > totalNetworkOperationTime){
+//				totalNetworkOperationTime = instantTime;
+//			}
+//	    	
+//	    	double timeDiffer = instantTime - lastInstantTime;
+//	    	
+//	        totalConsumedEnergy += timeDiffer * cp.getMesh().getTotalPowerConsumption();
+//	        totalConsumedEnergyTransponders += timeDiffer * cp.getMesh().getTotalPowerConsumptionTransponders();
+//	        totalConsumedEnergyOXCs += timeDiffer * cp.getMesh().getTotalPowerConsumptionOXCs();
+//	        totalConsumedEnergyAmplifiers += timeDiffer * cp.getMesh().getTotalPowerConsumptionAmplifiers();
+//	        
+//	        lastInstantTime = instantTime;   
+//    	}
     }
 
     @Override

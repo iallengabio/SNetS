@@ -19,7 +19,9 @@ import simulationControl.parsers.PhysicalLayerConfig;
  * @author Alexandre
  */
 public class PhysicalLayer implements Serializable {
-
+	
+	private int physicalLayerModel = 2; //1 = Model Johannisson or 2 = Model Habibi
+	
 	// Allows you to enable or disable the calculations of physical layer
     private boolean activeQoT; // QoTN
     private boolean activeQoTForOther; // QoTO
@@ -34,7 +36,7 @@ public class PhysicalLayer implements Serializable {
     private double L; // Size of a span, km
     private double alpha; // Fiber loss, dB/km
     private double gamma; // Fiber nonlinearity,  (W*m)^-1
-    private double D; // Dispersion parameter, s/m^2
+    private double D; // Dispersion parameter, s/m^2 or s/m/m
     private double centerFrequency; //Frequency of light
 	
     private double h; // Constant of Planck
@@ -112,7 +114,7 @@ public class PhysicalLayer implements Serializable {
         
         double spanMeter = L * 1000.0; // span in meter
         this.attenuationBySpanLinear = Math.pow(Math.E, alphaLinear * spanMeter);
-        double boosterAmpGainLinear = LsssLinear * LsssLinear;
+        double boosterAmpGainLinear = LsssLinear * LsssLinear * LsssLinear; //mux * demux * switch
         double lineAmpGainLinear = attenuationBySpanLinear;
         double preAmpGainLinear = attenuationBySpanLinear;
         
@@ -314,6 +316,20 @@ public class PhysicalLayer implements Serializable {
 	 * @return double - SNR (linear)
 	 */
 	public double computeSNRSegment(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
+		double SNR = 0.0;
+		
+		if (physicalLayerModel == 1) { // Model Johannisson
+			SNR = computeSNRSegment1(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, testCircuit, addTestCircuit);
+		
+		} else { // Model Habibi
+			SNR = computeSNRSegment2(circuit, route, sourceNodeIndex, destinationNodeIndex, modulation, spectrumAssigned, testCircuit, addTestCircuit);
+		}
+		
+		return SNR;
+	}
+	
+	//Model Johannisson
+	public double computeSNRSegment1(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
 		double Bsi = (numSlotsRequired - modulation.getGuardBand()) * slotBandwidth; // Circuit bandwidth, less the guard band
@@ -384,7 +400,7 @@ public class PhysicalLayer implements Serializable {
 				
 				
 				//para teste
-				boosterAmpNoiseAse = 0.0;
+				//boosterAmpNoiseAse = 0.0;
 				
 				lineAmpNoiseAse = Nl * lineAmpNoiseAse; // Computing ASE for all line amplifier spans
 				
@@ -397,6 +413,7 @@ public class PhysicalLayer implements Serializable {
 		return SNR;
 	}
 	
+	//Model Habibi
 	public double computeSNRSegment2(Circuit circuit, Route route, int sourceNodeIndex, int destinationNodeIndex, Modulation modulation, int spectrumAssigned[], Circuit testCircuit, boolean addTestCircuit){
 		
 		double numSlotsRequired = spectrumAssigned[1] - spectrumAssigned[0] + 1; // Number of slots required
@@ -468,7 +485,7 @@ public class PhysicalLayer implements Serializable {
 				
 				
 				//para teste
-				boosterAmpNoiseAse = 0.0;
+				//boosterAmpNoiseAse = 0.0;
 				
 				lineAmpNoiseAse = Nl * lineAmpNoiseAse; // Computing ASE for all line amplifier spans
 				
@@ -539,7 +556,10 @@ public class PhysicalLayer implements Serializable {
 			circuitPower = powerJ;
 			if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
 				circuitPower = circuitJ.getLaunchPowerLinear();
-				circuitPower = circuitPower / polarizationModes; // Determining the power for each polarization mode
+				
+				if (physicalLayerModel == 1) { // Model Johannisson
+					circuitPower = circuitPower / polarizationModes; // Determining the power for each polarization mode
+				}
 			}
 			
 			if(fixedPowerSpectralDensity){
@@ -657,30 +677,13 @@ public class PhysicalLayer implements Serializable {
 			beta21 = -1.0 * beta21;
 		}
 		
-		double o = 0.0;
-		if (modulation.getM() == 2) { //BPSK
-			o = 1.0;
-		} else if (modulation.getM() == 4) { //QPSK
-			o = 1.0;
-		} else if (modulation.getM() == 8) { //8QAM
-			o = 2.0 / 3.0;
-		} else if (modulation.getM() == 16) { //16QAM
-			o = 17.0 / 25.0;
-		} else if (modulation.getM() == 32) { //32QAM
-			o = 69.0 / 100.0;
-		} else if (modulation.getM() == 64) { //64QAM
-			o = 13.0 / 21.0;
-		} else if (modulation.getM() == 64) { //x-QAM
-			o = 3.0 / 5.0;
-		}
-		
 		double alfaCampo = alphaLinear / 2.0;
 		double Ls = L * 1000.0; // span in meter
 		double Leff = (1.0 - Math.pow(Math.E, -2.0 * alfaCampo * Ls)) / (2.0 * alfaCampo);
 		double E = (8.0 * gamma * gamma * Leff * Leff * 2.0 * alfaCampo) / (27.0 * Math.PI * beta21);
 		
 		//para teste
-		E = (8.0 * gamma * gamma) / (27.0 * Math.PI * beta21 * 2.0 * alfaCampo);
+		//E = (8.0 * gamma * gamma) / (27.0 * Math.PI * beta21 * 2.0 * alfaCampo);
 		
 		//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
 		double ro = (((Math.PI * Math.PI) / 2.0) * beta21 * BsI * BsI) / (2.0 * alfaCampo);
@@ -688,12 +691,13 @@ public class PhysicalLayer implements Serializable {
 		double gsci = Gi * Gi * Gi * ro2;
 		double gxci = 0.0;
 		
-		// Do termo de corecao relacionado com a modulacao de sinal
+		// Correction term related to signal modulation
 		double Wnn = 0;
 		double Wnm = 0;
 		
 		//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
-		Wnn = Gi * Gi * Gi * (E * (5.0 * o) / (3.0 * alfaCampo * Ls));
+		double Phii = getValueOfModulationConstant(modulation);
+		Wnn = Gi * Gi * Gi * (E * (5.0 * Phii) / (3.0 * alfaCampo * Ls));
 		Wnm = 0.0;
 		
 		int saJ[] = null;
@@ -719,7 +723,7 @@ public class PhysicalLayer implements Serializable {
 				
 				if(circuitJ.getLaunchPowerLinear() != Double.POSITIVE_INFINITY) {
 					powerJ = circuitJ.getLaunchPowerLinear();
-					powerJ = powerJ / polarizationModes; // Determining the power for each polarization mode
+					//powerJ = powerJ / polarizationModes; // Determining the power for each polarization mode
 				}
 				
 				if(!fixedPowerSpectralDensity){
@@ -740,7 +744,8 @@ public class PhysicalLayer implements Serializable {
 				gxci += Gi * Gj * Gj * pnm;
 				
 				//Artigo: Impairment-Aware Manycast Routing, Modulation Level, and Spectrum Assignment in Elastic Optical Networks (2019)
-				Wnm += Gi * Gj * Gj * (E * (5.0 * o * Bsj) / (6.0 * alfaCampo * Ls * deltaFij));
+				double Phij = getValueOfModulationConstant(circuitJ.getModulation());
+				Wnm += Gi * Gj * Gj * (E * (5.0 * Phij * Bsj) / (6.0 * alfaCampo * Ls * deltaFij));
 			}
 		}
 		
@@ -749,9 +754,32 @@ public class PhysicalLayer implements Serializable {
 		double gcorr = Wnn + Wnm;
 		
 		//Applying the correction term for the GN model
-		//gnli = gnli - gcorr;
+		gnli = gnli - gcorr;
 		
 		return gnli;
+	}
+	
+	
+	public double getValueOfModulationConstant(Modulation modulation) {
+		
+		double o = 0.0;
+		if (modulation.getM() == 2) { //BPSK
+			o = 1.0;
+		} else if (modulation.getM() == 4) { //QPSK
+			o = 1.0;
+		} else if (modulation.getM() == 8) { //8QAM
+			o = 2.0 / 3.0;
+		} else if (modulation.getM() == 16) { //16QAM
+			o = 17.0 / 25.0;
+		} else if (modulation.getM() == 32) { //32QAM
+			o = 69.0 / 100.0;
+		} else if (modulation.getM() == 64) { //64QAM
+			o = 13.0 / 21.0;
+		} else if (modulation.getM() > 64) { //x-QAM
+			o = 3.0 / 5.0;
+		}
+		
+		return o;
 	}
 	
 	/**
@@ -1108,6 +1136,7 @@ public class PhysicalLayer implements Serializable {
 				
 				if(activeASE){
 					Sase = lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
+					Sase = Sase / polarizationModes;
 				}
 				
 				double lossAndGain = 1.0;
@@ -1152,6 +1181,10 @@ public class PhysicalLayer implements Serializable {
 			link = sourceNode.getOxc().linkTo(destinationNode.getOxc());
 			Nl = getNumberOfLineAmplifiers(link.getDistance());
 			
+			// Switch insertion loss
+			Inli = Inli / LsssLinear;
+			Iase = Iase / LsssLinear;
+			
 			// MUX insertion loss
 			Inli = Inli / LsssLinear;
 			Iase = Iase / LsssLinear;
@@ -1164,7 +1197,11 @@ public class PhysicalLayer implements Serializable {
 			
 			if(activeASE){
 				double Sase = boosterAmp.getAseByGain(totalPower, boosterAmp.getGainByType(totalPower, typeOfAmplifierGain));
-				Sase = Sase / polarizationModes;
+				
+				if (physicalLayerModel == 1) { // Model Johannisson
+					Sase = Sase / polarizationModes;
+				}
+				
 				Iase = Iase + Sase;
 			}
 			
@@ -1184,21 +1221,44 @@ public class PhysicalLayer implements Serializable {
 					if(beta21 < 0.0){
 						beta21 = -1.0 * beta21;
 					}
+					double Snli = 0.0;
 					
-					double mi = (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21 * Bsi * Bsi * Bsi);
-					double ro =  Bsi * Bsi * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
-					if(ro < 0.0) {
-						ro = -1.0 * ro;
+					if (physicalLayerModel == 1) { // Model Johannisson
+						double mi = (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21 * Bsi * Bsi * Bsi);
+						double ro =  Bsi * Bsi * (Math.PI * Math.PI * beta21) / alphaLinear;
+						if(ro < 0.0) {
+							ro = -1.0 * ro;
+						}
+						double p1 = arcsinh(ro);
+						Snli = mi * p1;
+						
+					} else { // Model Habibi
+						double Phii = getValueOfModulationConstant(modulation);
+						
+						double alfaCampo = alphaLinear / 2.0;
+						double Ls = L * 1000.0; // span in meter
+						double Leff = (1.0 - Math.pow(Math.E, -2.0 * alfaCampo * Ls)) / (2.0 * alfaCampo);
+						double E = (8.0 * gamma * gamma * Leff * Leff * 2.0 * alfaCampo) / (27.0 * Math.PI * beta21);
+						
+						double ro = (((Math.PI * Math.PI) / 2.0) * beta21 * Bsi * Bsi) / (2.0 * alfaCampo);
+						double ro2 = E * arcsinh(ro);
+						double gsci = Bsi * Bsi * Bsi * ro2;
+						
+						double Wnn = Bsi * Bsi * Bsi * (E * (5.0 * Phii) / (3.0 * alfaCampo * Ls));
+						
+						Snli = gsci - Wnn;
 					}
-					double p1 = arcsinh(ro);
-					double Snli = mi * p1;
 					
 					Inli = Inli + Snli;
 				}
 				
 				if(activeASE){
 					double Sase = lineAmp.getAseByGain(totalPower, lineAmp.getGainByType(totalPower, typeOfAmplifierGain));
-					Sase = Sase / polarizationModes;
+					
+					if (physicalLayerModel == 1) { // Model Johannisson
+						Sase = Sase / polarizationModes;
+					}
+					
 					Iase = Iase + Sase;
 				}
 			}
@@ -1221,21 +1281,44 @@ public class PhysicalLayer implements Serializable {
 				if(beta21 < 0.0){
 					beta21 = -1.0 * beta21;
 				}
+				double Snli = 0.0;
 				
-				double mi = (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21 * Bsi * Bsi * Bsi);
-				double ro =  Bsi * Bsi * (Math.PI * Math.PI * beta21) / (2.0 * alphaLinear);
-				if(ro < 0.0) {
-					ro = -1.0 * ro;
+				if (physicalLayerModel == 1) { // Model Johannisson
+					double mi = (3.0 * gamma * gamma) / (2.0 * Math.PI * alphaLinear * beta21 * Bsi * Bsi * Bsi);
+					double ro =  Bsi * Bsi * (Math.PI * Math.PI * beta21) / alphaLinear;
+					if(ro < 0.0) {
+						ro = -1.0 * ro;
+					}
+					double p1 = arcsinh(ro);
+					Snli = mi * p1;
+					
+				} else { // Model Habibi
+					double Phii = getValueOfModulationConstant(modulation);
+					
+					double alfaCampo = alphaLinear / 2.0;
+					double Ls = L * 1000.0; // span in meter
+					double Leff = (1.0 - Math.pow(Math.E, -2.0 * alfaCampo * Ls)) / (2.0 * alfaCampo);
+					double E = (8.0 * gamma * gamma * Leff * Leff * 2.0 * alfaCampo) / (27.0 * Math.PI * beta21);
+					
+					double ro = (((Math.PI * Math.PI) / 2.0) * beta21 * Bsi * Bsi) / (2.0 * alfaCampo);
+					double ro2 = E * arcsinh(ro);
+					double gsci = Bsi * Bsi * Bsi * ro2;
+					
+					double Wnn = Bsi * Bsi * Bsi * (E * (5.0 * Phii) / (3.0 * alfaCampo * Ls));
+					
+					Snli = gsci - Wnn;
 				}
-				double p1 = arcsinh(ro);
-				double Snli = mi * p1;
 				
 				Inli = Inli + Snli;
 			}
 			
 			if(activeASE){
 				double Sase = preAmp.getAseByGain(totalPower, preAmp.getGainByType(totalPower, typeOfAmplifierGain));
-				Sase = Sase / polarizationModes;
+				
+				if (physicalLayerModel == 1) { // Model Johannisson
+					Sase = Sase / polarizationModes;
+				}
+				
 				Iase = Iase + Sase;
 			}
 			
@@ -1245,6 +1328,10 @@ public class PhysicalLayer implements Serializable {
 			
 			//I = I / LsssLinear;
 		}
+		
+		// Switch insertion loss
+		Inli = Inli / LsssLinear;
+		Iase = Iase / LsssLinear;
 		
 		double Pmax = Math.cbrt(Iase / (2.0 * Inli));
 		

@@ -38,17 +38,17 @@ public class MMRDS implements RoutingAlgorithmInterface {
             computeAllRoutes(mesh);
             salveRoutesByPar(mesh.getNodeList());
         }
-
+        
         Node source = request.getSource();
         Node destination = request.getDestination();
-
+        
         Route r = routesForAllPairs.get(source.getName() + DIV + destination.getName());
-
+        
         if (r != null) {
             request.setRoute(r);
             return true;
         }
-
+        
         return false;
     }
 

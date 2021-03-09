@@ -1,33 +1,10 @@
 package grmlsa;
 
 import grmlsa.integrated.*;
-import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
-import grmlsa.modulation.ModulationSelectionByDistance;
-import grmlsa.modulation.ModulationSelectionByDistance2;
-import grmlsa.modulation.ModulationSelectionByDistanceAndBandwidth;
-import grmlsa.modulation.ModulationSelectionByQoT;
-import grmlsa.modulation.ModulationSelectionByQoTAndSigma;
-import grmlsa.modulation.ModulationSelectionByQoTv2;
-import grmlsa.regeneratorAssignment.AllAssignmentOfRegenerator;
-import grmlsa.regeneratorAssignment.FLRRegeneratorAssignment;
-import grmlsa.regeneratorAssignment.FNSRegeneratorAssignment;
-import grmlsa.regeneratorAssignment.RegeneratorAssignmentAlgorithmInterface;
-import grmlsa.routing.DJK;
-import grmlsa.routing.FixedRoutes;
-import grmlsa.routing.MMRDS;
-import grmlsa.routing.RoutingAlgorithmInterface;
-import grmlsa.spectrumAssignment.BestFit;
-import grmlsa.spectrumAssignment.DispersionAdaptiveFirstLastFit;
-import grmlsa.spectrumAssignment.ExactFit;
-import grmlsa.spectrumAssignment.FirstFit;
-import grmlsa.spectrumAssignment.FirstLastExactFit;
-import grmlsa.spectrumAssignment.FirstLastFit;
-import grmlsa.spectrumAssignment.LastFit;
-import grmlsa.spectrumAssignment.RandomFit;
-import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
-import grmlsa.spectrumAssignment.SpectrumAssignmentWithInterferenceReduction;
-import grmlsa.spectrumAssignment.TrafficBalancingSpectrumAssignment;
-import grmlsa.spectrumAssignment.WorstFit;
+import grmlsa.modulation.*;
+import grmlsa.regeneratorAssignment.*;
+import grmlsa.routing.*;
+import grmlsa.spectrumAssignment.*;
 import grmlsa.trafficGrooming.*;
 
 import java.io.Serializable;
@@ -91,6 +68,9 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
     private static final String INTEGRATED_KSPSA_v3 = "kspsav3";
     private static final String INTEGRATED_KSPSA_v5 = "kspsav5";
+    
+    // Sequential
+    private static final String SEQUENTIAL_ALGORITHM = "sequential";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -254,6 +234,8 @@ public class GRMLSA implements Serializable {
                 return new KShortestPathsAndSpectrumAssignment_v3();
             case INTEGRATED_KSPSA_v5:
                 return new KShortestPathsAndSpectrumAssignment_v5();
+            case SEQUENTIAL_ALGORITHM:
+                return new SequentialAlgorithm();
             default:
                 return null;
         }

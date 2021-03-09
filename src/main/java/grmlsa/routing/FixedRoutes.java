@@ -65,17 +65,17 @@ public class FixedRoutes implements RoutingAlgorithmInterface {
         if (routesForAllPairs == null) {
         	computeAllRoutes(mesh);
         }
-
+        
         Node source = request.getSource();
         Node destination = request.getDestination();
-
+        
         Route route = routesForAllPairs.get(source.getName() + DIV + destination.getName());
-
+        
         if (route != null) {
             request.setRoute(route);
             return true;
         }
-
+        
         return false;
     }
 
