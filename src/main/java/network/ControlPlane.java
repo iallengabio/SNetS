@@ -509,7 +509,7 @@ public class ControlPlane implements Serializable {
      * @param circuit Circuit
      * @return boolean
      */
-    protected boolean isAdmissibleQualityOfTransmission(Circuit circuit) throws Exception {
+    public boolean isAdmissibleQualityOfTransmission(Circuit circuit) throws Exception {
     	
     	// Check if it is to test the QoT
     	if(mesh.getPhysicalLayer().isActiveQoT()){

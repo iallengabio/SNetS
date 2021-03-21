@@ -97,6 +97,7 @@ public class GRMLSA implements Serializable {
     private static final String INTEGRATED_KSPC = "kspc";
     private static final String INTEGRATED_MDPC= "mdpc";
     private static final String INTEGRATED_KSPRQOTO = "ksprqoto";
+    private static final String INTEGRATED_MULTIFACTORRSA = "multifactorrsa";
     
     // Regenerator assignment
     private static final String ALL_ASSIGNMENT_OF_REGENERATOR = "aar";
@@ -267,6 +268,8 @@ public class GRMLSA implements Serializable {
                 return new KShortestPathsReductionQoTO();
             case INTEGRATED_KSPFIRSTFITSSTG:
                 return new KSPFirstFitSSTG();
+            case INTEGRATED_MULTIFACTORRSA:
+                return new MultifactorRSA();
             default:
                 return null;
         }
