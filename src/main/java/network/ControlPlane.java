@@ -569,17 +569,10 @@ public class ControlPlane implements Serializable {
     	// Search for all circuits that have links in common with the circuit under evaluation
 		Route route = circuit.getRoute();
 		for (Link link : route.getLinkList()) {
-			
-			// Picks up the active circuits that use the link
-			HashSet<Circuit> circuitsTemp = link.getCircuitList();
-            for (Circuit circuitTemp : circuitsTemp) {
-            	
-            	// If the circuit is different from the circuit under evaluation and is not in the circuit list for test
-                if (!circuit.equals(circuitTemp) && !circuits.contains(circuitTemp)) {
-                    circuits.add(circuitTemp);
-                }
-            }
+		    // Picks up the active circuits that use the link
+            circuits.addAll(link.getCircuitList());
 		}
+		circuits.remove(circuit);
 		
 		// Tests the QoT of circuits
         for (Circuit circuitTemp : circuits) {

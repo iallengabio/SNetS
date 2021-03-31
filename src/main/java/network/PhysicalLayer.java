@@ -382,14 +382,9 @@ public class PhysicalLayer implements Serializable {
 	 */
 	private HashSet<Circuit> getCircuitList(Link link, Circuit circuit, Circuit testCircuit, boolean addTestCircuit){
 		HashSet<Circuit> circuitList = new HashSet<Circuit>();
-		
-		for (Circuit circtuiTemp : link.getCircuitList()) {
-			circuitList.add(circtuiTemp);
-		}
-		
-		if(!circuitList.contains(circuit)){
-			circuitList.add(circuit);
-		}
+
+		circuitList.addAll(link.getCircuitList());
+		circuitList.add(circuit);
 		
 		if(testCircuit != null && testCircuit.getRoute().containThisLink(link)) {
 			
