@@ -5,9 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import grmlsa.KRoutingAlgorithmInterface;
-import grmlsa.NewKShortestPaths;
-import grmlsa.Route;
+import grmlsa.*;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.spectrumAssignment.SpectrumAssignmentAlgorithmInterface;
@@ -35,7 +33,7 @@ import util.IntersectionFreeSpectrum;
 public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInterface {
 	
     private static int k = 4; // Number of candidate routes
-	private NewKShortestPaths kShortestsPaths;
+	private KRoutingAlgorithmInterface kShortestsPaths;
     private ModulationSelectionAlgorithmInterface modulationSelection;
     private SpectrumAssignmentAlgorithmInterface spectrumAssignment;
     
@@ -51,7 +49,25 @@ public class KShortestPathsReductionQoTO  implements IntegratedRMLSAAlgorithmInt
 	@Override
 	public boolean rsa(Circuit circuit, ControlPlane cp) {
 		if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k);
+			Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
+			String krt = (String)uv.get("krtype");
+			if(uv.get("k")!=null)
+				k = Integer.parseInt((String)uv.get("k"));
+
+			switch(krt){
+				case "ksp":
+				case "kspd":
+					kShortestsPaths = new KSPDistance(cp.getMesh(), k);
+					break;
+				case "ksph":
+					kShortestsPaths = new KSPHops(cp.getMesh(), k);
+					break;
+				case "kgp":
+					kShortestsPaths = new KGP(cp, k);
+					break;
+				default:
+					kShortestsPaths = new KSPDistance(cp.getMesh(), k);
+			}
         }
 		if (modulationSelection == null){
         	modulationSelection = cp.getModulationSelection(); // Uses the modulation selection algorithm defined in the simulation file

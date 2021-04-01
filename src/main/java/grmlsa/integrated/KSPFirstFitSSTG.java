@@ -1,8 +1,6 @@
 package grmlsa.integrated;
 
-import grmlsa.KRoutingAlgorithmInterface;
-import grmlsa.NewKShortestPaths;
-import grmlsa.Route;
+import grmlsa.*;
 import grmlsa.modulation.Modulation;
 import grmlsa.modulation.ModulationSelectionAlgorithmInterface;
 import grmlsa.spectrumAssignment.FirstFitSSTG;
@@ -32,10 +30,28 @@ public class KSPFirstFitSSTG implements IntegratedRMLSAAlgorithmInterface {
     @Override
     public boolean rsa(Circuit circuit, ControlPlane cp) {
         if (kShortestsPaths == null){
-        	kShortestsPaths = new NewKShortestPaths(cp.getMesh(), k); //This algorithm uses 3 alternative paths
+            Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
+            String krt = (String)uv.get("krtype");
+            if(uv.get("k")!=null)
+                k = Integer.parseInt((String)uv.get("k"));
+
+            switch(krt){
+                case "ksp":
+                case "kspd":
+                    kShortestsPaths = new KSPDistance(cp.getMesh(), k);
+                    break;
+                case "ksph":
+                    kShortestsPaths = new KSPHops(cp.getMesh(), k);
+                    break;
+                case "kgp":
+                    kShortestsPaths = new KGP(cp, k);
+                    break;
+                default:
+                    kShortestsPaths = new KSPDistance(cp.getMesh(), k);
+            }
             modulationSelection = cp.getModulationSelection();
             spectrumAssignment = new FirstFitSSTG();
-            Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
+            //Map<String, String> uv = cp.getMesh().getOthersConfig().getVariables();
             this.sigmaExpansiveness = Integer.parseInt(uv.get("sigmaExpansiveness"));
         }
 

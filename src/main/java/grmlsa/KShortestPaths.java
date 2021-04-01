@@ -22,6 +22,7 @@ import simulationControl.Util;
  * 
  * @author Iallen
  */
+@Deprecated
 public class KShortestPaths implements KRoutingAlgorithmInterface {
 	
 	// Used as a separator between the names of nodes

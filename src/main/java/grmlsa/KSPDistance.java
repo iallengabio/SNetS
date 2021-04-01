@@ -1,48 +1,41 @@
 package grmlsa;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.Vector;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import network.Mesh;
 import network.Node;
 import simulationControl.Util;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
 /**
  * This class serves to compute the k shortest paths for all pairs of source (s) and destination (d) nodes 
- * of a given network topology. This class have some optimizations over original KShortestPaths.
+ * of a given network topology considering the links lenght.
  * 
  * @author Iallen
  */
-@Deprecated
-public class NewKShortestPaths implements KRoutingAlgorithmInterface {
-	
+public class KSPDistance implements KRoutingAlgorithmInterface {
+
 	// Used as a separator between the names of nodes
     private static final String DIV = "-";
 
     // Number of shortest routes to be computed for each pair(s, d)
-    private int k;
+    private final int k;
 
     // List with the k shortest routes for all pairs (s, d)
     private HashMap<String, List<Route>> routesForAllPairs;
 
-    private Util util;
+    private final Util util;
     /**
      * Constructor
-     * 
+     *
      * @param mesh Mesha - network topology
      * @param k    int - number of routes to be computed for each pair(s, d)
      */
-    public NewKShortestPaths(Mesh mesh, int k) {
+    public KSPDistance(Mesh mesh, int k) {
         this.k = k;
         this.computeAllRoutes(mesh);
         util = mesh.getUtil();
@@ -82,7 +75,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
         r.addNode(n1);
         routesUnderConstruction.add(r);
 
-        Double highestAmongShortest = 999999999999999.9;
+        double highestAmongShortest = Double.POSITIVE_INFINITY;
 
         while (!routesUnderConstruction.isEmpty()) {
 
@@ -92,30 +85,22 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
 
             if (expand.getDestination().equals(n2)) { // route completed
 
-                if (chosenRoutes.size() < this.k) {
-                    chosenRoutes.add(expand);
-                    
-                } else { // Already has k chosen routes, should remain only the smallest k
-                    chosenRoutes.add(expand);
-
+                chosenRoutes.add(expand);
+                if (chosenRoutes.size() >= this.k) { // Already has k chosen routes, should remain only the smallest k
                     Route rl = chosenRoutes.pollLast();
-
-
                     highestAmongShortest = chosenRoutes.last().getDistanceAllLinks();
                 }
                 continue;
-            }
+            }else {
+                if (expand.getDistanceAllLinks() <= highestAmongShortest) { //  Search more routes from this
 
-            if (expand.getDistanceAllLinks() > highestAmongShortest) {// It's no use keeping looking on this route
+                    for (Node no : mesh.getAdjacents(expand.getDestination())) {
 
-            } else { //  Search more routes from this
+                        Route rAux = expand.clone();
+                        rAux.addNode(no);
 
-                for (Node no : mesh.getAdjacents(expand.getDestination())) {
-
-                    Route rAux = expand.clone();
-                    rAux.addNode(no);
-
-                    routesUnderConstruction.add(rAux);
+                        routesUnderConstruction.add(rAux);
+                    }
                 }
             }
         }
@@ -155,34 +140,30 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
      * 
      * @param nodeList Vector<Node>
      */
-    private void salveKRoutesByPar(Vector<Node> nodeList) {
+    private void saveKRoutesByPar(Vector<Node> nodeList) {
     	List<String> routesList = new ArrayList<String>();
 		
 		for(int i = 0; i < nodeList.size(); i++){
 			Node source = nodeList.get(i);
-			
-			for(int j = 0; j < nodeList.size(); j++){
-				Node destination = nodeList.get(j);
-				
-				if(!source.getName().equals(destination.getName())){
-					String pair = source.getName() + DIV + destination.getName();
-					
-					List<Route> routes = routesForAllPairs.get(pair);
-					for(int r = 0; r < routes.size(); r++){
-						Route rAux = routes.get(r);
-					  
-						StringBuilder sb = new StringBuilder();
-						for (int n = 0; n < rAux.getNodeList().size(); n++) {
-							sb.append(rAux.getNodeList().get(n).getName());
-							if(n < rAux.getNodeList().size() - 1){
-								sb.append("-");
-							}
-						}
-						
-						routesList.add(sb.toString());
-					}
-				}
-			}
+
+            for (Node destination : nodeList) {
+                if (!source.getName().equals(destination.getName())) {
+                    String pair = source.getName() + DIV + destination.getName();
+
+                    List<Route> routes = routesForAllPairs.get(pair);
+                    for (Route rAux : routes) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int n = 0; n < rAux.getNodeList().size(); n++) {
+                            sb.append(rAux.getNodeList().get(n).getName());
+                            if (n < rAux.getNodeList().size() - 1) {
+                                sb.append("-");
+                            }
+                        }
+
+                        routesList.add(sb.toString());
+                    }
+                }
+            }
 		}
 		
 		Gson gson = new GsonBuilder().create();
@@ -209,7 +190,7 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
      * 
      * @param nodeList Vector<Node>
      */
-    private void salveRoutesByPar(Vector<Node> nodeList) {
+    private void saveRoutesByPar(Vector<Node> nodeList) {
         try {
         	
         	FileWriter fw = new FileWriter(util.projectPath + "/routesByPar.txt");
@@ -217,32 +198,28 @@ public class NewKShortestPaths implements KRoutingAlgorithmInterface {
         	
 			for(int i = 0; i < nodeList.size(); i++){
 	    	    Node source = nodeList.get(i);
-	    	    
-	    	    for(int j = 0; j < nodeList.size(); j++){
-	    		    Node destination = nodeList.get(j);
-	    		    
-	    		    if(!source.getName().equals(destination.getName())){
-		      		    String pair = source.getName() + "-" + destination.getName();
-		      		  
-		      		    out.append("Pair " + pair + "\n");
-		      		    
-		      		    List<Route> routes = routesForAllPairs.get(pair);
-		      		    for(int r = 0; r < routes.size(); r++){
-		      			    Route rAux = routes.get(r);
-		      			  
-		      			    StringBuilder sb = new StringBuilder();
-		      			    for (int n = 0; n < rAux.getNodeList().size(); n++) {
-		      			        sb.append(rAux.getNodeList().get(n).getName());
-			      			    if(n < rAux.getNodeList().size() - 1){
-			  						sb.append("-");
-			  					}
-		      			    }
-		      			    
-		      			    out.append(sb.toString());
-		      			    out.append("\n");
-		      		    }
-	    		    }
-	    	    }
+
+                for (Node destination : nodeList) {
+                    if (!source.getName().equals(destination.getName())) {
+                        String pair = source.getName() + "-" + destination.getName();
+
+                        out.append("Pair ").append(pair).append("\n");
+
+                        List<Route> routes = routesForAllPairs.get(pair);
+                        for (Route rAux : routes) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int n = 0; n < rAux.getNodeList().size(); n++) {
+                                sb.append(rAux.getNodeList().get(n).getName());
+                                if (n < rAux.getNodeList().size() - 1) {
+                                    sb.append("-");
+                                }
+                            }
+
+                            out.append(sb.toString());
+                            out.append("\n");
+                        }
+                    }
+                }
 	        }
 			
 			out.close();
