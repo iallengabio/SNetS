@@ -111,6 +111,7 @@ public class SimulationManagement {
 
         ExecutorService executor = Executors.newScheduledThreadPool(simulationRequest.getSimulationConfig().getThreads());
         done = 0;
+        simulationProgressListener.onSimulationProgressUpdate(0);
         for(List<Simulation> loadPoint : simulations){
             for(Simulation replication : loadPoint){
                 executor.execute(new Runnable() {
