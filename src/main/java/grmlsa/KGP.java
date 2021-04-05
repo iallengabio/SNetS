@@ -118,7 +118,12 @@ public class KGP implements KRoutingAlgorithmInterface {
     private double getRouteWeight(Route r){
         double res = r.getDistanceAllLinks();
         for(Link l: r.getLinkList()){
-            res += kgpWeights.get(l.getSource().getName()).get(l.getDestination().getName());
+            Map<String, Double> maux = kgpWeights.get(l.getSource().getName());
+            if(maux!=null){
+                Double kgpweight = maux.get(l.getDestination().getName());
+                if(kgpweight!=null) res += kgpweight;
+            }
+            //res += kgpWeights.get(l.getSource().getName()).get(l.getDestination().getName());
         }
         return res;
     }
