@@ -44,7 +44,7 @@ public class KGP implements KRoutingAlgorithmInterface {
         this.k = k;
         kgpWeights = cp.getMesh().getOthersConfig().getKgpWeights();
         this.computeAllRoutes(cp.getMesh());
-        this.saveKRoutesByPar(cp.getMesh().getNodeList());
+        //this.saveKRoutesByPar(cp.getMesh().getNodeList());
         util = cp.getMesh().getUtil();
         //salvekRoutesByPar(mesh.getNodeList());
     }
