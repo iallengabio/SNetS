@@ -42,10 +42,10 @@ public class KGP implements KRoutingAlgorithmInterface {
      */
     public KGP(ControlPlane cp, int k) {
         this.k = k;
-        this.computeAllRoutes(cp.getMesh());
-        util = cp.getMesh().getUtil();
         kgpWeights = cp.getMesh().getOthersConfig().getKgpWeights();
-        int a = 2;
+        this.computeAllRoutes(cp.getMesh());
+        this.saveKRoutesByPar(cp.getMesh().getNodeList());
+        util = cp.getMesh().getUtil();
         //salvekRoutesByPar(mesh.getNodeList());
     }
 
@@ -60,7 +60,9 @@ public class KGP implements KRoutingAlgorithmInterface {
             for (Node n2 : mesh.getNodeList()) {
                 if (n1 == n2)
                     continue;
-
+                if(n1.getName().equals("6")&&n2.getName().equals("14")){
+                    int a = 1;
+                }
                 routesForAllPairs.put(n1.getName() + DIV + n2.getName(), this.computeRoutes(n1, n2, mesh));
             }
         }
@@ -75,8 +77,16 @@ public class KGP implements KRoutingAlgorithmInterface {
      * @return List<Route>
      */
     private List<Route> computeRoutes(Node n1, Node n2, Mesh mesh) {
-        TreeSet<Route> chosenRoutes = new TreeSet<>();
-        TreeSet<Route> routesUnderConstruction = new TreeSet<>();
+        Comparator<Route> kgpComparator = new Comparator<Route>() {
+            @Override
+            public int compare(Route o1, Route o2) {
+                int res = getRouteWeight(o1).compareTo(getRouteWeight(o2));
+                if(res==0) res = 1;
+                return res;
+            }
+        };
+        TreeSet<Route> chosenRoutes = new TreeSet<>(kgpComparator);
+        TreeSet<Route> routesUnderConstruction = new TreeSet<>(kgpComparator);
 
         Route r = new Route();
         r.addNode(n1);
@@ -93,7 +103,7 @@ public class KGP implements KRoutingAlgorithmInterface {
             if (expand.getDestination().equals(n2)) { // route completed
 
                 chosenRoutes.add(expand);
-                if (chosenRoutes.size() >= this.k) { // Already has k chosen routes, should remain only the smallest k
+                if (chosenRoutes.size() > this.k) { // Already has k chosen routes, should remain only the smallest k
                     Route rl = chosenRoutes.pollLast();
                     highestAmongShortest = getRouteWeight(chosenRoutes.last());
                 }
@@ -115,7 +125,7 @@ public class KGP implements KRoutingAlgorithmInterface {
         return new ArrayList<Route>(chosenRoutes);
     }
 
-    private double getRouteWeight(Route r){
+    private Double getRouteWeight(Route r){
         double res = r.getDistanceAllLinks();
         for(Link l: r.getLinkList()){
             Map<String, Double> maux = kgpWeights.get(l.getSource().getName());
@@ -192,7 +202,7 @@ public class KGP implements KRoutingAlgorithmInterface {
         try {
         	String separator = System.getProperty("file.separator");
         	
-        	FileWriter fw = new FileWriter(util.projectPath + separator + "kRoutesByPar.txt");
+        	FileWriter fw = new FileWriter("kRoutesByParIT2.txt");
 			BufferedWriter out = new BufferedWriter(fw);
             
 			out.append(json);
